@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.sonicle.extjs</groupId>
+    <artifactId>sonicle-extjs-extensions</artifactId>
+    <version>5.1.2.748</version>
+    <packaging>jar</packaging>
+	<name>sonicle-extjs-extensions</name>
+	
+	<parent>
+		<groupId>com.sonicle.maven</groupId>
+		<artifactId>sonicle-superpom-senchapkg</artifactId>
+		<version>5</version>
+	</parent>
+	
+    <properties>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+		<cmd.dir>${env.SENCHA_CMD_6}</cmd.dir>
+		<ext.dir>${env.SENCHA_EXT_5}</ext.dir>
+		<sencha.package.name>sonicle-extensions</sencha.package.name>
+    </properties>
+</project>
