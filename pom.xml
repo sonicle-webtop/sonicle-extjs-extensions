@@ -16,8 +16,8 @@
     <properties>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
-		<cmd.dir>${env.SENCHA_CMD_6}</cmd.dir>
-		<ext.dir>${env.SENCHA_EXT_5}</ext.dir>
+		
+		<!-- SENCHA CONFIGURATION -->
 		<sencha.package.name>sonicle-extensions</sencha.package.name>
     </properties>
 </project>
