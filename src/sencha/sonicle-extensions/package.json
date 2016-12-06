@@ -212,7 +212,7 @@
     ],
 
     "example": {
-        /**
+		/**
          * One or more folders that contain example applications for this package.
          */
         "path": [
