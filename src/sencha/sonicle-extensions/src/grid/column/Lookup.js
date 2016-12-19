@@ -8,9 +8,6 @@ Ext.define('Sonicle.grid.column.Lookup', {
 	extend: 'Ext.grid.column.Column',
 	alias: 'widget.solookupcolumn',
 	
-	requires: [
-		
-	],
 	mixins: [
 		'Ext.util.StoreHolder'
 	],
@@ -41,7 +38,7 @@ Ext.define('Sonicle.grid.column.Lookup', {
 	onBindStore: function(store, initial) {
 		// We're being bound, not unbound...
 		if(store) {
-			if(store.autoCreated) this.boldDateField = 'field1';
+			if(store.autoCreated) this.displayField = 'field1';
 		}
 	},
 	
@@ -55,6 +52,6 @@ Ext.define('Sonicle.grid.column.Lookup', {
 	
 	_storeValue: function(value) {
 		var mo = this.getStore().getById(value);
-		return mo ? mo.get(this.displayField) : '?';
+		return mo ? mo.get(this.displayField) : value;
 	}
 });
