@@ -32,7 +32,7 @@ Ext.define('Sonicle.plugin.EnterKeyPlugin', {
 		if(e.getKey() === e.ENTER) {
 			cmp = me.getCmp();
 			// If field is picker, prevent default behaviour if list is expanded
-			if(cmp.isXType('pickerfield') && cmp.isExpanded) return;
+			//if(cmp.isXType('pickerfield') && cmp.isExpanded) return;
 			cmp.fireEvent('enterkey', s, e);
 		}
 	}
