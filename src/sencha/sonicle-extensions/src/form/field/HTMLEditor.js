@@ -52,6 +52,42 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 	tmceNotification: null,
 	
     /**
+     * @cfg {String} createLinkTitle 
+     * The default title for the create link prompt
+     */
+    createLinkTitle: 'Create Hyperlink',	
+
+	/**
+     * @cfg {String} createLinkText 
+     * The default text for the create link prompt
+     */
+    createLinkText: 'Please enter the URL for the link:',	
+
+     /**
+     * @cfg {String} [defaultLinkValue='http://']
+     * The default value for the create link prompt
+     */
+    defaultLinkValue: 'http:/'+'/',
+	
+    /**
+     * @cfg {String} insertImageTitle 
+     * The default title for the insert image prompt
+     */
+    insertImageUrlTitle: 'Insert image from URL',	
+
+	/**
+     * @cfg {String} insertImageText 
+     * The default text for the insert image prompt
+     */
+    insertImageUrlText: 'Please enter the URL for the image:',	
+
+     /**
+     * @cfg {String} [defaultImageValue='http://']
+     * The default value for the insert image prompt
+     */
+    defaultImageUrlValue: 'http:/'+'/',
+	
+	/**
      * @cfg {String} defaultButtonUI
      * A default {@link Ext.Component#ui ui} to use for the HtmlEditor's toolbar
      * {@link Ext.button.Button Buttons}
@@ -74,7 +110,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 	enableLists: false,
 	enableSourceEdit: false,
 	enableClean: false,
-	
+		
 	fontFamilies: [
 		"Arial",
 		"Comic Sans MS",
@@ -360,7 +396,41 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 			if (me.enableLinks) {
 				items.push(
 					'-',
-					btn('createlink', false, me.createLink)
+					btn('createlink', false, function() {
+						Ext.Msg.prompt(
+							me.createLinkTitle,
+							me.createLinkText,
+							function(bid,url) {
+								if (bid==='ok' && url && url !== 'http:/'+'/') {
+									me.execCommand('createlink',false,url);
+								}
+							},
+							me,
+							false,
+							me.defaultLinkValue
+						);
+					}),
+					btn('unlink')
+				);
+			}
+			
+			if (me.enableImageUrls) {
+				items.push(
+					'-',
+					btn('insertimageurl', false, function() {
+						Ext.Msg.prompt(
+							me.insertImageUrlTitle,
+							me.insertImageUrlText,
+							function(bid,url) {
+								if (bid==='ok' && url && url !== 'http:/'+'/') {
+									me.execCommand('insertimage',false,url);
+								}
+							},
+							me,
+							false,
+							me.defaultImageUrlValue
+						);
+					})
 				);
 			}
 		}
@@ -729,6 +799,11 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
             text: 'Make the selected text a hyperlink.',
             cls: Ext.baseCSSPrefix + 'html-editor-tip'
         },
+        unlink: {
+            title: 'Remove hyperlink',
+            text: 'Remove hyperlink from selected text.',
+            cls: Ext.baseCSSPrefix + 'html-editor-tip'
+        },
         sourceedit: {
             title: 'Source Edit',
             text: 'Switch to source editing mode.',
@@ -738,7 +813,12 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
             title: 'Remove formatting',
             text: 'Clean selected text removing any undesired formatting.',
             cls: Ext.baseCSSPrefix + 'html-editor-tip'
-        }
+        },
+        insertimageurl: {
+            title: 'Image',
+            text: 'Insert image from URL.',
+            cls: Ext.baseCSSPrefix + 'html-editor-tip'
+        },
 		
     }
     //</locale>	
