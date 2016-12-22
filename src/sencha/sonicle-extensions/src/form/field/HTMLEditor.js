@@ -52,6 +52,12 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 	tmceNotification: null,
 	
     /**
+     * @cfg {Ext.button.Button[]} customButtons 
+     * an array of custom buttons to append to the toolbar
+     */
+    customButtons: null,	
+
+    /**
      * @cfg {String} createLinkTitle 
      * The default title for the create link prompt
      */
@@ -433,6 +439,13 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 					})
 				);
 			}
+			
+			if (me.customButtons) {
+				Ext.each(me.customButtons, function(b) {
+					items.push(b);
+				});
+			}
+			
 		}
 
 /*        // Everything starts disabled.
@@ -454,12 +467,12 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
             items: items,
 
             // stop form submits
-            listeners: {
-                click: function(e){
-                    e.preventDefault();
-                },
-                element: 'el'
-            }
+            //listeners: {
+            //    click: function(e){
+            //        e.preventDefault();
+            //    },
+            //    element: 'el'
+            //}
         }; 
     },	
 	
