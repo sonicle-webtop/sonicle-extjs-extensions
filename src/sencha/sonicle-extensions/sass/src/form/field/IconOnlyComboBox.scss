@@ -1,0 +1,19 @@
+.so-icononlycombo .x-form-text {
+	padding-left: 6px;
+}
+.so-icononlycombo-icon {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	margin-top: auto;
+	margin-bottom: auto;
+	width: 16px;
+	height: 16px;
+	margin-left: 5px;
+}
+.so-icononlycombo.x-combo-list-item > .so-icononlycombo-icon {
+	margin-left: 0px;
+}
+.so-icononlycombo.x-combo-list-item > span {
+	padding-left: 21px;
+}

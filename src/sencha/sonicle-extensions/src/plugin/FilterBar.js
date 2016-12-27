@@ -6,7 +6,7 @@
  */
 Ext.define('Sonicle.plugin.FilterBar', {
     extend: 'Ext.AbstractPlugin',
-    alias: 'plugin.filterbar',
+    alias: 'plugin.sofilterbar',
 
     require: [
         'Sonicle.plugin.OperatorButton'
@@ -59,9 +59,12 @@ Ext.define('Sonicle.plugin.FilterBar', {
      */
     init: function(grid) {
 
-        var me = this,
-            columns = grid.columns;
-
+		if (grid.columns) this.configureColumns(grid.columns);
+    },
+	
+	configureColumns: function(columns) {
+		var me=this;
+		
         Ext.Array.each(columns, function(column) {
 
             var filter = {};
@@ -120,8 +123,7 @@ Ext.define('Sonicle.plugin.FilterBar', {
             }));
 
         });
-
-    },
+	},
 	
 	setHidden: function(hidden) {
 		var me=this;

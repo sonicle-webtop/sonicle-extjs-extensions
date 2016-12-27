@@ -8,6 +8,8 @@ Ext.define('Sonicle.form.field.IconComboBox', {
 	extend: 'Ext.form.field.ComboBox',
 	alias: ['widget.soiconcombo', 'widget.soiconcombobox'],
 	
+	comboCls: 'so-'+'iconcombo',
+	
 	/**
 	 * @cfg {String} iconClsField
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as icon class.
@@ -37,11 +39,11 @@ Ext.define('Sonicle.form.field.IconComboBox', {
 		me.callParent(arguments);
 		
 		me.wrap = me.el.down('.x-form-text-wrap');
-		me.wrap.addCls('so-iconcombo');
+		me.wrap.addCls(me.comboCls);
 		Ext.DomHelper.append(me.wrap, {
-			tag: 'i', cls: 'so-iconcombo-icon'
+			tag: 'i', cls: me.comboCls+'-icon'
 		});
-		me.icon = me.el.down('.so-iconcombo-icon');
+		me.icon = me.el.down('.'+me.comboCls+'-icon');
 		if(me.icon && !me.editable) {
 			me.icon.on('click', me.onTriggerClick, me);
 		}
@@ -61,9 +63,9 @@ Ext.define('Sonicle.form.field.IconComboBox', {
 	 * Returns modified inner template.
 	 */
 	getListItemTpl: function(displayField){
-		var picker = this.pickerField;
-		return '<div class="so-iconcombo x-combo-list-item">'
-			+ '<div class="so-iconcombo-icon {'+picker.iconClsField+'}"></div>'
+		var me=this,picker = me.pickerField;
+		return '<div class="'+me.comboCls+' x-combo-list-item">'
+			+ '<div class="'+me.comboCls+'-icon {'+picker.iconClsField+'}"></div>'
 			+ '<span>{'+displayField+'}</span>'
 			+ '</div>';
 	},
