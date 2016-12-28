@@ -34,6 +34,8 @@ Ext.define('Sonicle.plugin.FilterBar', {
 	containers: [],
 	
 	hidden: false,
+	
+	filterSuspended: false,
 
 
     /**
@@ -65,6 +67,8 @@ Ext.define('Sonicle.plugin.FilterBar', {
 	configureColumns: function(columns) {
 		var me=this;
 		
+		me.containers=[];
+		me.columns=columns;
         Ext.Array.each(columns, function(column) {
 
             var filter = {};
@@ -94,8 +98,10 @@ Ext.define('Sonicle.plugin.FilterBar', {
                 listeners: {
                     change: {
                         fn: function (field) {
-                            var fn = (Ext.isEmpty(field.getValue())) ? me.clearFilter : me.applyFilter;
-                            me._task.delay(me.delay, fn, me, [field]);
+							if (!me.filterSuspended) {
+								var fn = (Ext.isEmpty(field.getValue())) ? me.clearFilter : me.applyFilter;
+								me._task.delay(me.delay, fn, me, [field]);
+							}
                         }
                     }
                 }
@@ -200,6 +206,32 @@ Ext.define('Sonicle.plugin.FilterBar', {
         field.triggers.clear.el.hide();
         column.setText(column.textEl.dom.firstElementChild.innerText);
     },
+	
+	suspendFiltering: function() {
+		this.filterSuspended=true;
+	},
+	
+	resumeFiltering: function() {
+		this.filterSuspended=false;
+	},
+	
+	clearFilterFields: function() {
+		var me=this;
+		
+		me.suspendFiltering();
+        Ext.Array.each(me.columns, function(column) {
+
+            var filter= column[me.activateKey];
+
+            if ( ! filter )
+                return true; // Returning false breaks. Wat?
+
+			var filterField=column.items.items[0].items.items[0];
+            if (filterField.reset) filterField.reset();
+		});
+		me.resumeFiltering();
+		
+	},
 
 
     /**

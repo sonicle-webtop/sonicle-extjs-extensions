@@ -63,9 +63,9 @@ Ext.define('Sonicle.form.field.IconComboBox', {
 	 * Returns modified inner template.
 	 */
 	getListItemTpl: function(displayField){
-		var me=this,picker = me.pickerField;
-		return '<div class="'+me.comboCls+' x-combo-list-item">'
-			+ '<div class="'+me.comboCls+'-icon {'+picker.iconClsField+'}"></div>'
+		var me=this,picker = me.pickerField, ccls=me.getRefOwner().comboCls;
+		return '<div class="'+ccls+' x-combo-list-item">'
+			+ '<div class="'+ccls+'-icon {'+picker.iconClsField+'}"></div>'
 			+ '<span>{'+displayField+'}</span>'
 			+ '</div>';
 	},
