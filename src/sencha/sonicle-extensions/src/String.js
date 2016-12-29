@@ -28,6 +28,16 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
+	 * Returns passed string if it isn't empty (@link Ext#isEmpty), ifValue otherwise.
+	 * @param {String} s The value
+	 * @param {String} ifEmpty The fallback value
+	 * @returns {String} Returned value
+	 */
+	deflt: function(s, ifEmpty) {
+		return Ext.isEmpty(s) ? ifEmpty : s;
+	},
+	
+	/**
 	 * Returns first non-NULL value of provided arguments.
 	 * @param {Mixed...} values List of values
 	 * @returns {Mixed} The first non-NULL value

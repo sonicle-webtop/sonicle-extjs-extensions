@@ -464,7 +464,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 			cls: Ext.baseCSSPrefix + 'html-editor-tb',
 //            bodyCls: 'wt-theme-bg-2',
             enableOverflow: true,
-            items: items,
+            items: items
 
             // stop form submits
             //listeners: {
@@ -831,8 +831,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
             title: 'Image',
             text: 'Insert image from URL.',
             cls: Ext.baseCSSPrefix + 'html-editor-tip'
-        },
-		
+        }
     }
     //</locale>	
 	

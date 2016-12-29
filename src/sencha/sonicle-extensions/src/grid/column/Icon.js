@@ -14,15 +14,6 @@ Ext.define('Sonicle.grid.column.Icon', {
 	iconIconCls: 'so-'+'iconcolumn-icon',
 	iconTextCls: 'so-'+'iconcolumn-text',
 	
-    /**
-	 * @cfg {Boolean} [stopSelection=true]
-	 * Prevent grid selection upon click.
-	 * Beware that if you allow for the selection to happen then the selection model will steal focus from
-	 * any possible floating window (like a message box) raised in the handler. This will prevent closing the
-	 * window when pressing the Escape button since it will no longer contain a focused component.
-	 */
-	stopSelection: true,
-	
 	/**
 	 * @cfg {String} iconClsField
 	 * The fieldName for getting the CSS class to apply to the icon image.
@@ -61,6 +52,15 @@ Ext.define('Sonicle.grid.column.Icon', {
 	 */
 	hideText: true,
 	
+	/**
+	 * @cfg {Boolean} [stopSelection=false]
+	 * Prevent grid selection upon click.
+	 * Beware that if you allow for the selection to happen then the selection model will steal focus from
+	 * any possible floating window (like a message box) raised in the handler. This will prevent closing the
+	 * window when pressing the Escape button since it will no longer contain a focused component.
+	 */
+	stopSelection: false,
+	
 	constructor: function(cfg) {
 		var me=this;
 		
@@ -77,12 +77,13 @@ Ext.define('Sonicle.grid.column.Icon', {
 				rec = cellValues ? cellValues.record : null,
 				ico = me.evalValue(me.getIconCls, me.iconClsField, value, rec),
 				ttip = me.evalValue(me.getTip, me.tipField, value, rec, null),
-				text = '';
+				style = 'width:'+size+'px;height:'+size+'px;',
+				text = '', style;
 		
-		if(ico) clsico += ' ' + ico;
-		if(!me.hideText) text = '<span class="'+clstxt+'">'+value+'</span>';
-		return '<div class="'+clsico+'" style="width:'+size+'px;height:'+size+'px;'+(me.handler?'cursor:pointer;':'')+'"'+
-				+(ttip ? ' data-qtip="'+ttip+'"' : '')+'></div>'+text;
+		if (ico) clsico += ' ' + ico;
+		if (!me.hideText) text = '<span class="'+clstxt+'">' + Sonicle.String.deflt(value, '') + '</span>';
+		if (Ext.isFunction(me.handler)) style += 'cursor:pointer;';
+		return '<div class="'+clsico+'" style="' + style + '"' + (ttip ? ' data-qtip="' + ttip + '"' : '') + '></div>' + text;
 	},
 	
 	evalValue: function(getFn, field, value, rec, fallback) {
@@ -96,13 +97,13 @@ Ext.define('Sonicle.grid.column.Icon', {
 	},
 	
     /**
-     * @private
-     * Process and re-fire events routed from the Ext.panel.Table's processEvent method.
-     * Also fires any configured click handlers. By default, cancels the mousedown event to prevent selection.
-     * Returns the event handler's status to allow canceling of GridView's bubbling process.
-     */
-    processEvent : function(type, view, cell, recordIndex, cellIndex, e, record, row){
-        var me = this,
+	 * @private
+	 * Process and re-fire events routed from the Ext.panel.Table's processEvent method.
+	 * Also fires any configured click handlers. By default, cancels the mousedown event to prevent selection.
+	 * Returns the event handler's status to allow canceling of GridView's bubbling process.
+	 */
+	processEvent: function (type, view, cell, recordIndex, cellIndex, e, record, row) {
+		var me = this,
 				target = e.getTarget(),
 				key = type === 'keydown' && e.getKey(),
 				match;
@@ -133,5 +134,5 @@ Ext.define('Sonicle.grid.column.Icon', {
 		}
 
 		return me.callParent(arguments);
-    }
+	}
 });
