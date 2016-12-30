@@ -106,6 +106,86 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
      */
     defaultButtonUI: 'default-toolbar',
 	
+    /**
+     * @cfg {Object} buttonTips
+     * Object collection of toolbar tooltips for the buttons in the editor. The key is the command id associated with
+     * that button and the value is a valid QuickTips object. For example:
+     *
+     *     {
+     *         bold: {
+     *             title: 'Bold (Ctrl+B)',
+     *             text: 'Make the selected text bold.'
+     *         },
+     *         italic: {
+     *             title: 'Italic (Ctrl+I)',
+     *             text: 'Make the selected text italic.'
+     *         }
+     *         // ...
+     *     }
+     */
+    buttonTips: {
+        bold: {
+            title: 'Bold (Ctrl+B)',
+            text: 'Make the selected text bold.'
+        },
+        italic: {
+            title: 'Italic (Ctrl+I)',
+            text: 'Make the selected text italic.'
+        },
+        underline: {
+            title: 'Underline (Ctrl+U)',
+            text: 'Underline the selected text.'
+        },
+        backcolor: {
+            title: 'Text Highlight Color',
+            text: 'Change the background color of the selected text.'
+        },
+        forecolor: {
+			title: 'Font Color',
+            text: 'Change the color of the selected text.'
+        },
+        justifyleft: {
+            title: 'Align Text Left',
+            text: 'Align text to the left.'
+        },
+        justifycenter: {
+            title: 'Center Text',
+            text: 'Center text in the editor.'
+        },
+        justifyright: {
+            title: 'Align Text Right',
+            text: 'Align text to the right.'
+        },
+        insertunorderedlist: {
+            title: 'Bullet List',
+            text: 'Start a bulleted list.'
+        },
+        insertorderedlist: {
+            title: 'Numbered List',
+            text: 'Start a numbered list.'
+        },
+        createlink: {
+            title: 'Hyperlink',
+            text: 'Make the selected text a hyperlink.'
+        },
+        unlink: {
+            title: 'Remove hyperlink',
+            text: 'Remove hyperlink from selected text.'
+        },
+        sourceedit: {
+            title: 'Source Edit',
+            text: 'Switch to source editing mode.'
+        },
+        clean: {
+            title: 'Remove formatting',
+			text: 'Clean selected text removing any undesired formatting.'
+        },
+        insertimageurl: {
+            title: 'Image',
+            text: 'Insert image from URL.'
+        }
+    },
+	
 	defaultFont: 'Arial',
 	
     // This will strip any number of single or double quotes (in any order) from a string at the anchors.
@@ -200,10 +280,24 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
         return this.toolbar;
     },
     
+	_getTooltip: function(id) {
+		var me=this,
+			tipsEnabled = Ext.quickTipsActive && Ext.tip.QuickTipManager.isEnabled();
+		return tipsEnabled ? ( me.buttonTips[id]? {
+			title: me.buttonTips[id].title,
+			text: me.buttonTips[id].text,
+			cls: Ext.baseCSSPrefix + 'html-editor-tip'
+		} : undef ) : undef;
+	},
+	
+	_getOverflowText: function(id) {
+		var me=this;
+		return me.buttonTips[id]? me.buttonTips[id].title : undef;
+	},
+	
     getToolbarCfg: function(){
         var me = this,
             items = [], i,
-            tipsEnabled = Ext.quickTipsActive && Ext.tip.QuickTipManager.isEnabled(),
             baseCSSPrefix = Ext.baseCSSPrefix,
             undef;
 
@@ -216,8 +310,8 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
                 scope: me,
                 handler:handler||me.relayBtnCmd,
                 clickEvent: 'mousedown',
-                tooltip: tipsEnabled ? me.buttonTips[id] || undef : undef,
-                overflowText: me.buttonTips[id].title || undef,
+                tooltip: me._getTooltip(id),
+                overflowText: me._getOverflowText(id),
                 tabIndex: -1
             };
         }
@@ -313,8 +407,8 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
                     itemId: 'forecolor',
                     cls: baseCSSPrefix + 'btn-icon',
                     iconCls: 'wt-icon-format-forecolor-xs',
-                    overflowText: me.buttonTips.forecolor.title,
-                    tooltip: tipsEnabled ? me.buttonTips.forecolor || undef : undef,
+					tooltip: me._getTooltip('forecolor'),
+					overflowText: me._getOverflowText('forecolor'),
                     tabIndex:-1,
                     menu: Ext.widget('menu', {
                         plain: true,
@@ -336,8 +430,8 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
                     itemId: 'backcolor',
                     cls: baseCSSPrefix + 'btn-icon',
                     iconCls: 'wt-icon-format-backcolor-xs',
-                    overflowText: me.buttonTips.backcolor.title,
-                    tooltip: tipsEnabled ? me.buttonTips.backcolor || undef : undef,
+					tooltip: me._getTooltip('backcolor'),
+					overflowText: me._getOverflowText('backcolor'),
                     tabIndex:-1,
                     menu: Ext.widget('menu', {
                         plain: true,
@@ -776,7 +870,6 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 		}
 	},
 	
-   //<locale>
     /**
      * @property {Object} buttonTips
      * Object collection of toolbar tooltips for the buttons in the editor. The key is the command id associated with
@@ -785,13 +878,11 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
      *     {
      *         bold: {
      *             title: 'Bold (Ctrl+B)',
-     *             text: 'Make the selected text bold.',
-     *             cls: 'x-html-editor-tip'
+     *             text: 'Make the selected text bold.'
      *         },
      *         italic: {
      *             title: 'Italic (Ctrl+I)',
-     *             text: 'Make the selected text italic.',
-     *             cls: 'x-html-editor-tip'
+     *             text: 'Make the selected text italic.'
      *         }
      *         // ...
      *     }
@@ -799,91 +890,64 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
     buttonTips: {
         bold: {
             title: 'Bold (Ctrl+B)',
-            text: 'Make the selected text bold.',
-            cls: Ext.baseCSSPrefix + 'html-editor-tip'
+            text: 'Make the selected text bold.'
         },
         italic: {
             title: 'Italic (Ctrl+I)',
-            text: 'Make the selected text italic.',
-            cls: Ext.baseCSSPrefix + 'html-editor-tip'
+            text: 'Make the selected text italic.'
         },
         underline: {
             title: 'Underline (Ctrl+U)',
-            text: 'Underline the selected text.',
-            cls: Ext.baseCSSPrefix + 'html-editor-tip'
-        },
-        increasefontsize: {
-            title: 'Grow Text',
-            text: 'Increase the font size.',
-            cls: Ext.baseCSSPrefix + 'html-editor-tip'
-        },
-        decreasefontsize: {
-            title: 'Shrink Text',
-            text: 'Decrease the font size.',
-            cls: Ext.baseCSSPrefix + 'html-editor-tip'
+            text: 'Underline the selected text.'
         },
         backcolor: {
             title: 'Text Highlight Color',
-            text: 'Change the background color of the selected text.',
-            cls: Ext.baseCSSPrefix + 'html-editor-tip'
+            text: 'Change the background color of the selected text.'
         },
         forecolor: {
-            title: 'Font Color',
-            text: 'Change the color of the selected text.',
-            cls: Ext.baseCSSPrefix + 'html-editor-tip'
+			title: 'Font Color',
+            text: 'Change the color of the selected text.'
         },
         justifyleft: {
             title: 'Align Text Left',
-            text: 'Align text to the left.',
-            cls: Ext.baseCSSPrefix + 'html-editor-tip'
+            text: 'Align text to the left.'
         },
         justifycenter: {
             title: 'Center Text',
-            text: 'Center text in the editor.',
-            cls: Ext.baseCSSPrefix + 'html-editor-tip'
+            text: 'Center text in the editor.'
         },
         justifyright: {
             title: 'Align Text Right',
-            text: 'Align text to the right.',
-            cls: Ext.baseCSSPrefix + 'html-editor-tip'
+            text: 'Align text to the right.'
         },
         insertunorderedlist: {
             title: 'Bullet List',
-            text: 'Start a bulleted list.',
-            cls: Ext.baseCSSPrefix + 'html-editor-tip'
+            text: 'Start a bulleted list.'
         },
         insertorderedlist: {
             title: 'Numbered List',
-            text: 'Start a numbered list.',
-            cls: Ext.baseCSSPrefix + 'html-editor-tip'
+            text: 'Start a numbered list.'
         },
         createlink: {
             title: 'Hyperlink',
-            text: 'Make the selected text a hyperlink.',
-            cls: Ext.baseCSSPrefix + 'html-editor-tip'
+            text: 'Make the selected text a hyperlink.'
         },
         unlink: {
             title: 'Remove hyperlink',
-            text: 'Remove hyperlink from selected text.',
-            cls: Ext.baseCSSPrefix + 'html-editor-tip'
+            text: 'Remove hyperlink from selected text.'
         },
         sourceedit: {
             title: 'Source Edit',
-            text: 'Switch to source editing mode.',
-            cls: Ext.baseCSSPrefix + 'html-editor-tip'
+            text: 'Switch to source editing mode.'
         },
         clean: {
             title: 'Remove formatting',
-            text: 'Clean selected text removing any undesired formatting.',
-            cls: Ext.baseCSSPrefix + 'html-editor-tip'
+			text: 'Clean selected text removing any undesired formatting.'
         },
         insertimageurl: {
             title: 'Image',
-            text: 'Insert image from URL.',
-            cls: Ext.baseCSSPrefix + 'html-editor-tip'
+            text: 'Insert image from URL.'
         }
     }
-    //</locale>	
-	
 	
 });
