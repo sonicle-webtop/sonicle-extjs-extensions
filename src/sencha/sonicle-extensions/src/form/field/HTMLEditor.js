@@ -58,6 +58,12 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
     customButtons: null,	
 
     /**
+     * @cfg {String} initialContent 
+     * The initial content for the editor
+     */
+    initialContent: null,	
+	
+    /**
      * @cfg {String} createLinkTitle 
      * The default title for the create link prompt
      */
@@ -538,7 +544,8 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 			delegated: false,
 			buffer:100
 		});
-		this.updateToolbar();
+		if (me.initialContent) me.setValue(me.initialContent);
+		me.updateToolbar();
 		me.fireEvent('init',me);
 	},
 	
@@ -725,6 +732,49 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 		ed.execCommand(cmd,ui,value,obj);
 	},
 	
+	/**
+	 * Retrieves text related info based on current selection.
+	 * @param {boolean} clip
+	 * @returns {Object} An object containing textContent, hasHTML flag and the html text.
+	 */
+	getSelection: function(clip) {
+		var me=this,
+			ed=me.getTinyMCEEditor(),
+			sel=ed.getDoc().getSelection(),
+			txt = '', hasHTML = false, html = '',selDocFrag=null;
+	
+		if (sel) {
+			if (clip) {
+				selDocFrag = sel.getRangeAt(0).extractContents();
+			} else {
+				selDocFrag = sel.getRangeAt(0).cloneContents();
+			}
+			Ext.each(selDocFrag.childNodes, function(n){
+				if (n.nodeType !== 3) {
+					hasHTML = true;
+				}
+			});
+			if (hasHTML) {
+				var div = document.createElement('div');
+				div.appendChild(selDocFrag);
+				html = div.innerHTML;
+				txt = sel + '';
+			} else {
+				html = txt = selDocFrag.textContent;
+			}
+			return {
+				textContent: txt,
+				hasHTML: hasHTML,
+				html: html
+			};
+		} else {
+			return {
+				textContent: '',
+				hasHTML: false,
+				html: ''
+			};
+		}
+	},
 	
    //<locale>
     /**
