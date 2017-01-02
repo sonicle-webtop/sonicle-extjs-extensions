@@ -31,7 +31,6 @@ Ext.define('Sonicle.selection.RowModel', {
 				}
 			});
 		}
-		
 	},
 	
 	/**
@@ -60,14 +59,21 @@ Ext.define('Sonicle.selection.RowModel', {
 				}
 			});
 		}
+		
 	},
 	
 	_reselect: function(ix) {
-		var me=this;
+		var me=this,
+			views   = me.views || [me.view],
+			viewsLn = views.length;
+	
 		if (ix>=me.store.getCount()) --ix;
 		if (ix>=0) {
 			me.view.bufferedRenderer.scrollTo(ix, true);
 			me.select(ix);
+			for (i = 0; i < viewsLn; i++) {
+				views[i].navigationModel.setPosition(ix);
+			}
 		}
 	}
 	

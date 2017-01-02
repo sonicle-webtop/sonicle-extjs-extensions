@@ -33,7 +33,7 @@ Ext.define('Sonicle.form.field.SourceComboBox', {
 		var picker = this.pickerField,
 				esc = picker.escapeDisplayed ? ':htmlEncode' : '';
 		return '<div style="float:left; white-space: pre;">'
-			+ '{'+displayField+'}'
+			+ '{'+displayField+esc+'}'
 			+ '</div>'
 			+ '<div style="text-align: right; width:100%">'
 			+ '{'+picker.sourceField+esc+'}'
