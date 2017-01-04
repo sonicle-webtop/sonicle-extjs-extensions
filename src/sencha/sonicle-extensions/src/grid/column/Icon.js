@@ -69,12 +69,11 @@ Ext.define('Sonicle.grid.column.Icon', {
 		me.callParent([ cfg ]);
 	},
 	
-	defaultRenderer: function(value, cellValues) {
+	buildHtml: function(value, rec) {
 		var me = this,
 				clsico = me.iconIconCls,
 				clstxt = me.iconTextCls,
 				size = me.iconSize,
-				rec = cellValues ? cellValues.record : null,
 				ico = me.evalValue(me.getIconCls, me.iconClsField, value, rec),
 				ttip = me.evalValue(me.getTip, me.tipField, value, rec, null),
 				style = 'width:'+size+'px;height:'+size+'px;',
@@ -84,6 +83,15 @@ Ext.define('Sonicle.grid.column.Icon', {
 		if (!me.hideText) text = '<span class="'+clstxt+'">' + Sonicle.String.deflt(value, '') + '</span>';
 		if (Ext.isFunction(me.handler)) style += 'cursor:pointer;';
 		return '<div class="'+clsico+'" style="' + style + '"' + (ttip ? ' data-qtip="' + ttip + '"' : '') + '></div>' + text;
+	},
+	
+	defaultRenderer: function(value, cellValues) {
+		return this.buildHtml(value, cellValues ? cellValues.record : null);
+	},
+	
+	updater: function(cell, value, rec) {
+		//TODO: valutare un metodo di aggiornamento parziale
+		cell.firstChild.innerHTML = this.buildHtml(value, rec);
 	},
 	
 	evalValue: function(getFn, field, value, rec, fallback) {
