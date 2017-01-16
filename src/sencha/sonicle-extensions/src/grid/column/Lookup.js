@@ -15,6 +15,11 @@ Ext.define('Sonicle.grid.column.Lookup', {
 	
 	displayField: '',
 	
+	/**
+	 * @private
+	 * @property {Ext.view.View} delayRefresh
+	 */
+	
 	initComponent: function() {
 		var me = this;
 		me.bindStore(me.store || 'ext-empty-store', true, true);
@@ -42,8 +47,34 @@ Ext.define('Sonicle.grid.column.Lookup', {
 		}
 	},
 	
-	defaultRenderer: function(value) {
-		return this._storeValue(value);
+	/**
+	 * See {@link Ext.util.StoreHolder StoreHolder}.
+	 */
+	getStoreListeners: function(store, o) {
+		var me = this;
+		return {
+			load: me.onStoreLoad
+		};
+	},
+	
+	onStoreLoad: function(store, records, success) {
+		var me = this;
+		if (success && me.delayRefresh) {
+			// Handle case in which store value is not ready at renderer call time.
+			// This performs a view refresh after a data load.
+			me.delayRefresh.refresh();
+			delete me.delayRefresh;
+		}
+	},
+	
+	defaultRenderer: function(value, meta, rec, ri, ci, sto, vw) {
+		var me = this;
+		if (me.getStore().loadCount > 0) {
+			return me._storeValue(value);
+		} else {
+			me.delayRefresh = vw;
+			return '';
+		}
 	},
 	
 	updater: function(cell, value) {
