@@ -51,6 +51,12 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 	toolbar: null,
 	tmceNotification: null,
 	
+	/**
+	 * @cfg {boolean} spellcheck
+	 * True to enable browser's native spell checker.
+	 */
+	spellcheck: true,
+	
     /**
      * @cfg {Ext.button.Button[]} customButtons 
      * an array of custom buttons to append to the toolbar
@@ -250,6 +256,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 				//toolbar2: "cut copy paste | searchreplace | bullist numlist | outdent indent blockquote | undo redo | link unlink anchor image media code | inserttime preview | forecolor backcolor",
 				//toolbar3: "table | hr removeformat | subscript superscript | charmap emoticons | print fullscreen | ltr rtl | spellchecker | visualchars visualblocks nonbreaking template pagebreak restoredraft",
 				menubar: false,
+				browser_spellcheck: (this.spellcheck === true),
 				toolbar_items_size: 'small',
 				forced_root_block: false,
                 extended_valid_elements: 'span[style]'
