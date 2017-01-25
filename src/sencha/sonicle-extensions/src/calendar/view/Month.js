@@ -231,7 +231,7 @@ Ext.define('Sonicle.calendar.view.Month', {
 				'<tpl if="_isPrivate">',
 				'<i class="ext-cal-ic {_pvtIconCls}">&#160;</i>',
 				'</tpl>',
-				'<tpl if="_isReminder">',
+				'<tpl if="_hasReminder">',
 				'<i class="ext-cal-ic {_remIconCls}">&#160;</i>',
 				'</tpl>',
 				'{Title}'
@@ -294,7 +294,7 @@ Ext.define('Sonicle.calendar.view.Month', {
 			_isPrivate: (evt[EM.IsPrivate.name] === true),
 			_isRecurring: (evt[EM.IsRecurring.name] === true),
 			_isBroken: (evt[EM.IsBroken.name] === true),
-			_isReminder: !Ext.isEmpty(evt[EM.Reminder.name]),
+			_hasReminder: (evt[EM.Reminder.name] !== -1),
 			_tzIconCls: me.timezoneIconCls,
 			_pvtIconCls: me.privateIconCls,
 			_recIconCls: (evt[EM.IsBroken.name] === true) ? me.recurrenceBrokenIconCls : me.recurrenceIconCls,
