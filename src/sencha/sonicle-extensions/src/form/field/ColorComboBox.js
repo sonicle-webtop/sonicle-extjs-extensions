@@ -20,6 +20,21 @@ Ext.define('Sonicle.form.field.ColorComboBox', {
 	 */
 	colorField: 'color',
 	
+	componentCls: 'so-'+'colorcombo',
+	swatchWrapCls: 'so-'+'colorcombo-swatch-wrap',
+	swatchCls: 'so-'+'colorcombo-swatch',
+	listSwatchCls: 'so-'+'colorcombo-list-swatch',
+	
+	preSubTpl: [
+		'<div id={cmpId}-swatchWrap data-ref="swatchWrap" class="{swatchWrapCls}">',
+			'<div id={cmpId}-swatchEl data-ref="swatchEl" class="{swatchCls} {swatchCircleCls}"></div>',
+		'</div>',
+		'<div id="{cmpId}-triggerWrap" data-ref="triggerWrap" class="{triggerWrapCls} {triggerWrapCls}-{ui}">', // Original (as Ext.form.field.Text)
+			'<div id={cmpId}-inputWrap data-ref="inputWrap" class="{inputWrapCls} {inputWrapCls}-{ui}">' // Original (as Ext.form.field.Text)
+	],
+	
+	childEls: ['swatchWrap', 'swatchEl'],
+	
 	initComponent: function() {
 		var me = this;
 		
@@ -29,31 +44,13 @@ Ext.define('Sonicle.form.field.ColorComboBox', {
 		me.callParent(arguments);
 	},
 	
-	/**
-	 * Overrides default implementation of {@link Ext.form.field.ComboBox#afterRender}.
-	 */
-	afterRender: function() {
+	getSubTplData: function(fieldData) {
 		var me = this;
-		me.callParent(arguments);
-		
-		me.wrap = me.el.down('.x-form-text-wrap');
-		me.wrap.addCls('so-colorcombo');
-		Ext.DomHelper.append(me.wrap, {
-			tag: 'i', cls: 'so-colorcombo-marker'
+		return Ext.apply(me.callParent(arguments), {
+			swatchWrapCls: me.swatchWrapCls,
+			swatchCls: me.swatchCls,
+			swatchCircleCls: (me.geometry === 'circle') ? (me.swatchCls + '-circle') : ''
 		});
-		me.marker = me.el.down('.so-colorcombo-marker');
-		if(me.marker && !me.editable) {
-			me.marker.on('click', me.onTriggerClick, me);
-		}
-	},
-	
-	/**
-	 * Overrides default implementation of {@link Ext.form.field.Field#onChange}.
-	 */
-	onChange: function(newVal, oldVal) {
-		var me = this;
-		me.updateMarker(newVal, oldVal);
-		me.callParent(arguments);
 	},
 	
 	/**
@@ -62,30 +59,53 @@ Ext.define('Sonicle.form.field.ColorComboBox', {
 	 */
 	getListItemTpl: function(displayField){
 		var picker = this.pickerField,
-				styles = picker.buildMarkerStyles(picker.geometry, '{'+picker.colorField+'}'),
-				style = Ext.dom.Helper.generateStyles(styles);
+				ccls = picker.componentCls,
+				lwcls = picker.listSwatchCls,
+				lwccls = (picker.geometry === 'circle') ? (lwcls + '-circle') : '',
+				style = Ext.dom.Helper.generateStyles({
+					backgroundColor: '{'+picker.colorField+'}',
+					border: '1px solid black'
+				});
 		
-		return '<div class="so-colorcombo x-combo-list-item">'
-			+ '<div class="so-colorcombo-marker" style="'+style+'"></div>'
+		return '<div class="' + ccls + ' x-combo-list-item">'
+			+ '<div class="' + lwcls + ' ' + lwccls + '" style="'+style+'"></div>'
 			+ '<span>{'+displayField+'}</span>'
 			+ '</div>'
 		;
 	},
 	
 	/**
+	 * Overrides default implementation of {@link Ext.form.field.ComboBox#afterRender}.
+	 */
+	afterRender: function() {
+		var me = this;
+		me.callParent(arguments);
+		if (me.inputWrap && me.swatchWrap) {
+			me.swatchWrap.setHeight(me.inputWrap.getHeight());
+		}
+	},
+	
+	/**
+	 * Overrides default implementation of {@link Ext.form.field.Field#onChange}.
+	 */
+	onChange: function(newVal, oldVal) {
+		var me = this;
+		me.updateSwatch(newVal, oldVal);
+		me.callParent(arguments);
+	},
+	
+	/**
 	 * @private
 	 */
-	buildMarkerStyles: function(geometry, color) {
-		var obj = {};
-		if(geometry === 'circle') {
-			Ext.apply(obj, {
-				borderRadius: '50%'
+	generateSwatchStyle: function(color) {
+		if (Ext.isEmpty(color)) {
+			return '';
+		} else {
+			return Ext.dom.Helper.generateStyles({
+				backgroundColor: color,
+				border: '1px solid black'
 			});
 		}
-		Ext.apply(obj, {
-			backgroundColor: !Ext.isEmpty(color) ? color : ''
-		});
-		return obj;
 	},
 	
 	/**
@@ -100,13 +120,13 @@ Ext.define('Sonicle.form.field.ColorComboBox', {
 	
 	/**
 	 * @private
-	 * Replaces old iconCls with the new one.
+	 * Replaces old swatch with the new one.
 	 */
-	updateMarker: function(nv, ov) {
+	updateSwatch: function(nv, ov) {
 		var me = this, color;
-		if(me.marker) {
+		if(me.swatchEl) {
 			color = me.getColorByValue(nv);
-			me.marker.setStyle(me.buildMarkerStyles(me.geometry, color));
+			me.swatchEl.applyStyles(me.generateSwatchStyle(color));
 		}
 	},
 	
@@ -121,11 +141,11 @@ Ext.define('Sonicle.form.field.ColorComboBox', {
 	updateEditable: function(editable, oldEditable) {
 		var me = this;
 		me.callParent(arguments);
-		if(me.marker) {
+		if(me.swatchEl) {
 			if(!editable) {
-				me.marker.on('click', me.onTriggerClick, me);
+				me.swatchEl.on('click', me.onTriggerClick, me);
 			} else {
-				me.marker.un('click', me.onTriggerClick, me);
+				me.swatchEl.un('click', me.onTriggerClick, me);
 			}
 		}
 	}

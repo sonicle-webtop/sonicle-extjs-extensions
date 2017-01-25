@@ -1,7 +1,24 @@
 .so-colorcombo .x-form-text {
 	padding-left: 23px;
 }
-.so-colorcombo-marker {
+.so-colorcombo-swatch-wrap {
+	display: table-cell;
+	position: absolute;
+	height: 22px;
+	margin-left: 5px;
+}
+.so-colorcombo-swatch {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	margin: auto;
+	width: 15px;
+	height: 15px;
+}
+.so-colorcombo-swatch-circle {
+	border-radius: 50%;
+}
+.so-colorcombo-list-swatch {
 	position: absolute;
 	top: 0px;
 	bottom: 0px;
@@ -9,12 +26,13 @@
 	margin-bottom: auto;
 	width: 15px;
 	height: 15px;
-	border: 1px solid black;
-	margin-left: 5px;
 }
-.so-colorcombo.x-combo-list-item > .so-colorcombo-marker {
-	margin-left: 0px;
+.so-colorcombo-list-swatch-circle {
+	border-radius: 50%;
 }
 .so-colorcombo.x-combo-list-item > span {
 	padding-left: 20px;
+}
+.so-colorcombo.x-combo-list-item > .so-colorcombo-list-swatch {
+	margin-left: 0px;
 }
