@@ -234,6 +234,9 @@ Ext.define('Sonicle.calendar.view.Month', {
 				'<tpl if="_hasReminder">',
 				'<i class="ext-cal-ic {_remIconCls}">&#160;</i>',
 				'</tpl>',
+				'<tpl if="_hasComments">',
+				'<i class="ext-cal-ic {_commIconCls}">&#160;</i>',
+				'</tpl>',
 				'{Title}'
 			].join('');
 		}
@@ -295,10 +298,12 @@ Ext.define('Sonicle.calendar.view.Month', {
 			_isRecurring: (evt[EM.IsRecurring.name] === true),
 			_isBroken: (evt[EM.IsBroken.name] === true),
 			_hasReminder: (evt[EM.Reminder.name] !== -1),
+			_hasComments: (evt[EM.HasComments.name] === true),
 			_tzIconCls: me.timezoneIconCls,
 			_pvtIconCls: me.privateIconCls,
 			_recIconCls: (evt[EM.IsBroken.name] === true) ? me.recurrenceBrokenIconCls : me.recurrenceIconCls,
 			_remIconCls: me.reminderIconCls,
+			_commIconCls: me.commentsIconCls,
 			Title: dinfo.title,
 			Tooltip: dinfo.tooltip,
 			_operaLT11: me.operaLT11 ? 'ext-operaLT11' : ''

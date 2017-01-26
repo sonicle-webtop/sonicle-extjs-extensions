@@ -51,6 +51,12 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	 */
 	
 	/**
+	 * @cfg {String} commentsIconCls
+	 * A css class which sets an image to be used as the icon for event that has comments.
+	 * There are no default icon classes that come with this component.
+	 */
+	
+	/**
 	 * @cfg {Number} dayCount
 	 * The number of days to display in the view (defaults to 1)
 	 */

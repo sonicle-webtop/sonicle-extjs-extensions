@@ -91,6 +91,11 @@ Sonicle.calendar.data.EventMappings = {
         //mapping: 'rem',
         type: 'int'
     },
+	HasComments: {
+        name: 'hasComments',
+       // mapping: 'pvt',
+        type: 'boolean'
+    },
     IsNew: {
         name: 'isNew',
         //mapping: 'n',
