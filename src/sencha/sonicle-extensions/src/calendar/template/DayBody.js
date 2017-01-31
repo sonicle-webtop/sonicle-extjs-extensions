@@ -99,7 +99,7 @@ Ext.define('Sonicle.calendar.template.DayBody', {
 
 		for (i=start; i<end; i++) {
 			times.push(dt);
-			bustimes.push((i >= me.businessHoursStart) && (i <= me.businessHoursEnd));
+			bustimes.push((i >= me.businessHoursStart) && (i < me.businessHoursEnd));
 			dt = soDate.add(dt, {minutes: mins});
 		}
 
