@@ -37,7 +37,7 @@ Ext.define('Sonicle.form.field.TinyMCETextArea', {
 
     extend: 'Ext.form.field.TextArea',
     alias: ['widget.tinymce_textarea', 'widget.tinymce_field'],
-
+	
     //-----------------------------------------------------------------
 
     /*
@@ -134,7 +134,7 @@ Ext.define('Sonicle.form.field.TinyMCETextArea', {
         // because the size values of the hidden editor
         // are calculated wrong.
 
-        if (ed.isHidden()) { return; }
+        if (!ed || ed.isHidden()) { return; }
         
         var edIframe = Ext.get(me.getInputId() + "_ifr");
         
@@ -253,6 +253,8 @@ Ext.define('Sonicle.form.field.TinyMCETextArea', {
                     setContent.apply(ed, arguments);
                     ed.fire('change', {});
                 };
+				
+				if (me.noWysiwyg) me.hideEditor();
                 
                 if(height) {
                   // setTimeout is a hack. The problem is that the editor
@@ -305,6 +307,7 @@ Ext.define('Sonicle.form.field.TinyMCETextArea', {
         
         me.intializationInProgress = false;
         me.wysiwygIntialized = true;
+		
     },
 	
 	
@@ -593,10 +596,20 @@ Ext.define('Sonicle.form.field.TinyMCETextArea', {
     },
     //-----------------------------------------------------------------
     setValue: function (v) {
-        var me = this;
+        var me = this,
+			ed = tinymce.get(me.getInputId());
 
-        var res = me.callParent(arguments);
-
+		//trick for first tinymce instance slow initialization
+		//binding may try to set value before editor is ready 
+		if (!ed || !ed.initialized) {
+			Ext.defer(function() {
+				me.setValue(v);
+			},200);
+			return this;
+		}
+		
+		var res=me.callParent(arguments);
+				
         if (me.wysiwygIntialized) {
             // The editor does some preformatting of the HTML text
             // entered by the user.
@@ -604,11 +617,12 @@ Ext.define('Sonicle.form.field.TinyMCETextArea', {
             // We have to load the text into editor for the
             // preformatting and then to save it back to the textarea.
 
-            var ed = tinymce.get(me.getInputId());
-            if (ed) {
-                ed.load();
-                ed.save();
-            }
+			if (!me.noWysiwyg) {
+				if (ed) {
+					ed.load();
+					ed.save();
+				}
+			}
         }
 
         return res;

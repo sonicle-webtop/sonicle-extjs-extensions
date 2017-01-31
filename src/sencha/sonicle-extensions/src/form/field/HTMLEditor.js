@@ -248,6 +248,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 					'insertdatetime media nonbreaking save table contextmenu directionality',
 					'emoticons template paste textcolor'
 				],
+				padd_empty_editor: false,
 				paste_block_drop: true,
 				skin: Ext.themeName || 'lightgray',
 				toolbar: false,
@@ -286,6 +287,14 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
         this.toolbar = Ext.widget(this.getToolbarCfg());
         return this.toolbar;
     },
+	
+	hideToolbar: function() {
+		this.toolbar.setHidden(true);
+	},
+    
+	showToolbar: function() {
+		this.toolbar.setHidden(false);
+	},
     
 	_getTooltip: function(id) {
 		var me=this,
@@ -763,6 +772,20 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 		}
 	},
 	
+	enableHtmlMode: function() {
+		var me=this;
+		me.tcme.noWysiwyg=false;
+		me.tmce.showEditor();
+		me.showToolbar();
+	},
+	
+	enableTextMode: function() {
+		var me=this;
+		me.tmce.noWysiwyg=true;
+		me.tmce.hideEditor();
+		me.hideToolbar();
+	},
+	
 	getEditingValue: function() {
 		var me=this,ed=me.tmce.getEditor();
 		if (ed) return ed.getContent();
@@ -875,7 +898,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 				html: ''
 			};
 		}
-	},
+	}//,
 	
     /**
      * @property {Object} buttonTips
@@ -894,6 +917,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
      *         // ...
      *     }
      */
+	/*
     buttonTips: {
         bold: {
             title: 'Bold (Ctrl+B)',
@@ -956,5 +980,5 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
             text: 'Insert image from URL.'
         }
     }
-	
+	*/
 });
