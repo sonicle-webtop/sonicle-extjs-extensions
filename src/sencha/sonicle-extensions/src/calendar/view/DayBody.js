@@ -221,8 +221,11 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 				'<tpl if="_isRecurring || _isBroken">',
 				'<i class="ext-cal-ic {_recIconCls}">&#160;</i>',
 				'</tpl>',
-				'<tpl if="_isTimezone">',
+				'<tpl if="_hasTimezone">',
 				'<i class="ext-cal-ic {_tzIconCls}">&#160;</i>',
+				'</tpl>',
+				'<tpl if="_hasAttendees">',
+				'<i class="ext-cal-ic {_attIconCls}">&#160;</i>',
 				'</tpl>',
 				'<tpl if="_isPrivate">',
 				'<i class="ext-cal-ic {_pvtIconCls}">&#160;</i>',
@@ -352,16 +355,18 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		data._colorCls = 'ext-color-' + (evt[EM.Color.name] || 'nocolor') + (evt._renderAsAllDay ? '-ad' : '');
 		data._spanCls = (!isSpan ? '' : (!spanTop && !spanBottom ? 'ext-cal-ev-spanboth' : (spanBottom ? 'ext-cal-ev-spanbottom' : 'ext-cal-ev-spantop')));
 		data._isDraggable = (me.enableEventResize && !isSpan) ? EU.isMovable(evt) : false;
-		data._isTimezone = (evt[EM.Timezone.name] !== me.timezone);
+		data._hasTimezone = (evt[EM.Timezone.name] !== me.timezone);
 		data._isPrivate = (evt[EM.IsPrivate.name] === true);
+		data._hasReminder = (evt[EM.Reminder.name] !== -1);
+		data._hasAttendees = (evt[EM.HasAttendees.name] === true);
 		data._isRecurring = (evt[EM.IsRecurring.name] === true);
 		data._isBroken = (evt[EM.IsBroken.name] === true);
-		data._hasReminder = (evt[EM.Reminder.name] !== -1);
 		data._hasComments = (evt[EM.HasComments.name] === true);
 		data._tzIconCls = me.timezoneIconCls;
 		data._pvtIconCls = me.privateIconCls;
-		data._recIconCls = (evt[EM.IsBroken.name] === true) ? me.recurrenceBrokenIconCls : me.recurrenceIconCls;
 		data._remIconCls = me.reminderIconCls;
+		data._attIconCls = me.attendeesIconCls;
+		data._recIconCls = (evt[EM.IsBroken.name] === true) ? me.recurrenceBrokenIconCls : me.recurrenceIconCls;
 		data._commIconCls = me.commentsIconCls;
 		data.isSpan = isSpan;
 		data.spanTop = spanTop;

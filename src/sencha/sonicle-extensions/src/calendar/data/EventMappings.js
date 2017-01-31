@@ -24,7 +24,7 @@ Sonicle.calendar.data.EventMappings = {
     },
     EventId: {
         name: 'eventId',
-        //mapping: 'id',
+        //mapping: 'eid',
         type: 'int'
     },
     CalendarId: {
@@ -39,7 +39,7 @@ Sonicle.calendar.data.EventMappings = {
     },
     Title: {
         name: 'title',
-        //mapping: 'title',
+        //mapping: 'tit',
         type: 'string'
     },
     StartDate: {
@@ -68,7 +68,7 @@ Sonicle.calendar.data.EventMappings = {
     },
     Url: {
         name: 'Url',
-        mapping: 'url',
+        //mapping: 'url',
         type: 'string'
     },
     IsAllDay: {
@@ -78,7 +78,7 @@ Sonicle.calendar.data.EventMappings = {
     },
     IsPrivate: {
         name: 'isPrivate',
-       // mapping: 'pvt',
+       // mapping: 'isPvt',
         type: 'boolean'
     },
 	Timezone: {
@@ -91,30 +91,39 @@ Sonicle.calendar.data.EventMappings = {
         //mapping: 'rem',
         type: 'int'
     },
+	HasAttendees: {
+        name: 'hasAtts',
+		// mapping: 'hasAtts',
+        type: 'boolean'
+    },
 	HasComments: {
-        name: 'hasComments',
-       // mapping: 'pvt',
+        name: 'hasCmts',
+       // mapping: 'hasCmts',
         type: 'boolean'
     },
     IsNew: {
         name: 'isNew',
-        //mapping: 'n',
+        //mapping: 'isNew',
         type: 'boolean'
     },
 	Rights: {
 		name: '_rights',
+		//mapping: 'rights',
 		type: 'string'
 	},
 	IsReadOnly: {
         name: 'isReadOnly',
+		//mapping: 'isRO',
         type: 'boolean'
     },
 	IsBroken: {
         name: 'isBroken',
+		//mapping: 'isBrk',
         type: 'boolean'
     },
 	IsRecurring: {
         name: 'isRecurring',
+		//mapping: 'isRec',
         type: 'boolean'
     }
 	

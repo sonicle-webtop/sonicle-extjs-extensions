@@ -67,6 +67,18 @@ Ext.define('Sonicle.calendar.MultiCalendar', {
 	 */
 	highlightMode : 'w5',
 	
+	/*
+	 * @cfg {String} dayText
+	 * The text to display in the day info tooltip
+	 */
+	dayText: 'Day',
+	
+	/*
+	 * @cfg {String} weekText
+	 * The text to display in the day info tooltip
+	 */
+	weekText: 'Week',
+	
 	/**
 	 * @cfg {Array} dates
 	 */
@@ -185,6 +197,8 @@ Ext.define('Sonicle.calendar.MultiCalendar', {
 				highlightNextDays: last,
 				hidePrevDays: !first,
 				hideNextDays: !last,
+				dayText: me.dayText,
+				weekText: me.weekText,
 				listeners: {
 					select: function(s,date) {
 						me.activePicker = s;

@@ -39,6 +39,12 @@ Ext.define('Sonicle.calendar.view.Day', {
 	 */
 	
 	/**
+	 * @cfg {String} attendeesIconCls
+	 * A css class which sets an image to be used as the icon for events with attendees.
+	 * There are no default icon classes that come with this component.
+	 */
+	
+	/**
 	 * @cfg {String} recurrenceIconCls
 	 * A css class which sets an image to be used as the icon for recurring events.
 	 * There are no default icon classes that come with this component.
