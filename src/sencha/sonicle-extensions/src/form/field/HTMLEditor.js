@@ -772,12 +772,14 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 		}
 	},
 	
-	enableHtmlMode: function() {
+	//this call seems to break binding
+	//html mode is the default, no need to call it.
+	/*enableHtmlMode: function() {
 		var me=this;
-		me.tcme.noWysiwyg=false;
+		me.tmce.noWysiwyg=false;
 		me.tmce.showEditor();
 		me.showToolbar();
-	},
+	},*/
 	
 	enableTextMode: function() {
 		var me=this;
