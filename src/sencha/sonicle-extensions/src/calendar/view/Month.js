@@ -296,7 +296,7 @@ Ext.define('Sonicle.calendar.view.Month', {
 			_foreColor: me.getEventForeColor(bgColor),
 			_colorCls: 'ext-color-' + (evt[EM.Color.name] || 'nocolor') + (evt._renderAsAllDay ? '-ad' : ''),
 			_isDraggable: EU.isMovable(evt),
-			_hasTimezone: (evt[EM.Timezone.name] !== me.timezone),
+			_hasTimezone: (evt[EM.HasTimezone.name] === true),
 			_isPrivate: (evt[EM.IsPrivate.name] === true),
 			_hasReminder: (evt[EM.Reminder.name] !== -1),
 			_hasAttendees: (evt[EM.HasAttendees.name] === true),

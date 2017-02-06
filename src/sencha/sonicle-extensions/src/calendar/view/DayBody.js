@@ -112,16 +112,19 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 	
 	//private
 	refresh: function(reloadData) {
-		var me = this,
-				top = me.el.getScroll().top;
+		var me = this;
+		//		top = me.el.getScroll().top;
 		me.callParent(arguments);
-
+		
 		// skip this if the initial render scroll position has not yet been set.
 		// necessary since IE/Opera must be deferred, so the first refresh will
 		// override the initial position by default and always set it to 0.
+		/*
 		if (me.scrollReady) {
+			//console.log('scroll ready');
 			me.scrollTo(top);
 		}
+		*/
 	},
 	
 	/**
@@ -135,15 +138,17 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 	 * <p>Note that this method should not generally need to be called directly as scroll position is managed internally.</p>
 	 */
 	scrollTo: function(y, defer) {
+		var me = this;
+		//console.log('scrollTo');
 		defer = defer || (Ext.isIE || Ext.isOpera);
 		if (defer) {
 			Ext.defer(function() {
-				this.el.scrollTo('top', y, true);
-				this.scrollReady = true;
-			}, 10, this);
+				me.el.scrollTo('top', y, true);
+				//me.scrollReady = true;
+			}, 50, this);
 		} else {
-			this.el.scrollTo('top', y, true);
-			this.scrollReady = true;
+			me.el.scrollTo('top', y, true);
+			//me.scrollReady = true;
 		}
 	},
 	
@@ -154,7 +159,6 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 			me.tpl = Ext.create('Sonicle.calendar.template.DayBody', {
 				id: me.id,
 				use24HourTime: me.use24HourTime,
-				timezone: me.timezone,
 				dayCount: me.dayCount,
 				showTodayText: me.showTodayText,
 				todayText: me.todayText,
@@ -355,7 +359,7 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		data._colorCls = 'ext-color-' + (evt[EM.Color.name] || 'nocolor') + (evt._renderAsAllDay ? '-ad' : '');
 		data._spanCls = (!isSpan ? '' : (!spanTop && !spanBottom ? 'ext-cal-ev-spanboth' : (spanBottom ? 'ext-cal-ev-spanbottom' : 'ext-cal-ev-spantop')));
 		data._isDraggable = (me.enableEventResize && !isSpan) ? EU.isMovable(evt) : false;
-		data._hasTimezone = (evt[EM.Timezone.name] !== me.timezone);
+		data._hasTimezone = (evt[EM.HasTimezone.name] === true);
 		data._isPrivate = (evt[EM.IsPrivate.name] === true);
 		data._hasReminder = (evt[EM.Reminder.name] !== -1);
 		data._hasAttendees = (evt[EM.HasAttendees.name] === true);
