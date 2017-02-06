@@ -128,13 +128,6 @@ Ext.define('Sonicle.calendar.Panel', {
 	use24HourTime: false,
 	
 	/**
-	 * @cfg {String} timezone
-	 * Timezone that should be considered as default view timezone.
-	 * A globe icon will be displayed on events that have a timezone different to this.
-	 */
-	timezone: null,
-	
-	/**
 	 * @cfg {String} activeView [activeView=d]
 	 */
 	activeView: 'd',
@@ -399,7 +392,6 @@ Ext.define('Sonicle.calendar.Panel', {
 			ownerCalendarPanel: me,
 			startDay: me.startDay,
 			use24HourTime: me.use24HourTime,
-			timezone: me.timezone,
 			eventTextColor: me.eventTextColor,
 			colorLuminance: me.colorLuminance,
 			showToday: me.showToday,

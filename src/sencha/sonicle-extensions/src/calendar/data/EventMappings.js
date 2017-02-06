@@ -96,6 +96,11 @@ Sonicle.calendar.data.EventMappings = {
 		// mapping: 'hasAtts',
         type: 'boolean'
     },
+	HasTimezone: {
+        name: 'hasTz',
+       // mapping: 'hasTz',
+        type: 'boolean'
+    },
 	HasComments: {
         name: 'hasCmts',
        // mapping: 'hasCmts',
