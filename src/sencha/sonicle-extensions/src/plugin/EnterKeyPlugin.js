@@ -8,6 +8,7 @@ Ext.define('Sonicle.plugin.EnterKeyPlugin', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.soenterkeyplugin',
 	
+	preventEnterFiringOnPickerExpanded: true,
 	/**
 	 * @event enterkey
 	 * Fires when the ENTER confirmation key is pressed on the field.
@@ -32,7 +33,7 @@ Ext.define('Sonicle.plugin.EnterKeyPlugin', {
 		if(e.getKey() === e.ENTER) {
 			cmp = me.getCmp();
 			// If field is picker, prevent default behaviour if list is expanded
-			//if(cmp.isXType('pickerfield') && cmp.isExpanded) return;
+			if (me.preventEnterFiringOnPickerExpanded && cmp.isXType('pickerfield') && cmp.isExpanded) return;
 			cmp.fireEvent('enterkey', s, e);
 		}
 	}
