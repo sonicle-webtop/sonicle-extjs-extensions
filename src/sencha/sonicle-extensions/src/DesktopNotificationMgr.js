@@ -79,22 +79,29 @@ Ext.define('Sonicle.DesktopNotificationMgr', {
 	 * instances of your website open at once (only for Chrome 22+, FF 22+, Safari 6+).
 	 * @param {Number} [opts.autoClose] The number of milliseconds after that 
 	 * the notification will be automatically closed. Defaults to {@link #autoClose} value.
+	 * @param {Boolean} [opts.preventFocusOnClick] 
 	 * @return {Object} An object wrapper that defines the close() method.
 	 */
 	notify: function(title, opts) {
 		opts = opts || {};
 		var me = this, 
 				auto = opts.autoClose || me.getAutoClose(),
+				noFocus = Ext.isBoolean(opts.noFocusOnClick) ? opts.noFocusOnClick : false,
 				ntf, ntfWrapper;
 		
-		if(!me.api) return;
-		if(!Ext.isString(title)) Ext.Error.raise('Title is required');
-		if(!Ext.isDefined(opts.icon)) Ext.Error.raise('Icon is required');
+		if (!me.api) return;
+		if (!Ext.isString(title)) Ext.Error.raise('Title is required');
+		if (!Ext.isDefined(opts.icon)) Ext.Error.raise('Icon is required');
 		
 		ntf = me.createNotification(title, opts);
+		if (ntf && !noFocus) {
+			ntf.addEventListener("click", function() {
+				window.focus();
+			});
+		}
 		ntfWrapper = me.createCloseWrapper(ntf);
 		
-		if((auto > 0) && ntf && !ntf.ieSeed && ntf.addEventListener) {
+		if ((auto > 0) && ntf && !ntf.ieSeed && ntf.addEventListener) {
 			ntf.addEventListener("show", function() {
 				Ext.defer(ntfWrapper.close, auto, me);
 			});
@@ -151,9 +158,9 @@ Ext.define('Sonicle.DesktopNotificationMgr', {
 	 * @private
 	 */
 	createNotification: function(title, opts) {
+		opts = opts || {};
 		var me = this,
 				win = window, ntf = null;
-		opts = opts || {};
 		
 		if(!me.api) return;
 		if(win.Notification) { /* Chrome 22+, FF 22+, Safari 6+ */
