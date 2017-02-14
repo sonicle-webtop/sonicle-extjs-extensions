@@ -13,8 +13,9 @@ Ext.define('Sonicle.selection.RowModel', {
 	 * then automatically set the new selection near the first
 	 * record of the old selection
 	 * @param {Ext.data.Model[]} [selection] The selection to be removed. Defaults to current selection.
+	 * @param {Object} [extraParams] The params to add to the reload action.
 	 */
-	removeSelection: function(selection) {
+	removeSelection: function(selection, extraParams) {
 		var me=this,
 			s=selection||me.getSelection(),
 			st=me.store,
@@ -26,6 +27,7 @@ Ext.define('Sonicle.selection.RowModel', {
 		}
 		else {
 			st.reload({
+				params: extraParams,
 				callback: function() {
 					me._reselect(ix);
 				}
@@ -38,8 +40,9 @@ Ext.define('Sonicle.selection.RowModel', {
 	 * then automatically set the new selection near the first
 	 * record of the first removed ID
 	 * @param {String[]} [ids] The ids to be removed.
+	 * @param {Object} [extraParams] The params to add to the reload action.
 	 */
-	removeIds: function(ids) {
+	removeIds: function(ids,extraParams) {
 		var me=this,
 			st=me.store,
 			stlen=st.getCount(),
@@ -80,11 +83,15 @@ Ext.define('Sonicle.selection.RowModel', {
 				if (ix<stlen) id0=st.getAt(ix).get(idprop);
 			}
 			st.reload({
+				params: extraParams,
 				callback: function() {
+					var newix=-1;
 					if (id0) {
-						var newix=st.findExact(idprop,id0);
-						if (newix>=0) me._reselect(newix);
+						newix=st.findExact(idprop,id0);
+					} else {
+						newix=st.getCount()-1;
 					}
+					if (newix>=0) me._reselect(newix);
 				}
 			});
 		}
