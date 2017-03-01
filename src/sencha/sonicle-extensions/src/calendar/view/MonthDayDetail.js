@@ -20,9 +20,11 @@ Ext.define('Sonicle.calendar.view.MonthDayDetail', {
         this.callParent(arguments);
 
         this.el.on({
-            click: this.view.onClick,
-            mouseover: this.view.onMouseOver,
+			mouseover: this.view.onMouseOver,
             mouseout: this.view.onMouseOut,
+            dblclick: this.view.onClick,
+			//TODO: valutare se abilitare il menu contestuale
+			//contextmenu: this.view.onContextMenu,
             scope: this.view
         });
     },
