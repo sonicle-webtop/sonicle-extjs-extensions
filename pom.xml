@@ -8,7 +8,7 @@
 	<name>sonicle-extjs-extensions</name>
 	
 	<parent>
-		<groupId>com.sonicle.maven</groupId>
+		<groupId>com.sonicle.extjs</groupId>
 		<artifactId>sonicle-superpom-senchapkg</artifactId>
 		<version>5</version>
 	</parent>
