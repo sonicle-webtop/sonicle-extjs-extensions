@@ -53,7 +53,7 @@
      * Typically, changes to the package should come along with changes to the version.
      * This number should be in this format: d+(.d+)*
      */
-    "version": "5.1.2.748",
+    "version": "6.2.0.981",
 
     /**
      * The version that users can transparently update from without requiring code changes.
@@ -61,7 +61,7 @@
      * In addition the version property, packages can also indicate the degree to which
      * they are backward compatible using the compatVersion property.
      */
-    "compatVersion": "5.1.2.748",
+    "compatVersion": "6.2.0.981",
 
     /**
      * Spec. version of this package.json file.
@@ -268,14 +268,21 @@
     "requires": [],
 	
 	"builds": {
+        "triton": {
+            "toolkit": "classic",
+            "theme": "theme-triton"
+        },
         "neptune": {
-            "theme": "ext-theme-neptune"
+            "toolkit": "classic",
+            "theme": "theme-neptune"
         },
         "crisp": {
-            "theme": "ext-theme-crisp"
+            "toolkit": "classic",
+            "theme": "theme-crisp"
         },
         "classic": {
-            "theme": "ext-theme-classic"
+            "toolkit": "classic",
+            "theme": "theme-classic"
         }
     }
 }
