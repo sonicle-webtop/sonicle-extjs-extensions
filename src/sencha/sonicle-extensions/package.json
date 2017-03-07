@@ -276,6 +276,9 @@
         },
         "classic": {
             "theme": "ext-theme-classic"
+        },
+        "gray": {
+            "theme": "ext-theme-gray"
         }
     }
 }

@@ -1,3 +1,4 @@
 /target/
 /src/sencha/sonicle-extensions/build/
 /src/sencha/sonicle-extensions/sass/example/
+/src/sencha/sonicle-extensions/*.log
