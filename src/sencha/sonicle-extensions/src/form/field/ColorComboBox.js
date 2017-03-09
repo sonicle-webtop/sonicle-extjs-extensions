@@ -29,8 +29,16 @@ Ext.define('Sonicle.form.field.ColorComboBox', {
 		'<div id={cmpId}-swatchWrap data-ref="swatchWrap" class="{swatchWrapCls}">',
 			'<div id={cmpId}-swatchEl data-ref="swatchEl" class="{swatchCls} {swatchCircleCls}"></div>',
 		'</div>',
-		'<div id="{cmpId}-triggerWrap" data-ref="triggerWrap" class="{triggerWrapCls} {triggerWrapCls}-{ui}">', // Original (as Ext.form.field.Text)
-			'<div id={cmpId}-inputWrap data-ref="inputWrap" class="{inputWrapCls} {inputWrapCls}-{ui}">' // Original (as Ext.form.field.Text)
+		// Original tpl (as Ext.form.field.Text)
+		'<div id="{cmpId}-triggerWrap" data-ref="triggerWrap"',
+				'<tpl if="ariaEl == \'triggerWrap\'">',
+					'<tpl foreach="ariaElAttributes"> {$}="{.}"</tpl>',
+				'<tpl else>',
+					' role="presentation"',
+				'</tpl>',
+				' class="{triggerWrapCls} {triggerWrapCls}-{ui}">',
+			'<div id={cmpId}-inputWrap data-ref="inputWrap"',
+				' role="presentation" class="{inputWrapCls} {inputWrapCls}-{ui}">'
 	],
 	
 	childEls: ['swatchWrap', 'swatchEl'],

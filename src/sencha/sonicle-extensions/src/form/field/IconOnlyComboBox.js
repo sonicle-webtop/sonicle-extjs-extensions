@@ -9,5 +9,4 @@ Ext.define('Sonicle.form.field.IconOnlyComboBox', {
 	alias: ['widget.soicononlycombo', 'widget.soicononlycombobox'],
 	
 	comboCls: 'so-'+'icononlycombo'
-	
 });

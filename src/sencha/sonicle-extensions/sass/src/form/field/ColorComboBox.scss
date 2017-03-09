@@ -1,19 +1,20 @@
-.so-colorcombo .x-form-text {
+.so-colorcombo input {
 	padding-left: 23px;
 }
 .so-colorcombo-swatch-wrap {
 	display: table-cell;
 	position: absolute;
 	height: 22px;
-	margin-left: 5px;
+	margin-left: 4px;
+	z-index: 10;
 }
 .so-colorcombo-swatch {
 	position: absolute;
 	top: 0px;
 	bottom: 0px;
 	margin: auto;
-	width: 15px;
-	height: 15px;
+	width: 16px;
+	height: 16px;
 }
 .so-colorcombo-swatch-circle {
 	border-radius: 50%;
