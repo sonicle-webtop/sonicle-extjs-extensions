@@ -23,7 +23,7 @@ Ext.define('Sonicle.selection.RowModel', {
 		
 		if (st.remove) {
 			st.remove(s);
-			me._reselect(ix);
+			Ext.defer(me._reselect,200,me,[ix]); //me._reselect(ix)
 		}
 		else {
 			st.reload({
@@ -91,7 +91,10 @@ Ext.define('Sonicle.selection.RowModel', {
 					} else {
 						newix=st.getCount()-1;
 					}
-					if (newix>=0) me._reselect(newix);
+					if (newix>=0) {
+						Ext.defer(me._reselect,200,me,[newix]);
+						//me._reselect(newix);
+					}
 				}
 			});
 		}
