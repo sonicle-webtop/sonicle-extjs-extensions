@@ -283,6 +283,10 @@
         "classic": {
             "toolkit": "classic",
             "theme": "theme-classic"
+        },
+        "gray": {
+            "toolkit": "classic",
+            "theme": "theme-gray"
         }
     }
 }
