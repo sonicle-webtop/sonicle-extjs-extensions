@@ -848,11 +848,8 @@ td.ext-cal-dtitle-today div {
 .ext-dd-ghost-ct {
 	color:#000;
 	font: normal 11px arial, helvetica, sans-serif;
-	border: 1px solid;
-    border-color: #ddd #bbb #bbb #ddd;
 	background-color:#fff;
 	padding:3px;
-	padding-left:20px;
 	white-space: nowrap;
 }
 .ext-dd-ghost-ct .x-dd-drag-ghost{
@@ -860,6 +857,7 @@ td.ext-cal-dtitle-today div {
 	background: none;
 	padding: 0;
 	width: 150px;
+	height: 5px;
 }
 .ext-dd-ghost-ct .ext-evt-rsz {
     display: none;
