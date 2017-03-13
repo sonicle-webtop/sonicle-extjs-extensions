@@ -1391,7 +1391,7 @@ Ext.define('Sonicle.form.field.TreeComboBox', {
             me.setRawValue(me.getDisplayValue());
             me.checkChange();
 
-            me.applyEmptyText();
+            me.refreshEmptyText();
         },
 
         /**

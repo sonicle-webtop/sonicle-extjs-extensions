@@ -253,6 +253,8 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 				skin: Ext.themeName || 'lightgray',
 				toolbar: false,
 				statusbar: false,
+				relative_urls: false,
+				convert_urls: false,
 				//toolbar1: "newdocument fullpage | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | styleselect formatselect fontselect fontsizeselect",
 				//toolbar2: "cut copy paste | searchreplace | bullist numlist | outdent indent blockquote | undo redo | link unlink anchor image media code | inserttime preview | forecolor backcolor",
 				//toolbar3: "table | hr removeformat | subscript superscript | charmap emoticons | print fullscreen | ltr rtl | spellchecker | visualchars visualblocks nonbreaking template pagebreak restoredraft",
