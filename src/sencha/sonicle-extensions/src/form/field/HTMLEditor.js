@@ -303,7 +303,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 			title: me.buttonTips[id].title,
 			text: me.buttonTips[id].text,
 			cls: Ext.baseCSSPrefix + 'html-editor-tip'
-		} : undef ) : undef;
+		} : undefined ) : undefined;
 	},
 	
 	_getOverflowText: function(id) {
