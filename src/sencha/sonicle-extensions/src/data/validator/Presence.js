@@ -9,14 +9,23 @@ Ext.define('Sonicle.data.validator.Presence', {
 	alias: 'data.validator.sopresence',
 	
 	/**
-	 * @cfg {Function} skip
-	 * Return 'true' to disable validation basing on custom logic.
+	 * @cfg {String} ifField
+	 * The field name of the field whose {@link#ifValues values} come from.
 	 */
-	skip: null,
+	ifField: null,
 	
-	validate: function(v,rec) {
-		var me = this;
-		if(Ext.isFunction(me.skip) && me.skip(rec)) return true;
+	/**
+	 * @cfg {Mixed[]} ifValues
+	 * Array of values for field targeted by {@link#ifField} for which to 
+	 * consider the presence of the attached field mandatory.
+	 */
+	ifValues: null,
+	
+	validate: function(v, rec) {
+		var me = this, 
+				check = Ext.isString(me.ifField) && Ext.isArray(me.ifValues);
+		
+		if (check && me.ifValues.indexOf(rec.get(me.ifField)) === -1) return true;
 		return me.callParent(arguments);
 	}
 });

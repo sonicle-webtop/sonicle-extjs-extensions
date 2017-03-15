@@ -30,7 +30,7 @@ Ext.define('Sonicle.data.validator.Equality', {
 		fieldLabel: ''
 	},
 	
-	validate: function(v,rec) {
+	validate: function(v, rec) {
 		var me = this,
 				name = me.getEqualField();
 		if(Ext.isString(name)) {

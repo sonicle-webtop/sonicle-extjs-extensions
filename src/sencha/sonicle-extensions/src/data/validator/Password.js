@@ -33,7 +33,7 @@ Ext.define('Sonicle.data.validator.Password', {
 		complexSpeRe: /.*[^a-zA-Z0-9].*/
 	},
 	
-	validate: function(v,rec) {
+	validate: function(v, rec) {
 		var me = this, count;
 		if(this.getComplex()) {
 			count = 0;
