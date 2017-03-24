@@ -50,6 +50,14 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
+	 * Converts line-breaks to HTML representation (br tag).
+	 * @returns {String}
+	 */
+	htmlLineBreaks: function(s) {
+		return Ext.isString(s) ? s.replace(/\n/g, '<br>') : s;
+	},
+	
+	/**
 	 * @deprecated
 	 * Converts passed value in bytes in a human readable format.(eg. like '10 kB' or '100 MB')
 	 * @param {int} bytes The value in bytes
