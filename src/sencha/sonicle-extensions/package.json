@@ -268,10 +268,12 @@
     "requires": [],
 	
 	"builds": {
-        "triton": {
+        /*
+		"triton": {
             "toolkit": "classic",
             "theme": "theme-triton"
         },
+		*/
         "neptune": {
             "toolkit": "classic",
             "theme": "theme-neptune"

@@ -5,7 +5,7 @@
  * http://www.sonicle.com
  */
 Ext.define('Sonicle.data.validator.Presence', {
-	extend:'Ext.data.validator.Presence',
+	extend: 'Ext.data.validator.Presence',
 	alias: 'data.validator.sopresence',
 	
 	config: {

@@ -180,7 +180,7 @@ Ext.define('Sonicle.upload.Field', {
 			val = file.name;
 		}
 		me.mixins.field.setValue.call(me, val);
-		me.applyEmptyText();
+		me.refreshEmptyText();
 		return me;
 	},
 	

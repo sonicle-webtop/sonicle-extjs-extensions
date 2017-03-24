@@ -17,9 +17,10 @@ Ext.define('Sonicle.menu.StoreMenu', {
 	},
 	
 	initComponent: function() {
-		var me = this;
-		me.bindStore(me.store || 'ext-empty-store', true, true);
+		var me = this, sto;
 		me.callParent(arguments);
+		sto = me.store = Ext.data.StoreManager.lookup(me.store || 'ext-empty-store');
+		me.bindStore(sto, true);
 	},
 	
 	/**
