@@ -23,7 +23,8 @@ Ext.define('Sonicle.selection.RowModel', {
 		
 		if (st.remove) {
 			st.remove(s);
-			Ext.defer(me._reselect,200,me,[ix]); //me._reselect(ix)
+			//Ext.defer(me._reselect,200,me,[ix]); 
+			me._reselect(ix)
 		}
 		else {
 			st.reload({
@@ -92,8 +93,8 @@ Ext.define('Sonicle.selection.RowModel', {
 						newix=st.getCount()-1;
 					}
 					if (newix>=0) {
-						Ext.defer(me._reselect,200,me,[newix]);
-						//me._reselect(newix);
+						//Ext.defer(me._reselect,200,me,[newix]);
+						me._reselect(newix);
 					}
 				}
 			});
@@ -108,7 +109,7 @@ Ext.define('Sonicle.selection.RowModel', {
 	
 		if (ix>=me.store.getCount()) --ix;
 		if (ix>=0) {
-			me.view.bufferedRenderer.scrollTo(ix, true);
+			//me.view.bufferedRenderer.scrollTo(ix, true);
 			me.select(ix);
 			for (i = 0; i < viewsLn; i++) {
 				views[i].navigationModel.setPosition(ix);
