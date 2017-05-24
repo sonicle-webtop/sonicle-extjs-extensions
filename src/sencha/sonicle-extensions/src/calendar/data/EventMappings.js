@@ -111,6 +111,11 @@ Sonicle.calendar.data.EventMappings = {
         //mapping: 'isNew',
         type: 'boolean'
     },
+	Owner: {
+		name: '_owner',
+		//mapping: 'owner',
+		type: 'string'
+	},
 	Rights: {
 		name: '_rights',
 		//mapping: 'rights',

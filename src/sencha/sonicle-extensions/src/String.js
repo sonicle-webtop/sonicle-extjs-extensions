@@ -50,7 +50,7 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
-	 * Converts line-breaks to HTML representation (br tag).
+	 * Converts line-breaks to HTML representation (in HTML5 <br> is preferred).
 	 * @returns {String}
 	 */
 	htmlLineBreaks: function(s) {

@@ -51,30 +51,31 @@ Ext.define('Sonicle.calendar.util.EventUtils', {
 		buildDisplayInfo: function(edata, dateFmt, timeFmt) {
 			var EM = Sonicle.calendar.data.EventMappings,
 					eDate = Ext.Date,
-					title = edata[EM.Title.name],
-					location = edata[EM.Location.name],
-					startd = eDate.format(edata[EM.StartDate.name], dateFmt),
+					soDate = Sonicle.Date,
+					etitle = edata[EM.Title.name],
+					elocation = edata[EM.Location.name],
+					eowner = edata[EM.Owner.name],
+					esd = edata[EM.StartDate.name],
+					eed = edata[EM.EndDate.name],
+					startd = eDate.format(esd, dateFmt),
 					startt = eDate.format(edata[EM.StartDate.name], timeFmt),
-					endd = eDate.format(edata[EM.EndDate.name], dateFmt),
+					endd = eDate.format(eed, dateFmt),
 					endt = eDate.format(edata[EM.EndDate.name], timeFmt),
-					titloc = Ext.isEmpty(location) ? title : Ext.String.format('{0} @{1}', title, location);
+					tit = Ext.isEmpty(elocation) ? etitle : Ext.String.format('{0} @{1}', etitle, elocation),
+					tip;
 			
-			/*
-			if((edata[EM.IsAllDay.name] === true)) {
-				return {
-					title: titloc,
-					tooltip: Ext.String.format('{0} {1}-{2}', startd, startt, endt)
-				};
-			} else {*/
-				return {
-					title: titloc,
-					tooltip: Ext.String.format('{0} {1}<br>{2} {3}', startd, startt, endd, endt)
-				};
-			//}
-	   },
-		
-		realEndDate: function(end) {
+			if (soDate.diffDays(esd, eed) === 0) {
+				tip = startd + ' ' + startt + ' - ' + endt;
+			} else {
+				tip = startd + ' ' + startt + '<br>' + endd + ' ' + endt;
+			}
+			if (!Ext.isEmpty(eowner)) tip += ('<br>(' + eowner + ')');
 			
-		}
+			return {
+				title: tit,
+				tooltip: tip
+				//tooltip: Ext.String.format('{0} {1}<br>{2} {3}{4}', startd, startt, endd, endt, tipown)
+			};
+	   }
 	}
 });
