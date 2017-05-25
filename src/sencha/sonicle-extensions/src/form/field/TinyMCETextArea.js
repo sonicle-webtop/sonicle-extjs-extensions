@@ -71,7 +71,7 @@ Ext.define('Sonicle.form.field.TinyMCETextArea', {
      liquidLayout to false.
      */
     liquidLayout: false,
-    
+	
     //-----------------------------------------------------------------
     afterRender: function () {
         var me = this;

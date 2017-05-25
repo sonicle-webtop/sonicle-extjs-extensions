@@ -52,6 +52,12 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 	tmceNotification: null,
 	
 	/**
+	 * @cfg {String} language
+	 * One of TinyMCE language codes.
+	 */
+	language: null,
+	
+	/**
 	 * @cfg {boolean} spellcheck
 	 * True to enable browser's native spell checker.
 	 */
@@ -248,8 +254,10 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 					'insertdatetime media nonbreaking save table contextmenu directionality',
 					'emoticons template paste textcolor'
 				],
+				contextmenu: 'inserttable | cell row column deletetable',
 				padd_empty_editor: false,
 				paste_block_drop: true,
+				language: this.language,
 				skin: Ext.themeName || 'lightgray',
 				toolbar: false,
 				statusbar: false,
