@@ -15,9 +15,9 @@ Ext.define('Sonicle.data.Model', {
 		Ext.iterate(me.associations, function(name) {
 			asso = me.associations[name];
 			sto = me[asso.getterName]();
-			assoData = data[asso.role];
-			if(assoData) {
-				sto.add(assoData);
+			if (sto) {
+				assoData = data[asso.role];
+				if (assoData) sto.add(assoData);
 			}
 		});
 	},
@@ -31,7 +31,7 @@ Ext.define('Sonicle.data.Model', {
 		Ext.iterate(me.associations, function(name) {
 			asso = me.associations[name];
 			sto = me[asso.getterName]();
-			if(sto.needsSync) {
+			if (sto && sto.needsSync) {
 				dirty = true;
 				return;
 			}
