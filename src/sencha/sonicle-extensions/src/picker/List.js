@@ -13,6 +13,7 @@ Ext.define('Sonicle.picker.List', {
 	
 	referenceHolder: true,
 	
+	groupText: '',
 	emptyText: 'No items to display',
 	searchText: 'Search...',
 	okText: 'Ok',
@@ -23,16 +24,31 @@ Ext.define('Sonicle.picker.List', {
 	searchField: null,
 	
 	/**
+	 * @cfg {Boolean} [enableGrouping=false]
+	 * Configure as `true` to enable grouped visualization. A grouping field
+	 * must be specified using dedicated {@link Ext.data.Store#groupField Store's configuration}.
+	 */
+	enableGrouping: false,
+	
+	/**
+	 * @cfg {Boolean} [allowMultiSelection=false]
+	 * Configure as `true` to enable multiselection mode.
+	 * A button in bottom toolbar will allow selection confirmation 
+	 */
+	allowMultiSelection: false,
+	
+	/**
 	 * @cfg {Boolean} [anyMatch=true]
-	 * Configure as `false` to disallow matching of the typed characters at any position in the {@link #searchField}'s value.
+	 * Configure as `false` to disallow matching of the typed characters at any 
+	 * position in the {@link #searchField}'s value.
 	 */
 	anyMatch: true,
 	
 	/**
-	 * @cfg {Boolean} [caseSensitive=false]
+	 * @cfg {Boolean} [caseSensitiveMatch=false]
 	 * Configure as `true` to make the filtering match with exact case matching.
 	 */
-	caseSensitive: false,
+	caseSensitiveMatch: false,
 	
 	/**
 	 * @cfg {Function} handler
@@ -68,52 +84,56 @@ Ext.define('Sonicle.picker.List', {
      * @event pick
      * Fires when a value is selected (corresponding row has been dblclicked).
 	 * @param {Sonicle.picker.List} this
-	 * @param {Mixed} value The selected value, according to {@link #valueField}.
-	 * @param {Ext.data.Model} record The whole record associated to the value.
+	 * @param {Mixed[]} values The selected values, according to {@link #valueField}.
+	 * @param {Ext.data.Model[]} records The records associated to values.
      */
 	
 	initComponent: function() {
-		var me = this;
+		var me = this,
+				multi = (me.allowMultiSelection === true);
 		
 		me.selModel = {
-			type: 'rowmodel'
+			type: 'rowmodel',
+			mode: multi ? 'MULTI' : 'SINGLE'
 		};
 		me.viewConfig = {
 			deferEmptyText: false,
 			emptyText: me.emptyText
 		};
 		
-		if(!me.columns) {
+		if (me.enableGrouping) {
+			me.features = [{
+				ftype: 'grouping',
+				startCollapsed: false,
+				groupHeaderTpl: (Ext.isEmpty(me.groupText) ? '' : me.groupText + ':') + '{name} ({children.length})'
+			}];
+		}
+		if (!me.columns) {
 			me.hideHeaders = true;
 			me.columns = [{
 				dataIndex: me.displayField,
 				flex: 1
 			}];
 		}
-		/*
-		me.columns = me.columns || [];
-		me.columns = Ext.Array.merge([{
-			dataIndex: 
-			flex: 1
-		}], me.columns);
-		*/
-		
-		if(me.searchField) {
+		if (me.searchField) {
 			me.dockedItems = me.makeDockedItems();
 		}
 		
-		me.buttons = [/*{
-			text: me.okText,
-			handler: function() {
-				me.fireEvent('okclick', me);
-				me.firePick();
-			}
-		}, */{
+		me.buttons = [{
 			text: me.cancelText,
 			handler: function() {
 				me.fireEvent('cancelclick', me);
 			}
 		}];
+		if (multi) {
+			me.buttons.unshift({
+				text: me.okText,
+				handler: function() {
+					me.fireEvent('okclick', me);
+					me.firePick(me.getSelection());
+				}
+			});
+		}
 		
 		me.callParent(arguments);
 		me.on('rowdblclick', me.onRowDblClick, me);
@@ -162,7 +182,7 @@ Ext.define('Sonicle.picker.List', {
 				me.searchFilter = filter = new Ext.util.Filter({
 					id: 'search',
 					anyMatch: me.anyMatch,
-					caseSensitive: me.caseSensitive,
+					caseSensitive: me.caseSensitiveMatch,
 					property: me.searchField,
 					value: text
 				});
@@ -175,12 +195,17 @@ Ext.define('Sonicle.picker.List', {
 		}
 	},
 	
-	firePick: function(rec) {
+	firePick: function(recs) {
 		var me = this,
-				value = me.valueField ? rec.get(me.valueField) : rec.getId(),
-				handler = me.handler;
-		me.fireEvent('pick', me, value, rec);
-		if(handler) handler.call(me.scope || me, me, value, rec);
+				vfld = me.valueField,
+				handler = me.handler,
+				values = [];
+		
+		Ext.iterate(recs, function(rec) {
+			values.push(vfld ? rec.get(vfld) : rec.getId());
+		});
+		me.fireEvent('pick', me, values, recs);
+		if (handler) handler.call(me.scope || me, me, values, recs);
 	},
 	
 	privates: {
@@ -193,7 +218,7 @@ Ext.define('Sonicle.picker.List', {
 		},
 		
 		onRowDblClick: function(s, rec) {
-			this.firePick(rec);
+			this.firePick([rec]);
 		}
 	}
 });
