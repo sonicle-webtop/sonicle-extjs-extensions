@@ -257,6 +257,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 				contextmenu: 'inserttable | cell row column deletetable',
 				padd_empty_editor: false,
 				paste_block_drop: true,
+				paste_data_images: true,
 				language: this.language,
 				skin: Ext.themeName || 'lightgray',
 				toolbar: false,
