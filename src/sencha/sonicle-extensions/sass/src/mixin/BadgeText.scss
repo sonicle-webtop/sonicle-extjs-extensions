@@ -1,0 +1,29 @@
+.so-badge-el {
+	position: absolute;
+	font-weight: bold;
+	background-color: #fa3e3e;
+	color: #ffffff;
+	cursor: pointer;
+	border-radius: 3px;
+	opacity: 0;
+}
+.so-badge-el.so-badge-small {
+	height: 12px;
+	line-height: 12px;
+	font-size: 9px;
+	padding: 0px 2px;
+}
+.so-badge-el.so-badge-medium {
+	height: 14px;
+	line-height: 16px;
+	font-size: 10px;
+	padding: 0px 2px;
+}
+.so-badge-el.so-badge-large {
+	height: 16px;
+	font-size: 12px;
+	padding: 2px 2px;
+}
+.so-has-badge .so-badge-el {
+	opacity: 1;
+}
