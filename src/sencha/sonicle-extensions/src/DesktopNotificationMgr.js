@@ -70,39 +70,58 @@ Ext.define('Sonicle.DesktopNotificationMgr', {
 	/**
 	 * Displays a desktop notification.
 	 * @param {String} title The notification's title.
-	 * @param {Object} opts
-	 * @param {String} opts.icon The notification's icon.
-	 * For IE needs to be an .ico resource with 16px max, otherwise an image of 32px.
-	 * @param {String} [opts.body] The notification’s subtitle.
+	 * @param {Object} opts Config options.
+	 * 
+	 * This object may contain any of the following properties:
+	 * 
 	 * @param {String} [opts.tag] The notification’s unique identifier.
 	 * This prevents duplicate entries from appearing if the user has multiple 
 	 * instances of your website open at once (only for Chrome 22+, FF 22+, Safari 6+).
+	 * @param {String} opts.icon The notification's icon.
+	 * For IE needs to be an .ico resource with 16px max, otherwise an image of 32px.
+	 * @param {String} [opts.body] The notification’s body (subtitle).
+	 * @param {Mixed} [opts.data] The notification’s custom data passed back during callbacks.
 	 * @param {Number} [opts.autoClose] The number of milliseconds after that 
 	 * the notification will be automatically closed. Defaults to {@link #autoClose} value.
-	 * @param {Boolean} [opts.preventFocusOnClick] 
+	 * @param {Boolean} [opts.preventFocusOnClick=false] Control if window needs
+	 * to be focused when the user clicks on the notification. Default to `false`.
+	 * @param {Function} [opts.clickCallback] A callback method to call when the user 
+	 * clicks on the notification.
+	 * @param {Object} [opts.scope] An optional scope for callbacks.
 	 * @return {Object} An object wrapper that defines the close() method.
 	 */
 	notify: function(title, opts) {
 		opts = opts || {};
 		var me = this, 
 				auto = opts.autoClose || me.getAutoClose(),
-				noFocus = Ext.isBoolean(opts.noFocusOnClick) ? opts.noFocusOnClick : false,
+				noFocus = Ext.isBoolean(opts.preventFocusOnClick) ? opts.preventFocusOnClick : false,
+				hasClickCb = Ext.isFunction(opts.clickCallback),
 				ntf, ntfWrapper;
 		
 		if (!me.api) return;
-		if (!Ext.isString(title)) Ext.Error.raise('Title is required');
-		if (!Ext.isDefined(opts.icon)) Ext.Error.raise('Icon is required');
+		if (Ext.isEmpty(title)) Ext.Error.raise('Title is mandatory');
+		if (Ext.isEmpty(opts.icon)) Ext.Error.raise('Icon is mandatory');
 		
 		ntf = me.createNotification(title, opts);
-		if (ntf && !noFocus) {
-			ntf.addEventListener("click", function() {
-				window.focus();
-			});
+		if (ntf) {
+			if (!noFocus || hasClickCb) {
+				ntf.addEventListener('click', function() {
+					if (!noFocus) window.focus();
+					if (hasClickCb) {
+						Ext.callback(opts.clickCallback, opts.scope || me, [{
+							tag: opts.tag,
+							title: title,
+							body: opts.body,
+							data: opts.data
+						}]);
+					}
+				});
+			}
 		}
 		ntfWrapper = me.createCloseWrapper(ntf);
 		
 		if ((auto > 0) && ntf && !ntf.ieSeed && ntf.addEventListener) {
-			ntf.addEventListener("show", function() {
+			ntf.addEventListener('show', function() {
 				Ext.defer(ntfWrapper.close, auto, me);
 			});
 		}
@@ -115,10 +134,10 @@ Ext.define('Sonicle.DesktopNotificationMgr', {
 	 */
 	requestPermission: function(callback) {
 		var me = this,
-				win = window, cbFn;
+				cbFn = Ext.isFunction(callback) ? callback : Ext.emptyFn(),
+				win = window;
 		
 		if(!me.api) return;
-		cbFn = Ext.isFunction(callback) ? callback : Ext.emptyFn();
 		if(win.webkitNotifications && win.webkitNotifications.checkPermission) {
 			/**
 			 * Chrome 23 supports win.Notification.requestPermission, but it
