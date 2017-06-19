@@ -24,6 +24,12 @@ Ext.define('Sonicle.ActivityMonitor', {
 	},
 	
 	/**
+	 * @cfg {String[]} activityEvents
+	 * An array of events that, when fired, should track user activity.
+	 */
+	activityEvents: ['mousemove', 'mousedown', 'keypress', 'DOMMouseScroll', 'mousewheel', 'touchmove', 'MSPointerMove'],
+	
+	/**
 	 * @readonly
 	 * @property {Boolean} enabled
 	 * Indicates if the idle timer is enabled
@@ -85,15 +91,8 @@ Ext.define('Sonicle.ActivityMonitor', {
 			if (Ext.isNumber(timeout)) me.setTimeout(timeout);
 			me.toggleDate = +new Date();
 			me.lastActive = me.toggleDate;
-			el.on({
-				mousemove: me.onUserActivity,
-				mousedown: me.onUserActivity,
-				keypress: me.onUserActivity,
-				DOMMouseScroll: me.onUserActivity,
-				mousewheel: me.onUserActivity,
-				touchmove: me.onUserActivity,
-				MSPointerMove: me.onUserActivity,
-				scope: me
+			Ext.each(me.activityEvents, function(event) {
+				el.on(event, me.onUserActivity, me);
 			});
 			me.enabled = true;
 			me.tId = Ext.Function.defer(me.toggleIdleState, me.getTimeout(), me);
@@ -104,15 +103,8 @@ Ext.define('Sonicle.ActivityMonitor', {
 		var me = this, el = me.targetEl;
 		if (me.enabled) {
 			clearTimeout(me.tId);
-			el.un({
-				keydown : me.onUserActivity,
-				mousemove: me.onUserActivity,
-				mousedown: me.onUserActivity,
-				wheel: me.onUserActivity,
-				mousewheel: me.onUserActivity,
-				DOMMouseScroll: me.onUserActivity,
-				touchmove: me.onUserActivity,
-				scope: me
+			Ext.each(me.activityEvents, function(event) {
+				el.un(event, me.onUserActivity, me);
 			});
 			me.enabled = false;
 		}
@@ -138,7 +130,6 @@ Ext.define('Sonicle.ActivityMonitor', {
 	},
 	
 	privates: {
-		
 		onUserActivity: function(e) {
 			var me = this;
 			

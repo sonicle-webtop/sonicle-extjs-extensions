@@ -30,7 +30,7 @@ Ext.define('Sonicle.PageActivityMonitor', {
 	/**
 	 * @event change
 	 * Fires when activity status changed
-	 * @param {Sonicle.PageActivityMonitor} this The activity monitor
+	 * @param {Sonicle.PageActivityMonitor} this The page activity monitor
 	 * @param {Boolean} idle True, if the user is idle, false otherwise
 	 */
 	
@@ -40,13 +40,11 @@ Ext.define('Sonicle.PageActivityMonitor', {
 		me.mixins.observable.constructor.call(me, cfg);
 		me.callParent([cfg]);
 		me.monitor = Ext.create('Sonicle.ActivityMonitor', {targetEl: Ext.getBody()});
-		me.monitor.on('change', me.onMonitorChange, me);
+		me.relayEvents(me.monitor, ['change']);
 	},
 	
 	destroy: function() {
-		var me = this;
-		me.monitor.un(me.onMonitorChange, me);
-		me.monitor = null;
+		this.monitor = null;
 	},
 	
 	start: function(timeout) {
@@ -77,11 +75,5 @@ Ext.define('Sonicle.PageActivityMonitor', {
 	getLastActiveTime: function() {
 		var mon = this.monitor;
 		return mon ? mon.getLastActiveTime() : undefined;
-	},
-	
-	privates: {
-		onMonitorChange: function(s, idle) {
-			this.fireEvent('change', this, idle);
-		}
 	}
 });
