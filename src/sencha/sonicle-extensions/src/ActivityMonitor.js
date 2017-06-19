@@ -5,10 +5,15 @@
  * http://www.sonicle.com
  */
 Ext.define('Sonicle.ActivityMonitor', {
-	singleton: true,
 	mixins: [
 		'Ext.mixin.Observable'
 	],
+	
+	/**
+	 * @cfg {Ext.dom.Element} targetEl
+	 * The element on which operate.
+	 */
+	targetEl: null,
 	
 	config: {
 		/**
@@ -61,6 +66,9 @@ Ext.define('Sonicle.ActivityMonitor', {
 	
 	constructor: function(cfg) {
 		var me = this;
+		if (!cfg.targetEl || !(cfg.targetEl instanceof Ext.dom.Element)) {
+			Ext.raise('You must specify a valid targetEl');
+		}
 		me.initConfig(cfg);
 		me.mixins.observable.constructor.call(me, cfg);
 		me.callParent([cfg]);
@@ -68,17 +76,16 @@ Ext.define('Sonicle.ActivityMonitor', {
 	
 	destroy: function() {
 		this.stop();
+		this.targetEl = null;
 	},
 	
 	start: function(timeout) {
-		var me = this,
-				body = Ext.getBody();
-		
-		if(!me.enabled) {
+		var me = this, el = me.targetEl;
+		if (!me.enabled) {
 			if (Ext.isNumber(timeout)) me.setTimeout(timeout);
 			me.toggleDate = +new Date();
 			me.lastActive = me.toggleDate;
-			body.on({
+			el.on({
 				mousemove: me.onUserActivity,
 				mousedown: me.onUserActivity,
 				keypress: me.onUserActivity,
@@ -94,12 +101,10 @@ Ext.define('Sonicle.ActivityMonitor', {
 	},
 	
 	stop: function() {
-		var me = this,
-				body = Ext.getBody();
-		
-		if(me.enabled) {
+		var me = this, el = me.targetEl;
+		if (me.enabled) {
 			clearTimeout(me.tId);
-			body.un({
+			el.un({
 				keydown : me.onUserActivity,
 				mousemove: me.onUserActivity,
 				mousedown: me.onUserActivity,
