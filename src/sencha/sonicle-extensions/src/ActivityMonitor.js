@@ -20,19 +20,49 @@ Ext.define('Sonicle.ActivityMonitor', {
 		 * @cfg {Number} timeout
 		 * The amount of time (ms) before the user is considered idle.
 		 */
-		timeout: 30000
+		timeout: 30000,
+		
+		/**
+		 * @cfg {Boolean} [trackMoveEvents = true]
+		 * Set to `false` to disable tracking of related {@link #moveEvents}
+		 */
+		trackMoveEvents: true,
+		
+		/**
+		 * @cfg {Boolean} [trackKeyEvents = true]
+		 * Set to `false` to disable tracking of related {@link #keyEvents}
+		 */
+		trackKeyEvents: true,
+		
+		/**
+		 * @cfg {Boolean} [trackScrollEvents = true]
+		 * Set to `false` to disable tracking of related {@link #scrollEvents}
+		 */
+		trackScrollEvents: true
 	},
 	
 	/**
-	 * @cfg {String[]} activityEvents
-	 * An array of events that, when fired, should track user activity.
+	 * @cfg {String[]} moveEvents
+	 * An array of events that, when fired, should track user move activity.
 	 */
-	activityEvents: ['mousemove', 'mousedown', 'keypress', 'DOMMouseScroll', 'mousewheel', 'touchmove', 'MSPointerMove'],
+	moveEvents: ['mousemove', 'MSPointerMove', 'touchmove'],
+	
+	/**
+	 * @cfg {String[]} keyEvents
+	 * An array of events that, when fired, should track uses activity on keys.
+	 */
+	keyEvents: ['mousedown', 'keypress'],
+	
+	/**
+	 * @cfg {String[]} scrollEvents
+	 * An array of events that, when fired, should track user scroll activity.
+	 */
+	scrollEvents: ['DOMMouseScroll', 'mousewheel'],
 	
 	/**
 	 * @readonly
 	 * @property {Boolean} enabled
-	 * Indicates if the idle timer is enabled
+	 * Indicates if monitoring is currently active.
 	 */
 	enabled: false,
 	
@@ -64,12 +94,6 @@ Ext.define('Sonicle.ActivityMonitor', {
 	tId: -1,
 	
 	/**
-	 * @private
-	 * @property {Object} evtsMap
-	 */
-	evtsMap: null,
-	
-	/**
 	 * @event change
 	 * Fires when activity status changed
 	 * @param {Sonicle.ActivityMonitor} this The activity monitor
@@ -84,30 +108,11 @@ Ext.define('Sonicle.ActivityMonitor', {
 		me.initConfig(cfg);
 		me.mixins.observable.constructor.call(me, cfg);
 		me.callParent([cfg]);
-		Ext.each(me.activityEvents, function(event) {
-			me.evtsMap[event] = true;
-		});
 	},
 	
 	destroy: function() {
 		this.stop();
 		this.targetEl = null;
-	},
-	
-	/**
-	 * Resume tracking of a specific activity event.
-	 * @param {String} eventName One event name of {@link #activityEvents}
-	 */
-	enableActivityEvent: function(eventName) {
-		this.evtsMap[eventName] = true;
-	},
-	
-	/**
-	 * Stop tracking of a specific activity event.
-	 * @param {String} eventName One event name of {@link #activityEvents}
-	 */
-	disableActivityEvent: function(eventName) {
-		this.evtsMap[eventName] = false;
 	},
 	
 	/**
@@ -120,8 +125,8 @@ Ext.define('Sonicle.ActivityMonitor', {
 			if (Ext.isNumber(timeout)) me.setTimeout(timeout);
 			me.toggleDate = +new Date();
 			me.lastActive = me.toggleDate;
-			Ext.each(me.activityEvents, function(event) {
-				if (me.evtsMap[event] === true) el.on(event, me.onUserActivity, me);
+			Ext.each(me.activityEvents(), function(event) {
+				el.on(event, me.onUserActivity, me);
 			});
 			me.enabled = true;
 			me.tId = Ext.Function.defer(me.toggleIdleState, me.getTimeout(), me);
@@ -135,7 +140,7 @@ Ext.define('Sonicle.ActivityMonitor', {
 		var me = this, el = me.targetEl;
 		if (me.enabled) {
 			clearTimeout(me.tId);
-			Ext.each(me.activityEvents, function(event) {
+			Ext.each(me.activityEvents(), function(event) {
 				el.un(event, me.onUserActivity, me);
 			});
 			me.enabled = false;
@@ -174,6 +179,14 @@ Ext.define('Sonicle.ActivityMonitor', {
 	},
 	
 	privates: {
+		activityEvents: function() {
+			var me = this, ExArr = Ext.Array, evts = [];
+			if (me.getTrackMoveEvents()) evts = ExArr.merge(evts, me.moveEvents);
+			if (me.getTrackKeyEvents()) evts = ExArr.merge(evts, me.keyEvents);
+			if (me.getTrackScrollEvents()) evts = ExArr.merge(evts, me.scrollEvents);
+			return evts;
+		},
+		
 		onUserActivity: function(e) {
 			var me = this;
 			
