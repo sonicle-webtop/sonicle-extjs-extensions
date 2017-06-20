@@ -18,7 +18,7 @@ Ext.define('Sonicle.ActivityMonitor', {
 	config: {
 		/**
 		 * @cfg {Number} timeout
-		 * The amount of time (ms) before the user is considered idle
+		 * The amount of time (ms) before the user is considered idle.
 		 */
 		timeout: 30000
 	},
@@ -64,6 +64,12 @@ Ext.define('Sonicle.ActivityMonitor', {
 	tId: -1,
 	
 	/**
+	 * @private
+	 * @property {Object} evtsMap
+	 */
+	evtsMap: null,
+	
+	/**
 	 * @event change
 	 * Fires when activity status changed
 	 * @param {Sonicle.ActivityMonitor} this The activity monitor
@@ -78,6 +84,9 @@ Ext.define('Sonicle.ActivityMonitor', {
 		me.initConfig(cfg);
 		me.mixins.observable.constructor.call(me, cfg);
 		me.callParent([cfg]);
+		Ext.each(me.activityEvents, function(event) {
+			me.evtsMap[event] = true;
+		});
 	},
 	
 	destroy: function() {
@@ -85,6 +94,26 @@ Ext.define('Sonicle.ActivityMonitor', {
 		this.targetEl = null;
 	},
 	
+	/**
+	 * Resume tracking of a specific activity event.
+	 * @param {String} eventName One event name of {@link #activityEvents}
+	 */
+	enableActivityEvent: function(eventName) {
+		this.evtsMap[eventName] = true;
+	},
+	
+	/**
+	 * Stop tracking of a specific activity event.
+	 * @param {String} eventName One event name of {@link #activityEvents}
+	 */
+	disableActivityEvent: function(eventName) {
+		this.evtsMap[eventName] = false;
+	},
+	
+	/**
+	 * Start monitoring the target element.
+	 * @param {Number} [timeout] Optional {@link #timeout} override.
+	 */
 	start: function(timeout) {
 		var me = this, el = me.targetEl;
 		if (!me.enabled) {
@@ -92,13 +121,16 @@ Ext.define('Sonicle.ActivityMonitor', {
 			me.toggleDate = +new Date();
 			me.lastActive = me.toggleDate;
 			Ext.each(me.activityEvents, function(event) {
-				el.on(event, me.onUserActivity, me);
+				if (me.evtsMap[event] === true) el.on(event, me.onUserActivity, me);
 			});
 			me.enabled = true;
 			me.tId = Ext.Function.defer(me.toggleIdleState, me.getTimeout(), me);
 		}
 	},
 	
+	/**
+	 * Stop monitoring the target element.
+	 */
 	stop: function() {
 		var me = this, el = me.targetEl;
 		if (me.enabled) {
@@ -110,10 +142,18 @@ Ext.define('Sonicle.ActivityMonitor', {
 		}
 	},
 	
+	/**
+	 * Returns if the user is currently in idle.
+	 * @return {Boolean}
+	 */
 	isIdle: function() {
 		return this.idle;
 	},
 	
+	/**
+	 * Returns the remaining millis until next status transition.
+	 * @return {Number}
+	 */
 	getRemainingTime: function() {
 		var me = this, remain;
 		if (!me.enabled && me.idle) return 0;
@@ -125,6 +165,10 @@ Ext.define('Sonicle.ActivityMonitor', {
 		return this.enabled ? (+new Date()) - this.toggleDate : 0;
 	},
 	
+	/**
+	 * Return the timestamp (in millis) of the last tracked user activity.
+	 * @return {Number}
+	 */
 	getLastActiveTime: function() {
 		return this.lastActive;
 	},
