@@ -80,11 +80,11 @@ Ext.define('Sonicle.Bytes', {
 				num, i;
 		
 		num = Ext.Number.from(amount, null);
-		if((num == null) && !(unit.match(/\D*/).pop() === unit)) return null;
+		if((num === null) && !(unit.match(/\D*/).pop() === unit)) return null;
 		if(Ext.isEmpty(unit)) return Math.round(num);
 		
 		for(i=0; i<pb.length; i++) {
-			if(pb[i][0].indexOf(unit) != -1) {
+			if(pb[i][0].indexOf(unit) !== -1) {
 				return Math.round(num * pb[i][1][base]);
 			}
 		}
