@@ -39,7 +39,7 @@ Ext.define('Sonicle.mixin.ActHolder', {
 		if (obj.isAction) {
 			return (me.__acts[group][name] = obj);
 		} else {
-			return (me.__acts[group][name] = new Ext.Action(obj));
+			return (me.__acts[group][name] = me.createAction(group, name, obj));
 		}
 	},
 	
@@ -66,6 +66,10 @@ Ext.define('Sonicle.mixin.ActHolder', {
 	 */
 	getActs: function(group) {
 		return this.__acts[group];
+	},
+	
+	createAction: function(group, name, cfg) {
+		return new Ext.Action(cfg);
 	},
 	
 	statics: {
