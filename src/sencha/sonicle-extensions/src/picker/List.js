@@ -116,7 +116,7 @@ Ext.define('Sonicle.picker.List', {
 			}];
 		}
 		if (me.searchField) {
-			me.dockedItems = me.makeDockedItems();
+			me.dockedItems = me.buildDockedItems();
 		}
 		
 		me.buttons = [{
@@ -140,33 +140,6 @@ Ext.define('Sonicle.picker.List', {
 		me.on('afterrender', function() {
 			me.lookupReference('searchField').focus();
 		}, me, {single: true});
-	},
-	
-	makeDockedItems: function() {
-		var me = this;
-		return [{
-			xtype: 'textfield',
-			reference: 'searchField',
-			dock: 'top',
-			hideFieldLabel: true,
-			emptyText: me.searchText,
-			triggers: {
-				clear: {
-					type: 'soclear'
-				}
-			},
-			listeners: {
-				change: {
-					fn: me.onSearchChange,
-					scope: me,
-					options: {buffer: 300}
-				},
-				specialkey: {
-					fn: me.onSearchSpecialkey,
-					scope: me
-				}
-			}
-		}];
 	},
 	
 	search: function(text) {
@@ -209,6 +182,33 @@ Ext.define('Sonicle.picker.List', {
 	},
 	
 	privates: {
+		buildDockedItems: function() {
+			var me = this;
+			return [{
+				xtype: 'textfield',
+				reference: 'searchField',
+				dock: 'top',
+				hideFieldLabel: true,
+				emptyText: me.searchText,
+				triggers: {
+					clear: {
+						type: 'soclear'
+					}
+				},
+				listeners: {
+					change: {
+						fn: me.onSearchChange,
+						scope: me,
+						options: {buffer: 300}
+					},
+					specialkey: {
+						fn: me.onSearchSpecialkey,
+						scope: me
+					}
+				}
+			}];
+		},
+		
 		onSearchChange: function(s) {
 			this.search(s.getValue());
 		},
