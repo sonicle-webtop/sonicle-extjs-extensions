@@ -36,6 +36,7 @@ Ext.define('Sonicle.Emojis', {
 	constructor: function(cfg) {
 		var me = this, emj;
 		me.callParent([cfg]);
+		if (!EmojiConvertor) Ext.raise('Library js-emoji is required (see https://github.com/iamcal/js-emoji).');
 		me.emjconv = emj = new EmojiConvertor();
 		emj.replace_mode = 'unified';
 		emj.allow_native = true;
