@@ -13,7 +13,10 @@ Ext.define('Sonicle.menu.StoreMenu', {
 	],
 	
 	config: {
-		textField: 'text'
+		textAsHtml: false,
+		textField: 'text',
+		tagField: null,
+		staticItems: null,
 	},
 	
 	initComponent: function() {
@@ -73,14 +76,17 @@ Ext.define('Sonicle.menu.StoreMenu', {
 	
 	updateMenuItems: function() {
 		var me = this,
-				textField = me.getTextField();
+			textField = me.getTextField(),
+			tagField = me.getTagField();
 		
 		if(me.store) {
 			Ext.suspendLayouts();
 			me.removeAll();
+			if (me.staticItems) me.add(me.staticItems);
 			me.store.each(function(rec) {
 				me.add({
 					itemId: rec.getId(),
+					tag: tagField?rec.get(tagField):undefined,
 					text: rec.get(textField)
 				});
 			});
