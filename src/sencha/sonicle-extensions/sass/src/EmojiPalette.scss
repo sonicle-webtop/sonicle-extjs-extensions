@@ -1,0 +1,35 @@
+.so-emoji-palette {
+    /*
+	width: 192px;
+    height: 120px;
+	*/
+	width: 336px;
+	height: 144px;
+    background-color: #fff;
+    border-color: #fff;
+    border-width: 0;
+    border-style: solid;
+}
+.so-emoji-palette-item {
+	float: left;
+    width: 24px;
+    height: 24px;
+    border-width: 1px;
+    border-color: #fff;
+    border-style: solid;
+    background-color: #fff;
+    cursor: pointer;
+	text-decoration: none;
+	text-align: center;
+	vertical-align: middle;
+}
+a.so-emoji-palette-item:hover {
+    border-color: #8bb8f3;
+    background-color: #e6e6e6;
+}
+.so-emoji-palette-item-inner {
+	display: block;
+	line-height: initial;
+	font-size: 15px;
+    border-style: none;
+}
