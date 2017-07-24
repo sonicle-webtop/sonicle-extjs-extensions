@@ -36,13 +36,14 @@ Ext.define('Sonicle.Emojis', {
 	constructor: function(cfg) {
 		var me = this, emj;
 		me.callParent([cfg]);
-		if (!EmojiConvertor) Ext.raise('Library js-emoji is required (see https://github.com/iamcal/js-emoji).');
-		me.emjconv = emj = new EmojiConvertor();
-		emj.replace_mode = 'unified';
-		emj.allow_native = true;
-		emj.use_sheet = false;
-		emj.use_css_imgs = false;
-		emj.init_env();
+		if (!EmojiConvertor) {
+			me.emjconv = emj = new EmojiConvertor();
+			emj.replace_mode = 'unified';
+			emj.allow_native = true;
+			emj.use_sheet = false;
+			emj.use_css_imgs = false;
+			emj.init_env();
+		}
 	},
 	
 	destroy: function() {
@@ -52,10 +53,19 @@ Ext.define('Sonicle.Emojis', {
 	},
 	
 	replaceUnified: function(s) {
+		this.ensureEmojiConvertor();
 		return this.emjconv.replace_unified(s);
 	},
 	
 	replaceColons: function(s) {
+		this.ensureEmojiConvertor();
 		return this.emjconv.replace_colons(s);
+	},
+	
+	privates: {
+		
+		ensureEmojiConvertor: function() {
+			if (!this.emjconv) Ext.raise('Library js-emoji is required (see https://github.com/iamcal/js-emoji).');
+		}
 	}
 });

@@ -147,7 +147,7 @@ Ext.define('Sonicle.picker.List', {
 				filters = me.getStore().getFilters(),
 				filter = me.searchFilter;
 
-		if(text) {
+		if (text) {
 			filters.beginUpdate();
 			if (filter) {
 				filter.setValue(text);
@@ -214,7 +214,7 @@ Ext.define('Sonicle.picker.List', {
 		},
 		
 		onSearchSpecialkey: function(s, e) {
-			if(e.getKey() === e.DOWN) this.getSelectionModel().select(0);
+			if (e.getKey() === e.DOWN) this.getSelectionModel().select(0);
 		},
 		
 		onRowDblClick: function(s, rec) {
