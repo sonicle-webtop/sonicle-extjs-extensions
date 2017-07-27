@@ -22,9 +22,8 @@ Ext.define('Sonicle.Crypto', {
 		},
 		
 		md5: function(s) {
-			var spk = SparkMD5;
-			if (!spk) Ext.raise('Library SparkMD5 is required (see https://github.com/satazor/js-spark-md5).');
-			return spk.hash(s);
+			if (!window['SparkMD5']) Ext.raise('Library SparkMD5 is required (see https://github.com/satazor/js-spark-md5).');
+			return SparkMD5.hash(s);
 		},
 		
 		sha256: function(s) {
