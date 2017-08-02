@@ -31,12 +31,17 @@ Ext.define('Sonicle.Emojis', {
 		]
 	},
 	
-	emjconv: null,
+	/**
+	 * @readonly
+	 * @property {Boolean} isAvailEmojiConvertor
+	 * `true` if EmojiConvertor library is available, `false` otherwise.
+	 */
 	
 	constructor: function(cfg) {
-		var me = this, emj;
+		var me = this;
 		me.callParent([cfg]);
-		if (window['EmojiConvertor']) {
+		me.isAvailEmojiConvertor = Ext.isDefined(window['EmojiConvertor']);
+		if (me.isAvailEmojiConvertor) {
 			me.emjconv = emj = new EmojiConvertor();
 			emj.replace_mode = 'unified';
 			emj.allow_native = true;
@@ -53,19 +58,18 @@ Ext.define('Sonicle.Emojis', {
 	},
 	
 	replaceUnified: function(s) {
-		this.ensureEmojiConvertor();
+		this.checkAvail();
 		return this.emjconv.replace_unified(s);
 	},
 	
 	replaceColons: function(s) {
-		this.ensureEmojiConvertor();
+		this.checkAvail();
 		return this.emjconv.replace_colons(s);
 	},
 	
 	privates: {
-		
-		ensureEmojiConvertor: function() {
-			if (!this.emjconv) Ext.raise('Library js-emoji is required (see https://github.com/iamcal/js-emoji).');
+		checkAvail: function() {
+			if (!this.isAvailEmojiConvertor) Ext.raise('Library js-emoji is required (see https://github.com/iamcal/js-emoji).');
 		}
 	}
 });
