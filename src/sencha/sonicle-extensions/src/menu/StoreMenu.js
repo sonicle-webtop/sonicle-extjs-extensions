@@ -17,7 +17,7 @@ Ext.define('Sonicle.menu.StoreMenu', {
 		textAsHtml: false,
 		textField: 'text',
 		tagField: null,
-		staticItems: null,
+		staticItems: null
 	},
 	
 	initComponent: function() {
