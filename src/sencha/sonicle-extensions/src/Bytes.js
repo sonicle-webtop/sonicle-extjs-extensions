@@ -45,7 +45,7 @@ Ext.define('Sonicle.Bytes', {
 	 */
 	format: function(value, opts) {
 		opts = opts || {};
-		if(!value) return null;
+		if (value === null) return null;
 		var uni = opts.units || 'err',
 				mul = (uni === 'si') ? 1000: 1024,
 				sym = this.unitSymbols[(uni === 'iec') ? 'iec' : 'si'],
@@ -53,8 +53,8 @@ Ext.define('Sonicle.Bytes', {
 				dec = opts.decimals || 2,
 				u = -1;
 		
-		if(uni === 'err') sym[0] = sym[0].toUpperCase();
-		if(Math.abs(value) < mul) return value + sep + 'B';
+		if (uni === 'err') sym[0] = sym[0].toUpperCase();
+		if (Math.abs(value) < mul) return value + sep + 'B';
 		do {
 			value /= mul;
 			++u;
@@ -71,7 +71,7 @@ Ext.define('Sonicle.Bytes', {
 	 */
 	parse: function(value, opts) {
 		opts = opts || {};
-		if(!value) return null;
+		if (Ext.isEmpty(value)) return null;
 		var pb = this.parserBases,
 				base = (opts.base === 'si') ? 10: 2,
 				parsed = value.match(/^([0-9\.,]*)(?:\s*)?(.*)$/),
@@ -80,11 +80,11 @@ Ext.define('Sonicle.Bytes', {
 				num, i;
 		
 		num = Ext.Number.from(amount, null);
-		if((num === null) && !(unit.match(/\D*/).pop() === unit)) return null;
-		if(Ext.isEmpty(unit)) return Math.round(num);
+		if ((num === null) && !(unit.match(/\D*/).pop() === unit)) return null;
+		if (Ext.isEmpty(unit)) return Math.round(num);
 		
 		for(i=0; i<pb.length; i++) {
-			if(pb[i][0].indexOf(unit) !== -1) {
+			if (pb[i][0].indexOf(unit) !== -1) {
 				return Math.round(num * pb[i][1][base]);
 			}
 		}
