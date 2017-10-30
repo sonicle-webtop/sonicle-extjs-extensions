@@ -152,6 +152,17 @@ Ext.define('Sonicle.Date', {
 	},
 	
 	/**
+	 * Formats a date given the supplied format string. If the supplied value
+	 * is not a valid date object, null will be returned.
+	 * @param {Date} date The date to format
+	 * @param {String} format The format string
+	 * @returns {String} The formatted date or null if date parameter is not a JavaScript Date object
+	 */
+	format: function(date, format) {
+		return (!Ext.isDate(date)) ? null : Ext.Date.format(date, format);
+	},
+	
+	/**
 	 * Returns localized day name with minimal string length.
 	 * @param {Number} day The day index (0=sunday, 1=monday, etc...)
 	 * @returns {String} Localized name.
@@ -190,7 +201,7 @@ Ext.define('Sonicle.Date', {
 	 * Calculates the number of calendar days between two dates, ignoring time values.
 	 * A time span that starts at 11pm (23:00) on Monday and ends at 1am (01:00) on Wednesday is
 	 * only 26 total hours, but it spans 3 calendar days, so this function would return 2. For the
-	 * exact time difference, use {@link Extensible.Date.diff diff} instead.
+	 * exact time difference, use {@link Sonicle.Date.diff diff} instead.
 	 * 
 	 * NOTE that the dates passed into this function are expected to be in local time matching the
 	 * system timezone. This does not work with timezone-relative or UTC dates as the exact date
