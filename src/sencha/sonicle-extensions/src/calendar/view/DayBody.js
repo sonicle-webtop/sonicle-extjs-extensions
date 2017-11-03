@@ -569,27 +569,41 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 	
 	// private
 	onClick: function(e, t) {
-		if (this.dragPending || Sonicle.calendar.view.DayBody.superclass.onClick.apply(this, arguments)) {
-			// The superclass handled the click already so exit
-			return;
-		}
-		if (e.getTarget('.ext-cal-day-times', 3) !== null) {
-			// ignore clicks on the times-of-day gutter
-			return;
-		}
-		var el = e.getTarget('td', 3);
-		if (el) {
+		var me = this, el, date, day;
+		
+		// The superclass handled the click already so exit
+		if (me.dragPending || Sonicle.calendar.view.DayBody.superclass.onClick.apply(this, arguments)) return;
+		// ignore clicks on the times-of-day gutter
+		if (e.getTarget('.ext-cal-day-times', 3) !== null) return;
+		
+		if (el = e.getTarget('td', 3)) {
 			if (el.id && el.id.indexOf(this.dayElIdDelimiter) > -1) {
-				var dt = this.getDateFromId(el.id, this.dayElIdDelimiter);
+				date = this.getDateFromId(el.id, this.dayElIdDelimiter);
 				// We handle dayclick/daydblclick in same way...
-				this.fireEvent('day'+e.type, this, Ext.Date.parseDate(dt, 'Ymd'), true, Ext.get(this.getDayId(dt, true)), e);
+				this.fireEvent('day'+e.type, this, Ext.Date.parseDate(date, 'Ymd'), true, Ext.get(this.getDayId(date, true)), e);
 				return;
 			}
 		}
-		var day = this.getDayAt(e.getX(), e.getY());
+		
+		day = me.getDayAt(e.getX(), e.getY());
 		if (day && day.date) {
-			// We handle dayclick/daydblclick in same way...
-			this.fireEvent('day'+e.type, this, day.date, false, null, e);
+			// We handle click/dblclick in same way...
+			me.fireEvent('day'+e.type, me, day.date, false, null, e);
+			return;
+		}
+	},
+	
+	onContextMenu: function(e, t) {
+		var me = this, el, day;
+		
+		// The superclass handled the click already so exit
+		if (Sonicle.calendar.view.DayBody.superclass.onContextMenu.apply(this, arguments)) return;
+		
+		if (el = e.getTarget('.ext-cal-day-col-gutter', 2, true)) {
+			day = me.getDayAt(e.getX(), e.getY());
+			if (day && day.date) {
+				me.fireEvent('daycontextmenu', me, day.date, false, e, el);
+			}
 		}
 	},
 	

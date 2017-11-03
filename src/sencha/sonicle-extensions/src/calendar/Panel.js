@@ -498,7 +498,7 @@ Ext.define('Sonicle.calendar.Panel', {
 				this.relayEvents(c, ['contextmenu', 
 					'eventsrendered', 'eventclick', 'eventdblclick', 'eventover', 'eventout', 
 					'eventcontextmenu', 'eventmove', 'eventdelete', 'eventresize', 
-					'dayclick', 'daydblclick',  
+					'dayclick', 'daydblclick', 'daycontextmenu',
 					'datechange', 'rangeselect', 'initdrag']);
 			},
 			scope: this,

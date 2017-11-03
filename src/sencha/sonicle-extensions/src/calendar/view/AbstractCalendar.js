@@ -260,6 +260,8 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	eventSelectorDepth: 10,
 	eventOverClass: 'ext-evt-over',
 	eventElIdDelimiter: '-evt-',
+	daySelector: '.ext-cal-day',
+	dayTitleSelector: '.ext-cal-dtitle',
 	dayElIdDelimiter: '-day-',
 	
 	/**
@@ -1502,13 +1504,20 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	},
 	
 	onContextMenu: function(e, t) {
-		//var el = e.getTarget(this.eventSelector, 5, true);
-		var el = null;
-		if(el = e.getTarget(this.eventSelector, 5, true)) {
-			var id = this.getEventIdFromEl(el);
-			this.fireEvent('eventcontextmenu', this, this.getEventRecord(id), el, e);
-		} else {
-			this.fireEvent('contextmenu', this, e);
+		var me = this,
+				el = null;
+		if (el = e.getTarget(me.eventSelector, 5, true)) {
+			var id = me.getEventIdFromEl(el);
+			me.fireEvent('eventcontextmenu', me, me.getEventRecord(id), e, el);
+			return true;
+		} else if (el = e.getTarget(me.daySelector, 2, true)) {
+			var dt = Ext.Date.parseDate(me.getDateFromId(el.id, me.dayElIdDelimiter), 'Ymd');
+			me.fireEvent('daycontextmenu', me, dt, true, e, el);
+			return true;
+		} else if (el = e.getTarget(me.dayTitleSelector, 2, true)) {
+			var dt = Ext.Date.parseDate(me.getDateFromId(el.id, me.dayElIdDelimiter), 'Ymd');
+			me.fireEvent('daycontextmenu', me, dt, true, e, el);
+			return true;
 		}
 	},
 	

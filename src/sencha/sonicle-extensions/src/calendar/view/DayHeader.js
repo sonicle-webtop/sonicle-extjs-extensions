@@ -43,7 +43,7 @@ Ext.define('Sonicle.calendar.view.DayHeader', {
 	 * @param {Ext.core.Element} el The Element that was clicked on
 	 * @param {Ext.event.Event} evt The raw event object.
 	 */
-
+	
 	// private
 	afterRender: function() {
 		var me = this;
@@ -103,7 +103,7 @@ Ext.define('Sonicle.calendar.view.DayHeader', {
 			if(el.id && el.id.indexOf(this.dayElIdDelimiter) > -1) {
 				parts = el.id.split(this.dayElIdDelimiter);
 				dt = parts[parts.length - 1];
-				// We handle dayclick/daydblclick in same way...
+				// We handle click/dblclick in same way...
 				this.fireEvent('day'+e.type, this, Ext.Date.parseDate(dt, 'Ymd'), true, Ext.get(this.getDayId(dt)), e);
 				return;
 			}

@@ -84,7 +84,6 @@ Ext.define('Sonicle.calendar.view.Month', {
 	morePanelMinWidth: 220,
 	
 	//private properties -- do not override:
-	daySelector: '.ext-cal-day',
 	moreSelector: '.ext-cal-ev-more',
 	weekLinkSelector: '.ext-cal-week-link',
 	weekCount: -1,
@@ -526,37 +525,28 @@ Ext.define('Sonicle.calendar.view.Month', {
 	
 	// private
 	onClick: function(e, t) {
-		if (this.detailPanel) {
-			this.detailPanel.hide();
-		}
-		if (Sonicle.calendar.view.Month.superclass.onClick.apply(this, arguments)) {
-			// The superclass handled the click already so exit
+		var me = this, el, date;
+		if (me.detailPanel) me.detailPanel.hide();
+		
+		// The superclass handled the click already so exit
+		if (Sonicle.calendar.view.Month.superclass.onClick.apply(me, arguments)) return;
+		
+		if (me.dropZone) me.dropZone.clearShims();
+		
+		if (el = e.getTarget(me.weekLinkSelector, 3)) {
+			date = el.id.split(me.weekLinkIdDelimiter)[1];
+			me.fireEvent('weekclick', me, Ext.Date.parseDate(date, 'Ymd'));
 			return;
 		}
-		if (this.dropZone) {
-			this.dropZone.clearShims();
-		}
-		var el = e.getTarget(this.weekLinkSelector, 3),
-				dt,
-				parts;
-		if (el) {
-			dt = el.id.split(this.weekLinkIdDelimiter)[1];
-			this.fireEvent('weekclick', this, Ext.Date.parseDate(dt, 'Ymd'));
+		if (el = e.getTarget(me.moreSelector, 3)) {
+			date = el.id.split(me.moreElIdDelimiter)[1];
+			me.onMoreClick(Ext.Date.parseDate(date, 'Ymd'));
 			return;
 		}
-		el = e.getTarget(this.moreSelector, 3);
-		if (el) {
-			dt = el.id.split(this.moreElIdDelimiter)[1];
-			this.onMoreClick(Ext.Date.parseDate(dt, 'Ymd'));
-			return;
-		}
-		el = e.getTarget('td', 3);
-		if (el) {
-			if (el.id && el.id.indexOf(this.dayElIdDelimiter) > -1) {
-				parts = el.id.split(this.dayElIdDelimiter);
-				dt = parts[parts.length - 1];
-
-				this.fireEvent('dayclick', this, Ext.Date.parseDate(dt, 'Ymd'), false, Ext.get(this.getDayId(dt)));
+		if (el = e.getTarget('td', 3)) {
+			if (el.id && el.id.indexOf(me.dayElIdDelimiter) > -1) {
+				date = me.getDateFromId(el.id, me.dayElIdDelimiter);
+				me.fireEvent('day'+e.type, me, Ext.Date.parseDate(date, 'Ymd'), true, Ext.get(me.getDayId(date)));
 				return;
 			}
 		}
