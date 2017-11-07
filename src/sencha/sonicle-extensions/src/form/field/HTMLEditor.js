@@ -255,6 +255,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 					'emoticons template paste textcolor'
 				],
 				contextmenu: 'inserttable | cell row column deletetable',
+				entity_encoding: 'numeric', // we cannot use 'named+numeric' due to this https://github.com/tinymce/tinymce/issues/3213
 				padd_empty_editor: false,
 				paste_block_drop: true,
 				paste_data_images: true,
