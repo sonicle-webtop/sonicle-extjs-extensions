@@ -15,7 +15,8 @@ Ext.define('Sonicle.PrintMgr', {
 			me.printer = Ext.create({
 				xtype: 'component',
 				id: 'printer',
-				style: 'display:none',
+				// This fixes Chrome display bug: see https://bugs.chromium.org/p/chromium/issues/detail?id=735059
+				style: 'visibility:hidden;pointer-events:none;border:none;',
 				html: {
 					tag: 'iframe',
 					id: 'printer-iframe',
@@ -34,20 +35,22 @@ Ext.define('Sonicle.PrintMgr', {
 	},
 	
 	print: function(html) {
-		var me = this,
-				iframe = me.printer.getEl().down('#printer-iframe');
+		var me = this, iframe, cw;
 		if(me.printing) {
 			Ext.log.warn('Printer is busy. Retry later...');
 			return;
 		}
 		
 		me.printing = true;
-		iframe.dom.contentDocument.open();
-		iframe.dom.contentDocument.write(html);
-		iframe.dom.contentDocument.close;
+		iframe = me.printer.getEl().down('#printer-iframe');
+		cw = iframe.dom.contentWindow;
+		cw.document.open();
+		cw.document.write(html);
+		cw.document.close();
+		
 		Ext.defer(function() {
-			iframe.dom.contentWindow.focus();
-			iframe.dom.contentWindow.print();
+			cw.focus();
+			cw.print();
 			me.printing = false;
 		}, 500);
 	}
