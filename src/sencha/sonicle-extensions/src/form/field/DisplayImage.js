@@ -78,19 +78,23 @@ Ext.define('Sonicle.form.field.DisplayImage', {
 			width: me.getImageWidth() + 'px',
 			height: me.getImageHeight() + 'px'
 		});
-		url = Ext.isEmpty(value) ? me.getBlankImageUrl() : me.buildBackgroundUrl(value);
-		me.displayLoading(true);
-		Ext.Ajax.request({
-			method: 'GET',
-			url: url,
-			success: function() {
-				me.displayLoading(false);
-				el.setStyle('background-image', 'url(' + url + ')');
-			},
-			failure: function() {
-				me.displayLoading(false);
-			}
-		});
+		if (!Ext.isEmpty(value)) {
+			url = me.buildBackgroundUrl(value);
+			me.displayLoading(true);
+			Ext.Ajax.request({
+				method: 'GET',
+				url: url,
+				success: function() {
+					me.displayLoading(false);
+					el.setStyle('background-image', 'url(' + url + ')');
+				},
+				failure: function() {
+					me.displayLoading(false);
+				}
+			});
+		} else {
+			el.setStyle('background-image', 'url(' + me.getBlankImageUrl() + ')');
+		}	
 	},
 	
 	/*
