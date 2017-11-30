@@ -174,7 +174,7 @@ Ext.define('Sonicle.upload.Field', {
 				srpas = me.responseValueProperty,
 				val;
 		me.setRawValue(file.name);
-		if(file._serverResponse && !Ext.isEmpty(srpas)) {
+		if (file._serverResponse && !Ext.isEmpty(srpas)) {
 			val = file._serverResponse[srpas];
 		} else {
 			val = file.name;

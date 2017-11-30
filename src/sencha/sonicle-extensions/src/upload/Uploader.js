@@ -45,8 +45,8 @@ Ext.define('Sonicle.upload.Uploader', {
 	 * When a file upload encounters an error
 	 * @param {Sonicle.upload.Uploader} this
 	 * @param {Object} file File data
-	 * @param {String} message Error message returned in server response
-	 * @param {Object} response The server raw HTTP response object
+	 * @param {String} cause The error cause (size, ext, server or null)
+	 * @param {Object} json Response JSON if present
 	 */
 	
 	/**
@@ -415,11 +415,11 @@ Ext.define('Sonicle.upload.Uploader', {
 	
 	_StateChanged: function(plu) {
 		var me = this;
-		if(plu.state === 2) {
+		if (plu.state === 2) {
 			me.fireEvent('uploadstarted', me);
 		} else {
 			me.fireEvent('uploadcomplete', me, me.succeeded, me.failed);
-			if(me.getAutoRemoveUploaded()) me.removeUploaded();
+			if (me.getAutoRemoveUploaded()) me.removeUploaded();
 		}
 	},
 	
@@ -441,7 +441,7 @@ Ext.define('Sonicle.upload.Uploader', {
 				percent = file.percent;
 		
 		me.fireEvent('uploadprogress', me, file, percent);
-		if(file._serverError) file.status = 4;
+		if (file._serverError) file.status = 4;
 		me.updateStore(file);
 	},
 	
@@ -461,7 +461,7 @@ Ext.define('Sonicle.upload.Uploader', {
 			file._serverResponse = json.message;
 			me.failed.push(file);
 			me.fireOverallProgress();
-			me.fireEvent('uploaderror', me, file, json.message, response);
+			me.fireEvent('uploaderror', me, file, 'server', json);
 		}
 	},
 	
@@ -496,15 +496,17 @@ Ext.define('Sonicle.upload.Uploader', {
 	},
 	
 	_Error: function(plu, data) {
-		var me = this;
+		var me = this, cause = null;
 		
-		if(data.file) {
+		if (data.file) {
 			data.file.status = 4;
 			me.failed.push(data.file);
 			me.updateStore(data.file);
 		}
-		me.fireEvent('uploaderror', me, data);
-		if(data.code === -600) me.fireEvent('invalidfilesize', me, data);
-		if(data.code === -700) me.fireEvent('invalidfileext', me, data);
+		if (data.code === -600) cause = 'size';
+		if (data.code === -700) cause = 'ext';
+		me.fireEvent('uploaderror', me, data.file, cause, null);
+		//if(data.code === -600) me.fireEvent('invalidfilesize', me, data.file);
+		//if(data.code === -700) me.fireEvent('invalidfileext', me, data.file);
 	}
 });
