@@ -32,6 +32,8 @@
  * display the words "Copyright (C) 2014 Sonicle S.r.l.".
  */
 
+/* global undef */
+
 Ext.define('Sonicle.form.field.HTMLEditor', {
     extend: 'Ext.form.FieldContainer',
     mixins: {
@@ -68,7 +70,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
      * an array of custom buttons to append to the toolbar
      */
     customButtons: null,	
-
+	
     /**
      * @cfg {String} initialContent 
      * The initial content for the editor
@@ -80,14 +82,14 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
      * The default title for the create link prompt
      */
     createLinkTitle: 'Create Hyperlink',	
-
+	
 	/**
      * @cfg {String} createLinkText 
      * The default text for the create link prompt
      */
     createLinkText: 'Please enter the URL for the link:',	
-
-     /**
+	
+	/**
      * @cfg {String} [defaultLinkValue='http://']
      * The default value for the create link prompt
      */
@@ -98,14 +100,14 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
      * The default title for the insert image prompt
      */
     insertImageUrlTitle: 'Insert image from URL',	
-
+	
 	/**
      * @cfg {String} insertImageText 
      * The default text for the insert image prompt
      */
     insertImageUrlText: 'Please enter the URL for the image:',	
-
-     /**
+	
+	/**
      * @cfg {String} [defaultImageValue='http://']
      * The default value for the insert image prompt
      */
@@ -156,6 +158,11 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 			title: 'Font Color',
             text: 'Change the color of the selected text.'
         },
+		emoticon: {
+			title: 'Emoticon',
+			text: 'Input a emoticon in the text'
+		}
+		,
         justifyleft: {
             title: 'Align Text Left',
             text: 'Align text to the left.'
@@ -209,12 +216,13 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 	enableFontSize: false,
 	enableFormat: false,
 	enableColors: false,
+	enableEmoticons: false,
 	enableAlignments: false,
 	enableLinks: false,
 	enableLists: false,
 	enableSourceEdit: false,
 	enableClean: false,
-		
+	
 	fontFamilies: [
 		"Arial",
 		"Comic Sans MS",
@@ -275,7 +283,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
                 extended_valid_elements: 'span[style]'
 			}/*,
 			value: 'This is the WebTop-TinyMCE HTML Editor'*/
-
+			
 		});
 		return this.tmce;
 		
@@ -289,7 +297,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 		return this.toolbar;
 	},
 	
-/*
+	/*
      * Called when the editor creates its toolbar. Override this method if you need to
      * add custom toolbar buttons.
      * @param {Ext.form.field.HtmlEditor} editor
@@ -310,7 +318,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
     
 	_getTooltip: function(id) {
 		var me=this,
-			tipsEnabled = Ext.quickTipsActive && Ext.tip.QuickTipManager.isEnabled();
+		tipsEnabled = Ext.quickTipsActive && Ext.tip.QuickTipManager.isEnabled();
 		return tipsEnabled ? ( me.buttonTips[id]? {
 			title: me.buttonTips[id].title,
 			text: me.buttonTips[id].text,
@@ -325,10 +333,10 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 	
     getToolbarCfg: function(){
         var me = this,
-            items = [], i,
-            baseCSSPrefix = Ext.baseCSSPrefix,
-            undef;
-
+		items = [], i,
+		baseCSSPrefix = Ext.baseCSSPrefix,
+		undef;
+		
         function btn(id, toggle, handler){
             return {
                 itemId: id,
@@ -343,8 +351,8 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
                 tabIndex: -1
             };
         }
-
-
+		
+		
         if (me.enableFont) {
 			var fontData=[];
 			for(i=0;i<me.fontFamilies.length;++i) {
@@ -353,95 +361,96 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 			}
 			
             items.push(
-				me.fontCombo=Ext.widget({
-					xtype: 'combo', 
-					width: 140,
-					store: Ext.create('Ext.data.Store', {
-						fields: ['id'],
-						data : fontData
-					}),
-					autoSelect: true,
-					displayField: 'id',
-					valueField: 'id',
-					queryMode: 'local',
-					listeners: {
-						'select': function(c,r,o) {
-							me.execCommand('fontname',false,r.get('id'));
-                            me.focusEditor();
-						},
-						'specialkey': function(f,e) {
-							if (e.getKey() == e.ENTER) {
-                                me.execCommand('fontname',false,f.getValue());
-                                me.focusEditor();
-							}
-						}						
-					}
+					me.fontCombo=Ext.widget({
+						xtype: 'combo', 
+				width: 140,
+				store: Ext.create('Ext.data.Store', {
+					fields: ['id'],
+					data : fontData
 				}),
-				'-'
-            );
+				autoSelect: true,
+				displayField: 'id',
+				valueField: 'id',
+				queryMode: 'local',
+				listeners: {
+					'select': function(c,r,o) {
+						me.execCommand('fontname',false,r.get('id'));
+						me.focusEditor();
+					},
+					'specialkey': function(f,e) {
+						if (e.getKey() == e.ENTER) {
+							me.execCommand('fontname',false,f.getValue());
+							me.focusEditor();
+						}
+					}						
+				}
+			}),
+			'-'
+					);
         }
 		
         if (me.enableFontSize) {
 			items.push(
-				me.fontSizeCombo=Ext.widget({
-					xtype: 'combo', 
-					width: 70,
-					store: Ext.create('Ext.data.Store', {
-						fields: ['id'],
-						data : [
-							{ id: "8px" },
-							{ id: "10px" },
-							{ id: "12px" },
-							{ id: "14px" },
-							{ id: "16px" },
-							{ id: "18px" },
-							{ id: "24px" },
-							{ id: "36px" }
-						]
-					}),
-					autoSelect: true,
-					displayField: 'id',
-					valueField: 'id',
-					queryMode: 'local',
-					listeners: {
-						'select': function(c,r,o) {
-							me.execCommand('fontsize',false,r.get('id'));
-                            me.focusEditor();
-						},
-						'specialkey': function(f,e) {
-							if (e.getKey() == e.ENTER) {
-                                me.execCommand('fontsize',false,f.getValue());
-                                me.focusEditor();
-							}
+					me.fontSizeCombo=Ext.widget({
+						xtype: 'combo', 
+				width: 70,
+				store: Ext.create('Ext.data.Store', {
+					fields: ['id'],
+					data : [
+						{ id: "8px" },
+						{ id: "10px" },
+						{ id: "12px" },
+						{ id: "14px" },
+						{ id: "16px" },
+						{ id: "18px" },
+						{ id: "24px" },
+						{ id: "36px" }
+					]
+				}),
+				autoSelect: true,
+				displayField: 'id',
+				valueField: 'id',
+				queryMode: 'local',
+				listeners: {
+					'select': function(c,r,o) {
+						me.execCommand('fontsize',false,r.get('id'));
+						me.focusEditor();
+					},
+					'specialkey': function(f,e) {
+						if (e.getKey() == e.ENTER) {
+							me.execCommand('fontsize',false,f.getValue());
+							me.focusEditor();
 						}
 					}
-				}),
-				'-'
-			);
+				}
+			}),
+			'-'
+					);
 			
 		}		
-
+		
         if (me.enableFormat) {
             items.push(
-                btn('bold'),
-                btn('italic'),
-                btn('underline')
-            );
+					btn('bold'),
+			btn('italic'),
+			btn('underline')
+					);
         }
 		
         if (me.enableColors) {
             items.push(
-                '-', {
-                    itemId: 'forecolor',
-                    cls: baseCSSPrefix + 'btn-icon',
-                    iconCls: 'wt-icon-format-forecolor-xs',
-					tooltip: me._getTooltip('forecolor'),
-					overflowText: me._getOverflowText('forecolor'),
-                    tabIndex:-1,
-                    menu: Ext.widget('menu', {
-                        plain: true,
-
-                        items: [{
+					'-', {
+						itemId: 'forecolor',
+				cls: baseCSSPrefix + 'btn-icon',
+				iconCls: 'wt-icon-format-forecolor-xs',
+				tooltip: me._getTooltip('forecolor'),
+				overflowText: me._getOverflowText('forecolor'),
+				tabIndex:-1,
+				arrowVisible:false,
+				menu: Ext.widget('menu', {
+					plain: true,
+					
+					items: [{
                             xtype: 'colorpicker',
                             allowReselect: true,
                             focus: Ext.emptyFn,
@@ -453,18 +462,19 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
                                 this.up('menu').hide();
                             }
                         }]
-                    })
-                }, {
-                    itemId: 'backcolor',
-                    cls: baseCSSPrefix + 'btn-icon',
-                    iconCls: 'wt-icon-format-backcolor-xs',
-					tooltip: me._getTooltip('backcolor'),
-					overflowText: me._getOverflowText('backcolor'),
-                    tabIndex:-1,
-                    menu: Ext.widget('menu', {
-                        plain: true,
-
-                        items: [{
+				})
+			}, {
+				itemId: 'backcolor',
+				cls: baseCSSPrefix + 'btn-icon',
+				iconCls: 'wt-icon-format-backcolor-xs',
+				tooltip: me._getTooltip('backcolor'),
+				overflowText: me._getOverflowText('backcolor'),
+				tabIndex:-1,
+				
+				menu: Ext.widget('menu', {
+					plain: true,
+					
+					items: [{
                             xtype: 'colorpicker',
                             focus: Ext.emptyFn,
                             value: 'FFFFFF',
@@ -483,89 +493,126 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
                                 this.up('menu').hide();
                             }
                         }]
-                    })
-                }
-            );
+				}) 
+			}
+					);
         }
+		if (me.enableEmoticons) {
+            items.push(
+					'-', {
+						itemId: 'emoticon',
+						cls: baseCSSPrefix + 'btn-icon',
+						iconCls: 'wt-icon-format-emoticon-xs',
+						tooltip: me._getTooltip('emoticon'),
+						overflowText: me._getOverflowText('emoticon'),
+						tabIndex:-1,
+						arrowVisible:false,
+						menu: Ext.widget('menu', {
+							plain: true,
 
+							items: [{
+									xtype: 'soemojipicker',
+									reference: 'pnlemojis',
+									header: false,
+									recentsText: WT.res('soemojipicker.recents.tip'),
+									peopleText: WT.res('soemojipicker.people.tip'),
+									natureText: WT.res('soemojipicker.nature.tip'),
+									foodsText: WT.res('soemojipicker.foods.tip'),
+									activityText: WT.res('soemojipicker.activity.tip'),
+									placesText: WT.res('soemojipicker.places.tip'),
+									objectsText: WT.res('soemojipicker.objects.tip'),
+									symbolsText: WT.res('soemojipicker.symbols.tip'),
+									flagsText: WT.res('soemojipicker.flags.tip'),
+									listeners: {
+										select: function(s, emoji) {
+											me.execCommand('inserthtml', false, emoji);
+										}
+									}
+								}] 
+						})
+					}
+				);
+        }
+		
+		
         if (me.enableAlignments) {
             items.push(
-                '-',
-                btn('justifyleft'),
-                btn('justifycenter'),
-                btn('justifyright')
-            );
+					'-',
+			btn('justifyleft'),
+			btn('justifycenter'),
+			btn('justifyright')
+					);
         }
-
+		
         if (!Ext.isSafari2) {
             if (me.enableLists) {
                 items.push(
-                    '-',
-                    btn('insertorderedlist'),
-                    btn('insertunorderedlist')
-                );
+						'-',
+				btn('insertorderedlist'),
+				btn('insertunorderedlist')
+						);
             }
         }
         
 		if (me.enableClean) {
 			items.push(
-				'-',
-				btn('clean', false, function(){
-					me.execCommand('RemoveFormat',true,true);
-				})
-			);
+					'-',
+			btn('clean', false, function(){
+				me.execCommand('RemoveFormat',true,true);
+			})
+					);
 		}
 		
         if (!Ext.isSafari2) {
             if (me.enableSourceEdit) {
                 items.push(
-                    '-',
-                    btn('sourceedit', false, function(){
-                        //me.toggleSourceEdit(!me.sourceEditMode);
-						me.execCommand('mceCodeEditor',true,true);
-                    })
-                );
+						'-',
+				btn('sourceedit', false, function(){
+					//me.toggleSourceEdit(!me.sourceEditMode);
+					me.execCommand('mceCodeEditor',true,true);
+				})
+						);
             }
 			
 			if (me.enableLinks) {
 				items.push(
-					'-',
-					btn('createlink', false, function() {
-						Ext.Msg.prompt(
+						'-',
+				btn('createlink', false, function() {
+					Ext.Msg.prompt(
 							me.createLinkTitle,
-							me.createLinkText,
-							function(bid,url) {
-								if (bid==='ok' && url && url !== 'http:/'+'/') {
-									me.execCommand('createlink',false,url);
-								}
-							},
-							me,
-							false,
-							me.defaultLinkValue
+					me.createLinkText,
+					function(bid,url) {
+						if (bid==='ok' && url && url !== 'http:/'+'/') {
+							me.execCommand('createlink',false,url);
+						}
+					},
+					me,
+					false,
+					me.defaultLinkValue
+							);
+				}),
+				btn('unlink')
 						);
-					}),
-					btn('unlink')
-				);
 			}
 			
 			if (me.enableImageUrls) {
 				items.push(
-					'-',
-					btn('insertimageurl', false, function() {
-						Ext.Msg.prompt(
+						'-',
+				btn('insertimageurl', false, function() {
+					Ext.Msg.prompt(
 							me.insertImageUrlTitle,
-							me.insertImageUrlText,
-							function(bid,url) {
-								if (bid==='ok' && url && url !== 'http:/'+'/') {
-									me.execCommand('insertimage',false,url);
-								}
-							},
-							me,
-							false,
-							me.defaultImageUrlValue
+					me.insertImageUrlText,
+					function(bid,url) {
+						if (bid==='ok' && url && url !== 'http:/'+'/') {
+							me.execCommand('insertimage',false,url);
+						}
+					},
+					me,
+					false,
+					me.defaultImageUrlValue
+							);
+				})
 						);
-					})
-				);
 			}
 			
 			if (me.customButtons) {
@@ -575,14 +622,14 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 			}
 			
 		}
-
-/*        // Everything starts disabled.
+		
+		/*        // Everything starts disabled.
         for (i = 0; i < items.length; i++) {
             if (items[i].itemId !== 'sourceedit') {
                 items[i].disabled = true;
             }
         }*/
-
+		
         // build the toolbar
         // Automatically rendered in Component.afterRender's renderChildren call
         return {
@@ -590,10 +637,10 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 			region: 'north',
             defaultButtonUI: me.defaultButtonUI,
 			cls: Ext.baseCSSPrefix + 'html-editor-tb',
-//            bodyCls: 'wt-theme-bg-2',
+			//            bodyCls: 'wt-theme-bg-2',
             enableOverflow: true,
             items: items
-
+			
             // stop form submits
             //listeners: {
             //    click: function(e){
@@ -631,16 +678,16 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 			me.tmceNotification=null;
 		}
 	},
-
+	
     disableItems: function(disabled) {
         var items = this.getToolbar().items.items,
-            i,
-            iLen  = items.length,
-            item;
-
+		i,
+		iLen  = items.length,
+		item;
+		
         for (i = 0; i < iLen; i++) {
             item = items[i];
-
+			
             if (item.getItemId() !== 'sourceedit') {
                 item.setDisabled(disabled);
             }
@@ -653,10 +700,10 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 	
 	tmceInit: function() {
         var me = this, fn,
-			ed = tinymce.get(me.tmce.getInputId()),
-			doc = ed.getDoc(),
-			docEl = Ext.get(doc);
-	
+		ed = tinymce.get(me.tmce.getInputId()),
+		doc = ed.getDoc(),
+		docEl = Ext.get(doc);
+		
 		fn = me.onEditorEvent.bind(me);
 		docEl.on({
 			mousedown: fn,
@@ -694,20 +741,20 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
      */
     updateToolbar: function() {
         var me = this,
-            i, l, btns, ed, doc, name, queriedName, fontSelect,
-            toolbarSubmenus;
-	
-//			console.log("updateToolbar");
-
-//        if (me.readOnly) {
-//            return;
-//        }
-
-//        if (!me.activated) {
-//            me.onFirstFocus();
-//            return;
-//        }
-
+		i, l, btns, ed, doc, name, queriedName, fontSelect,
+		toolbarSubmenus;
+		
+		//			console.log("updateToolbar");
+		
+		//        if (me.readOnly) {
+		//            return;
+		//        }
+		
+		//        if (!me.activated) {
+		//            me.onFirstFocus();
+		//            return;
+		//        }
+		
 		
         btns = me.getToolbar().items.map;
 		ed = tinymce.get(this.tmce.getInputId());
@@ -715,9 +762,9 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 		
 		doc = ed.getDoc();
 		if (!doc) return;
-
+		
         if (me.enableFont && !Ext.isSafari2) {
-/*            // When querying the fontName, Chrome may return an Array of font names
+			/*            // When querying the fontName, Chrome may return an Array of font names
             // with those containing spaces being placed between single-quotes.
             queriedName = doc.queryCommandValue('fontName');
             name = (queriedName ? queriedName.split(",")[0].replace(me.reStripQuotes, '') : me.defaultFont).toLowerCase();
@@ -736,7 +783,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
             //}
 			me.fontSizeCombo.setValue(me.getComputedProperty("fontSize"));
         }
-
+		
         function updateButtons() {
             var state;
             
@@ -764,7 +811,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
         if(!Ext.isSafari2 && me.enableLists){
             updateButtons('insertorderedlist', 'insertunorderedlist');
         }
-
+		
         // Ensure any of our toolbar's owned menus are hidden.
         // The overflow menu must control itself.
         toolbarSubmenus = me.toolbar.query('menu');
@@ -773,10 +820,10 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
         }
         me.syncValue();
     },
-
+	
 	setValue: function(val) {
 		var me=this;
-	
+		
 		if (val!==me.value) {
 			me.mixins.field.setValue.call(me,val);
 			//console.log("updating tmce too!");
@@ -817,7 +864,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
         if (ed) me.autosaveValue=ed.getContent();
     },
 	
-/*	setHtml: function(html) {
+	/*	setHtml: function(html) {
 		//Ext.Error.raise('Stop here!');
 		this.tmce.setValue(html);
 	},
@@ -831,7 +878,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
         me.setValue(html);
         //me.initValue=me.getValue();
     },
-
+	
     isDirty: function() {
         return this.getValue()!=this.initValue;
     },*/
@@ -877,10 +924,10 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 	 */
 	getSelection: function(clip) {
 		var me=this,
-			ed=me.getTinyMCEEditor(),
-			sel=ed.getDoc().getSelection(),
-			txt = '', hasHTML = false, html = '',selDocFrag=null;
-	
+		ed=me.getTinyMCEEditor(),
+		sel=ed.getDoc().getSelection(),
+		txt = '', hasHTML = false, html = '',selDocFrag=null;
+		
 		if (sel) {
 			if (clip) {
 				selDocFrag = sel.getRangeAt(0).extractContents();
@@ -994,5 +1041,5 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
             text: 'Insert image from URL.'
         }
     }
-	*/
+	 */
 });
