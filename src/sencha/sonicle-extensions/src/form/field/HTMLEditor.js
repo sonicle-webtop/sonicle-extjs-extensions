@@ -458,7 +458,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
                             plain: true,
                             clickEvent: 'mousedown',
                             handler: function(cp, color) {
-                                me.execCommand('forecolor', false, Ext.isWebKit || Ext.isIE ? '#'+color : color);
+                                me.execCommand('forecolor', false, Ext.isWebKit || Ext.isIE || Ext.isGecko ? '#'+color : color);
                                 this.up('menu').hide();
                             }
                         }]
