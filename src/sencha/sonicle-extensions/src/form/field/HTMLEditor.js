@@ -470,7 +470,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 				tooltip: me._getTooltip('backcolor'),
 				overflowText: me._getOverflowText('backcolor'),
 				tabIndex:-1,
-				
+				arrowVisible:false,
 				menu: Ext.widget('menu', {
 					plain: true,
 					
