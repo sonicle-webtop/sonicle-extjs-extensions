@@ -163,12 +163,43 @@ Ext.define('Sonicle.Date', {
 	},
 	
 	/**
-	 * Returns localized day name with minimal string length.
-	 * @param {Number} day The day index (0=sunday, 1=monday, etc...)
-	 * @returns {String} Localized name.
+	 * Get the day name (localized) for the given day number.
+	 * @param {Number} day A zero-based day number (0=sunday, 1=monday, etc...).
+	 * @param {Boolean} [lowercase] True to return a lowercase value.
+	 * @returns {String} The day name.
+	 */
+	getDayName: function(day, lowercase) {
+		var s = Ext.Date.dayNames[day];
+		return (lowercase === true) ? s.toLowerCase() : s;
+	},
+	
+	/**
+	 * Get the short day name (localized) for the given day number.
+	 * @param {Number} day A zero-based day number (0=sunday, 1=monday, etc...).
+	 * @returns {String} The short day name.
+	 */
+	getShortDayName: function(day) {
+		return Ext.Date.getShortDayName(day);
+	},
+	
+	/**
+	 * Get the initial day name letter (localized) for the given day number.
+	 * @param {Number} day A zero-based day number (0=sunday, 1=monday, etc...).
+	 * @returns {String} The day name beginning letter.
 	 */
 	getShortestDayName: function(day) {
 		return Ext.Date.getShortDayName(day).substring(0, 1);
+	},
+	
+	/**
+	 * Get the month name (localized) for the given month number.
+	 * @param {Number} day A zero-based month number.
+	 * @param {Boolean} [lowercase] True to return a lowercase value.
+	 * @returns {String} The month name.
+	 */
+	getMonthName: function(month, lowercase) {
+		var s = Ext.Date.monthNames[month];
+		return (lowercase === true) ? s.toLowerCase() : s;
 	},
 	
 	/**
@@ -471,5 +502,30 @@ Ext.define('Sonicle.Date', {
 	getLastDateOfWeek: function(date, startDay) {
 		var eDate = Ext.Date, start = this.getFirstDateOfWeek(date, startDay);
 		return eDate.add(start, eDate.DAY, 6);
+	},
+	
+	/**
+	 * Get the number of days in the month. If passed month is a date, 
+	 * return value will be adjusted for leap year.
+	 * @param {Number|Date} month The month number or a date
+	 * @return {Number} The number of days in the month.
+	 */
+	getDaysInMonth: function(month) {
+		if (Ext.isDate(month)) {
+			return Ext.Date.getDaysInMonth(month);
+		} else {
+			var daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+			return daysInMonth[month-1];
+		}
+	},
+	
+	/**
+	 * Get the n-th week-day of a date. In other words: the week-day of the 
+	 * passed date is the n-th week-day of the month.
+	 * @param {Date} date The date
+	 * @returns {Number} The ordinal week-day number.
+	 */
+	getNthWeekDayOfMonth: function(date) {
+		return Math.floor((date.getDate()+6)/7);
 	}
 });
