@@ -517,7 +517,7 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 				EM = Sonicle.calendar.data.EventMappings,
 				lastInMonth = Ext.Date.getLastDateOfMonth(me.startDate),
 				w = 0, d,
-				dt = Ext.Date.clone(me.viewStart),
+				dt = Ext.Date.clearTime(Ext.Date.clone(me.viewStart),true), 
 				weeks = me.weekCount < 1 ? 6 : me.weekCount;
 
 		me.eventGrid = [[]];
@@ -552,7 +552,7 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 					me.sortEventRecordsForDay(evts);
 					me.prepareEventGrid(evts, w, d);
 				}
-				dt = Sonicle.Date.add(dt, {days: 1});
+				dt = Ext.Date.clearTime(Sonicle.Date.add(dt, {days: 1}),true);
 			}
 		}
 		this.currentWeekCount = w;
