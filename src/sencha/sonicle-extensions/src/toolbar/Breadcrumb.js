@@ -90,9 +90,9 @@ Ext.define('Sonicle.toolbar.Breadcrumb', {
 						hidden: i < md,
 						cls: me._btnCls + ' ' + me._btnCls + '-' + me.ui,
 						text: needSho ? Ext.String.ellipsis(text, shoLen) : text,
-						showEmptyMenu: true,
+						showEmptyMenu: me.hideMenu?false:true,
 						// begin with an empty menu - items are populated on beforeshow 
-						menu: {
+						menu: me.hideMenu?null:{
 							listeners: {
 								click: '_onMenuClick',
 								beforeshow: '_onMenuBeforeShow',
