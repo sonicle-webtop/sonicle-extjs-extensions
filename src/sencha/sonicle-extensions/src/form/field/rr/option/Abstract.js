@@ -90,7 +90,7 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 	 * 
 	 * @return {Object} Dynamic default configuration.
 	 */
-	buildVMDataDefaults: function() {
+	calculateVMDataDefaults: function() {
 		return {};
 	},
 	
@@ -107,6 +107,11 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 	setStartDate: function(value) {
 		var me = this;
 		me.startDate = value;
+		if (Ext.isDate(value)) {
+			if (me.rrule && !me.validateRRule(me.rrule)) {
+				me.getViewModel().set(me.getVMData());
+			}
+		}
 	},
 	
 	setRRule: function(value) {
@@ -136,7 +141,7 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 		if (data.opt1 !== null) {
 			return data;
 		} else {
-			data = Ext.apply({}, me.buildVMDataDefaults(), me.returnVMDataDefaults());
+			data = Ext.apply({}, me.calculateVMDataDefaults(), me.returnVMDataDefaults());
 			vm.setData(data);
 			return data;
 		}

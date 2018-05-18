@@ -257,7 +257,7 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 		return Ext.isDefined(rrCfg.bysetpos) && Ext.isDefined(rrCfg.byweekday);
 	},
 	
-	buildVMDataDefaults: function() {
+	calculateVMDataDefaults: function() {
 		var stDt = this.startDate, nth;
 		if (Ext.isDate(stDt)) {
 			var nth = Sonicle.Date.getNthWeekDayOfMonth(stDt);

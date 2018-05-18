@@ -158,7 +158,7 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 		return Ext.isDefined(rrCfg.until);
 	},
 	
-	buildVMDataDefaults: function() {
+	calculateVMDataDefaults: function() {
 		var stDt = this.startDate;
 		if (Ext.isDate(stDt)) {
 			return {
