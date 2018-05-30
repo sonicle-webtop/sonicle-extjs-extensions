@@ -170,7 +170,8 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 				// (is oldValue null?); we must use a private duringSetValue flag.
 				if (!s.duringSetValue) me.onRRuleCfgChange();
 			} else {
-				if (ov !== null) me.onRRuleCfgChange();
+				//if (ov !== null) me.onRRuleCfgChange();
+				me.onRRuleCfgChange();
 			}
 		}
 	},
@@ -196,7 +197,7 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 		if (Ext.isArray(item)) {
 			return item;
 		} else {
-			return (item !== null) ? [item] : [];
+			return Ext.isDefined(item) ? [item] : [];
 		}
 	},
 	

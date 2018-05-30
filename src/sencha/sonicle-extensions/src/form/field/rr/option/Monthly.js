@@ -28,7 +28,7 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 			xtype: 'fieldcontainer',
 			layout: 'hbox',
 			defaults: {
-				margin: '0 5 0 0',
+				style: {marginRight: '5px'},
 				flex: 1
 			},
 			items: [{
@@ -42,6 +42,7 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 				}
 			}, {
 				xtype: 'label',
+				cls: 'x-form-cb-label-default',
 				text: me.onTheText
 			}, {
 				xtype: 'numberfield',
@@ -58,6 +59,7 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 				width: 60
 			}, {
 				xtype: 'label',
+				cls: 'x-form-cb-label-default',
 				text: me.thDayText + ', ' + me.ofEveryText
 			}, {
 				xtype: 'numberfield',
@@ -74,13 +76,14 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 				width: 60
 			}, {
 				xtype: 'label',
+				cls: 'x-form-cb-label-default',
 				text: me.monthText
 			}]
 		}, {
 			xtype: 'fieldcontainer',
 			layout: 'hbox',
 			defaults: {
-				margin: '0 5 0 0',
+				style: {marginRight: '5px'},
 				flex: 1
 			},
 			items: [{
@@ -94,6 +97,7 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 				}
 			}, {
 				xtype: 'label',
+				cls: 'x-form-cb-label-default',
 				text: me.onTheText
 			}, {
 				xtype: 'combo',
@@ -143,6 +147,9 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 						{name: 'desc', type: 'string'}
 					],
 					data: [
+						[-1, me.byDayText],
+						[-2, me.byWeekdayText],
+						[-3, me.byWeText],
 						[1, SoDate.getDayName(1, true)],
 						[2, SoDate.getDayName(2, true)],
 						[3, SoDate.getDayName(3, true)],
@@ -162,6 +169,7 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 				width: 100
 			}, {
 				xtype: 'label',
+				cls: 'x-form-cb-label-default',
 				text: me.ofEveryText
 			}, {
 				xtype: 'numberfield',
@@ -178,9 +186,20 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 				width: 60
 			}, {
 				xtype: 'label',
+				cls: 'x-form-cb-label-default',
 				text: me.monthText
 			}]
 		}]);
+	},
+	
+	fieldOnChange: function(s, nv, ov) {
+		var me = this, vm = me.getViewModel();
+		if (me.suspendOnChange === 0) {
+			vm.set('opt1', false);
+			vm.set('opt2', false);
+			vm.set(s.getItemId().split('-')[0], true);
+		}
+		me.callParent(arguments);
 	},
 	
 	shouldSkipChange: function(field) {
@@ -195,12 +214,6 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 				rrCfg = rr.origOptions;
 		if (rrCfg.freq !== RRule.MONTHLY) return false;
 		if (!me.isOpt1(rrCfg) && !me.isOpt2(rrCfg)) return false;
-		if (me.isOpt1(rrCfg)) {
-			if (me.asArray(rrCfg.bymonthday).length !== 1) return false;
-		} else if (me.isOpt2(rrCfg)) {
-			if (me.asArray(rrCfg.bysetpos).length !== 1) return false;
-			if (me.asArray(rrCfg.byweekday).length !== 1) return false;
-		}
 		return true;
 	},
 	
@@ -220,7 +233,15 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 		} else if (me.isOpt2(rrCfg)) {
 			data.opt2 = true;
 			data.opt2ByPos = me.asArray(rrCfg.bysetpos)[0];
-			data.opt2ByWeekDay = me.byWeekdayToJsWeekday(me.asArray(rrCfg.byweekday))[0];
+			if (me.asArray(rrCfg.bymonthday).length === 4) {
+				data.opt2ByWeekDay = -1;
+			} else if (me.asArray(rrCfg.bymonthday).length === 5) {
+				data.opt2ByWeekDay = -1;
+			} else if (me.asArray(rrCfg.byweekday).length === 2) {
+				data.opt2ByWeekDay = -3;
+			} else {
+				data.opt2ByWeekDay = me.byWeekdayToJsWeekday(me.asArray(rrCfg.byweekday))[0];
+			}
 			if (rrCfg.interval) data.opt2Interval = rrCfg.interval;
 		}
 		
@@ -237,24 +258,97 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 				bymonthday: [data.opt1ByMonthDay],
 				interval: data.opt1Interval
 			};
+			
 		} else if (data.opt2 === true) {
-			return {
-				freq: RRule.MONTHLY,
-				bysetpos: [data.opt2ByPos],
-				byweekday: me.jsWeekdayToByWeekday(me.asArray(data.opt2ByWeekDay)),
-				interval: data.opt2Interval
-			};
+			if (data.opt2ByWeekDay === -3) {
+				return {
+					freq: RRule.MONTHLY,
+					bysetpos: [data.opt2ByPos],
+					byweekday: [RRule.SA, RRule.SU],
+					interval: data.opt2Interval
+				};
+				
+			} else if (data.opt2ByWeekDay === -2) {
+				return {
+					freq: RRule.MONTHLY,
+					bysetpos: [data.opt2ByPos],
+					byweekday: [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR],
+					interval: data.opt2Interval
+				};
+				
+			} else if ((data.opt2ByWeekDay === -1 && (data.opt2ByPos === -1))) {
+				return {
+					freq: RRule.MONTHLY,
+					bysetpos: [-1],
+					bymonthday: [28, 29, 30, 31],
+					interval: data.opt2Interval
+				};
+				
+			} else if ((data.opt2ByWeekDay === -1 && (data.opt2ByPos === -2))) {
+				return {
+					freq: RRule.MONTHLY,
+					bysetpos: [-2],
+					bymonthday: [27, 28, 29, 30, 31],
+					interval: data.opt2Interval
+				};
+				
+			} else if (data.opt2ByWeekDay === -1) {
+				return {
+					freq: RRule.MONTHLY,
+					bymonthday: data.opt2ByPos,
+					interval: data.opt2Interval
+				};
+				
+			} else {
+				return {
+					freq: RRule.MONTHLY,
+					bysetpos: [data.opt2ByPos],
+					byweekday: me.jsWeekdayToByWeekday(me.asArray(data.opt2ByWeekDay)),
+					interval: data.opt2Interval
+				};
+			}
+			
 		} else {
 			return {};
 		}
 	},
 	
 	isOpt1: function(rrCfg) {
-		return Ext.isDefined(rrCfg.bymonthday);
+		var me = this;
+		if (Ext.isDefined(rrCfg.bymonthday)) {
+			if (me.asArray(rrCfg.bymonthday).length === 1) return true;
+		}
+		return false;
 	},
 	
 	isOpt2: function(rrCfg) {
-		return Ext.isDefined(rrCfg.bysetpos) && Ext.isDefined(rrCfg.byweekday);
+		var me = this;
+		if (Ext.isDefined(rrCfg.bysetpos) && Ext.isDefined(rrCfg.bymonthday)) {
+			var bsps = me.asArray(rrCfg.bysetpos);
+			var bmds = me.asArray(rrCfg.bymonthday);
+			if ((bsps.length === 1)
+					&& (bsps[0] === -1)
+					&& (bmds.length === 4)
+					&& (Ext.Array.difference(bmds, [28, 29, 30, 31]).length === 0)) return true; // last day of...
+			if ((bsps.length === 1)
+					&& (bsps[0] === -2)
+					&& (bmds.length === 5)
+					&& (Ext.Array.difference(bmds, [27, 28, 29, 30, 31]).length === 0)) return true; // last-1 day of...
+		}
+		if (Ext.isDefined(rrCfg.bysetpos) && Ext.isDefined(rrCfg.byweekday)) {
+			var bsps = me.asArray(rrCfg.bysetpos);
+			var bwds = me.asArray(rrCfg.byweekday);
+			if ((bsps.length === 1)
+					&& (bwds.length === 2)
+					&& (Ext.Array.difference(bwds, [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR]).length === 0)) return true; // weekday of...
+			if ((bsps.length === 1)
+					&& (bwds.length === 2)
+					&& (Ext.Array.difference(bwds, [RRule.SA, RRule.SU]).length === 0)) return true; // weekend of...
+			if ((bsps.length === 1)
+					&& (bwds.length === 1)) return true; // dayX of...
+			
+		}
+		return false;
 	},
 	
 	calculateVMDataDefaults: function() {

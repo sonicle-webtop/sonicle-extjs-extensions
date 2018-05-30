@@ -27,7 +27,7 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 			xtype: 'fieldcontainer',
 			layout: 'hbox',
 			defaults: {
-				margin: '0 5 0 0',
+				style: {marginRight: '5px'},
 				flex: 1
 			},
 			items: [{
@@ -66,6 +66,7 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 				width: 60
 			}, {
 				xtype: 'label',
+				cls: 'x-form-cb-label-default',
 				text: me.occurrenceText,
 				width: 100
 			}, {
@@ -95,6 +96,17 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 			labelWidth: 60,
 			fieldLabel: me.endsText
 		}]);
+	},
+	
+	fieldOnChange: function(s, nv, ov) {
+		var me = this, vm = me.getViewModel();
+		if (me.suspendOnChange === 0) {
+			vm.set('opt1', false);
+			vm.set('opt2', false);
+			vm.set('opt3', false);
+			vm.set(s.getItemId().split('-')[0], true);
+		}
+		me.callParent(arguments);
 	},
 	
 	shouldSkipChange: function(field) {
