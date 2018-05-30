@@ -27,9 +27,17 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 	defaultBindProperty: 'value',
 	
 	config: {
+		/**
+		 * @cfg {Date} startDate
+		 * The start date of the underlying recurrence series.
+		 */
 		startDate: null,
 		
-		showRawValue: false
+		/**
+		 * @cfg {Boolean} [allowRawFreqSelection=true]
+		 * Set to `false` in order to prevent user selection on raw freq. entry.
+		 */
+		allowRawFreqSelection: true
 	},
 	
 	/**
@@ -57,14 +65,15 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 	repeatsText: 'Repeats',
 	endsText: 'Ends',
 	frequencyTexts: {
-		'-1': 'Does not repeat',
+		'none': 'Does not repeat',
+		'raw': 'Custom',
 		'3': 'Daily',
 		'2': 'Weekly',
 		'1': 'Monthly',
 		'0': 'Yearly'
 	},
 	onEveryText: 'Every',
-	onEveryWeekdayText: 'Every week-day',
+	onEveryWeekdayText: 'Every weekday',
 	onDayText: 'Day',
 	onTheText: 'The',
 	thDayText: '° day',
@@ -82,10 +91,14 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		'-2': 'second-last',
 		'-1': 'last'
 	},
+	byDayText: 'day',
+	byWeekdayText: 'weekday',
+	byWeText: 'weekend',
 	endsNeverText: 'never',
 	endsAfterText: 'after',
 	endsByText: 'by',
 	occurrenceText: 'occurrence(s)',
+	rawFieldEmptyText: 'Paste here a RRULE string that follows iCalendar RFC',
 	
 	/**
 	 * @private
@@ -119,7 +132,7 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 						type: 'array',
 						autoLoad: true,
 						fields: [
-							{name: 'id', type: 'int'},
+							{name: 'id', type: 'string'},
 							{name: 'desc', type: 'string'}
 						],
 						data: me.buildFreqComboData(me.freqOptions)
@@ -127,6 +140,13 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 					valueField: 'id',
 					displayField: 'desc',
 					listeners: {
+						beforeselect: function(s, rec) {
+							if ((rec.get('id') === 'raw') && (me.getAllowRawFreqSelection() === false)) {
+								return false;
+							} else {
+								return true;
+							}
+						},
 						select: function(s, rec) {
 							me.onFrequencyChange(rec.get('id'));
 						}
@@ -166,8 +186,11 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 				onTheText: me.onTheText,
 				thDayText: me.thDayText,
 				ofEveryText: me.ofEveryText,
-				monthText: me.monthText,
-				ordinalsTexts: me.ordinalsTexts
+				ordinalsTexts: me.ordinalsTexts,
+				byDayText: me.byDayText,
+				byWeekdayText: me.byWeekdayText,
+				byWeText: me.byWeText,
+				monthText: me.monthText
 			}, {
 				xtype: 'sorryearly',
 				itemId: me.optsCtItemId(RRule.YEARLY),
@@ -176,13 +199,16 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 				ofText: me.ofText,
 				ofEveryText: me.ofEveryText,
 				ordinalsTexts: me.ordinalsTexts,
+				byDayText: me.byDayText,
+				byWeekdayText: me.byWeekdayText,
+				byWeText: me.byWeText,
 				yearText: me.yearText
 			}]
 		}, {
 			xtype: 'container',
 			itemId: 'durct',
 			hideMode: 'offsets',
-			hidden: !me.getShowRawValue(),
+			//hidden: !me.getShowRawValue(),
 			defaults: {
 				startDay: me.startDay,
 				dateFormat: me.dateFormat,
@@ -203,10 +229,28 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		}, {
 			xtype: 'textfield',
 			itemId: 'rawfld',
-			readOnly: true,
-			selectOnFocus: true,
 			hideMode: 'offsets',
-			hidden: false
+			selectOnFocus: true,
+			readOnly: true,
+			hidden: true,
+			emptyText: me.rawFieldEmptyText,
+			listeners: {
+				paste: {
+					element: 'inputEl',
+					fn: function(e) {
+						e.stopEvent();
+						var be = e.event, txt;
+						if (be && be.clipboardData && be.clipboardData.types && be.clipboardData.getData) {
+							txt = be.clipboardData.getData('text/plain');
+							if (me.fromRRuleString(txt)) {
+								me.setValue(txt);
+							} else {
+								me.fireEvent('rawpasteinvalid', me);
+							}
+						}
+					}
+				}
+			}
 		}];
 		me.callParent(arguments);
 		me.initField();
@@ -215,7 +259,7 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 	afterRender: function() {
 		var me = this;
 		me.callParent();
-		me.configureUi(me.rrule ? me.rrule.origOptions.freq : -1 , me.rrule);
+		me.configureUi(me.rrule ? me.rrule.origOptions.freq : 'none', me.rrule);
 	},
 	
 	setValue: function(value) {
@@ -229,7 +273,7 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 			rr = me.fromRRuleString(value);
 			me.rrule = rr ? rr : null;
 		}
-		me.configureUi(me.rrule ? me.rrule.origOptions.freq : -1 , me.rrule);
+		me.configureUi(me.rrule ? me.rrule.origOptions.freq : 'none', me.rrule);
 		me.checkChange();
 		return me;
 	},
@@ -246,18 +290,6 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		}
 	},
 	
-	updateShowRawValue: function(newValue, oldValue) {
-		var me = this, rawFld;
-		if (me.rendered) {
-			rawFld = me.getComponent('rawfld');
-			if (newValue === true) {
-				rawFld.show();
-			} else if (newValue === false) {
-				rawFld.hide();
-			}
-		}
-	},
-	
 	configureUi: function(freq, rrule) {
 		var me = this,
 				freqCbo = me.getComponent(0).getComponent(0).getComponent('freqcbo'),
@@ -265,28 +297,46 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 				durCt = me.getComponent('durct'),
 				rawFld = me.getComponent('rawfld');
 		
-		freqCbo.setValue(freq);
 		rawFld.setValue(rrule ? rrule.toString() : null);
-		if (freq === -1) {
+		
+		if (freq === 'none') {
 			optsCt.hide();
 			durCt.hide();
 			rawFld.hide();
+			
+		} else if (freq === 'raw') {
+			optsCt.hide();
+			durCt.hide();
+			rawFld.show();
+			
 		} else {
-			optsCt.setActiveItem(me.optsCtItemId(freq));
+			var ok = true;
 			if (rrule !== undefined) {
-				optsCt.getComponent(me.optsCtItemId(freq)).setRRule(rrule);
-				durCt.getComponent(0).setRRule(rrule);
+				ok = optsCt.getComponent(me.optsCtItemId(freq)).setRRule(rrule);
+				if (ok) durCt.getComponent(0).setRRule(rrule);
 			}
-			optsCt.show();
-			durCt.show();
-			if (me.getShowRawValue() === true) rawFld.show();
+			if (ok) {
+				optsCt.setActiveItem(me.optsCtItemId(freq));
+				optsCt.show();
+				durCt.show();
+				rawFld.hide();
+				
+			} else {
+				freq = 'raw';
+				optsCt.hide();
+				durCt.hide();
+				rawFld.show();
+			}
 		}
+		freqCbo.setValue(freq);
 	},
 	
 	onFrequencyChange: function(freq) {
 		var me = this, cfg;
-		if (freq === -1) {
+		if (freq === 'none') {
 			me.setValue(null);
+		} else if (freq === 'raw') {
+			me.configureUi('raw', me.rrule);
 		} else {
 			cfg = me.buildRRuleCfg(null, null);
 			me.setValue(new RRule(cfg).toString());
@@ -324,11 +374,12 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		var me = this,
 				freqTexts = me.frequencyTexts,
 				data = [], freq;
-		data.push([-1, freqTexts['-1']]);
+		data.push(['none', freqTexts['none']]);
 		for (var i=0; i < freqOptions.length; i++) {
 			freq = freqOptions[i];
-			data.push([freq, freqTexts[freq]]);
+			data.push([freq+'', freqTexts[freq]]);
 		}
+		data.push(['raw', freqTexts['raw']]);
 		return data;
 	},
 	

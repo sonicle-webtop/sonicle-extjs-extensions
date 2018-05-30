@@ -30,7 +30,7 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 			xtype: 'fieldcontainer',
 			layout: 'hbox',
 			defaults: {
-				margin: '0 5 0 0',
+				style: {marginRight: '5px'},
 				flex: 1
 			},
 			items: [{
@@ -44,6 +44,7 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 				}
 			}, {
 				xtype: 'label',
+				cls: 'x-form-cb-label-default',
 				text: me.onEveryText
 			}, {
 				xtype: 'numberfield',
@@ -60,6 +61,7 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 				width: 60
 			}, {
 				xtype: 'label',
+				cls: 'x-form-cb-label-default',
 				text: me.weekText
 			}]
 		}, {
@@ -178,7 +180,10 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 	},
 	
 	isOpt1: function(rrCfg) {
-		return Ext.isDefined(rrCfg.byweekday);
+		if (Ext.isDefined(rrCfg.bymonth)) return false;
+		if (Ext.isDefined(rrCfg.bymonthday)) return false;
+		if (Ext.isDefined(rrCfg.bysetpos)) return false;
+		return true;
 	},
 	
 	returnVMDataDefaults: function() {
