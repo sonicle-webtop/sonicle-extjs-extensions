@@ -279,7 +279,11 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 				menubar: false,
 				browser_spellcheck: (this.spellcheck === true),
 				toolbar_items_size: 'small',
-				forced_root_block: false,
+				//forced_root_block: false,
+				forced_root_block: 'P',
+				forced_root_block_attrs: {
+					'style' : 'padding: 0; margin: 0;'
+				},
                 extended_valid_elements: 'span[style]'
 			}/*,
 			value: 'This is the WebTop-TinyMCE HTML Editor'*/
