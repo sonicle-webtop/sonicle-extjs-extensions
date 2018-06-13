@@ -53,7 +53,7 @@ Ext.define('Sonicle.form.field.Icon', {
 	
 	/**
 	 * @cfg {String} clsFormat
-	 * Formatting pattern string used to builc class name to apply.
+	 * Formatting pattern string used to build class name to apply.
 	 * The `{0}` placeholder refers to field's value.
 	 * 
 	 * For example, if you want to add a suffix or a prefix you can set it to:

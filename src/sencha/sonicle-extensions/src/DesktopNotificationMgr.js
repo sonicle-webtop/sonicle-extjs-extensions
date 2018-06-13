@@ -6,6 +6,9 @@
  */
 Ext.define('Sonicle.DesktopNotificationMgr', {
 	singleton: true,
+	mixins: [
+		'Ext.mixin.Observable'
+	],
 	
 	config: {
 		/**
@@ -39,9 +42,16 @@ Ext.define('Sonicle.DesktopNotificationMgr', {
 	 */
 	ieSeed: -1,
 	
+	/**
+	 * @event requestpermission
+	 * Fires when a permission request is requested on the browser
+	 * @param {Sonicle.DesktopNotificationMgr} this The notification manager
+	 */
+	
 	constructor: function(cfg) {
 		var me = this;
 		me.initConfig(cfg);
+		me.mixins.observable.constructor.call(me, cfg);
 		me.callParent([cfg]);
 		me.ieSeed = Math.floor((Math.random()*10) +1),
 		me.api = me.checkApi();
@@ -62,7 +72,7 @@ Ext.define('Sonicle.DesktopNotificationMgr', {
 	 */
 	ensureAuthorization: function() {
 		var me = this;
-		if(me.api && me.permissionLevel() === me.PERM_DEFAULT) {
+		if (me.api && me.permissionLevel() === me.PERM_DEFAULT) {
 			me.requestPermission();
 		}
 	},
@@ -137,8 +147,9 @@ Ext.define('Sonicle.DesktopNotificationMgr', {
 				cbFn = Ext.isFunction(callback) ? callback : Ext.emptyFn(),
 				win = window;
 		
-		if(!me.api) return;
-		if(win.webkitNotifications && win.webkitNotifications.checkPermission) {
+		if (!me.api) return;
+		me.fireEvent('requestpermission', me);
+		if (win.webkitNotifications && win.webkitNotifications.checkPermission) {
 			/**
 			 * Chrome 23 supports win.Notification.requestPermission, but it
 			 * breaks the browsers, so use the old-webkit-prefixed
