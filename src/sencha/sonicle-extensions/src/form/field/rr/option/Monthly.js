@@ -166,7 +166,7 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 					select: me.fieldOnChange,
 					scope: me
 				},
-				width: 100
+				width: 120
 			}, {
 				xtype: 'label',
 				cls: 'x-form-cb-label-default',
@@ -339,7 +339,7 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 			var bsps = me.asArray(rrCfg.bysetpos);
 			var bwds = me.asArray(rrCfg.byweekday);
 			if ((bsps.length === 1)
-					&& (bwds.length === 2)
+					&& (bwds.length === 5)
 					&& (Ext.Array.difference(bwds, [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR]).length === 0)) return true; // weekday of...
 			if ((bsps.length === 1)
 					&& (bwds.length === 2)
