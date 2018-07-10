@@ -20,7 +20,7 @@ Ext.define('Sonicle.menu.Emoji', {
 	
 	/**
 	 * @cfg {Boolean} hideOnClick 
-	 * False to continue showing the menu after a color is selected.
+	 * False to continue showing the menu after an emoji is selected.
 	 */
 	hideOnClick: true,
 	
