@@ -12,9 +12,9 @@ Ext.define('Sonicle.PageMgr', {
 	
 	/**
 	 * @readonly
-	 * @property {Boolean} visibilityApi
+	 * @property {Boolean} api
 	 */
-	visibilityApi: false,
+	api: false,
 	
 	/**
 	 * @readonly
@@ -34,44 +34,53 @@ Ext.define('Sonicle.PageMgr', {
 	 */
 	
 	constructor: function(cfg) {
-		var me = this, api;
+		var me = this, chk;
 		me.initConfig(cfg);
 		me.mixins.observable.constructor.call(me, cfg);
 		me.callParent([cfg]);
 		
-		api = me.checkVisibilityApi();
-		if(api) {
-			visibilityApi = true;
-			me.hiddenProp = api[0];
-			me.visibilityEvent = api[1];
+		chk = me.checkApi();
+		if (chk) {
+			me.api = true;
+			me.hiddenProp = chk[0];
+			me.visibilityEvent = chk[1];
 			document.addEventListener(me.visibilityEvent, me.onVisibilityChange.bind(me));
 		}
 	},
 	
-	onVisibilityChange: function() {
-		this.fireEvent('visibilitychange');
+	/**
+	 * Checks if Visibility API is supported.
+	 * @return {Boolean}
+	 */
+	isSupported: function() {
+		return this.api;
 	},
 	
 	isHidden: function() {
-		var me = this;
-		return !me.visibilityApi ? false : document[me.hiddenProp];
+		return !this.isSupported() ? false : document[this.hiddenProp];
 	},
 	
-	checkVisibilityApi: function() {
-		try {
-			if('hidden' in document) {
-				return ['hidden','visibilitychange'];
-			} else {
-				var prefixes = ['webkit','moz','ms','o'];
-				for(var i=0; i<prefixes.length; i++) {
-					if((document[prefixes[i]+'Hidden']) in document) {
-						return [prefixes[i]+'Hidden', prefixes[i]+'visibilitychange'];
+	privates: {
+		onVisibilityChange: function() {
+			this.fireEvent('visibilitychange');
+		},
+		
+		checkApi: function() {
+			try {
+				if('hidden' in document) {
+					return ['hidden','visibilitychange'];
+				} else {
+					var prefixes = ['webkit','moz','ms','o'];
+					for(var i=0; i<prefixes.length; i++) {
+						if((document[prefixes[i]+'Hidden']) in document) {
+							return [prefixes[i]+'Hidden', prefixes[i]+'visibilitychange'];
+						}
 					}
+					return false;
 				}
+			} catch (e) {
 				return false;
 			}
-		} catch (e) {
-			return false;
 		}
 	}
 });

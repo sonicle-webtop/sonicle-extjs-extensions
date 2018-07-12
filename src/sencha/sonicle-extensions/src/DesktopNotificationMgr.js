@@ -163,112 +163,108 @@ Ext.define('Sonicle.DesktopNotificationMgr', {
 		}
 	},
 	
-	/**
-	 * @private
-	 */
-	createCloseWrapper: function(ntf) {
-		var win = window;
-		return {
-			close: function() {
-				if(ntf) {
-					if(ntf.close) {
-						//http://code.google.com/p/ff-html5notifications/issues/detail?id=58
-						ntf.close();
-					} else if(ntf.cancel) {
-						ntf.cancel();
-					} else if (win.external && win.external.msIsSiteMode()) {
-						if(ntf.ieSeed === this.ieSeed) win.external.msSiteModeClearIconOverlay();
-					}
-				}
-			}
-		};
-	},
-	
-	/**
-	 * @private
-	 */
-	createNotification: function(title, opts) {
-		opts = opts || {};
-		var me = this,
-				win = window, ntf = null;
-		
-		if(!me.api) return;
-		if(win.Notification) { /* Chrome 22+, FF 22+, Safari 6+ */
-			ntf = new win.Notification(title, {
-				/**
-				 * The notification's icon - For Chrome in Windows, Linux & Chrome OS
-				 */
-				icon: Ext.isString(opts.icon) ? opts.icon : opts.icon.x32,
-				/**
-				 * The notification’s subtitle.
-				 */
-				body: opts.body || '',
-				/**
-				 * The notification’s unique identifier.
-				 * This prevents duplicate entries from appearing if the user has multiple instances of your website open at once.
-				 */
-				tag: opts.tag || '',
-				dir: me.getDirection()
-			});
-			
-		} else if(win.webkitNotifications) { /* Chrome <22 & FF + html5notifications plugin */
-			ntf = win.webkitNotifications.createNotification(opts.icon, title, opts.body || '');
-			ntf.show();
-			
-		} else if(navigator.mozNotification) { /* FF <22 */
-			ntf = navigator.mozNotification.createNotification(title, opts.body || '', opts.icon);
-			ntf.show();
-			
-		} else if (win.external && win.external.msIsSiteMode()) { /* IE9+ */
-			win.external.msSiteModeClearIconOverlay(); // Clears any previous notification
-			win.external.msSiteModeSetIconOverlay((Ext.isString(opts.icon) ? opts.icon : opts.icon.x16), title);
-			win.external.msSiteModeActivate();
-			ntf = {"ieSeed": ieSeed+1};
-		}
-		return ntf;
-	},
-	
 	permissionLevel: function() {
 		var me = this, win = window, arr;
-		
+
 		if(!me.api) return;
 		if(win.Notification && win.Notification.permissionLevel) { /* Safari 6+ */
 			return win.Notification.permissionLevel;
-			
+
 		} else if(win.webkitNotifications && win.webkitNotifications.checkPermission) { /* Chrome <22 & FF + html5notifications plugin */
 			arr = [me.PERM_GRANTED, me.PERM_DEFAULT, me.PERM_DENIED];
 			arr[win.webkitNotifications.checkPermission()];
-			
+
 		} else if(win.Notification && win.Notification.permission) { /* Chrome 32+, FF 22+ */
 			return win.Notification.permission;
-			
+
 		} else if(navigator.mozNotification) { /* FF <22 */
 			return me.PERM_GRANTED;
-			
+
 		} else if (win.external && (win.external.msIsSiteMode() !== undefined)) { /* IE9+ */
 			return win.external.msIsSiteMode() ? me.PERM_GRANTED : me.PERM_DEFAULT;
-			
+
 		} else {
 			return;
 		}
 	},
 	
-	checkApi: function() {
-		try {
+	privates: {
+		createCloseWrapper: function(ntf) {
 			var win = window;
-			/**
-			 * We cannot detect if msIsSiteMode method exists, as it is
-			 * a method of host object. In IE check for existing method of host
-			 * object returns undefined. So, we try to run it - if it runs
-			 * successfully - then it is IE9+, if not - an exceptions is thrown.
-			 */
-			return !!(win.Notification /* Chrome 22+, FF 22+, Safari 6+ */
-					|| win.webkitNotifications /* Chrome <22 & FF + html5notifications plugin */
-					|| navigator.mozNotification /* FF <22 */
-					|| (win.external && win.external.msIsSiteMode() !== undefined) /* IE9+ */
-					);
-		} catch (e) {
-			return false;
+			return {
+				close: function() {
+					if(ntf) {
+						if(ntf.close) {
+							//http://code.google.com/p/ff-html5notifications/issues/detail?id=58
+							ntf.close();
+						} else if(ntf.cancel) {
+							ntf.cancel();
+						} else if (win.external && win.external.msIsSiteMode()) {
+							if(ntf.ieSeed === this.ieSeed) win.external.msSiteModeClearIconOverlay();
+						}
+					}
+				}
+			};
+		},
+		
+		createNotification: function(title, opts) {
+			opts = opts || {};
+			var me = this,
+					win = window, ntf = null;
+
+			if(!me.api) return;
+			if(win.Notification) { /* Chrome 22+, FF 22+, Safari 6+ */
+				ntf = new win.Notification(title, {
+					/**
+					 * The notification's icon - For Chrome in Windows, Linux & Chrome OS
+					 */
+					icon: Ext.isString(opts.icon) ? opts.icon : opts.icon.x32,
+					/**
+					 * The notification’s subtitle.
+					 */
+					body: opts.body || '',
+					/**
+					 * The notification’s unique identifier.
+					 * This prevents duplicate entries from appearing if the user has multiple instances of your website open at once.
+					 */
+					tag: opts.tag || '',
+					dir: me.getDirection()
+				});
+
+			} else if(win.webkitNotifications) { /* Chrome <22 & FF + html5notifications plugin */
+				ntf = win.webkitNotifications.createNotification(opts.icon, title, opts.body || '');
+				ntf.show();
+
+			} else if(navigator.mozNotification) { /* FF <22 */
+				ntf = navigator.mozNotification.createNotification(title, opts.body || '', opts.icon);
+				ntf.show();
+
+			} else if (win.external && win.external.msIsSiteMode()) { /* IE9+ */
+				win.external.msSiteModeClearIconOverlay(); // Clears any previous notification
+				win.external.msSiteModeSetIconOverlay((Ext.isString(opts.icon) ? opts.icon : opts.icon.x16), title);
+				win.external.msSiteModeActivate();
+				ntf = {"ieSeed": ieSeed+1};
+			}
+			return ntf;
+		},
+		
+		checkApi: function() {
+			try {
+				var win = window;
+				/**
+				 * We cannot detect if msIsSiteMode method exists, as it is
+				 * a method of host object. In IE check for existing method of host
+				 * object returns undefined. So, we try to run it - if it runs
+				 * successfully - then it is IE9+, if not - an exceptions is thrown.
+				 */
+				return !!(win.Notification /* Chrome 22+, FF 22+, Safari 6+ */
+						|| win.webkitNotifications /* Chrome <22 & FF + html5notifications plugin */
+						|| navigator.mozNotification /* FF <22 */
+						|| (win.external && win.external.msIsSiteMode() !== undefined) /* IE9+ */
+						);
+			} catch (e) {
+				return false;
+			}
 		}
 	}
 });
