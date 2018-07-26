@@ -301,90 +301,107 @@ Ext.define('Sonicle.calendar.Panel', {
 		var me = this, wiewIdx = -1;
 		me.bindStore(me.store || 'ext-empty-store', true, true);
 		
-		me.tbar = {
-			cls: 'ext-cal-toolbar',
-			border: true,
-			items: ['->', {
-					id: me.id + '-tb-prev',
-					handler: me.onPrevClick,
-					scope: me,
-					iconCls: 'x-tbar-page-prev'
-				}]
-		};
+		if (me.showNavBar === true) {
+			me.tbar = {
+				cls: 'ext-cal-toolbar',
+				border: true,
+				items: ['->', {
+						id: me.id + '-tb-prev',
+						handler: me.onPrevClick,
+						scope: me,
+						iconCls: 'x-tbar-page-prev'
+					}]
+			};
+		}
 		
 		// Keep tb buttons in same order of views
 		if (me.showDayView) {
 			wiewIdx++;
 			me.viewMap['d'] = wiewIdx;
-			me.tbar.items.push({
-				id: me.id + '-tb-day',
-				text: me.dayText,
-				handler: me.onDayClick,
-				scope: me,
-				toggleGroup: 'tb-views'
-			});
+			if (me.showNavBar === true) {
+				me.tbar.items.push({
+					id: me.id + '-tb-day',
+					text: me.dayText,
+					handler: me.onDayClick,
+					scope: me,
+					toggleGroup: 'tb-views'
+				});
+			}
 		}
 		if (me.showWeek5View) {
 			wiewIdx++;
 			me.viewMap['w5'] = wiewIdx;
-			me.tbar.items.push({
-				id: me.id + '-tb-week5',
-				text: me.week5Text,
-				handler: me.onWeek5Click,
-				scope: me,
-				toggleGroup: 'tb-views'
-			});
+			if (me.showNavBar === true) {
+				me.tbar.items.push({
+					id: me.id + '-tb-week5',
+					text: me.week5Text,
+					handler: me.onWeek5Click,
+					scope: me,
+					toggleGroup: 'tb-views'
+				});
+			}
 		}
 		if (me.showWeekView) {
 			wiewIdx++;
 			me.viewMap['w'] = wiewIdx;
-			me.tbar.items.push({
-				id: me.id + '-tb-week',
-				text: me.weekText,
-				handler: me.onWeekClick,
-				scope: me,
-				toggleGroup: 'tb-views'
-			});
+			if (me.showNavBar === true) {
+				me.tbar.items.push({
+					id: me.id + '-tb-week',
+					text: me.weekText,
+					handler: me.onWeekClick,
+					scope: me,
+					toggleGroup: 'tb-views'
+				});
+			}
 		}
 		if (me.showDblWeekView) {
 			wiewIdx++;
 			me.viewMap['dw'] = wiewIdx;
-			me.tbar.items.push({
-				id: me.id + '-tb-dweek',
-				text: me.dblWeekText,
-				handler: me.onDblWeekClick,
-				scope: me,
-				toggleGroup: 'tb-views'
-			});
+			if (me.showNavBar === true) {
+				me.tbar.items.push({
+					id: me.id + '-tb-dweek',
+					text: me.dblWeekText,
+					handler: me.onDblWeekClick,
+					scope: me,
+					toggleGroup: 'tb-views'
+				});
+			}
 		}
 		if (me.showMonthView || (me.wiewIdx === -1)) {
+			me.showMonthView = true;
 			wiewIdx++;
 			me.viewMap['m'] = wiewIdx;
-			me.tbar.items.push({
-				id: me.id + '-tb-month',
-				text: me.monthText,
-				handler: me.onMonthClick,
-				scope: me,
-				toggleGroup: 'tb-views'
-			});
-			me.showMonthView = true;
+			if (me.showNavBar === true) {
+				me.tbar.items.push({
+					id: me.id + '-tb-month',
+					text: me.monthText,
+					handler: me.onMonthClick,
+					scope: me,
+					toggleGroup: 'tb-views'
+				});
+			}
 		}
-		me.tbar.items.push({
-			id: me.id + '-tb-next',
-			handler: me.onNextClick,
-			scope: me,
-			iconCls: 'x-tbar-page-next'
-		});
-		me.tbar.items.push('->');
+		
+		if (me.showNavBar === true) {
+			me.tbar.items.push({
+				id: me.id + '-tb-next',
+				handler: me.onNextClick,
+				scope: me,
+				iconCls: 'x-tbar-page-next'
+			});
+			me.tbar.items.push('->');
+		}
 		
 		var idx = (Ext.isString(me.activeView)) ? me.viewMap[me.activeView] : wiewIdx;
 		me.activeItem =  (!Ext.isDefined(me.activeItem)) ? idx: (me.activeItem > idx ? idx: me.activeItem);
 		delete me.activeView;
-
+		
+		/*
 		if (me.showNavBar === false) {
 			delete me.tbar;
 			me.addCls('x-calendar-nonav');
 		}
+		*/
 		
 		me.callParent();
 		

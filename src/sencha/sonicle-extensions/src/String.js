@@ -24,6 +24,18 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
+	 * Gets the substring before the first occurrence of a separator. The separator is not returned.
+	 * @param {String} s The String to get a substring from, may be null.
+	 * @param {String} sep The String to search for, may be null.
+	 * @returns {String} The substring before the first occurrence of the separator, null if null String input.
+	 */
+	substrBeforeLast: function(s, sep) {
+		if (!s) return s;
+		var lio = s.lastIndexOf(sep);
+		return (lio === -1) ? s : s.substring(0, lio);
+	},
+	
+	/**
 	 * Joins passed values into a string of values delimited by provided separator.
 	 * @param {String} separator The separator.
 	 * @param {Mixed...} values Values to join.

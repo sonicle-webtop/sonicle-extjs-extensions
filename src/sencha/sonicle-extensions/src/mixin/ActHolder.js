@@ -51,10 +51,11 @@ Ext.define('Sonicle.mixin.ActHolder', {
 	 * @return {Ext.Action} The action.
 	 */
 	getAct: function(group, name) {
-		var me = this;
+		var me = this,
+				SoStr = Sonicle.String;
 		if (arguments.length === 1) {
-			name = group;
-			group = Sonicle.mixin.ActHolder.DEFAULT_GROUP;
+			name = SoStr.substrBeforeLast(group, '@');
+			group = SoStr.deflt(SoStr.substrAfterLast(group, '@'), Sonicle.mixin.ActHolder.DEFAULT_GROUP);
 		}
 		return (me.__acts[group]) ? me.__acts[group][name] : undefined;
 	},
