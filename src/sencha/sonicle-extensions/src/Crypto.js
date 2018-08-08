@@ -21,12 +21,12 @@ Ext.define('Sonicle.Crypto', {
 			return bytes;
 		},
 		
-		md5: function(s) {
+		md5Hex: function(s) {
 			if (!window['SparkMD5']) Ext.raise('Library SparkMD5 is required (see https://github.com/satazor/js-spark-md5).');
 			return SparkMD5.hash(s);
 		},
 		
-		sha256: function(s) {
+		sha256Hex: function(s) {
 			var win = window,
 					crypto = (win.crypto || win.msCrypto),
 					buf = new TextEncoder("utf-8").encode(s),

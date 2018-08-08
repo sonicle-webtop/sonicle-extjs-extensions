@@ -12,6 +12,17 @@ Ext.define('Sonicle.String', {
 	],
 	
 	/**
+	 * Gets the lestmost len characters of a String.
+	 * @param {String} s The String to get a substring from, may be null.
+	 * @param {Integer} len The length of the required String.
+	 * @returns {String} The lestmost characters, null if null String input.
+	 */
+	left: function(s, len) {
+		if (!s) return s;
+		return s.substring(0, len);
+	},
+	
+	/**
 	 * Gets the substring after the last occurrence of a separator. The separator is not returned.
 	 * @param {String} s The String to get a substring from, may be null.
 	 * @param {String} sep The String to search for, may be null.
