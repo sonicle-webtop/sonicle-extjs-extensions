@@ -12,14 +12,47 @@ Ext.define('Sonicle.String', {
 	],
 	
 	/**
-	 * Gets the lestmost len characters of a String.
+	 * Gets the leftmost len characters of a String.
 	 * @param {String} s The String to get a substring from, may be null.
 	 * @param {Integer} len The length of the required String.
-	 * @returns {String} The lestmost characters, null if null String input.
+	 * @returns {String} The leftmost characters, null if null String input.
 	 */
 	left: function(s, len) {
-		if (!s) return s;
-		return s.substring(0, len);
+		return Ext.isEmpty(s) ? s : s.substring(0, len);
+	},
+	
+	/**
+	 * Gets the rightmost len characters of a String.
+	 * @param {String} s The String to get a substring from, may be null.
+	 * @param {Integer} len The length of the required String.
+	 * @returns {String} The rightmost characters, null if null String input.
+	 */
+	right: function(s, len) {
+		
+	},
+	
+	/**
+	 * Removes a substring only if it is at the beginning of a source string, 
+	 * otherwise returns the source string.
+	 * @param {String} s The source String to search, may be null.
+	 * @param {String} remove The String to search for and remove, may be null.
+	 * @param {Boolean} [ignoreCase=false] True to ignore the case in the comparison.
+	 * @returns {String} The substring with the string removed if found, null if null String input
+	 */
+	removeStart: function(s, remove, ignoreCase) {
+		return Ext.String.startsWith(s, remove, ignoreCase) ? s.substr(remove.length) : s;
+	},
+	
+	/**
+	 * Removes a substring only if it is at the end of a source string, 
+	 * otherwise returns the source string.
+	 * @param {String} s The source String to search, may be null.
+	 * @param {String} remove The String to search for and remove, may be null.
+	 * @param {Boolean} [ignoreCase=false] True to ignore the case in the comparison.
+	 * @returns {String} The substring with the string removed if found, null if null String input
+	 */
+	removeEnd: function(s, remove, ignoreCase) {
+		return Ext.String.endsWith(s, remove, ignoreCase) ? s.slice(-remove.length) : s;
 	},
 	
 	/**
@@ -29,7 +62,7 @@ Ext.define('Sonicle.String', {
 	 * @returns {String} The substring after the last occurrence of the separator, null if null String input.
 	 */
 	substrAfterLast: function(s, sep) {
-		if (!s) return s;
+		if (Ext.isEmpty(s)) return s;
 		var lio = s.lastIndexOf(sep);
 		return (lio === -1) ? '' : s.substring(lio + sep.length);
 	},
@@ -41,7 +74,7 @@ Ext.define('Sonicle.String', {
 	 * @returns {String} The substring before the first occurrence of the separator, null if null String input.
 	 */
 	substrBeforeLast: function(s, sep) {
-		if (!s) return s;
+		if (Ext.isEmpty(s)) return s;
 		var lio = s.lastIndexOf(sep);
 		return (lio === -1) ? s : s.substring(0, lio);
 	},
@@ -90,6 +123,33 @@ Ext.define('Sonicle.String', {
 	 */
 	htmlLineBreaks: function(s) {
 		return Ext.isString(s) ? s.replace(/\n/g, '<br>') : s;
+	},
+	
+	/**
+	 * Appends content to the query string of a URL, handling logic for whether 
+	 * to place a question mark or ampersand.
+	 * @param {String} url The URL to append to.
+	 * @param {String} string The content to append to the URL.
+	 * @returns {String} The resulting URL
+	 */
+	urlAppend: function(url, qstring) {
+		return Ext.String.urlAppend(url, qstring);
+	},
+	
+	/**
+	 * Appends content to the path of a URL, handling the query string part properly.
+	 * @param {String} url The URL to append path to.
+	 * @param {String} path The content to append to the URL path.
+	 * @returns {String} The resulting URL
+	 */
+	urlAppendPath: function(url, path) {
+		if (!Ext.isString(url)) return url;
+		if (Ext.isEmpty(path)) return url;
+		var me = this,
+				iofq = url.indexOf('?'),
+				base = url.substr(Math.max(iofq, 0)),
+				remaining = (iofq !== -1) ? url.substr(iofq) : '';
+		return me.removeEnd(base, '/', false) + '/' + me.removeStart(path, '/', false) + remaining;
 	},
 	
 	/**
