@@ -1,17 +1,28 @@
 /**
- * @class Sonicle.calendar.template.Month
- * @extends Ext.XTemplate
- * <p>This is the template used to render the {@link Sonicle.calendar.template.Month MonthView}. Internally this class defers to an
- * instance of {@link Ext.calerndar.BoxLayoutTemplate} to handle the inner layout rendering and adds containing elements around
- * that to form the month view.</p> 
- * <p>This template is automatically bound to the underlying event store by the 
- * calendar components and expects records of type {@link Sonicle.calendar.EventRecord}.</p>
- * @constructor
- * @param {Object} config The config object
+ * This is the template used to render the {@link Sonicle.calendar.view.Month MonthView}. 
+ * Internally this class defers to an instance of {@link Sonicle.calendar.template.BoxLayout} 
+ * to handle the inner layout rendering and adds containing elements around
+ * that to form the month view.
+ * 
+ * This template is automatically bound to the underlying event store by the
+ * calendar components and expects records of type {@link Sonicle.calendar.data.EventModel}.
  */
 Ext.define('Sonicle.calendar.template.Month', {
 	extend: 'Ext.XTemplate',
 	requires: ['Sonicle.calendar.template.BoxLayout'],
+	
+	/**
+	 * @cfg {String} dayHeaderFormat
+	 * The date format to use for day headers, if used (defaults to 'D', e.g. 'Mon' for Monday)
+	 */
+	dayHeaderFormat: 'D',
+	
+	/**
+	 * @cfg {String} dayHeaderTitleFormat
+	 * The date format to use for the day header's HTML title attribute displayed on mouseover
+	 * (defaults to 'l, F j, Y', e.g. 'Monday, December 27, 2010')
+	 */
+	dayHeaderTitleFormat: 'l, F j, Y',
 	
 	constructor: function(config) {
 		var me = this;
@@ -21,7 +32,6 @@ Ext.define('Sonicle.calendar.template.Month', {
 		me.weekTpl.compile();
 
 		var weekLinkTpl = me.showWeekLinks ? '<div class="ext-cal-week-link-hd">&#160;</div>' : '';
-
 		me.callParent([
 			'<div class="ext-cal-inner-ct {extraClasses}">',
 				'<div class="ext-cal-hd-ct ext-cal-month-hd">',
@@ -30,7 +40,8 @@ Ext.define('Sonicle.calendar.template.Month', {
 					'<tbody>',
 						'<tr>',
 							'<tpl for="days">',
-								'<th class="ext-cal-hd-day{[xindex==1 ? " ext-cal-day-first" : ""]}" title="{.:date("l, F j, Y")}">{.:date("D")}</th>',
+								'<th class="ext-cal-hd-day{[xindex==1 ? " ext-cal-day-first" : ""]}" title="{title}">{name}</th>',
+								//'<th class="ext-cal-hd-day{[xindex==1 ? " ext-cal-day-first" : ""]}" title="{.:date("l, F j, Y")}">{.:date("D")}</th>',
 							'</tpl>',
 						'</tr>',
 					'</tbody>',
@@ -43,14 +54,19 @@ Ext.define('Sonicle.calendar.template.Month', {
 	
 	// private
 	applyTemplate: function(o) {
-		var me = this;
-		var days = [],
+		var me = this,
+				XDate = Ext.Date,
+				SoDate = Sonicle.Date,
 				weeks = me.weekTpl.apply(o),
-				dt = o.viewStart,
-				soDate = Sonicle.Date;
+				dt = SoDate.add(XDate.clearTime(o.viewStart, true), {hours: 12}),
+				days = [];
 
 		for (var i = 0; i < 7; i++) {
-			days.push(soDate.add(dt, {days: i}));
+			days.push({
+				name: XDate.format(dt, me.dayHeaderFormat),
+				title: XDate.format(dt, me.dayHeaderTitleFormat)
+			});
+			dt = SoDate.add(dt, {days: 1});
 		}
 
 		var extraClasses = me.showHeader === true ? '' : 'ext-cal-noheader';

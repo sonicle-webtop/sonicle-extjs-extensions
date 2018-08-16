@@ -1,9 +1,27 @@
+/**
+ * This is the template used to render calendar views based on small day boxes 
+ * within a non-scrolling container (currently the {@link Sonicle.calendar.view.Month MonthView} 
+ * and the all-day headers for {@link Sonicle.calendar.view.Day DayView} 
+ * and {@link Sonicle.calendar.view.Week WeekView}. This template is 
+ * automatically bound to the underlying event store by the calendar components 
+ * and expects records of type {@link Sonicle.calendar.data.EventModel}.
+ */
 Ext.define('Sonicle.calendar.template.BoxLayout', {
 	extend: 'Ext.XTemplate',
 	requires: [
 		'Sonicle.Date',
 		'Sonicle.calendar.util.EventUtils'
 	],
+	
+	firstWeekDateFormat: 'D j',
+	
+	otherWeeksDateFormat: 'j',
+	
+	singleDayDateFormat: 'l, F j, Y',
+	
+	multiDayFirstDayFormat: 'M j, Y',
+	
+	multiDayMonthStartFormat: 'M j',
 	
 	constructor: function (config) {
 		var me = this;
@@ -13,7 +31,7 @@ Ext.define('Sonicle.calendar.template.BoxLayout', {
 		me.callParent([
 			'<tpl for="weeks">',
 			'<div id="{[this.id]}-wk-{[xindex-1]}" class="ext-cal-wk-ct" style="top:{[this.getRowTop(xindex, xcount)]}%; height:{[this.getRowHeight(xcount)]}%;">',
-			weekLinkTpl,
+				weekLinkTpl,
 				'<table class="ext-cal-bg-tbl" cellpadding="0" cellspacing="0">',
 				'<tbody>',
 					'<tr>',
@@ -35,10 +53,10 @@ Ext.define('Sonicle.calendar.template.BoxLayout', {
 			'</div>',
 			'</tpl>', {
 				getRowTop: function (i, ln) {
-					return ((i - 1) * (100 / ln));
+					return ((i-1)*(100/ln));
 				},
 				getRowHeight: function (ln) {
-					return 100 / ln;
+					return 100/ln;
 				}
 			}
 		]);
@@ -47,41 +65,53 @@ Ext.define('Sonicle.calendar.template.BoxLayout', {
 	applyTemplate: function(o) {
 		Ext.apply(this, o);
 		
-		var w = 0, title = '', first = true, isToday = false, showMonth = false, prevMonth = false, nextMonth = false,
+		var me = this,
+				XDate = Ext.Date,
+				SoDate = Sonicle.Date,
+				first = true,
+				isToday = false,
+				showMonth = false,
+				prevMonth = false,
+				nextMonth = false,
+				isWeekend = false,
+				weekendCls = o.weekendCls,
+				prevMonthCls = o.prevMonthCls,
+				nextMonthCls = o.nextMonthCls,
+				todayCls = o.todayCls,
+				dt = SoDate.add(XDate.clearTime(me.viewStart, true), {hours: 12}),
+				thisMonth = me.startDate.getMonth(),
 				weeks = [[]],
-				dt = Ext.Date.clone(this.viewStart),
-				thisMonth = this.startDate.getMonth();
+				title = '';
 
-		for (; w < this.weekCount || this.weekCount === -1; w++) {
-			if (dt > this.viewEnd) {
+		for (var w=0; w < me.weekCount || me.weekCount === -1; w++) {
+			if (dt > me.viewEnd) {
 				break;
 			}
 			weeks[w] = [];
 
-			for (var d = 0; d < this.dayCount; d++) {
-				isToday = dt.getTime() === Sonicle.Date.today().getTime();
+			for (var d=0; d < me.dayCount; d++) {
+				isToday = SoDate.isToday(dt);
 				showMonth = first || (dt.getDate() === 1);
-				prevMonth = (dt.getMonth() < thisMonth) && this.weekCount === -1;
-				nextMonth = (dt.getMonth() > thisMonth) && this.weekCount === -1;
+				prevMonth = (dt.getMonth() < thisMonth) && me.weekCount === -1;
+				nextMonth = (dt.getMonth() > thisMonth) && me.weekCount === -1;
+				isWeekend = SoDate.isWeekend(dt);
 
 				if (dt.getDay() === 1) {
 					// The ISO week format 'W' is relative to a Monday week start. If we
 					// make this check on Sunday the week number will be off.
-					weeks[w].weekNum = this.showWeekNumbers ? Ext.Date.format(dt, 'W') : '&#160;';
-					weeks[w].weekLinkId = 'ext-cal-week-' + Ext.Date.format(dt, 'Ymd');
+					weeks[w].weekNum = me.showWeekNumbers ? XDate.format(dt, 'W') : '&#160;';
+					weeks[w].weekLinkId = 'ext-cal-week-' + XDate.format(dt, 'Ymd');
 				}
 
 				if (showMonth) {
 					if (isToday) {
-						title = this.getTodayText();
+						title = me.getTodayText();
+					} else {
+						title = XDate.format(dt, me.dayCount === 1 ? 'l, F j, Y' : (first ? 'M j, Y' : 'M j'));
 					}
-					else {
-						title = Ext.Date.format(dt, this.dayCount === 1 ? 'l, F j, Y' : (first ? 'M j, Y' : 'M j'));
-					}
-				}
-				else {
-					var dayFmt = (w === 0 && this.showHeader !== true) ? 'D j' : 'j';
-					title = isToday ? this.getTodayText() : Ext.Date.format(dt, dayFmt);
+				} else {
+					var dayFmt = (w === 0 && me.showHeader !== true) ? 'D j' : 'j';
+					title = isToday ? me.getTodayText() : XDate.format(dt, dayFmt);
 				}
 
 				weeks[w].push({
@@ -91,35 +121,38 @@ Ext.define('Sonicle.calendar.template.BoxLayout', {
 							(w === 0 ? ' ext-cal-dtitle-first' : '') +
 							(prevMonth ? ' ext-cal-dtitle-prev' : '') +
 							(nextMonth ? ' ext-cal-dtitle-next' : ''),
-					cellCls: 'ext-cal-day ' + (isToday ? ' ext-cal-day-today' : '') +
+					cellCls: 'ext-cal-day ' + (isToday ? ' ' + todayCls : '') +
 							(d === 0 ? ' ext-cal-day-first' : '') +
-							(prevMonth ? ' ext-cal-day-prev' : '') +
-							(nextMonth ? ' ext-cal-day-next' : '')
+							(prevMonth ? ' ' + prevMonthCls : '') +
+							(nextMonth ? ' ' + nextMonthCls : '') +
+							(isWeekend && weekendCls ? ' ' + weekendCls : '')
 				});
-				dt = Sonicle.Date.add(dt, {days: 1});
+				dt = SoDate.add(dt, {days: 1});
 				first = false;
 			}
 		}
 
-		return this.applyOut({
+		return me.applyOut({
 			weeks: weeks
 		}, []).join('');
 	},
 	
 	getTodayText: function() {
-		var dt = Ext.Date.format(new Date(), 'l, F j, Y'),
-				fmt,
-				timeFmt = Sonicle.calendar.util.EventUtils.timeFmt(this.use24HourTime)+' ',
-				todayText = this.showTodayText !== false ? this.todayText : '',
-				timeText = this.showTime !== false ? ' <span id="' + this.id + '-clock" class="ext-cal-dtitle-time">' +
-				Ext.Date.format(new Date(), timeFmt) + '</span>' : '',
-				separator = todayText.length > 0 || timeText.length > 0 ? ' &mdash; ' : '';
+		var me = this,
+				XDate = Ext.Date,
+				dt = XDate.format(new Date(), 'l, F j, Y'),
+				timeFmt = Sonicle.calendar.util.EventUtils.timeFmt(me.use24HourTime)+' ',
+				todayText = me.showTodayText !== false ? me.todayText : '',
+				timeText = me.showTime !== false ? (' <span id="' + me.id + '-clock" class="ext-cal-dtitle-time">' + XDate.format(new Date(), timeFmt) + '</span>') : '',
+				separator = todayText.length > 0 || timeText.length > 0 ? ' &mdash; ' : '',
+				fmt;
 
-		if (this.dayCount === 1) {
+		if (me.dayCount === 1) {
 			return dt + separator + todayText + timeText;
+		} else {
+			fmt = me.weekCount === 1 ? 'D j' : 'j';
+			return todayText.length > 0 ? todayText + timeText : XDate.format(new Date(), fmt) + timeText;
 		}
-		fmt = this.weekCount === 1 ? 'D j' : 'j';
-		return todayText.length > 0 ? todayText + timeText : Ext.Date.format(new Date(), fmt) + timeText;
 	}
 },
 

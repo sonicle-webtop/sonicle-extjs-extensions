@@ -1,13 +1,12 @@
 /**
- * @class Sonicle.calendar.template.DayBody
- * @extends Ext.XTemplate
- * <p>This is the template used to render the scrolling body container used in {@link Sonicle.calendar.DayView DayView} and 
- * {@link Sonicle.calendar.WeekView WeekView}. This template is automatically bound to the underlying event store by the 
- * calendar components and expects records of type {@link Sonicle.calendar.EventRecord}.</p>
- * <p>Note that this template would not normally be used directly. Instead you would use the {@link Sonicle.calendar.DayViewTemplate}
- * that internally creates an instance of this template along with a {@link Sonicle.calendar.DayHeaderTemplate}.</p>
- * @constructor
- * @param {Object} config The config object
+ * This is the template used to render the scrolling body container used in
+ * {@link Sonicle.calendar.view.Day DayView} and {@link Sonicle.calendar.view.Week WeekView}. 
+ * This template is automatically bound to the underlying event store by the 
+ * calendar components and expects records of type {@link Sonicle.calendar.data.EventModel}.
+ * 
+ * Note that this template would not normally be used directly. Instead you would 
+ * use the {@link Sonicle.calendar.view.DayTemplate} that internally creates 
+ * an instance of this template along with a {@link Sonicle.calendar.DayHeaderTemplate}.
  */
 Ext.define('Sonicle.calendar.template.DayBody', {
 	extend: 'Ext.XTemplate',
@@ -75,32 +74,32 @@ Ext.define('Sonicle.calendar.template.DayBody', {
 	// private
 	applyTemplate: function (o) {
 		var me = this,
-				eDate = Ext.Date,
-				soDate = Sonicle.Date,
+				XDate = Ext.Date,
+				SoDate = Sonicle.Date,
 				start = me.viewStartHour,
 				end = me.viewEndHour,
 				mins = me.hourIncrement,
 				dayHeight = me.hourHeight * (end - start),
-				i = 0,
+				dt = SoDate.add(XDate.clearTime(o.viewStart, true), {hours: 12}),
 				days = [],
-				dt = Ext.Date.clone(o.viewStart),
 				times = [],
-				bustimes = [];
+				bustimes = [],
+				i = 0;
 		
-		me.today = soDate.today();
+		me.today = SoDate.today();
 		me.dayCount = me.dayCount || 1;
 		
 		for (; i < me.dayCount; i++) {
-			days[i] = soDate.add(dt, {days: i});
+			days[i] = SoDate.add(dt, {days: i});
 		}
 
 		// use a fixed DST-safe date so times don't get skipped on DST boundaries
-		dt = eDate.clearTime(new Date('5/26/1972'));
+		dt = SoDate.add(new Date('5/26/1972'), {hours: start});
 
 		for (i=start; i<end; i++) {
 			times.push(dt);
 			bustimes.push((i >= me.businessHoursStart) && (i < me.businessHoursEnd));
-			dt = soDate.add(dt, {minutes: mins});
+			dt = SoDate.add(dt, {minutes: mins});
 		}
 
 		return me.applyOut({

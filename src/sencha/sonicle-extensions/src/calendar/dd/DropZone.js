@@ -19,29 +19,29 @@ Ext.define('Sonicle.calendar.dd.DropZone', {
     shims: [],
 
     getTargetFromEvent: function(e) {
-        var dragOffset = this.dragOffset || 0,
-        y = e.getY() - dragOffset,
-        d = this.view.getDayAt(e.getX(), y);
-
-        return d.el ? d: null;
-    },
+		var dragOffset = this.dragOffset || 0,
+				y = e.getY() - dragOffset,
+				d = this.view.getDayAt(e.getX(), y);
+		return d.el ? d : null;
+	},
 
     onNodeOver: function(n, dd, e, data) {
         var me = this,
-				soDate = Sonicle.Date,
+				XDate = Ext.Date,
+				SoDate = Sonicle.Date,
 				copy = e.ctrlKey || e.altKey,
 				eventDragText = copy ? me.copyText: me.moveText,
-				start = (data.type === 'eventdrag') ? n.date: soDate.min(data.start, n.date),
-				end = (data.type === 'eventdrag') ? soDate.add(n.date, {days: soDate.diffDays(data.eventStart, data.eventEnd)}) : soDate.max(data.start, n.date);
+				start = (data.type === 'eventdrag') ? n.date: SoDate.min(data.start, n.date),
+				end = (data.type === 'eventdrag') ? SoDate.add(n.date, {days: SoDate.diffDays(data.eventStart, data.eventEnd)}) : SoDate.max(data.start, n.date);
 
-        if (!me.dragStartDate || !me.dragEndDate || (soDate.diffDays(start, me.dragStartDate) !== 0) || (soDate.diffDays(end, me.dragEndDate) !== 0)) {
+        if (!me.dragStartDate || !me.dragEndDate || (SoDate.diffDays(start, me.dragStartDate) !== 0) || (SoDate.diffDays(end, me.dragEndDate) !== 0)) {
             me.dragStartDate = start;
-            me.dragEndDate = soDate.add(end, {days: 1, millis: -1, clearTime: true});
+			me.dragEndDate = SoDate.add(end, {hours: 12, clearTime: true});
             me.shim(start, end);
-
-            var range = Ext.Date.format(start, me.dateFormat);
-            if (soDate.diffDays(start, end) > 0) {
-				end = Ext.Date.format(end, me.dateFormat);
+			
+            var range = XDate.format(start, me.dateFormat);
+            if (SoDate.diffDays(start, end) > 0) {
+				end = XDate.format(end, me.dateFormat);
 				range = Ext.String.format(me.dateRangeFormat, range, end);
             }
 			me.currentRange = range;
@@ -57,165 +57,163 @@ Ext.define('Sonicle.calendar.dd.DropZone', {
 		var me = this,
 				copy = false,
 				text, dt;
-		
-		if(data.type === 'eventdrag') {
+
+		if (data.type === 'eventdrag') {
 			copy = e.ctrlKey || e.altKey;
-			text = (e.ctrlKey || e.altKey) ? me.copyText: me.moveText;
+			text = (e.ctrlKey || e.altKey) ? me.copyText : me.moveText;
 		} else {
 			text = me.createText;
 		}
-		if(Sonicle.Date.diffDays(start, end) > 0) {
-			dt = Ext.String.format(me.dateRangeFormat, 
-					Ext.Date.format(start, me.dateFormat), 
+		if (Sonicle.Date.diffDays(start, end) > 0) {
+			dt = Ext.String.format(me.dateRangeFormat,
+					Ext.Date.format(start, me.dateFormat),
 					Ext.Date.format(end, me.dateFormat));
 		} else {
 			dt = Ext.Date.format(start, me.dateFormat);
 		}
-		
+
 		data.proxy.updateMsg(Ext.String.format(text, dt));
 		return data.proxy.getDropAllowedCls(copy);
 	},
 
     shim: function(start, end) {
-        this.currWeek = -1;
-        this.DDMInstance.notifyOccluded = true;
-        var dt = Ext.Date.clone(start),
-            i = 0,
-            shim,
-            box,
-            D = Sonicle.Date,
-            cnt = D.diffDays(dt, end) + 1;
+		var me = this,
+				SoDate = Sonicle.Date,
+				dt = Ext.Date.clone(start),
+				cnt = SoDate.diffDays(dt, end) + 1,
+				i = 0,
+				shim,
+				box;
 
-        Ext.each(this.shims,
-            function(shim) {
-                if (shim) {
-                    shim.isActive = false;
-                }
-            }
-        );
+		me.currWeek = -1;
+		me.DDMInstance.notifyOccluded = true;
 
-        while (i++<cnt) {
-            var dayEl = this.view.getDayEl(dt);
+		Ext.each(me.shims, function (shim) {
+			if (shim) shim.isActive = false;
+		});
 
-            // if the date is not in the current view ignore it (this
-            // can happen when an event is dragged to the end of the
-            // month so that it ends outside the view)
-            if (dayEl) {
-                var wk = this.view.getWeekIndex(dt);
-                shim = this.shims[wk];
+		while (i++ < cnt) {
+			var dayEl = me.view.getDayEl(dt);
 
-                if (!shim) {
-                    shim = this.createShim();
-                    this.shims[wk] = shim;
-                }
-                if (wk !== this.currWeek) {
-                    shim.boxInfo = dayEl.getBox();
-                    this.currWeek = wk;
-                }
-                else {
-                    box = dayEl.getBox();
-                    shim.boxInfo.right = box.right;
-                    shim.boxInfo.width = box.right - shim.boxInfo.x;
-                }
-                shim.isActive = true;
-            }
-            dt = D.add(dt, {days: 1});
-        }
+			// if the date is not in the current view ignore it (this
+			// can happen when an event is dragged to the end of the
+			// month so that it ends outside the view)
+			if (dayEl) {
+				var wk = me.view.getWeekIndex(dt);
+				shim = me.shims[wk];
 
-        Ext.each(this.shims, function(shim) {
-            if (shim) {
-                if (shim.isActive) {
-                    shim.show();
-                    shim.setBox(shim.boxInfo);
-                }
-                else if (shim.isVisible()) {
-                    shim.hide();
-                }
-            }
-        });
-    },
+				if (!shim) {
+					shim = me.createShim();
+					me.shims[wk] = shim;
+				}
+				if (wk !== me.currWeek) {
+					shim.boxInfo = dayEl.getBox();
+					me.currWeek = wk;
+				} else {
+					box = dayEl.getBox();
+					shim.boxInfo.right = box.right;
+					shim.boxInfo.width = box.right - shim.boxInfo.x;
+				}
+				shim.isActive = true;
+			}
+			dt = SoDate.add(dt, {days: 1});
+		}
+
+		Ext.each(me.shims, function (shim) {
+			if (shim) {
+				if (shim.isActive) {
+					shim.show();
+					shim.setBox(shim.boxInfo);
+				} else if (shim.isVisible()) {
+					shim.hide();
+				}
+			}
+		});
+	},
 
     createShim: function() {
-        if (!this.shimCt) {
-            this.shimCt = Ext.get('ext-dd-shim-ct');
-            if (!this.shimCt) {
-                this.shimCt = document.createElement('div');
-                this.shimCt.id = 'ext-dd-shim-ct';
-                Ext.getBody().appendChild(this.shimCt);
-            }
-        }
-        var el = document.createElement('div');
-        el.className = 'ext-dd-shim';
-        this.shimCt.appendChild(el);
+		var me = this;
+		if (!me.shimCt) {
+			me.shimCt = Ext.get('ext-dd-shim-ct');
+			if (!me.shimCt) {
+				me.shimCt = document.createElement('div');
+				me.shimCt.id = 'ext-dd-shim-ct';
+				Ext.getBody().appendChild(me.shimCt);
+			}
+		}
+		var el = document.createElement('div');
+		el.className = 'ext-dd-shim';
+		me.shimCt.appendChild(el);
 
-        el = Ext.get(el);
+		el = Ext.get(el);
+		el.setVisibilityMode(2);
 
-        el.setVisibilityMode(2);
-
-        return el;
-    },
+		return el;
+	},
 
     clearShims: function() {
-        Ext.each(this.shims,
-        function(shim) {
-            if (shim) {
-                shim.hide();
-            }
-        });
-        this.DDMInstance.notifyOccluded = false;
-    },
+		Ext.each(this.shims, function (shim) {
+			if (shim) shim.hide();
+		});
+		this.DDMInstance.notifyOccluded = false;
+	},
+	
+	onContainerOver: function (dd, e, data) {
+		return this.dropAllowed;
+	},
 
-    onContainerOver: function(dd, e, data) {
-        return this.dropAllowed;
-    },
-
-    onCalendarDragComplete: function() {
-        delete this.dragStartDate;
-        delete this.dragEndDate;
-        this.clearShims();
-    },
+    onCalendarDragComplete: function () {
+		var me = this;
+		delete me.dragStartDate;
+		delete me.dragEndDate;
+		me.clearShims();
+	},
 
     onNodeDrop: function(n, dd, e, data) {
 		var me = this,
-				soDate = Sonicle.Date;
-        if (n && data) {
-            if (data.type === 'eventdrag') {
-                var rec = me.view.getEventRecordFromEl(data.ddel),
-                dt = soDate.copyTime(rec.data[Sonicle.calendar.data.EventMappings.StartDate.name], n.date);
-				
-				me.view.onEventDrop(rec, dt, (e.ctrlKey || e.altKey) ? 'copy': 'move');
-                me.onCalendarDragComplete();
-                return true;
-            }
-            if (data.type === 'caldrag') {
-				if(!me.dragEndDate) {
+				XDate = Ext.Date,
+				SoDate = Sonicle.Date;
+		if (n && data) {
+			if (data.type === 'eventdrag') {
+				var rec = me.view.getEventRecordFromEl(data.ddel),
+						dt = SoDate.copyTime(rec.data[Sonicle.calendar.data.EventMappings.StartDate.name], n.date);
+
+				me.view.onEventDrop(rec, dt, (e.ctrlKey || e.altKey) ? 'copy' : 'move');
+				me.onCalendarDragComplete();
+				return true;
+
+			} else if (data.type === 'caldrag') {
+				me.dragStartDate = SoDate.add(XDate.clearTime(data.start, true), {hours: 12});
+				if (me.dragEndDate) {
+					me.dragEndDate = SoDate.add(XDate.clearTime(me.dragEndDate), {hours: 13});
+				} else {
 					// this can occur on a long click where drag starts but onNodeOver is never executed
-					me.dragStartDate = Ext.Date.clearTime(data.start);
-					me.dragEndDate = soDate.add(me.dragStartDate, {days: 1, millis: -1, clearTime: true});
+					me.dragEndDate = SoDate.add(XDate.clone(me.dragStartDate), {hours: 1});
 				}
-				
-                me.view.onCalendarEndDrag(me.dragStartDate, me.dragEndDate,
-                Ext.bind(me.onCalendarDragComplete, me));
-                //shims are NOT cleared here -- they stay visible until the handling
-                //code calls the onCalendarDragComplete callback which hides them.
-                return true;
-            }
-        }
-        me.onCalendarDragComplete();
-        return false;
-    },
+
+				me.view.onCalendarEndDrag(me.dragStartDate, me.dragEndDate,
+						Ext.bind(me.onCalendarDragComplete, me));
+				//shims are NOT cleared here -- they stay visible until the handling
+				//code calls the onCalendarDragComplete callback which hides them.
+				return true;
+			}
+		}
+		me.onCalendarDragComplete();
+		return false;
+	},
 
     onContainerDrop: function(dd, e, data) {
-        this.onCalendarDragComplete();
-        return false;
-    },
+		this.onCalendarDragComplete();
+		return false;
+	},
 	
 	destroy: function() {
-		Ext.each(this.shims, function(shim) {
-			if(shim) Ext.destroy(shim);
+		var me = this;
+		Ext.each(me.shims, function (shim) {
+			if (shim) Ext.destroy(shim);
 		});
-		Ext.removeNode(this.shimCt);
-		delete this.shimCt;
-		this.shims.length = 0;
+		Ext.removeNode(me.shimCt);
+		delete me.shimCt;
+		me.shims.length = 0;
 	}
 });

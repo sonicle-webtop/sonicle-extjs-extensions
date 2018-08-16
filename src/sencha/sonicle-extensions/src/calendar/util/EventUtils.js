@@ -26,20 +26,20 @@ Ext.define('Sonicle.calendar.util.EventUtils', {
 		},
 		
 		isSpanning: function(start, end) {
-			var soDate = Sonicle.Date,
-					diff = soDate.diffDays(start, end);
+			var SoDate = Sonicle.Date,
+					diff = SoDate.diffDays(start, end);
 			//if((diff <= 1) && soDate.isMidnight(end)) return false;
 			return (diff > 0);
 		},
 		
 		isLikeSingleDay: function(start, end) {
-			var soDate = Sonicle.Date;
-			return (soDate.isMidnight(start) && soDate.isMidnight(end) && (soDate.diffDays(start, end) === 1));
+			var SoDate = Sonicle.Date;
+			return (SoDate.isMidnight(start) && SoDate.isMidnight(end) && (SoDate.diffDays(start, end) === 1));
 		},
 		
 		durationInHours: function(start, end) {
-			var soDate = Sonicle.Date;
-			return soDate.diff(start, end, 'hours');
+			var SoDate = Sonicle.Date;
+			return SoDate.diff(start, end, 'hours');
 		},
 		
 		/**
@@ -50,31 +50,33 @@ Ext.define('Sonicle.calendar.util.EventUtils', {
 		*/
 		buildDisplayInfo: function(edata, dateFmt, timeFmt) {
 			var EM = Sonicle.calendar.data.EventMappings,
-					eDate = Ext.Date,
-					soDate = Sonicle.Date,
-					etitle = edata[EM.Title.name],
-					elocation = edata[EM.Location.name],
-					eowner = edata[EM.Owner.name],
-					esd = edata[EM.StartDate.name],
-					eed = edata[EM.EndDate.name],
-					startd = eDate.format(esd, dateFmt),
-					startt = eDate.format(edata[EM.StartDate.name], timeFmt),
-					endd = eDate.format(eed, dateFmt),
-					endt = eDate.format(edata[EM.EndDate.name], timeFmt),
-					tit = Ext.isEmpty(elocation) ? etitle : Ext.String.format('{0} @{1}', etitle, elocation),
+					XDate = Ext.Date,
+					SoDate = Sonicle.Date,
+					evTit = edata[EM.Title.name],
+					evLoc = edata[EM.Location.name],
+					evOwn = edata[EM.Owner.name],
+					evStaDt = edata[EM.StartDate.name],
+					evEndDt = edata[EM.EndDate.name],
+					evIsAD = edata[EM.IsAllDay.name] === true,
+					sdate = XDate.format(evStaDt, dateFmt),
+					stime = XDate.format(edata[EM.StartDate.name], timeFmt),
+					edate = XDate.format(evEndDt, dateFmt),
+					etime = XDate.format(edata[EM.EndDate.name], timeFmt),
+					tit = Ext.isEmpty(evLoc) ? evTit : Ext.String.format('{0} @{1}', evTit, evLoc),
 					tip;
 			
-			if (soDate.diffDays(esd, eed) === 0) {
-				tip = startd + ' ' + startt + ' - ' + endt;
+			if (SoDate.diffDays(evStaDt, evEndDt) === 0) {
+				tip = sdate + (evIsAD ? '' : ' ' + stime + ' - ' + etime);
+				//tip = startd + ' ' + startt + ' - ' + endt;
 			} else {
-				tip = startd + ' ' + startt + '<br>' + endd + ' ' + endt;
+				tip = sdate + (evIsAD ? '' : ' ' + stime) + '<br>' + edate + (evIsAD ? '' : ' ' + etime);
+				//tip = startd + ' ' + startt + '<br>' + endd + ' ' + endt;
 			}
-			if (!Ext.isEmpty(eowner)) tip += ('<br>(' + eowner + ')');
+			if (!Ext.isEmpty(evOwn)) tip += ('<br>(' + evOwn + ')');
 			
 			return {
 				title: tit,
 				tooltip: tip
-				//tooltip: Ext.String.format('{0} {1}<br>{2} {3}{4}', startd, startt, endd, endt, tipown)
 			};
 	   }
 	}

@@ -203,6 +203,23 @@ Ext.define('Sonicle.Date', {
 	},
 	
 	/**
+	 * Calculate the `Date.timezoneOffset()` difference between two dates.
+	 * @param {Date} dt1 The first date.
+	 * @param {Date} dt2 The second date.
+	 * @param {String} [unit] The time unit to return. Valid values are 'minutes' (the default), 'seconds' or 'millis'.
+	 * @returns {Number} The time difference between the timezoneOffset values in the units specified by the unit param.
+	 */
+	diffTimezones: function(dt1, dt2, unit) {
+		var diff = dt1.getTimezoneOffset() - dt2.getTimezoneOffset(); // minutes
+		if (unit === 's' || unit === 'seconds') {
+			return diff * 60;
+		} else if (unit === 'ms' || unit === 'millis') {
+			return diff * 60 * 1000;	
+		}
+		return diff;
+	},
+	
+	/**
 	 * Returns the time duration between two dates in the specified units. For finding the number of
 	 * calendar days (ignoring time) between two dates use {@link Extensible.Date.diffDays diffDays} instead.
 	 * @param {Date} start The start date
@@ -230,14 +247,16 @@ Ext.define('Sonicle.Date', {
 	
 	/**
 	 * Calculates the number of calendar days between two dates, ignoring time values.
-	 * A time span that starts at 11pm (23:00) on Monday and ends at 1am (01:00) on Wednesday is
-	 * only 26 total hours, but it spans 3 calendar days, so this function would return 2. For the
-	 * exact time difference, use {@link Sonicle.Date.diff diff} instead.
+	 * A time span that starts at 11pm (23:00) on Monday and ends at 1am (01:00) 
+	 * on Wednesday is only 26 total hours, but it spans 3 calendar days, 
+	 * so this function would return 2.
+	 * For the  exact time difference, use {@link Sonicle.Date.diff diff} instead.
 	 * 
-	 * NOTE that the dates passed into this function are expected to be in local time matching the
-	 * system timezone. This does not work with timezone-relative or UTC dates as the exact date
-	 * boundaries can shift with timezone shifts, affecting the output. If you need precise control
-	 * over the difference, use {@link Extensible.Date.diff diff} instead.
+	 * NOTE that the dates passed into this function are expected to be in local 
+	 * time matching the system timezone. This does not work with timezone-relative 
+	 * or UTC dates as the exact date boundaries can shift with timezone shifts, 
+	 * affecting the output.
+	 * If you need precise control over the difference, use {@link Sonicle.Date.diff diff} instead.
 	 * 
 	 * @param {Date} start The start date
 	 * @param {Date} end The end date
@@ -406,16 +425,20 @@ Ext.define('Sonicle.Date', {
 	 * @return {Boolean} True if the date is today, else false
 	 */
 	isToday: function(dt) {
-		return this.diffDays(dt, this.today()) === 0;
+		var me = this,
+				ndt = me.add(Ext.Date.clearTime(dt, true), {hours: 12});
+		return me.diffDays(ndt, me.today()) === 0;
 	},
 	
 	/**
 	 * Convenience method to get the current browser-local date with no time value.
-	 * @return {Date} The current date, with time 00:00
+	 * @return {Date} The current date, with time 12:00
 	 */
 	today: function() {
-		return Ext.Date.clearTime(new Date());
+		return this.add(Ext.Date.clearTime(new Date()), {hours: 12});
 	},
+	
+	
 	
 	/**
 	 * Adds time to the specified date and returns a new Date instance as the result (does not
@@ -528,4 +551,12 @@ Ext.define('Sonicle.Date', {
 	getNthWeekDayOfMonth: function(date) {
 		return Math.floor((date.getDate()+6)/7);
 	}
+	
+	/*
+	utcTimezoneOffset: function(date) {
+		var ExDate = Ext.Date,
+				tzOffset = date.getTimezoneOffset();
+		return ExDate.subtract(date, ExDate.MINUTE, tzOffset);
+	}
+	*/
 });

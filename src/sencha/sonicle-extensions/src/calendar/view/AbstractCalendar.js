@@ -238,6 +238,40 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	dateParamFormat: 'Y-m-d',
 	
 	/**
+	 * @cfg {String} weekendCls
+	 * A CSS class to apply to weekend days in the current view (defaults to 
+	 * 'ext-cal-day-we' which highlights weekend days in light blue).
+	 * To disable this styling set the value to null or ''.
+	 */
+	weekendCls: 'ext-cal-day-we',
+	
+	/**
+	 * @cfg {String} prevMonthCls
+	 * A CSS class to apply to any days that fall in the month previous to the 
+	 * current view's month (defaults to 'ext-cal-day-prev' which highlights 
+	 * previous month days in light gray).
+	 * To disable this styling set the value to null or ''.
+	 */
+	prevMonthCls: 'ext-cal-day-prev',
+	
+	/**
+	 * @cfg {String} nextMonthCls
+	 * A CSS class to apply to any days that fall in the month after the current 
+	 * view's month (defaults to 'ext-cal-day-next' which highlights next month 
+	 * days in light gray).
+	 * To disable this styling set the value to null or ''.
+	 */
+	nextMonthCls: 'ext-cal-day-next',
+	
+	/**
+	 * @cfg {String} todayCls
+	 * A CSS class to apply to the current date when it is visible in the current 
+	 * view (defaults to 'ext-cal-day-today' which highlights today in yellow). 
+	 * To disable this styling set the value to null or ''.
+	 */
+	todayCls: 'ext-cal-day-today',
+	
+	/**
 	 * @property ownerCalendarPanel
 	 * @readonly
 	 * @type Sonicle.calendar.CalendarPanel
@@ -423,7 +457,7 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 
 	// must be implemented by a subclass
 	// private
-	initComponent: function () {
+	initComponent: function() {
 		var me = this;
 		me.setStartDate(me.startDate || new Date());
 		
@@ -464,7 +498,7 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	},
 	
 	// private
-	afterRender: function () {
+	afterRender: function() {
 		var me = this;
 		me.callParent(arguments);
 
@@ -494,7 +528,7 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	},
 	
 	// private
-	forceSize: function () {
+	forceSize: function() {
 		if (this.el && this.el.down) {
 			var hd = this.el.down('.ext-cal-hd-ct'),
 					bd = this.el.down('.ext-cal-body-ct');
@@ -506,19 +540,21 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 		}
 	},
 	
-	getWeekCount: function () {
+	getWeekCount: function() {
 		var days = Sonicle.Date.diffDays(this.viewStart, this.viewEnd);
 		return Math.ceil(days / this.dayCount);
 	},
 	
 	// private
-	prepareData: function () {
+	prepareData: function() {
 		var me = this,
+				XDate = Ext.Date,
+				SoDate = Sonicle.Date,
 				EM = Sonicle.calendar.data.EventMappings,
-				lastInMonth = Ext.Date.getLastDateOfMonth(me.startDate),
-				w = 0, d,
-				dt = Ext.Date.clearTime(Ext.Date.clone(me.viewStart),true), 
-				weeks = me.weekCount < 1 ? 6 : me.weekCount;
+				lastInMonth = SoDate.add(XDate.clearTime(XDate.getLastDateOfMonth(me.startDate), true), {hours: 12}),
+				dt = SoDate.add(XDate.clearTime(me.viewStart, true), {hours: 12}),
+				weeks = me.weekCount < 1 ? 6 : me.weekCount,
+				w = 0, d = 0;
 
 		me.eventGrid = [[]];
 		me.allDayGrid = [[]];
@@ -528,16 +564,16 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 			return me.isEventVisible(rec.data);
 		}, me);
 		
-		var filterFn = function(rec) {
-			var startDt = Ext.Date.clearTime(rec.data[EM.StartDate.name], true),
-					startsOnDate = dt.getTime() === startDt.getTime(),
+		var evtsInDayFFn = function(rec) {
+			var startDt = SoDate.add(XDate.clearTime(rec.data[EM.StartDate.name], true), {hours: 12}),
+					startsOnDate = SoDate.diffDays(dt, startDt) === 0,
 					spansFromPrevView = ((w === 0) && (d === 0) && (dt > rec.data[EM.StartDate.name]));
 			
 			return startsOnDate || spansFromPrevView;
 		};
 
 		for (; w < weeks; w++) {
-			me.evtMaxCount[w] = 0;
+			me.evtMaxCount[w] = me.evtMaxCount[w] || 0;
 			if (me.weekCount === -1 && dt > lastInMonth) {
 				//current week is fully in next month so skip
 				break;
@@ -547,21 +583,20 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 
 			for (d = 0; d < me.dayCount; d++) {
 				if (evtsInView.getCount() > 0) {
-					var evts = evtsInView.filterBy(filterFn, me);
-
+					var evts = evtsInView.filterBy(evtsInDayFFn, me);
 					me.sortEventRecordsForDay(evts);
 					me.prepareEventGrid(evts, w, d);
 				}
-				dt = Ext.Date.clearTime(Sonicle.Date.add(dt, {days: 1}),true);
+				dt = SoDate.add(dt, {days: 1});
 			}
 		}
 		this.currentWeekCount = w;
 	},
 	
 	// private
-	prepareEventGrid: function (evts, w, d) {
+	prepareEventGrid: function(evts, w, d) {
 		var me = this,
-				soDate = Sonicle.Date,
+				SoDate = Sonicle.Date,
 				EU = Sonicle.calendar.util.EventUtils,
 				EM = Sonicle.calendar.data.EventMappings,
 				row = 0;
@@ -569,10 +604,9 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 		evts.each(function (evt) {
 			if (EU.isSpanning(evt.data[EM.StartDate.name], evt.data[EM.EndDate.name])) {
 				// Event spans on multiple days...
-				var daysInView = soDate.diffDays(
-							soDate.max(me.viewStart, evt.data[EM.StartDate.name]),
-							soDate.min(me.viewEnd, evt.data[EM.EndDate.name])
-					) +1;
+				var daysInView = SoDate.diffDays(
+							SoDate.max(me.viewStart, evt.data[EM.StartDate.name]),
+							SoDate.min(me.viewEnd, evt.data[EM.EndDate.name])) +1;
 				
 				//TODO: 24h threshold as config
 				if(EU.durationInHours(evt.data[EM.StartDate.name], evt.data[EM.EndDate.name]) >= 24) {
@@ -619,17 +653,19 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	},
 	
 	// private
-	prepareEventGridSpans: function (evt, grid, w, d, days, allday) {
+	prepareEventGridSpans: function(evt, grid, w, d, days, allday) {
 		// this event spans multiple days/weeks, so we have to preprocess
 		// the events and store special span events as placeholders so that
 		// the render routine can build the necessary TD spans correctly.
 		var me = this,
+				SoDate = Sonicle.Date,
 				w1 = w,
 				d1 = d,
 				row = me.findEmptyRowIndex(w, d, allday),
-				dt = Ext.Date.clone(me.viewStart);
+				dt = SoDate.add(Ext.Date.clearTime(me.viewStart, true), {hours: 12}),
+				start;
 
-		var start = {
+		start = {
 			event: evt,
 			isSpan: true,
 			isSpanStart: true,
@@ -644,7 +680,7 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 		me.setMaxEventsForDay(w, d);
 
 		while (--days) {
-			dt = Sonicle.Date.add(dt, {days: 1});
+			dt = SoDate.add(dt, {days: 1});
 			if (dt > me.viewEnd) {
 				break;
 			}
@@ -674,15 +710,14 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	},
 	
 	// private
-	findEmptyRowIndex: function (w, d, allday) {
+	findEmptyRowIndex: function(w, d, allday) {
 		var grid = allday ? this.allDayGrid : this.eventGrid,
 				day = grid[w] ? grid[w][d] || [] : [],
-				i = 0,
-				ln = day.length;
+				ln = day.length,
+				i = 0;
 
 		for (; i < ln; i++) {
-			if (!day[i])
-				return i;
+			if (!day[i]) return i;
 		}
 		return ln;
 	},
@@ -1666,19 +1701,23 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	},
 	
 	// private
-	doShiftEvent: function (rec, newStartDate, moveOrCopy) {
+	doShiftEvent: function(rec, newStartDate, moveOrCopy) {
 		var me = this,
+				SoDate = Sonicle.Date,
 				EM = Sonicle.calendar.data.EventMappings,
 				start = rec.data[EM.StartDate.name],
 				end = rec.data[EM.EndDate.name],
-				diff = newStartDate.getTime() - start.getTime();
+				startDiff = SoDate.diff(start, newStartDate),
+				newEndDate = SoDate.add(start, {millis: startDiff}),
+				tzOffset = SoDate.diffTimezones(end, newEndDate);
+		
+		if (tzOffset) newEndDate = SoDate.add(newEndDate, {minutes: -tzOffset});
 		
 		rec.beginEdit();
 		rec.set(EM.StartDate.name, newStartDate);
-		rec.set(EM.EndDate.name, Sonicle.Date.add(end, {millis: diff}));
+		rec.set(EM.EndDate.name, newEndDate);
 		rec.endEdit();
-		if(rec.phantom) me.store.add(rec);
-
+		if (rec.phantom) me.store.add(rec);
 		me.fireEvent('event' + moveOrCopy, me, rec);
 	},
 	
