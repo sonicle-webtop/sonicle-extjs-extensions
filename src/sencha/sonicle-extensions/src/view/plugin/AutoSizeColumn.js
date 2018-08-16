@@ -10,7 +10,7 @@ Ext.define('Sonicle.view.plugin.AutoSizeColumns', {
 
 	init: function(cmp) {
 		var me = this;
-		if(!cmp.isXtype('dataview')) Ext.Error.raise('This plugin can be used on Ext.view.View components');
+		if (!cmp.isXtype('dataview')) Ext.raise('This plugin can be used on Ext.view.View components');
 		me.setCmp(cmp);
 		cmp.on('refresh', me.onCmpRefresh, me);
 	},

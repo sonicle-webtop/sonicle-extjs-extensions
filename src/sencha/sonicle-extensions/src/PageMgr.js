@@ -14,7 +14,7 @@ Ext.define('Sonicle.PageMgr', {
 	 * @readonly
 	 * @property {Boolean} api
 	 */
-	api: false,
+	visApi: false,
 	
 	/**
 	 * @readonly
@@ -29,6 +29,16 @@ Ext.define('Sonicle.PageMgr', {
 	visibilityEvent: null,
 	
 	/**
+	 * @readonly
+	 * @property {String} pageTitle
+	 */
+	
+	/**
+	 * @readonly
+	 * @property {Object} blinkInterval
+	 */
+	
+	/**
 	 * @event visibilitychange
 	 * Fires when page visibility changes.
 	 */
@@ -39,9 +49,9 @@ Ext.define('Sonicle.PageMgr', {
 		me.mixins.observable.constructor.call(me, cfg);
 		me.callParent([cfg]);
 		
-		chk = me.checkApi();
+		chk = me.checkVisApi();
 		if (chk) {
-			me.api = true;
+			me.visApi = true;
 			me.hiddenProp = chk[0];
 			me.visibilityEvent = chk[1];
 			document.addEventListener(me.visibilityEvent, me.onVisibilityChange.bind(me));
@@ -52,12 +62,42 @@ Ext.define('Sonicle.PageMgr', {
 	 * Checks if Visibility API is supported.
 	 * @return {Boolean}
 	 */
-	isSupported: function() {
-		return this.api;
+	isVisSupported: function() {
+		return this.visApi;
 	},
 	
+	/**
+	 * Returns if page is currently not directly visible.
+	 * @returns {Boolean}
+	 */
 	isHidden: function() {
-		return !this.isSupported() ? false : document[this.hiddenProp];
+		return !this.isVisSupported() ? false : document[this.hiddenProp];
+	},
+	
+	/**
+	 * Starts page title blinking.
+	 * @param {String} msg The alternative message.
+	 * @param {Integer} interval Blinking speed interval in millis.
+	 */
+	blinkTitle: function(msg, interval) {
+		var me = this,
+				doc = document;
+		if (!me.blinkInterval) {
+			me.pageTitle = doc.title;
+			me.blinkInterval = window.setInterval(function() {
+				doc.title = (me.pageTitle === doc.title) ? msg : me.pageTitle;
+			}, interval ? interval : 1000);
+		}
+	},
+	
+	/**
+	 * Stops page title blinking.
+	 */
+	stopBlinkTitle: function() {
+		var me = this;
+		window.clearInterval(me.blinkInterval);
+		me.blinkInterval = null;
+		document.title = me.pageTitle;
 	},
 	
 	privates: {
@@ -65,7 +105,7 @@ Ext.define('Sonicle.PageMgr', {
 			this.fireEvent('visibilitychange');
 		},
 		
-		checkApi: function() {
+		checkVisApi: function() {
 			try {
 				if('hidden' in document) {
 					return ['hidden','visibilitychange'];

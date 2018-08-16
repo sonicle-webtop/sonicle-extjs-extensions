@@ -1216,7 +1216,7 @@ Ext.define('Sonicle.form.field.TreeComboBox', {
 
             //<debug>
             if (add && !me.multiSelect) {
-                Ext.Error.raise('Cannot add values to non multiSelect ComboBox');
+                Ext.raise('Cannot add values to non multiSelect ComboBox');
             }
             //</debug>
 

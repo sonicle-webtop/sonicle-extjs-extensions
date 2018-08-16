@@ -109,8 +109,8 @@ Ext.define('Sonicle.DesktopNotificationMgr', {
 				ntf, ntfWrapper;
 		
 		if (!me.api) return;
-		if (Ext.isEmpty(title)) Ext.Error.raise('Title is mandatory');
-		if (Ext.isEmpty(opts.icon)) Ext.Error.raise('Icon is mandatory');
+		if (Ext.isEmpty(title)) Ext.raise('Title is mandatory');
+		if (Ext.isEmpty(opts.icon)) Ext.raise('Icon is mandatory');
 		
 		ntf = me.createNotification(title, opts);
 		if (ntf) {

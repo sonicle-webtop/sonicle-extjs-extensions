@@ -869,7 +869,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
     },
 	
 	/*	setHtml: function(html) {
-		//Ext.Error.raise('Stop here!');
+		//Ext.raise('Stop here!');
 		this.tmce.setValue(html);
 	},
 	
