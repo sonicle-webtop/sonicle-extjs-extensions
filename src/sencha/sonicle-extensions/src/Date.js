@@ -438,93 +438,96 @@ Ext.define('Sonicle.Date', {
 		return this.add(Ext.Date.clearTime(new Date()), {hours: 12});
 	},
 	
-	
-	
 	/**
-	 * Adds time to the specified date and returns a new Date instance as the result (does not
-	 * alter the original date object). Time can be specified in any combination of milliseconds
-	 * to years, and the functionautomatically takes leap years and daylight savings into account.
-	 * Some syntax examples:<code><pre>
-	 var now = new Date();
-	 
-	 // Add 24 hours to the current date/time:
-	 var tomorrow = Extensible.Date.add(now, { days: 1 });
-	 
-	 // More complex, returning a date only with no time value:
-	 var futureDate = Extensible.Date.add(now, {
-	 weeks: 1,
-	 days: 5,
-	 minutes: 30,
-	 clearTime: true
-	 });
-	 </pre></code>
+	 * Add time to the specified date and returns a new Date instance as the 
+	 * result (does not alter the original date object). Time can be specified 
+	 * in any combination of milliseconds to years, and the function automatically 
+	 * takes leap years and daylight savings into account.
+	 * Some syntax examples:
+	 *		var now = new Date();
+	 *		// Add 24 hours to the current date/time:
+	 *		var tomorrow = Extensible.Date.add(now, { days: 1 });
+	 *		// More complex, returning a date only with no time value:
+	 *		var futureDate = Extensible.Date.add(now, {
+	 *			weeks: 1,
+	 *			days: 5,
+	 *			minutes: 30
+	 *		});
+	 * 
 	 * @param {Date} dt The starting date to which to add time
-	 * @param {Object} o A config object that can contain one or more of the following
-	 * properties, each with an integer value:
+	 * @param {Object} opts A config object that can contain one or more of the 
+	 * following properties, each with an integer value:
 	 * 
-	 * - millis
-	 * - seconds
-	 * - minutes
-	 * - hours
-	 * - days
-	 * - weeks
-	 * - months
-	 * - years
-	 * 
-	 * You can also optionally include the property "clearTime: true" which will perform all of the
-	 * date addition first, then clear the time value of the final date before returning it.
-	 * @return {Date} A new date instance containing the resulting date/time value
+	 *	* millis
+	 *	* seconds
+	 *	* minutes
+	 *	* hours
+	 *	* days
+	 *	* weeks
+	 *	* months
+	 *	* years
+	 *	
+	 *	You can also optionally include the property "clearTime: true" which 
+	 *	will perform all of the date addition first, then clear the time value 
+	 *	of the final date before returning it.
+	 *	@return {Date} A new date instance containing the resulting date/time value
 	 */
-	add: function(dt, o) {
-		if(!o) return dt;
-		var eDate = Ext.Date,
-				dateAdd = eDate.add,
-				newDt = eDate.clone(dt);
+	add: function(dt, opts) {
+		if (!opts) return dt;
+		var XDate = Ext.Date,
+				dateAdd = XDate.add,
+				newDt = XDate.clone(dt);
 
-		if (o.years) {
-			newDt = dateAdd(newDt, eDate.YEAR, o.years);
+		if (opts.years) {
+			newDt = dateAdd(newDt, XDate.YEAR, opts.years);
 		}
-		if (o.months) {
-			newDt = dateAdd(newDt, eDate.MONTH, o.months);
+		if (opts.months) {
+			newDt = dateAdd(newDt, XDate.MONTH, opts.months);
 		}
-		if (o.weeks) {
-			o.days = (o.days || 0) + (o.weeks * 7);
+		if (opts.weeks) {
+			opts.days = (opts.days || 0) + (opts.weeks * 7);
 		}
-		if (o.days) {
-			newDt = dateAdd(newDt, eDate.DAY, o.days);
+		if (opts.days) {
+			newDt = dateAdd(newDt, XDate.DAY, opts.days);
 		}
-		if (o.hours) {
-			newDt = dateAdd(newDt, eDate.HOUR, o.hours);
+		if (opts.hours) {
+			newDt = dateAdd(newDt, XDate.HOUR, opts.hours);
 		}
-		if (o.minutes) {
-			newDt = dateAdd(newDt, eDate.MINUTE, o.minutes);
+		if (opts.minutes) {
+			newDt = dateAdd(newDt, XDate.MINUTE, opts.minutes);
 		}
-		if (o.seconds) {
-			newDt = dateAdd(newDt, eDate.SECOND, o.seconds);
+		if (opts.seconds) {
+			newDt = dateAdd(newDt, XDate.SECOND, opts.seconds);
 		}
-		if (o.millis) {
-			newDt = dateAdd(newDt, eDate.MILLI, o.millis);
+		if (opts.millis) {
+			newDt = dateAdd(newDt, XDate.MILLI, opts.millis);
 		}
-		return o.clearTime ? eDate.clearTime(newDt) : newDt;
+		return (opts.clearTime === true) ? XDate.clearTime(newDt): newDt;
 	},
 	
 	getFirstDateOfWeek: function(date, startDay) {
-		var eDate = Ext.Date, newDate = eDate.clearTime(date, true), day = newDate.getDay(), sub;
+		var XDate = Ext.Date,
+				newDate = XDate.clearTime(date, true),
+				day = newDate.getDay(),
+				sub;
+		
 		if (day !== startDay) {
 			if (day === 0) {
 				sub = 6;
 			} else {
 				sub = day - startDay;
 			}
-			return eDate.add(newDate, eDate.DAY, -sub);
+			return XDate.add(newDate, XDate.DAY, -sub);
 		} else {
 			return newDate;
 		}
 	},
 	
 	getLastDateOfWeek: function(date, startDay) {
-		var eDate = Ext.Date, start = this.getFirstDateOfWeek(date, startDay);
-		return eDate.add(start, eDate.DAY, 6);
+		var XDate = Ext.Date,
+				start = this.getFirstDateOfWeek(date, startDay);
+		
+		return XDate.add(start, XDate.DAY, 6);
 	},
 	
 	/**

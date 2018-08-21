@@ -1,11 +1,7 @@
 /**
- * @class Sonicle.calendar.view.Month
- * @extends Sonicle.calendar.CalendarView
- * <p>Displays a calendar view by month. This class does not usually need to be used directly as you can
- * use a {@link Sonicle.calendar.CalendarPanel CalendarPanel} to manage multiple calendar views at once including
- * the month view.</p>
- * @constructor
- * @param {Object} config The config object
+ * Displays a calendar view by month. This class does not usually need to be 
+ * used directly as you can use a {@link Sonicle.calendar.Panel CalendarPanel} to manage 
+ * multiple calendar views at once including the month view.
  */
 Ext.define('Sonicle.calendar.view.Month', {
 	extend: 'Sonicle.calendar.view.AbstractCalendar',
@@ -29,12 +25,6 @@ Ext.define('Sonicle.calendar.view.Month', {
 	 * True to display the {@link #todayText} string in today's box in the calendar, false to not display it (defautls to true)
 	 */
 	showTodayText: true,
-	
-	/**
-	 * @cfg {String} todayText
-	 * The text to display in the current day's box in the calendar when {@link #showTodayText} is true (defaults to 'Today')
-	 */
-	todayText: 'Today',
 	
 	/**
 	 * @cfg {Boolean} showHeader
@@ -66,14 +56,6 @@ Ext.define('Sonicle.calendar.view.Month', {
 	weekLinkOverClass: 'ext-week-link-over',
 	
 	/**
-	 * @cfg {String} moreText
-	 * The text to display in a day box when there are more events than can be displayed and a link is provided to
-	 * show a popup window with all events for that day (defaults to '+{0} more...', where {0} will be
-	 * replaced by the number of additional events that are not currently displayed for the day).
-	 */
-	moreText: '+{0} more...',
-	
-	/**
 	 * @cfg {Number} morePanelMinWidth
 	 * When there are more events in a given day than can be displayed in the calendar view, the extra events
 	 * are hidden and a "{@link #moreText more events}" link is displayed. When clicked, the link pops up a
@@ -83,16 +65,27 @@ Ext.define('Sonicle.calendar.view.Month', {
 	 */
 	morePanelMinWidth: 220,
 	
+	/**
+	 * @cfg {String} todayText
+	 * The text to display in the current day's box in the calendar when {@link #showTodayText} is true (defaults to 'Today')
+	 */
+	todayText: 'Today',
+	
+	/**
+	 * @cfg {String} moreText
+	 * The text to display in a day box when there are more events than can be displayed and a link is provided to
+	 * show a popup window with all events for that day (defaults to '+{0} more...', where {0} will be
+	 * replaced by the number of additional events that are not currently displayed for the day).
+	 */
+	moreText: '+{0} more...',
+	
 	//private properties -- do not override:
+	weekCount: -1,
+	dayCount: 7, // defaults to auto by month
 	moreSelector: '.ext-cal-ev-more',
 	weekLinkSelector: '.ext-cal-week-link',
-	weekCount: -1,
-	// defaults to auto by month
-	dayCount: 7,
 	moreElIdDelimiter: '-more-',
 	weekLinkIdDelimiter: 'ext-cal-week-',
-	// See EXTJSIV-11407.
-	operaLT11: Ext.isOpera && (parseInt(Ext.operaVersion) < 11),
 	
 	/**
 	 * @event dayclick
@@ -116,7 +109,6 @@ Ext.define('Sonicle.calendar.view.Month', {
 	// inherited docs
 	//dayout: true
 
-	// private
 	initDD: function() {
 		var me = this;
 		var cfg = {
@@ -132,95 +124,95 @@ Ext.define('Sonicle.calendar.view.Month', {
 		me.dropZone = Ext.create('Sonicle.calendar.dd.DropZone', me.el, cfg);
 	},
 	
-	// private
 	onDestroy: function() {
-		Ext.destroy(this.ddSelector);
-		Ext.destroy(this.dragZone);
-		Ext.destroy(this.dropZone);
+		var me = this;
+		Ext.destroy(me.ddSelector);
+		Ext.destroy(me.dragZone);
+		Ext.destroy(me.dropZone);
 
-		this.callParent(arguments);
+		me.callParent(arguments);
 	},
 	
-	// private
 	afterRender: function() {
-		if (!this.tpl) {
-			this.tpl = Ext.create('Sonicle.calendar.template.Month', {
-				id: this.id,
-				showTodayText: this.showTodayText,
-				todayText: this.todayText,
-				showTime: this.showTime,
-				showHeader: this.showHeader,
-				showWeekLinks: this.showWeekLinks,
-				showWeekNumbers: this.showWeekNumbers
+		var me = this;
+		if (!me.tpl) {
+			me.tpl = Ext.create('Sonicle.calendar.template.Month', {
+				id: me.id,
+				showTodayText: me.showTodayText,
+				todayText: me.todayText,
+				showTime: me.showTime,
+				showHeader: me.showHeader,
+				showWeekLinks: me.showWeekLinks,
+				showWeekNumbers: me.showWeekNumbers
 			});
 		}
-		this.tpl.compile();
-		this.addCls('ext-cal-monthview ext-cal-ct');
+		me.tpl.compile();
+		me.addCls('ext-cal-monthview ext-cal-ct');
 
-		this.callParent(arguments);
+		me.callParent(arguments);
 	},
 	
-	// private
 	onResize: function() {
 		var me = this;
-		//me.callParent(arguments); ?????????????????????
 		if (me.monitorResize) {
-			me.maxEventsPerDay = me.getMaxEventsPerDay();
+			me.maxEventsPerDay = me.computeMaxEventsPerDay();
 			me.refresh(false);
 		}
 	},
 	
-	// private
 	forceSize: function() {
+		var me = this;
 		// Compensate for the week link gutter width if visible
-		if (this.showWeekLinks && this.el) {
-			var hd = this.el.down('.ext-cal-hd-days-tbl'),
-					bgTbl = this.el.select('.ext-cal-bg-tbl'),
-					evTbl = this.el.select('.ext-cal-evt-tbl'),
-					wkLinkW = this.el.down('.ext-cal-week-link').getWidth(),
-					w = this.el.getWidth() - wkLinkW;
+		if (me.showWeekLinks && me.el) {
+			var hd = me.el.down('.ext-cal-hd-days-tbl'),
+					bgTbl = me.el.select('.ext-cal-bg-tbl'),
+					evTbl = me.el.select('.ext-cal-evt-tbl'),
+					wkLinkW = me.el.down('.ext-cal-week-link').getWidth(),
+					w = me.el.getWidth() - wkLinkW;
 
 			hd.setWidth(w);
 			bgTbl.setWidth(w);
 			evTbl.setWidth(w);
 		}
-		this.callParent(arguments);
+		me.callParent(arguments);
 	},
 	
-	//private
 	initClock: function() {
-		if (Ext.fly(this.id + '-clock') !== null) {
-			this.prevClockDay = new Date().getDay();
-			if (this.clockTask) {
-				Ext.TaskManager.stop(this.clockTask);
+		var me = this;
+		if (Ext.fly(me.id + '-clock') !== null) {
+			me.prevClockDay = new Date().getDay();
+			if (me.clockTask) {
+				Ext.TaskManager.stop(me.clockTask);
 			}
 			
-			this.clockTask = Ext.TaskManager.start({
+			me.clockTask = Ext.TaskManager.start({
 				run: function() {
-					var el = Ext.fly(this.id + '-clock'),
+					var el = Ext.fly(me.id + '-clock'),
 							t = new Date(),
-							timeFmt = Sonicle.calendar.util.EventUtils.timeFmt(this.use24HourTime);
+							timeFmt = Sonicle.calendar.util.EventUtils.timeFmt(me.use24HourTime);
 
-					if (t.getDay() === this.prevClockDay) {
+					if (t.getDay() === me.prevClockDay) {
 						if (el) {
 							el.update(Ext.Date.format(t, timeFmt));
 						}
-					}
-					else {
-						this.prevClockDay = t.getDay();
-						this.moveTo(t);
+					} else {
+						me.prevClockDay = t.getDay();
+						me.moveTo(t);
 					}
 				},
-				scope: this,
+				scope: me,
 				interval: 1000
 			});
 		}
 	},
 	
-	// inherited docs
+	/**
+	 * @protected
+	 */
 	getEventBodyMarkup: function() {
-		if (!this.eventBodyMarkup) {
-			this.eventBodyMarkup = [
+		var me = this;
+		if (!me.eventBodyMarkup) {
+			me.eventBodyMarkup = [
 				'<tpl if="_isRecurring || _isBroken">',
 				'<i class="ext-cal-ic {_recIconCls}">&#160;</i>',
 				'</tpl>',
@@ -242,29 +234,31 @@ Ext.define('Sonicle.calendar.view.Month', {
 				'{Title}'
 			].join('');
 		}
-		return this.eventBodyMarkup;
+		return me.eventBodyMarkup;
 	},
 	
-	// inherited docs
+	/**
+	 * @protected
+	 */
 	getEventTemplate: function() {
-		if (!this.eventTpl) {
-			var tpl,
-					body = this.getEventBodyMarkup();
+		var me = this, tpl, body;
+		if (!me.eventTpl) {
+			body = me.getEventBodyMarkup();
 
-			tpl = !(Ext.isIE7m || this.operaLT11) ?
+			tpl = !(Ext.isIE || Ext.isOpera) ?
 					new Ext.XTemplate(
-							'<div id="{_elId}" data-qtitle="{Title}" data-qtip="{Tooltip}" data-draggable="{_isDraggable}" class="{_selectorCls} {_colorCls} {_spanCls} ext-cal-evt ext-cal-evr" style="background:{_bgColor};">',
-							'<div class="ext-evt-bd" style="color:{_foreColor};">', body, '</div>',
+							'<div id="{_elId}" data-qtitle="{Title}" data-qtip="{Tooltip}" data-draggable="{_isDraggable}" class="{_selectorCls} {_spanCls} {_colorCls} ext-cal-evt ext-cal-evr" style="background:{_bgColor};">',
+								'<div class="ext-evt-bd" style="color:{_foreColor};">', body, '</div>',
 							'</div>'
 							)
 					: new Ext.XTemplate(
 							'<tpl if="_renderAsAllDay">',
-							'<div id="{_elId}" data-qtitle="{Title}" data-qtip="{Tooltip}" data-draggable="{_isDraggable}" class="{_selectorCls} {_spanCls} {_colorCls} {_operaLT11} ext-cal-evo" style="background:{_bgColor};">',
+							'<div id="{_elId}" data-qtitle="{Title}" data-qtip="{Tooltip}" data-draggable="{_isDraggable}" class="{_selectorCls} {_spanCls} {_colorCls} ext-cal-evo" style="background:{_bgColor};">',
 								'<div class="ext-cal-evm">',
 									'<div class="ext-cal-evi">',
 							'</tpl>',
 							'<tpl if="!_renderAsAllDay">',
-							'<div id="{_elId}" data-qtitle="{Title}" data-qtip="{Tooltip}" class="{_selectorCls} {_colorCls} {_operaLT11} ext-cal-evt ext-cal-evr" style="background:{_bgColor};">',
+							'<div id="{_elId}" data-qtitle="{Title}" data-qtip="{Tooltip}" class="{_selectorCls} {_colorCls} ext-cal-evt ext-cal-evr" style="background:{_bgColor};">',
 							'</tpl>',
 							'<div class="ext-evt-bd" style="color:{_foreColor};">', body, '</div>',
 							'<tpl if="_renderAsAllDay">',
@@ -274,12 +268,11 @@ Ext.define('Sonicle.calendar.view.Month', {
 							'</div>'
 							);
 			tpl.compile();
-			this.eventTpl = tpl;
+			me.eventTpl = tpl;
 		}
-		return this.eventTpl;
+		return me.eventTpl;
 	},
 	
-	// private
 	getTemplateEventData: function(evt) {
 		var me = this,
 				EM = Sonicle.calendar.data.EventMappings,
@@ -309,53 +302,45 @@ Ext.define('Sonicle.calendar.view.Month', {
 			_recIconCls: (evt[EM.IsBroken.name] === true) ? me.recurrenceBrokenIconCls : me.recurrenceIconCls,
 			_commIconCls: me.commentsIconCls,
 			Title: dinfo.title,
-			Tooltip: dinfo.tooltip,
-			_operaLT11: me.operaLT11 ? 'ext-operaLT11' : ''
+			Tooltip: dinfo.tooltip
 		},
 		evt);
 	},
 	
-	// private
 	refresh: function(reloadData) {
-		if (this.detailPanel) {
-			this.detailPanel.hide();
-		}
-		if(!this.isHeaderView) {
-			this.maxEventsPerDay = this.getMaxEventsPerDay();
+		var me = this;
+		if (me.detailPanel) me.detailPanel.hide();
+		if (!me.isHeaderView) {
+			me.maxEventsPerDay = me.computeMaxEventsPerDay();
 		} else {
-			this.maxEventsPerDay = 3;
+			me.maxEventsPerDay = 3;
 		}
-		this.callParent(arguments);
+		me.callParent(arguments);
 
-		if (this.showTime !== false) {
-			this.initClock();
-		}
+		if (me.showTime !== false) me.initClock();
 	},
 	
-	// private
 	renderItems: function() {
+		var me = this;
 		Sonicle.calendar.util.WeekEventRenderer.render({
-			eventGrid: this.allDayOnly ? this.allDayGrid : this.eventGrid,
-			viewStart: this.viewStart,
-			tpl: this.getEventTemplate(),
-			maxEventsPerDay: this.maxEventsPerDay,
-			//maxEventsPerDay: this.getMaxEventsPerDay(),
-			id: this.id,
-			templateDataFn: Ext.bind(this.getTemplateEventData, this),
-			evtMaxCount: this.evtMaxCount,
-			weekCount: this.weekCount,
-			dayCount: this.dayCount,
-			moreText: this.moreText
+			eventGrid: me.allDayOnly ? me.allDayGrid : me.eventGrid,
+			viewStart: me.viewStart,
+			tpl: me.getEventTemplate(),
+			maxEventsPerDay: me.maxEventsPerDay,
+			id: me.id,
+			templateDataFn: Ext.bind(me.getTemplateEventData, me),
+			evtMaxCount: me.evtMaxCount,
+			weekCount: me.weekCount,
+			dayCount: me.dayCount,
+			moreText: me.moreText
 		});
-		this.fireEvent('eventsrendered', this);
+		me.fireEvent('eventsrendered', me);
 	},
 	
-	// private
 	getDayEl: function(dt) {
 		return Ext.get(this.getDayId(dt));
 	},
 	
-	// private
 	getDayId: function(dt) {
 		if (Ext.isDate(dt)) {
 			dt = Ext.Date.format(dt, 'Ymd');
@@ -363,13 +348,11 @@ Ext.define('Sonicle.calendar.view.Month', {
 		return this.id + this.dayElIdDelimiter + dt;
 	},
 	
-	// private
 	getWeekIndex: function(dt) {
 		var el = this.getDayEl(dt).up('.ext-cal-wk-ct');
 		return parseInt(el.id.split('-wk-')[1], 10);
 	},
 	
-	// private
 	getDaySize: function(contentOnly) {
 		var me = this,
 				box = me.el.getBox(),
@@ -385,47 +368,43 @@ Ext.define('Sonicle.calendar.view.Month', {
 		return {height: h, width: w};
 	},
 	
-	// private
 	getEventHeight: function() {
-		if (!this.eventHeight) {
-			var evt = this.el.select('.ext-cal-evt').first();
+		var me = this, evt;
+		if (!me.eventHeight) {
+			evt = me.el.select('.ext-cal-evt').first();
 			if (evt) {
-				this.eventHeight = evt.parent('td').getHeight();
-			}
-			else {
+				me.eventHeight = evt.parent('td').getHeight();
+			} else {
 				return 18; // no events rendered, so try setting this.eventHeight again later
 			}
 		}
-		return this.eventHeight;
+		return me.eventHeight;
 	},
 	
-	// private
-	getMaxEventsPerDay: function() {
+	computeMaxEventsPerDay: function() {
 		var dayHeight = this.getDaySize(true).height,
 				eventHeight = this.getEventHeight();
 		return Math.max(Math.floor((dayHeight - eventHeight) / eventHeight), 0);
 	},
 	
-	// private
 	getViewPadding: function(sides) {
 		sides = sides || 'tlbr';
-		
-		var top = sides.indexOf('t') > -1,
+		var me = this,
+				top = sides.indexOf('t') > -1,
 				left = sides.indexOf('l') > -1,
 				right = sides.indexOf('r') > -1,
-				height = this.showHeader && top ? this.el.select('.ext-cal-hd-days-tbl').first().getHeight() : 0,
+				height = me.showHeader && top ? me.el.select('.ext-cal-hd-days-tbl').first().getHeight() : 0,
 				width = 0;
 
-		if (this.isHeaderView) {
+		if (me.isHeaderView) {
 			if (left) {
-				width = this.el.select('.ext-cal-gutter').first().getWidth();
+				width = me.el.select('.ext-cal-gutter').first().getWidth();
 			}
 			if (right) {
-				width += this.el.select('.ext-cal-gutter-rt').first().getWidth();
+				width += me.el.select('.ext-cal-gutter-rt').first().getWidth();
 			}
-		}
-		else if (this.showWeekLinks && left) {
-			width = this.el.select('.ext-cal-week-link').first().getWidth();
+		} else if (me.showWeekLinks && left) {
+			width = me.el.select('.ext-cal-week-link').first().getWidth();
 		}
 
 		return {
@@ -434,47 +413,51 @@ Ext.define('Sonicle.calendar.view.Month', {
 		};
 	},
 	
-	// private
 	getDayAt: function(x, y) {
-		var box = this.el.getBox(),
-				daySize = this.getDaySize(),
-				dayL = Math.floor(((x - box.x) / daySize.width)),
-				dayT = Math.floor(((y - box.y) / daySize.height)),
+		var me = this,
+				box = me.el.getBox(),
+				padding = me.getViewPadding('tl'), // top/left only since we only want the xy offsets
+				daySize = me.getDaySize(),
+				dayL = Math.floor(((x - box.x - padding.width) / daySize.width)),
+				dayT = Math.floor(((y - box.y - padding.height) / daySize.height)),
 				days = (dayT * 7) + dayL,
-				dt = Sonicle.Date.add(this.viewStart, {days: days});
+				dt = Sonicle.Date.add(me.viewStart, {days: days});
 		return {
 			date: dt,
-			el: this.getDayEl(dt)
+			el: me.getDayEl(dt)
 		};
 	},
 	
-	// inherited docs
+	/**
+	 * @protected
+	 */
 	moveNext: function() {
-		return this.moveMonths(1);
+		return this.moveMonths(1, true);
 	},
 	
-	// inherited docs
+	/**
+	 * @protected
+	 */
 	movePrev: function() {
-		return this.moveMonths(-1);
+		return this.moveMonths(-1, true);
 	},
 	
-	// private
 	onInitDrag: function() {
-		this.callParent(arguments);
+		var me = this;
+		me.callParent(arguments);
 
-		if (this.dayOverClass) {
-			Ext.select(this.daySelector).removeCls(this.dayOverClass);
+		if (me.dayOverClass) {
+			Ext.select(me.daySelector).removeCls(me.dayOverClass);
 		}
-		if (this.detailPanel) {
-			this.detailPanel.hide();
-		}
+		if (me.detailPanel) me.detailPanel.hide();
 	},
 	
 	// private
 	onMoreClick: function(dt) {
-		if (!this.detailPanel) {
-			this.detailPanel = Ext.create('Ext.Panel', {
-				id: this.id + '-details-panel',
+		var me = this;
+		if (!me.detailPanel) {
+			me.detailPanel = Ext.create('Ext.Panel', {
+				id: me.id + '-details-panel',
 				title: Ext.Date.format(dt, 'F j'),
 				layout: 'fit',
 				floating: true,
@@ -487,43 +470,39 @@ Ext.define('Sonicle.calendar.view.Month', {
 					}],
 				items: {
 					xtype: 'monthdaydetailview',
-					id: this.id + '-details-view',
+					id: me.id + '-details-view',
 					date: dt,
-					view: this,
-					store: this.store,
+					view: me,
+					store: me.store,
 					listeners: {
-						'eventsrendered': Ext.bind(this.onDetailViewUpdated, this)
+						'eventsrendered': Ext.bind(me.onDetailViewUpdated, me)
 					}
 				}
 			});
+		} else {
+			me.detailPanel.setTitle(Ext.Date.format(dt, 'F j'));
 		}
-		else {
-			this.detailPanel.setTitle(Ext.Date.format(dt, 'F j'));
-		}
-		this.detailPanel.getComponent(this.id + '-details-view').update(dt);
+		me.detailPanel.getComponent(me.id + '-details-view').update(dt);
 	},
 	
-	// private
 	onDetailViewUpdated: function(view, dt, numEvents) {
-		var p = this.detailPanel,
-				dayEl = this.getDayEl(dt),
+		var me = this,
+				p = me.detailPanel,
+				dayEl = me.getDayEl(dt),
 				box = dayEl.getBox();
 		
-		p.setWidth(Math.max(box.width, this.morePanelMinWidth));
+		p.setWidth(Math.max(box.width, me.morePanelMinWidth));
 		p.show();
 		p.getEl().alignTo(dayEl, 't-t?');
 	},
 	
-	// private
 	onHide: function() {
-		this.callParent(arguments);
+		var me = this;
+		me.callParent(arguments);
 
-		if (this.detailPanel) {
-			this.detailPanel.hide();
-		}
+		if (me.detailPanel) me.detailPanel.hide();
 	},
 	
-	// private
 	onClick: function(e, t) {
 		var me = this, el, date;
 		if (me.detailPanel) me.detailPanel.hide();
@@ -552,13 +531,13 @@ Ext.define('Sonicle.calendar.view.Month', {
 		}
 	},
 	
-	// private
 	handleDayMouseEvent: function(e, t, type) {
-		var el = e.getTarget(this.weekLinkSelector, 3, true);
-		if (el && this.weekLinkOverClass) {
-			el[type === 'over' ? 'addCls' : 'removeCls'](this.weekLinkOverClass);
+		var me = this,
+				el = e.getTarget(me.weekLinkSelector, 3, true);
+		if (el && me.weekLinkOverClass) {
+			el[type === 'over' ? 'addCls' : 'removeCls'](me.weekLinkOverClass);
 			return;
 		}
-		this.callParent(arguments);
+		me.callParent(arguments);
 	}
 });

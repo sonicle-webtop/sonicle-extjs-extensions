@@ -1,12 +1,9 @@
-/**S
- * @class Sonicle.calendar.view.DayBody
- * @extends Sonicle.calendar.view.AbstractCalendar
- * <p>This is the scrolling container within the day and week views where non-all-day events are displayed.
- * Normally you should not need to use this class directly -- instead you should use {@link Sonicle.calendar.DayView DayView}
- * which aggregates this class and the {@link Sonicle.calendar.DayHeaderView DayHeaderView} into the single unified view
- * presented by {@link Sonicle.calendar.CalendarPanel CalendarPanel}.</p>
- * @constructor
- * @param {Object} config The config object
+/**
+ * This is the scrolling container within the day and week views where 
+ * non-all-day events are displayed. Normally you should not need to use this 
+ * class directly -- instead you should use {@link Sonicle.calendar.view.Day DayView} 
+ * which aggregates this class and the {@link Sonicle.calendar.view.DayHeader DayHeaderView} 
+ * into the single unified view presented by {@link Sonicle.calendar.Panel CalendarPanel}.
  */
 Ext.define('Sonicle.calendar.view.DayBody', {
 	extend: 'Sonicle.calendar.view.AbstractCalendar',
@@ -19,9 +16,17 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		'Sonicle.calendar.dd.DayDropZone'
 	],
 	
-	//private
-	dayColumnElIdDelimiter: '-day-col-',
 	hourIncrement: 60,
+	
+	dayColumnElIdDelimiter: '-day-col-',
+	
+	config: {
+		/**
+		 * @cfg {Boolean} showNowMarker
+		 * `true` to show a marker on the view that equates to the current local time.
+		 */
+		showNowMarker: true
+	},
 	
 	/**
 	 * @event beforeeventresize
@@ -66,18 +71,32 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 	 * @param {Ext.core.Element} el The Element that was clicked on
 	 * @param {Ext.event.Event} evt The raw event object.
 	 */
-
+	
+	$nowMarkerCls: 'so-'+'cal-now-marker',
+	slotTicks: 5,
+	slotsPerHour: null, // calculated below
+	
+	constructor: function(cfg) {
+		var me = this;
+		me.slotsPerHour = 60 / me.slotTicks;
+		me.callParent([cfg]);
+	},
+	
 	initComponent: function() {
 		var me = this;
 		me.callParent(arguments);
 
-		if (me.readOnly === true)
-			me.enableEventResize = false;
+		if (me.readOnly === true) me.enableEventResize = false;
 		me.incrementsPerHour = me.hourIncrement / me.ddIncrement;
 		me.minEventHeight = me.minEventDisplayMinutes / (me.hourIncrement / me.hourHeight);
 	},
 	
-	//private
+	doDestroy: function() {
+		var me = this;
+		me.setShowNowMarker(false);
+		me.callParent();
+	},
+	
 	initDD: function() {
 		var me = this, cfg = {
 			use24HourTime: me.use24HourTime,
@@ -110,7 +129,28 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		cfg));
 	},
 	
-	//private
+	updateShowNowMarker: function(showNowMarker) {
+		var me = this,
+				markerId = me.nowMarkerId();
+		
+		clearInterval(me.showNowInterval);
+		me.showNowInterval = null;
+		Ext.destroy(Ext.fly(markerId));
+		
+		if (showNowMarker) {
+			if (!me.isConfiguring) me.checkNowMarker();
+			me.showNowInterval = Ext.interval(me.checkNowMarker, 300000, me); // 5 mins 
+		}
+	},
+	
+	renderTemplate: function() {
+		var me = this;
+		me.callParent();
+		if (me.tpl) {
+			me.checkNowMarker();
+		}
+	},
+	
 	refresh: function(reloadData) {
 		var me = this;
 		//		top = me.el.getScroll().top;
@@ -138,9 +178,8 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 	 * <p>Note that this method should not generally need to be called directly as scroll position is managed internally.</p>
 	 */
 	scrollTo: function(y, defer) {
-		var me = this;
-		//console.log('scrollTo');
-		defer = defer || (Ext.isIE || Ext.isOpera);
+		var me = this,
+				defer = defer || (Ext.isIE || Ext.isOpera);
 		if (defer) {
 			Ext.defer(function() {
 				me.el.scrollTo('top', y, true);
@@ -152,7 +191,6 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		}
 	},
 	
-	// private
 	afterRender: function() {
 		var me = this;
 		if (!me.tpl) {
@@ -175,7 +213,7 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		}
 		me.tpl.compile();
 		me.addCls('ext-cal-body-ct');
-
+		
 		me.callParent(arguments);
 		
 		// default scroll position to scrollStartHour (7am by default) or min view hour if later
@@ -184,18 +222,15 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		if (scrollStart > 0) me.scrollTo(scrollStart * me.hourHeight, true);
 	},
 	
-	// private
 	forceSize: Ext.emptyFn,
 	
-	// private (called from DayViewDropZone)
 	onEventResize: function(rec, data) {
 		var me = this,
-				soDate = Sonicle.Date,
-				start = Sonicle.calendar.data.EventMappings.StartDate.name,
-				end = Sonicle.calendar.data.EventMappings.EndDate.name;
+				SoDate = Sonicle.Date,
+				EM = Sonicle.calendar.data.EventMappings;
 
-		if (soDate.compare(rec.data[start], data.StartDate) === 0 &&
-				soDate.compare(rec.data[end], data.EndDate) === 0) {
+		if (SoDate.compare(rec.data[EM.StartDate.name], data.StartDate) === 0 &&
+				SoDate.compare(rec.data[EM.EndDate.name], data.EndDate) === 0) {
 			// no changes
 			return;
 		}
@@ -207,18 +242,19 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 	
 	doEventResize: function(rec, data) {
 		var me = this,
-				start = Sonicle.calendar.data.EventMappings.StartDate.name,
-				end = Sonicle.calendar.data.EventMappings.EndDate.name;
+				EM = Sonicle.calendar.data.EventMappings;
 		
-		rec.set(start, data.StartDate);
-		rec.set(end, data.EndDate);
+		rec.set(EM.StartDate.name, data.StartDate);
+		rec.set(EM.EndDate.name, data.EndDate);
 		rec.commit();
 		
 		me.fireEvent('eventupdate', this, rec);
 		me.fireEvent('eventresize', this, rec);
 	},
 	
-	// inherited docs
+	/**
+	 * @protected
+	 */
 	getEventBodyMarkup: function() {
 		if (!this.eventBodyMarkup) {
 			this.eventBodyMarkup = [
@@ -246,7 +282,9 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		return this.eventBodyMarkup;
 	},
 	
-	// inherited docs
+	/**
+	 * @protected
+	 */
 	getEventTemplate: function() {
 		var me = this;
 		if (!me.eventTpl) {
@@ -320,7 +358,6 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		return this.eventAllDayTpl;
 	},
 	
-	// private
 	getTemplateEventData: function(evt, date) {
 		var me = this,
 				soDate = Sonicle.Date,
@@ -380,7 +417,6 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		return Ext.applyIf(data, evt);
 	},
 	
-	// private
 	getEventPositionOffsets: function() {
 		return {
 			top: 0,
@@ -388,7 +424,6 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		};
 	},
 	
-	// private
 	getTemplateEventBox: function(start, end) {
 		var me = this,
 				heightFactor = me.hourHeight / me.hourIncrement,
@@ -396,14 +431,14 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 				endOffset = Math.min(end.getHours() - me.viewStartHour, me.viewEndHour - me.viewStartHour),
 				startMins = startOffset * me.hourIncrement,
 				endMins = endOffset * me.hourIncrement,
-				viewEndDt = Sonicle.Date.add(Ext.Date.clone(end), {hours: me.viewEndHour, clearTime: true}),
+				viewEndDt = Ext.Date.clearTime(Sonicle.Date.add(end, {hours: me.viewEndHour})),
 				evtOffsets = this.getEventPositionOffsets();
 		
-		if(start.getHours() >= me.viewStartHour) {
+		if (start.getHours() >= me.viewStartHour) {
 			// only add the minutes if the start is visible, otherwise it offsets the event incorrectly
 			startMins += start.getMinutes();
 		}
-		if(end <= viewEndDt) {
+		if (end <= viewEndDt) {
 			// only add the minutes if the end is visible, otherwise it offsets the event incorrectly
 			endMins += end.getMinutes();
 		}
@@ -416,106 +451,99 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		};
 	},
 	
-	// private
 	renderItems: function() {
 		var me = this,
+				SoDate = Sonicle.Date,
 				EM = Sonicle.calendar.data.EventMappings,
 				day = 0,
-				evts = [],
-				ev,
-				d,
-				ct,
-				item,
-				ad,
-				span,
-				date,
-				i,
-				j,
-				l,
-				emptyCells, skipped,
-				evt,
-				evt2,
-				overlapCols,
-				prevCol,
-				colWidth,
-				evtWidth,
-				markup,
-				target;
+				evts = [], evt;
 		
 		for (; day < me.dayCount; day++) {
-			ev = emptyCells = skipped = 0;
-			d = me.eventGrid[0][day];
-			ct = d ? d.length : 0;
-
+			var ev = 0,
+					d = me.eventGrid[0][day],
+					ct = d ? d.length : 0;
+			
 			for (; ev < ct; ev++) {
 				evt = d[ev];
-				if(!evt) continue;
+				if (!evt) continue;
 				
-				item = evt.data || evt.event.data;
-				ad = item[EM.IsAllDay.name] === true;
-				span = me.isEventSpanning(evt.event || evt);
+				var item = evt.data || evt.event.data,
+						ad = item[EM.IsAllDay.name] === true,
+						span = me.isEventSpanning(evt.event || evt);
+				
 				//TODO: 24h threshold as config
-				if(ad || (span && (me.eventDurationInHours(evt.event || evt) >= 24))) continue; // this event is already rendered in the header view
+				if (ad || (span && (me.eventDurationInHours(evt.event || evt) >= 24))) {
+					// this event is already rendered in the header view
+					continue; 
+				}
 				
-				date = Sonicle.Date.add(me.viewStart, {days: day});
 				Ext.apply(item, {
 					cls: 'ext-cal-ev',
 					_positioned: true
 				});
 				evts.push({
-					date: date,
-					data: me.getTemplateEventData(item, date)
+					data: me.getTemplateEventData(item, evt),
+					date: SoDate.add(me.viewStart, {days: day})
 				});
 			}
 		}
 		
 		// overlapping event pre-processing loop
-		i = j = overlapCols = prevCol = 0;
-		l = evts.length;
-		for (; i < l; i++) {
+		var l = evts.length,
+				overlapCols = [],
+				evt2,
+				dt,
+				i, j;
+		
+		for (i=0; i<l; i++) {
 			evt = evts[i].data;
 			evt2 = null;
-			prevCol = overlapCols;
-			for (j = 0; j < l; j++) {
+			dt = evt[EM.StartDate.name].getDate();
+			
+			for (j=0; j<l; j++) {
 				if (i === j) continue;
+				
 				evt2 = evts[j].data;
-				if (this.isOverlapping(evt, evt2)) {
-					evt._overlap = (evt._overlap === undefined) ? 1 : evt._overlap + 1;
+				if (me.isOverlapping(evt, evt2)) {
+					evt._overlap = evt._overlap === undefined ? 1 : evt._overlap+1;
 					if (i < j) {
-						if (evt._overcol === undefined) {
-							evt._overcol = 0;
-						}
+						if (evt._overcol === undefined) evt._overcol = 0;
 						evt2._overcol = evt._overcol + 1;
-						overlapCols = Math.max(overlapCols, evt2._overcol);
+						overlapCols[dt] = overlapCols[dt] ? Math.max(overlapCols[dt], evt2._overcol) : evt2._overcol;
 					}
 				}
 			}
 		}
-
+		
 		// rendering loop
-		for (i = 0; i < l; i++) {
+		for (i=0; i<l; i++) {
 			evt = evts[i].data;
+			dt = evt[EM.StartDate.name].getDate();
+			
 			if (evt._overlap !== undefined) {
-				colWidth = 100 / (overlapCols + 1);
-				evtWidth = 100 - (colWidth * evt._overlap);
-
+				var colWidth = 100 / (overlapCols[dt]+1),
+						evtWidth = 100 - (colWidth * evt._overlap);
+				
 				evt._width = colWidth;
 				evt._left = colWidth * evt._overcol;
 			}
-			markup = this.getEventTemplate().apply(evt);
-			target = this.id + '-day-col-' + Ext.Date.format(evts[i].date, 'Ymd');
-			Ext.core.DomHelper.append(target, markup);
+			
+			var markup = me.getEventTemplate().apply(evt),
+					target = me.id + '-day-col-' + Ext.Date.format(evts[i].date, 'Ymd');
+			Ext.DomHelper.append(target, markup);
 		}
 		
-		this.fireEvent('eventsrendered', this);
+		me.fireEvent('eventsrendered', me);
 	},
 	
-	// private
+	getDayColumn: function(date) {
+		return this.el.down('#' + this.tpl.dayColumnId(date));
+	},
+	
 	getDayEl: function(dt) {
 		return Ext.get(this.getDayId(dt));
 	},
 	
-	// private
 	getDayId: function(dt) {
 		if (Ext.isDate(dt)) {
 			dt = Ext.Date.format(dt, 'Ymd');
@@ -523,7 +551,6 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		return this.id + this.dayColumnElIdDelimiter + dt;
 	},
 	
-	// private
 	getDaySize: function() {
 		var box = this.el.down('.ext-cal-day-col-inner').getBox();
 		return {
@@ -532,7 +559,6 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		};
 	},
 	
-	// private
 	getDayAt: function(x, y) {
 		var me = this,
 				xoffset = me.el.down('.ext-cal-day-times').getWidth(),
@@ -567,7 +593,6 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		};
 	},
 	
-	// private
 	onClick: function(e, t) {
 		var me = this, el, date, day;
 		
@@ -577,10 +602,10 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		if (e.getTarget('.ext-cal-day-times', 3) !== null) return;
 		
 		if (el = e.getTarget('td', 3)) {
-			if (el.id && el.id.indexOf(this.dayElIdDelimiter) > -1) {
-				date = this.getDateFromId(el.id, this.dayElIdDelimiter);
+			if (el.id && el.id.indexOf(me.dayElIdDelimiter) > -1) {
+				date = me.getDateFromId(el.id, me.dayElIdDelimiter);
 				// We handle dayclick/daydblclick in same way...
-				this.fireEvent('day'+e.type, this, Ext.Date.parseDate(date, 'Ymd'), true, Ext.get(this.getDayId(date, true)), e);
+				me.fireEvent('day'+e.type, me, Ext.Date.parseDate(date, 'Ymd'), true, Ext.get(me.getDayId(date, true)), e);
 				return;
 			}
 		}
@@ -597,7 +622,7 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		var me = this, el, day;
 		
 		// The superclass handled the click already so exit
-		if (Sonicle.calendar.view.DayBody.superclass.onContextMenu.apply(this, arguments)) return;
+		if (Sonicle.calendar.view.DayBody.superclass.onContextMenu.apply(me, arguments)) return;
 		
 		if (el = e.getTarget('.ext-cal-day-col-gutter', 2, true)) {
 			day = me.getDayAt(e.getX(), e.getY());
@@ -607,9 +632,87 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		}
 	},
 	
-	// inherited docs
+	getVisibleBounds: function() {
+		var me = this,
+				ExDate = Ext.Date,
+				bounds = me.callParent(arguments);
+		return {
+			start: ExDate.add(bounds.start, ExDate.HOUR, me.viewStartHour, true),
+			end: ExDate.subtract(bounds.end, ExDate.HOUR, 24 - me.viewEndHour, true)
+		};
+	},
+	
+	/**
+	 * @protected
+	 */
 	isActiveView: function() {
-		var calendarPanel = this.ownerCalendarPanel;
-		return (calendarPanel && calendarPanel.getActiveView().isDayView);
+		var pnl = this.ownerCalendarPanel;
+		return (pnl && pnl.getActiveView().isDayView);
+	},
+	
+	privates: {
+		nowMarkerId: function() {
+			return this.id + '-now-marker';
+		},
+		
+		checkNowMarker: function() {
+			if (this.getShowNowMarker()) {
+				this.doCheckNowMarker();
+			}
+		},
+		
+		/**
+		 * Checks the position of the now marker, hides/shows it in the correct 
+		 * place as required. Does not check the existence of the config flag, 
+		 * assumes it's true at this point.
+		 */
+		doCheckNowMarker: function() {
+			var me = this,
+					XDate = Ext.Date,
+					EU = Sonicle.calendar.util.EventUtils,
+					minSlotHeight = me.hourHeight / me.slotsPerHour,
+					days = me.dayCount,
+					startHour = me.viewStartHour,
+					endHour = me.viewEndHour,
+					markerId = me.nowMarkerId(),
+					now = EU.roundDate(EU.getLocalNow(), me.slotTicks * 1000),
+					y = now.getFullYear(),
+					m = now.getMonth(),
+					d = now.getDate(),
+					h = now.getHours(),
+					min = now.getMinutes(),
+					vbounds, dt, end,
+					offset, pos, i;
+			
+			Ext.destroy(Ext.fly(markerId));
+			if (!me.el || !me.el.isVisible(true)) return;
+			
+			vbounds = me.getVisibleBounds();
+			dt = EU.utcToLocal(vbounds.start);
+			end = EU.utcToLocal(vbounds.end);
+
+			if (dt <= now && now < end) {
+				for (i = 0; i < days; ++i) {
+					if (dt.getFullYear() === y && dt.getMonth() === m && dt.getDate() === d) {
+						// Same day, check time ranges 
+						if (startHour <= h && (h < endHour || h === endHour && min === 0)) {
+							dt.setHours(startHour);
+							offset = XDate.diff(dt, now, XDate.MINUTE);
+							pos = (offset / me.slotTicks) * minSlotHeight;
+						}
+						break;
+					}
+					dt = XDate.add(dt, XDate.DAY, 1, true);
+				}
+			}
+
+			if (pos !== undefined) {
+				Ext.fly(me.getDayColumn(dt)).createChild({
+					id: markerId,
+					cls: me.$nowMarkerCls,
+					style: { top: pos + 'px' }
+				}, null, true);
+			}
+		}
 	}
 });

@@ -1,11 +1,7 @@
 /**
- * @class Sonicle.calendar.view.Week
- * @extends Sonicle.calendar.DayView
- * <p>Displays a calendar view by week. This class does not usually need to be used directly as you can
- * use a {@link Sonicle.calendar.CalendarPanel CalendarPanel} to manage multiple calendar views at once including
- * the week view.</p>
- * @constructor
- * @param {Object} config The config object
+ * Displays a calendar view by week. This class does not usually need to be 
+ * used directly as you can use a {@link Sonicle.calendar.Panel CalendarPanel} to manage 
+ * multiple calendar views at once including the week view.
  */
 Ext.define('Sonicle.calendar.view.Week', {
     extend: 'Sonicle.calendar.view.Day',

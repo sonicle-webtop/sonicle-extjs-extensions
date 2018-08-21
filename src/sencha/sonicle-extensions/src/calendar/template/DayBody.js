@@ -14,6 +14,8 @@ Ext.define('Sonicle.calendar.template.DayBody', {
 		'Sonicle.Date'
 	],
 	
+	$dayColumnElIdDelimiter: '-day-col-',
+	
 	constructor: function (cfg) {
 		Ext.apply(this, cfg);
 
@@ -72,7 +74,7 @@ Ext.define('Sonicle.calendar.template.DayBody', {
 	},
 	
 	// private
-	applyTemplate: function (o) {
+	applyTemplate: function(o) {
 		var me = this,
 				XDate = Ext.Date,
 				SoDate = Sonicle.Date,
@@ -116,7 +118,12 @@ Ext.define('Sonicle.calendar.template.DayBody', {
 		}, []).join('');
 	},
 	
-	apply: function (values) {
+	apply: function(values) {
 		return this.applyTemplate.apply(this, arguments);
+	},
+	
+	dayColumnId: function(date) {
+		var me = this;
+		return me.id + me.$dayColumnElIdDelimiter + Ext.Date.format(date, 'Ymd');
 	}
 });

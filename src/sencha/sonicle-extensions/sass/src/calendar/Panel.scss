@@ -485,6 +485,20 @@ td.ext-cal-dtitle-today div {
     color: #fff;
     -moz-user-select: none;
 }
+.so-cal-now-marker {
+	position: absolute;
+	left: 0;
+	right: 0;
+	z-index: 1000;
+}
+.ext-cal-day-col .so-cal-now-marker {
+	margin: 0 0 0 10px;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+	opacity: 0.7;
+	border-width: 2px 0 0 0;
+	border-style: solid;
+	border-color: #fa3e3e
+}
 .ext-cal-evt dl {
     margin: 0;
     border: 0 1px;

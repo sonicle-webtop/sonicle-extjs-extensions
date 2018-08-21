@@ -36,7 +36,7 @@ Ext.define('Sonicle.calendar.dd.DropZone', {
 
         if (!me.dragStartDate || !me.dragEndDate || (SoDate.diffDays(start, me.dragStartDate) !== 0) || (SoDate.diffDays(end, me.dragEndDate) !== 0)) {
             me.dragStartDate = start;
-			me.dragEndDate = SoDate.add(end, {hours: 12, clearTime: true});
+			me.dragEndDate = XDate.clearTime(SoDate.add(end, {hours: 12}));
             me.shim(start, end);
 			
             var range = XDate.format(start, me.dateFormat);

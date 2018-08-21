@@ -1,14 +1,12 @@
 /**
- * @class Sonicle.calendar.view.AbstractCalendar
- * @extends Ext.BoxComponent
- * <p>This is an abstract class that serves as the base for other calendar views. This class is not
- * intended to be directly instantiated.</p>
- * <p>When extending this class to create a custom calendar view, you must provide an implementation
- * for the <code>renderItems</code> method, as there is no default implementation for rendering events
- * The rendering logic is totally dependent on how the UI structures its data, which
- * is determined by the underlying UI template (this base class does not have a template).</p>
- * @constructor
- * @param {Object} config The config object
+ * This is an abstract class that serves as the base for other calendar views. 
+ * This class is not intended to be directly instantiated.
+ * 
+ * When extending this class to create a custom calendar view, you must provide 
+ * an implementation for the <tt>renderItems</tt> method, as there is no default 
+ * implementation for rendering events.
+ * The rendering logic is totally dependent on how the UI structures its data, 
+ * which is determined by the underlying UI template (this base class does not have a template).
  */
 Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	extend: 'Ext.Component',
@@ -454,10 +452,8 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	 * @param {Sonicle.calendar.view.AbstractCalendar} this
 	 * @param {Sonicle.calendar.EventRecord} rec The {@link Sonicle.calendar.EventRecord record} for the event that was deleted
 	 */
-
-	// must be implemented by a subclass
-	// private
-	initComponent: function() {
+	
+	initComponent: function(){
 		var me = this;
 		me.setStartDate(me.startDate || new Date());
 		
@@ -467,7 +463,6 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 			xtype: 'editor',
 			updateEl: false,
 			hideEl: false,
-			
 			alignment: 'c-c',
 			minHeight: 24,
 			autoSize: {
@@ -1179,15 +1174,15 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	 */
 	setStartDate: function (start, reload) {
 		var me = this,
-				eDate = Ext.Date,
-				cloneDt = eDate.clone,
-				cloStart = eDate.clone(start),
+				XDate = Ext.Date,
+				cloneDt = XDate.clone,
+				cloStart = XDate.clone(start),
 				cloStartDate = (me.startDate) ? cloneDt(me.startDate) : null,
 				cloViewStart = (me.viewStart) ? cloneDt(me.viewStart) : null,
 				cloViewEnd = (me.viewEnd) ? cloneDt(me.viewEnd) : null;
 		
 		if(me.fireEvent('beforedatechange', me, cloStartDate, cloStart, cloViewStart, cloViewEnd) !== false) {
-			me.startDate = eDate.clearTime(start);
+			me.startDate = XDate.clearTime(start);
 			me.setViewBounds(start);
 			
 			if(me.ownerCalendarPanel && me.ownerCalendarPanel.startDate !== me.startDate) {
@@ -1204,9 +1199,10 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	// private
 	setViewBounds: function (startDate) {
 		var me = this,
+				XDate = Ext.Date,
+				SoDate = Sonicle.Date,
 				start = startDate || me.startDate,
-				offset = start.getDay() - me.startDay,
-				soDate = Sonicle.Date;
+				offset = start.getDay() - me.startDay;
 
 		if (offset < 0) {
 			// if the offset is negative then some days will be in the previous week so add a week to the offset
@@ -1217,22 +1213,22 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 			case 0:
 			case 1:
 				me.viewStart = ((me.dayCount < 7) && !me.startDayIsStatic) ? start
-						: soDate.add(start, {days: -offset, clearTime: true});
-				me.viewEnd = soDate.add(me.viewStart, {days: me.dayCount || 7, seconds: -1});
+						: XDate.clearTime(SoDate.add(start, {days: -offset}));
+				me.viewEnd = SoDate.add(me.viewStart, {days: me.dayCount || 7, seconds: -1});
 				return;
 
 			case -1:
 				// auto by month
-				start = Ext.Date.getFirstDateOfMonth(start);
+				start = XDate.getFirstDateOfMonth(start);
 				offset = start.getDay() - me.startDay;
 				if (offset < 0) {
 					// if the offset is negative then some days will be in the previous week so add a week to the offset
 					offset += 7;
 				}
-				me.viewStart = soDate.add(start, {days: -offset, clearTime: true});
+				me.viewStart = XDate.clearTime(SoDate.add(start, {days: -offset}));
 
 				// start from current month start, not view start:
-				var end = soDate.add(start, {months: 1, seconds: -1});
+				var end = SoDate.add(start, {months: 1, seconds: -1});
 
 				// fill out to the end of the week:
 				offset = me.startDay;
@@ -1241,14 +1237,13 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 					// if the offset is larger than the end day index then the last row will be empty so skip it
 					offset -= 7;
 				}
-				;
 
-				me.viewEnd = soDate.add(end, {days: 6 - end.getDay() + offset});
+				me.viewEnd = SoDate.add(end, {days: 6 - end.getDay() + offset});
 				return;
 
 			default:
-				me.viewStart = soDate.add(start, {days: -offset, clearTime: true});
-				me.viewEnd = soDate.add(me.viewStart, {days: me.weekCount * 7, seconds: -1});
+				me.viewStart = XDate.clearTime(SoDate.add(start, {days: -offset}));
+				me.viewEnd = SoDate.add(me.viewStart, {days: me.weekCount * 7, seconds: -1});
 		}
 	},
 	
@@ -1257,6 +1252,16 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 		return {
 			start: this.viewStart,
 			end: this.viewEnd
+		};
+	},
+	
+	getVisibleBounds: function() {
+		var me = this,
+				ExDate = Ext.Date,
+				EU = Sonicle.calendar.util.EventUtils;
+		return {
+			start: EU.toUtcOffset(ExDate.clearTime(me.viewStart, true)),
+			end: EU.toUtcOffset(ExDate.clearTime(me.viewEnd, true))
 		};
 	},
 	
@@ -1323,11 +1328,9 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	 * @param {Date} dt The date to display
 	 * @return {Date} The new view start date
 	 */
-	moveTo: function (dt, noRefresh) {
+	moveTo: function(dt, /*private*/reload) {
 		if (Ext.isDate(dt)) {
-			this.setStartDate(dt);
-			if (noRefresh !== false)
-				this.refresh();
+			this.setStartDate(dt, reload);
 			return this.startDate;
 		}
 		return dt;
@@ -1337,17 +1340,17 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	 * Updates the view to the next consecutive date(s)
 	 * @return {Date} The new view start date
 	 */
-	moveNext: function (noRefresh) {
-		return this.moveTo(Sonicle.Date.add(this.viewEnd, {days: 1}));
+	moveNext: function(/*private*/reload) {
+		return this.moveTo(Sonicle.Date.add(this.viewEnd, {days: 1}), reload);
 	},
 	
 	/**
 	 * Updates the view to the previous consecutive date(s)
 	 * @return {Date} The new view start date
 	 */
-	movePrev: function (noRefresh) {
-		var days = Sonicle.Date.diffDays(this.viewStart, this.viewEnd) + 1;
-		return this.moveDays(-days, noRefresh);
+	movePrev: function(/*private*/reload) {
+		var me = this, days = Sonicle.Date.diffDays(me.viewStart, me.viewEnd) + 1;
+		return me.moveDays(-days, reload);
 	},
 	
 	/**
@@ -1355,8 +1358,8 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	 * @param {Number} value The number of months (positive or negative) by which to shift the view
 	 * @return {Date} The new view start date
 	 */
-	moveMonths: function (value, noRefresh) {
-		return this.moveTo(Sonicle.Date.add(this.startDate, {months: value}), noRefresh);
+	moveMonths: function (value, /*private*/reload) {
+		return this.moveTo(Sonicle.Date.add(this.startDate, {months: value}), reload);
 	},
 	
 	/**
@@ -1364,8 +1367,8 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	 * @param {Number} value The number of weeks (positive or negative) by which to shift the view
 	 * @return {Date} The new view start date
 	 */
-	moveWeeks: function (value, noRefresh) {
-		return this.moveTo(Sonicle.Date.add(this.startDate, {days: value * 7}), noRefresh);
+	moveWeeks: function (value, /*private*/reload) {
+		return this.moveTo(Sonicle.Date.add(this.startDate, {days: value * 7}), reload);
 	},
 	
 	/**
@@ -1373,16 +1376,16 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	 * @param {Number} value The number of days (positive or negative) by which to shift the view
 	 * @return {Date} The new view start date
 	 */
-	moveDays: function (value, noRefresh) {
-		return this.moveTo(Sonicle.Date.add(this.startDate, {days: value}), noRefresh);
+	moveDays: function (value, /*private*/reload) {
+		return this.moveTo(Sonicle.Date.add(this.startDate, {days: value}), reload);
 	},
 	
 	/**
 	 * Updates the view to show today
 	 * @return {Date} Today's date
 	 */
-	moveToday: function (noRefresh) {
-		return this.moveTo(new Date(), noRefresh);
+	moveToday: function(/*private*/reload) {
+		return this.moveTo(new Date(), reload);
 	},
 	
 	/**

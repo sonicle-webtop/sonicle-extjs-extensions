@@ -1,14 +1,12 @@
 /**
- * @class Sonicle.calendar.view.Day
- * @extends Ext.container.Container
- * <p>Unlike other calendar views, is not actually a subclass of {@link Sonicle.calendar.view.AbstractCalendar AbstractCalendar}.
- * Instead it is a {@link Ext.container.Container Container} subclass that internally creates and manages the layouts of
- * a {@link Sonicle.calendar.DayHeaderView DayHeaderView} and a {@link Sonicle.calendar.DayBodyView DayBodyView}. As such
- * DayView accepts any config values that are valid for DayHeaderView and DayBodyView and passes those through
- * to the contained views. It also supports the interface required of any calendar view and in turn calls methods
- * on the contained views as necessary.</p>
- * @constructor
- * @param {Object} config The config object
+ * Unlike other calendar views, is not actually a subclass of 
+ * {@link Sonicle.calendar.view.AbstractCalendar CalendarView}.
+ * Instead it is a {@link Ext.container.Container Container} subclass that 
+ * internally creates and manages the layouts of a {@link Sonicle.calendar.view.DayHeader DayHeaderView} 
+ * and a {@link Sonicle.calendar.view.DayBody DayBodyView}. As such DayView 
+ * accepts any config values that are valid for DayHeaderView and DayBodyView 
+ * and passes those through to the contained views. It also supports the interface 
+ * required of any calendar view and in turn calls methods on the contained views as necessary.
  */
 Ext.define('Sonicle.calendar.view.Day', {
     extend: 'Ext.container.Container',
@@ -112,14 +110,14 @@ Ext.define('Sonicle.calendar.view.Day', {
 	/**
 	 * @cfg {Integer} viewStartHour
 	 * The hour of the day at which to begin the scrolling body area's times (defaults to 0, which equals early 12am / 00:00).
-	 * Valid values are integers from 0 to 24, but should be less than the value of {@link viewEndHour}.
+	 * Valid values are integers from 0 to 23, but should be less than the value of {@link viewEndHour}.
 	 */
 	viewStartHour: 0,
 	
 	/**
 	 * @cfg {Integer} viewEndHour
 	 * The hour of the day at which to end the scrolling body area's times (defaults to 24, which equals late 12am / 00:00).
-	 * Valid values are integers from 0 to 24, but should be greater than the value of {@link viewStartHour}.
+	 * Valid values are integers from 1 to 24, but should be greater than the value of {@link viewStartHour}.
 	 */
 	viewEndHour: 24,
 	
@@ -199,24 +197,18 @@ Ext.define('Sonicle.calendar.view.Day', {
 	 * (the default), false to hide it.
 	 */
 	showHourSeparator: true,
-    
-    /**
-     * @cfg {Boolean} showTime
-     * True to display the current time in today's box in the calendar, false to not display it (defautls to true)
-     */
-    showTime: true,
 	
-    /**
-     * @cfg {Boolean} showTodayText
-     * True to display the {@link #todayText} string in today's box in the calendar, false to not display it (defautls to true)
-     */
-    showTodayText: true,
+	/**
+	 * @cfg {Boolean} showTime
+	 * True to display the current time in today's box in the calendar, false to not display it (defautls to true)
+	 */
+	showTime: true,
 	
-    /**
-     * @cfg {String} todayText
-     * The text to display in the current day's box in the calendar when {@link #showTodayText} is true (defaults to 'Today')
-     */
-    todayText: 'Today',
+	/**
+	 * @cfg {Boolean} showTodayText
+	 * True to display the {@link #todayText} string in today's box in the calendar, false to not display it (defautls to true)
+	 */
+	showTodayText: true,
 	
 	/**
 	 * @cfg {Boolean} readOnly
@@ -227,47 +219,10 @@ Ext.define('Sonicle.calendar.view.Day', {
 	/**
 	 * @cfg {Boolean} enableEventResize
 	 * True to allow events in the view's scrolling body area to be updated by a resize handle at the
-     * bottom of the event, false to disallow it (defaults to true). If {@link #readOnly} is true event
-     * resizing will be disabled automatically.
+	 * bottom of the event, false to disallow it (defaults to true). If {@link #readOnly} is true event
+	 * resizing will be disabled automatically.
 	 */
 	enableEventResize: true,
-	
-    /**
-     * @cfg {String} ddCreateEventText
-     * The text to display inside the drag proxy while dragging over the calendar to create a new event (defaults to 
-     * 'Create event for {0}' where {0} is a date range supplied by the view)
-     */
-    ddCreateEventText: 'Create event for {0}',
-	
-	/**
-	 * @cfg {String} ddCopyEventText
-	 * The text to display inside the drag proxy while alt-dragging an event to copy it (defaults to
-	 * 'Copy event to {0}' where {0} is the updated event start date/time supplied by the view)
-	 */
-	ddCopyEventText: 'Copy event to {0}',
-	
-    /**
-     * @cfg {String} ddMoveEventText
-     * The text to display inside the drag proxy while dragging an event to reposition it (defaults to 
-     * 'Move event to {0}' where {0} is the updated event start date/time supplied by the view)
-     */
-    ddMoveEventText: 'Move event to {0}',
-	
-	/**
-     * @cfg {String} ddResizeEventText
-     * The string displayed to the user in the drag proxy while dragging the resize handle of an event (defaults to 
-     * 'Update event to {0}' where {0} is the updated event start-end range supplied by the view). Note that 
-     * this text is only used in views
-     * that allow resizing of events.
-     */
-    ddResizeEventText: 'Update event to {0}',
-	
-	/**
-	 * @cfg {String} ddDateFormat
-	 * String used for formatting date in texts ({@link #ddCreateEventText}, {@link #ddCopyEventText} or 
-	 * {@link #ddMoveEventText}) displayed in the drag proxy while dragging an event.
-	 */
-	ddDateFormat: 'n/j',
 	
 	/**
 	 * @cfg {Integer} ddIncrement
@@ -283,47 +238,93 @@ Ext.define('Sonicle.calendar.view.Day', {
 	ddIncrement: 30,
 	
 	/**
+	 * @cfg {String} ddDateFormat
+	 * String used for formatting date in texts ({@link #ddCreateEventText}, {@link #ddCopyEventText} or 
+	 * {@link #ddMoveEventText}) displayed in the drag proxy while dragging an event.
+	 */
+	ddDateFormat: 'n/j',
+	
+    /**
+	 * @cfg {String} todayText
+	 * The text to display in the current day's box in the calendar when {@link #showTodayText} is true (defaults to 'Today')
+	 */
+	todayText: 'Today',
+	
+	/**
+	 * @cfg {String} ddCreateEventText
+	 * The text to display inside the drag proxy while dragging over the calendar to create a new event (defaults to 
+	 * 'Create event for {0}' where {0} is a date range supplied by the view)
+	 */
+	ddCreateEventText: 'Create event for {0}',
+	
+	/**
+	 * @cfg {String} ddCopyEventText
+	 * The text to display inside the drag proxy while alt-dragging an event to copy it (defaults to
+	 * 'Copy event to {0}' where {0} is the updated event start date/time supplied by the view)
+	 */
+	ddCopyEventText: 'Copy event to {0}',
+	
+	/**
+	 * @cfg {String} ddMoveEventText
+	 * The text to display inside the drag proxy while dragging an event to reposition it (defaults to 
+	 * 'Move event to {0}' where {0} is the updated event start date/time supplied by the view)
+	 */
+	ddMoveEventText: 'Move event to {0}',
+	
+	/**
+	 * @cfg {String} ddResizeEventText
+	 * The string displayed to the user in the drag proxy while dragging the resize handle of an event (defaults to 
+	 * 'Update event to {0}' where {0} is the updated event start-end range supplied by the view). Note that 
+	 * this text is only used in views
+	 * that allow resizing of events.
+	 */
+	ddResizeEventText: 'Update event to {0}',
+	
+	/**
 	 * @private
 	 */
 	isDayView: true,
 	
 	constructor: function(cfg) {
-		if(cfg.dayCount) cfg.dayCount = (cfg.dayCount > 7) ? 7 : cfg.dayCount;
+		if (cfg.dayCount) {
+			cfg.dayCount = (cfg.dayCount > 7) ? 7 : cfg.dayCount;
+		}
 		this.callParent([cfg]);
 	},
-    
-    // private
-    initComponent : function(){
-		var me = this;
-        // rendering more than 7 days per view is not supported
-        me.dayCount = me.dayCount > 7 ? 7 : me.dayCount;
-        
-        var cfg = Ext.apply({}, me.initialConfig);
-		cfg.timezoneIconCls = me.timezoneIconCls;
-		cfg.privateIconCls = me.privateIconCls;
-		cfg.reminderIconCls = me.reminderIconCls;
-		cfg.recurrenceIconCls = me.recurrenceIconCls;
-		cfg.recurrenceBrokenIconCls = me.recurrenceBrokenIconCls;
-		cfg.commentsIconCls = me.commentsIconCls;
-		cfg.use24HourTime = me.use24HourTime;
-        cfg.showTime = me.showTime;
-        cfg.showTodatText = me.showTodayText;
-        cfg.todayText = me.todayText;
-        cfg.dayCount = me.dayCount;
-        cfg.weekCount = 1;
-		cfg.readOnly = me.readOnly;
-		cfg.ddIncrement = me.ddIncrement;
-		cfg.minEventDisplayMinutes = me.minEventDisplayMinutes;
+	
+	initComponent: function() {
+		var me = this,
+				icfg, header, body;
 		
-        var header = Ext.applyIf({
-            xtype: 'dayheaderview',
-            id: me.id+'-hd',
+		// rendering more than 7 days per view is not supported
+		me.dayCount = me.dayCount > 7 ? 7 : me.dayCount;
+
+		icfg = Ext.apply({}, me.initialConfig);
+		icfg.timezoneIconCls = me.timezoneIconCls;
+		icfg.privateIconCls = me.privateIconCls;
+		icfg.reminderIconCls = me.reminderIconCls;
+		icfg.recurrenceIconCls = me.recurrenceIconCls;
+		icfg.recurrenceBrokenIconCls = me.recurrenceBrokenIconCls;
+		icfg.commentsIconCls = me.commentsIconCls;
+		icfg.use24HourTime = me.use24HourTime;
+		icfg.showTime = me.showTime;
+		icfg.showTodatText = me.showTodayText;
+		icfg.todayText = me.todayText;
+		icfg.dayCount = me.dayCount;
+		icfg.weekCount = 1;
+		icfg.readOnly = me.readOnly;
+		icfg.ddIncrement = me.ddIncrement;
+		icfg.minEventDisplayMinutes = me.minEventDisplayMinutes;
+
+		header = Ext.applyIf({
+			xtype: 'dayheaderview',
+			id: me.id + '-hd',
 			ownerCalendarPanel: me.ownerCalendarPanel
-        }, cfg);
-        
-        var body = Ext.applyIf({
-            xtype: 'daybodyview',
-            id: me.id+'-bd',
+		}, icfg);
+
+		body = Ext.applyIf({
+			xtype: 'daybodyview',
+			id: me.id + '-bd',
 			ownerCalendarPanel: me.ownerCalendarPanel,
 			enableEventResize: me.enableEventResize,
 			showHourSeparator: me.showHourSeparator,
@@ -334,43 +335,42 @@ Ext.define('Sonicle.calendar.view.Day', {
 			highlightBusinessHours: me.highlightBusinessHours,
 			businessHoursStart: me.businessHoursStart,
 			businessHoursEnd: me.businessHoursEnd
-        }, cfg);
-        
-        me.items = [header, body];
-        me.addCls('ext-cal-dayview ext-cal-ct');
-        
-        me.callParent(arguments);
-    },
+		}, icfg);
+
+		me.items = [header, body];
+		me.addCls('ext-cal-dayview ext-cal-ct');
+
+		me.callParent(arguments);
+	},
     
-    // private
-    afterRender : function(){
-        this.callParent(arguments);
-        
-        this.header = Ext.getCmp(this.id+'-hd');
-        this.body = Ext.getCmp(this.id+'-bd');
-        this.body.on('eventsrendered', this.forceSize, this);
-    },
-    
-    // private
-    refresh : function(){
-        this.header.refresh();
-        this.body.refresh();
-    },
-    
-    // private
-    forceSize: function() {
+    afterRender: function() {
 		var me = this;
-		
-        // The defer call is mainly for good ol' IE, but it doesn't hurt in
-        // general to make sure that the window resize is good and done first
-        // so that we can properly calculate sizes.
-        Ext.defer(function() {
-            var ct = me.el.up('.x-panel-body'),
+		me.callParent(arguments);
+
+		me.header = Ext.getCmp(me.id + '-hd');
+		me.body = Ext.getCmp(me.id + '-bd');
+		me.body.on('eventsrendered', me.forceSize, me);
+	},
+    
+    refresh: function(reloadData) {
+		if (reloadData === undefined) reloadData = false;
+		this.header.refresh(reloadData);
+		this.body.refresh(reloadData);
+	},
+    
+	forceSize: function() {
+		var me = this;
+
+		// The defer call is mainly for good ol' IE, but it doesn't hurt in
+		// general to make sure that the window resize is good and done first
+		// so that we can properly calculate sizes.
+		Ext.defer(function () {
+			var ct = me.el.up('.x-panel-body'),
 					hd = me.el.down('.ext-cal-day-header'),
 					bH = ct ? ct.getHeight() - hd.getHeight() : false;
-            
-			if(bH) {
-				if(bH < me.minBodyHeight) {
+
+			if (bH) {
+				if (bH < me.minBodyHeight) {
 					bH = me.minBodyHeight;
 					me.addCls('ext-cal-overflow-y');
 				} else {
@@ -379,98 +379,112 @@ Ext.define('Sonicle.calendar.view.Day', {
 				//this.el.down('.ext-cal-body-ct').setHeight(h);
 				me.el.down('.ext-cal-body-ct').setHeight(bH - 1);
 			}
-        }, Ext.isIE ? 1 : 0, this);
-    },
-    
-    // private
-    onResize : function() {
-        this.callParent(arguments);
-        this.forceSize();
-    },
-    
-    // private
-    getViewBounds : function(){
-        return this.header.getViewBounds();
-    },
-    
-    /**
-     * Returns the start date of the view, as set by {@link #setStartDate}. Note that this may not 
-     * be the first date displayed in the rendered calendar -- to get the start and end dates displayed
-     * to the user use {@link #getViewBounds}.
-     * @return {Date} The start date
-     */
-    getStartDate : function(){
-        return this.header.getStartDate();
-    },
+		}, Ext.isIE ? 1 : 0, this);
+	},
 
+	onResize: function() {
+		var me = this;
+		me.callParent(arguments);
+		me.forceSize();
+		Ext.defer(me.refresh, Ext.isIE ? 1 : 0, me); //IE needs the defer
+	},
+    
+	getViewBounds: function() {
+		return this.header.getViewBounds();
+	},
+	
+	/**
+	 * Returns the start date of the view, as set by {@link #setStartDate}. Note that this may not 
+	 * be the first date displayed in the rendered calendar -- to get the start and end dates displayed
+	 * to the user use {@link #getViewBounds}.
+	 * @return {Date} The start date
+	 */
+	getStartDate: function() {
+		return this.header.getStartDate();
+	},
+	
+	/**
+	 * Sets the start date used to calculate the view boundaries to display. The displayed view will be the 
+	 * earliest and latest dates that match the view requirements and contain the date passed to this function.
+	 * @param {Date} dt The date used to calculate the new view boundaries
+	 */
+	setStartDate: function(dt) {
+		this.header.setStartDate(dt, true);
+		this.body.setStartDate(dt, true);
+	},
+	
+    renderItems: function() {
+		this.header.renderItems();
+		this.body.renderItems();
+	},
+	
+	/**
+	 * Returns true if the view is currently displaying today's date, else false.
+	 * @return {Boolean} True or false
+	 */
+	isToday: function() {
+		return this.header.isToday();
+	},
+    
     /**
-     * Sets the start date used to calculate the view boundaries to display. The displayed view will be the 
-     * earliest and latest dates that match the view requirements and contain the date passed to this function.
-     * @param {Date} dt The date used to calculate the new view boundaries
-     */
-    setStartDate: function(dt){
-        this.header.setStartDate(dt, true);
-        this.body.setStartDate(dt, true);
-    },
+	 * Updates the view to contain the passed date
+	 * @param {Date} dt The date to display
+	 * @return {Date} The new view start date
+	 */
+	moveTo: function(dt) {
+		var me = this,
+				dt = me.header.moveTo(dt, false);
+		me.body.moveTo(dt, true);
+		me.forceSize();
+		return dt;
+	},
+	
+	/**
+	 * Updates the view to the next consecutive date(s)
+	 * @return {Date} The new view start date
+	 */
+	moveNext: function() {
+		var me = this,
+				dt = me.header.moveNext(false);
+		me.body.moveNext(true);
+		me.forceSize();
+		return dt;
+	},
+    
+    /**
+	 * Updates the view to the previous consecutive date(s)
+	 * @return {Date} The new view start date
+	 */
+	movePrev: function() {
+		var me = this,
+				dt = me.header.movePrev(false);
+		me.body.movePrev(true);
+		me.forceSize();
+		return dt;
+	},
+	
+	/**
+	 * Shifts the view by the passed number of days relative to the currently set date
+	 * @param {Number} value The number of days (positive or negative) by which to shift the view
+	 * @return {Date} The new view start date
+	 */
+	moveDays: function(value) {
+		var me = this,
+				dt = me.header.moveDays(false);
+		me.body.moveDays(value, true);
+		me.forceSize();
+		return dt;
+	},
 
-    // private
-    renderItems: function(){
-        this.header.renderItems();
-        this.body.renderItems();
-    },
-    
-    /**
-     * Returns true if the view is currently displaying today's date, else false.
-     * @return {Boolean} True or false
-     */
-    isToday : function(){
-        return this.header.isToday();
-    },
-    
-    /**
-     * Updates the view to contain the passed date
-     * @param {Date} dt The date to display
-     * @return {Date} The new view start date
-     */
-    moveTo : function(dt, noRefresh){
-        this.header.moveTo(dt, noRefresh);
-        return this.body.moveTo(dt, noRefresh);
-    },
-    
-    /**
-     * Updates the view to the next consecutive date(s)
-     * @return {Date} The new view start date
-     */
-    moveNext : function(noRefresh){
-        this.header.moveNext(noRefresh);
-        return this.body.moveNext(noRefresh);
-    },
-    
-    /**
-     * Updates the view to the previous consecutive date(s)
-     * @return {Date} The new view start date
-     */
-    movePrev : function(noRefresh){
-        this.header.movePrev(noRefresh);
-        return this.body.movePrev(noRefresh);
-    },
-
-    /**
-     * Shifts the view by the passed number of days relative to the currently set date
-     * @param {Number} value The number of days (positive or negative) by which to shift the view
-     * @return {Date} The new view start date
-     */
-    moveDays : function(value, noRefresh){
-        this.header.moveDays(value, noRefresh);
-        return this.body.moveDays(value, noRefresh);
-    },
-    
-    /**
-     * Updates the view to show today
-     * @return {Date} Today's date
-     */
-    moveToday : function(noRefresh){
-        this.header.moveToday(noRefresh);
-        return this.body.moveToday(noRefresh);
-    }
+	/**
+	 * Updates the view to show today
+	 * @return {Date} Today's date
+	 */
+	moveToday: function() {
+		var me = this,
+				dt = me.header.moveToday(false);
+		me.body.moveToday(true);
+		me.forceSize();
+		return dt;
+	}
 });

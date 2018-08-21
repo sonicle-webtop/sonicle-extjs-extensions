@@ -55,17 +55,17 @@ Ext.define('Sonicle.calendar.view.MonthDayDetail', {
     refresh: function() {
         if (!this.rendered) return;
         var me = this,
-				eDate = Ext.Date,
-				soDate = Sonicle.Date,
+				XDate = Ext.Date,
+				SoDate = Sonicle.Date,
 				EM = Sonicle.calendar.data.EventMappings,
 				eventTpl = me.view.getEventTemplate(),
 
         templateData = [],
 
         evts = me.store.queryBy(function(rec) {
-            var thisDt = eDate.clearTime(me.date, true).getTime(),
-                recStart = eDate.clearTime(rec.data[EM.StartDate.name], true).getTime(),
-				recEnd = eDate.clearTime(rec.data[EM.EndDate.name], true).getTime(),
+            var thisDt = XDate.clearTime(me.date, true).getTime(),
+                recStart = XDate.clearTime(rec.data[EM.StartDate.name], true).getTime(),
+				recEnd = XDate.clearTime(rec.data[EM.EndDate.name], true).getTime(),
 				isAllDay = (rec.data[EM.IsAllDay.name] === true),
                 startsOnDate = (thisDt === recStart),
 				endsOnDate = (thisDt === recEnd),
@@ -77,7 +77,7 @@ Ext.define('Sonicle.calendar.view.MonthDayDetail', {
 			}
 			
             if (!startsOnDate) {
-                var recEnd = eDate.clearTime(rec.data[EM.EndDate.name], true).getTime();
+                var recEnd = XDate.clearTime(rec.data[EM.EndDate.name], true).getTime();
                 spansDate = recStart < thisDt && recEnd >= thisDt;
             }
             return startsOnDate || spansDate;
@@ -87,9 +87,9 @@ Ext.define('Sonicle.calendar.view.MonthDayDetail', {
         evts.each(function(evt) {
             var item = evt.data;
 
-            item._renderAsAllDay = item[EM.IsAllDay.name] || soDate.diffDays(item[EM.StartDate.name], item[EM.EndDate.name]) > 0;
-            item.spanLeft = soDate.diffDays(item[EM.StartDate.name], me.date) > 0;
-            item.spanRight = soDate.diffDays(me.date, item[EM.EndDate.name]) > 0;
+            item._renderAsAllDay = item[EM.IsAllDay.name] || SoDate.diffDays(item[EM.StartDate.name], item[EM.EndDate.name]) > 0;
+            item.spanLeft = SoDate.diffDays(item[EM.StartDate.name], me.date) > 0;
+            item.spanRight = SoDate.diffDays(me.date, item[EM.EndDate.name]) > 0;
             item._spanCls = (item.spanLeft ? (item.spanRight ? 'ext-cal-ev-spanboth':
             'ext-cal-ev-spanleft') : (item.spanRight ? 'ext-cal-ev-spanright': ''));
 

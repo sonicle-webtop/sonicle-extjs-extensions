@@ -1,12 +1,9 @@
 /**
- * @class Sonicle.calendar.view.DayHeader
- * @extends Sonicle.calendar.MonthView
- * <p>This is the header area container within the day and week views where all-day events are displayed.
- * Normally you should not need to use this class directly -- instead you should use {@link Sonicle.calendar.DayView DayView}
- * which aggregates this class and the {@link Sonicle.calendar.DayBodyView DayBodyView} into the single unified view
- * presented by {@link Sonicle.calendar.CalendarPanel CalendarPanel}.</p>
- * @constructor
- * @param {Object} config The config object
+ * This is the header area container within the day and week views where 
+ * all-day events are displayed. Normally you should not need to use this class 
+ * directly -- instead you should use {@link Sonicle.calendar.view.Day DayView} 
+ * which aggregates this class and the {@link Sonicle.calendar.view.DayBody DayBodyView} 
+ * into the single unified view presented by {@link Sonicle.calendar.Panel CalendarPanel}
  */
 Ext.define('Sonicle.calendar.view.DayHeader', {
 	extend: 'Sonicle.calendar.view.Month',
@@ -15,7 +12,6 @@ Ext.define('Sonicle.calendar.view.DayHeader', {
 		'Sonicle.calendar.template.DayHeader'
 	],
 	
-	// private configs
 	weekCount: 1,
 	dayCount: 1,
 	allDayOnly: true,
@@ -44,10 +40,9 @@ Ext.define('Sonicle.calendar.view.DayHeader', {
 	 * @param {Ext.event.Event} evt The raw event object.
 	 */
 	
-	// private
 	afterRender: function() {
 		var me = this;
-		if(!me.tpl) {
+		if (!me.tpl) {
 			me.tpl = Ext.create('Sonicle.calendar.template.DayHeader', {
 				id: me.id,
 				showTodayText: me.showTodayText,
@@ -61,59 +56,56 @@ Ext.define('Sonicle.calendar.view.DayHeader', {
 		me.callParent(arguments);
 	},
 	
-	// private
 	forceSize: Ext.emptyFn,
 	
-	// private
 	refresh: function(reloadData) {
-		this.callParent(false);
+		this.callParent(arguments);
 		this.recalcHeaderBox();
 	},
 	
-	// private
-	recalcHeaderBox: function() {
+	recalcHeaderBox: function () {
 		var me = this, tbl = me.el.down('.ext-cal-evt-tbl'),
 				h = tbl.getHeight();
-				//h = Math.max(tbl.getHeight(), 80);
+		//h = Math.max(tbl.getHeight(), 80);
 		tbl.setHeight(h);
 		me.el.setHeight(h + 7);
-		
+
 		// These should be auto-height, but since that does not work reliably
 		// across browser / doc type, we have to size them manually
 		me.el.down('.ext-cal-hd-ad-inner').setHeight(h + 5);
 		me.el.down('.ext-cal-bg-tbl').setHeight(h + 5);
 	},
 	
-	// private
-	moveNext: function(noRefresh) {
-		return this.moveDays(this.dayCount, noRefresh);
+	moveNext: function() {
+		return this.moveDays(this.dayCount, false);
 	},
 	
-	// private
-	movePrev: function(noRefresh) {
-		return this.moveDays(-this.dayCount, noRefresh);
+	movePrev: function() {
+		return this.moveDays(-this.dayCount, false);
 	},
 	
-	// private
 	onClick: function(e, t) {
-		var el = e.getTarget('td', 3),
+		var me = this,
+				el = e.getTarget('td', 3),
 				parts,
 				dt;
-		if(el) {
-			if(el.id && el.id.indexOf(this.dayElIdDelimiter) > -1) {
-				parts = el.id.split(this.dayElIdDelimiter);
+		if (el) {
+			if (el.id && el.id.indexOf(me.dayElIdDelimiter) > -1) {
+				parts = el.id.split(me.dayElIdDelimiter);
 				dt = parts[parts.length - 1];
 				// We handle click/dblclick in same way...
-				this.fireEvent('day'+e.type, this, Ext.Date.parseDate(dt, 'Ymd'), true, Ext.get(this.getDayId(dt)), e);
+				me.fireEvent('day' + e.type, me, Ext.Date.parseDate(dt, 'Ymd'), true, Ext.get(me.getDayId(dt)), e);
 				return;
 			}
 		}
-		this.callParent(arguments);
+		me.callParent(arguments);
 	},
 	
-	// inherited docs
-	isActiveView: function() {
-		var calendarPanel = this.ownerCalendarPanel;
-		return (calendarPanel && calendarPanel.getActiveView().isDayView);
+	/**
+	 * @protected
+	 */
+	isActiveView: function () {
+		var pnl = this.ownerCalendarPanel;
+		return (pnl && pnl.getActiveView().isDayView);
 	}
 });
