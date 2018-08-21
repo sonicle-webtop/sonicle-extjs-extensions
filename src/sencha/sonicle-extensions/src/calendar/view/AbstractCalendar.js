@@ -1261,7 +1261,7 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 				EU = Sonicle.calendar.util.EventUtils;
 		return {
 			start: EU.toUtcOffset(ExDate.clearTime(me.viewStart, true)),
-			end: EU.toUtcOffset(ExDate.clearTime(me.viewEnd, true))
+			end: EU.toUtcOffset(ExDate.add(ExDate.clearTime(me.viewEnd, true), ExDate.DAY, 1, true))
 		};
 	},
 	
