@@ -9,6 +9,12 @@ Ext.define('Sonicle.form.field.ColorComboBox', {
 	alias: ['widget.socolorcombo', 'widget.socolorcombobox'],
 	
 	/**
+	 * @cfg {geometry|text} colorize [colorize=geometry]
+	 * Specify the target element on which apply the color.
+	 */
+	colorize: 'geometry',
+	
+	/**
 	 * @cfg {square|circle} geometry [geometry=square]
 	 * Changes the geometry of the marker that displays the color.
 	 */
@@ -24,12 +30,15 @@ Ext.define('Sonicle.form.field.ColorComboBox', {
 	swatchWrapCls: 'so-'+'colorcombo-swatch-wrap',
 	swatchCls: 'so-'+'colorcombo-swatch',
 	listSwatchCls: 'so-'+'colorcombo-list-swatch',
+	inputWrapSwatchCls: 'so-'+'colorcombo-swatch-spacer',
 	
 	preSubTpl: [
-		'<div id={cmpId}-swatchWrap data-ref="swatchWrap" class="{swatchWrapCls}">',
-			'<div id={cmpId}-swatchEl data-ref="swatchEl" class="{swatchCls} {swatchCircleCls}"></div>',
-		'</div>',
-		// Original tpl (as Ext.form.field.Text)
+		'<tpl if="hasSwatch">',
+			'<div id={cmpId}-swatchWrap data-ref="swatchWrap" class="{swatchWrapCls}">',
+				'<div id={cmpId}-swatchEl data-ref="swatchEl" class="{swatchCls} {swatchCircleCls}"></div>',
+			'</div>',
+		'</tpl>',
+		// Original tpl (as Ext.form.field.Text) with customized wrap cls added!
 		'<div id="{cmpId}-triggerWrap" data-ref="triggerWrap"',
 				'<tpl if="ariaEl == \'triggerWrap\'">',
 					'<tpl foreach="ariaElAttributes"> {$}="{.}"</tpl>',
@@ -38,9 +47,8 @@ Ext.define('Sonicle.form.field.ColorComboBox', {
 				'</tpl>',
 				' class="{triggerWrapCls} {triggerWrapCls}-{ui}">',
 			'<div id={cmpId}-inputWrap data-ref="inputWrap"',
-				' role="presentation" class="{inputWrapCls} {inputWrapCls}-{ui}">'
+				' role="presentation" class="{inputWrapCls} {inputWrapCls}-{ui} {inputWrapSwatchCls}">'
 	],
-	
 	childEls: ['swatchWrap', 'swatchEl'],
 	
 	initComponent: function() {
@@ -53,33 +61,35 @@ Ext.define('Sonicle.form.field.ColorComboBox', {
 	},
 	
 	getSubTplData: function(fieldData) {
-		var me = this;
+		var me = this,
+				hasSwatch = (me.colorize === 'geometry');
 		return Ext.apply(me.callParent(arguments), {
+			hasSwatch: hasSwatch,
+			inputWrapSwatchCls: hasSwatch ? me.inputWrapSwatchCls : '',
 			swatchWrapCls: me.swatchWrapCls,
 			swatchCls: me.swatchCls,
 			swatchCircleCls: (me.geometry === 'circle') ? (me.swatchCls + '-circle') : ''
 		});
-	},
-	
+	},	
+		
 	/**
-	 * @private
 	 * Returns modified inner template.
 	 */
-	getListItemTpl: function(displayField){
+	getListItemTpl: function(displayField) {
 		var picker = this.pickerField,
-				ccls = picker.componentCls,
-				lwcls = picker.listSwatchCls,
-				lwccls = (picker.geometry === 'circle') ? (lwcls + '-circle') : '',
-				style = Ext.dom.Helper.generateStyles({
-					backgroundColor: '{'+picker.colorField+'}',
-					border: '1px solid black'
-				});
+				colorizeGeometry = (picker.colorize === 'geometry'),
+				style = picker.genStyleForListItem(colorizeGeometry, picker.colorField);
 		
-		return '<div class="' + ccls + ' x-combo-list-item">'
-			+ '<div class="' + lwcls + ' ' + lwccls + '" style="'+style+'"></div>'
-			+ '<span>{'+displayField+'}</span>'
-			+ '</div>'
-		;
+		if (colorizeGeometry) {
+			var lwcls = picker.listSwatchCls,
+					lwccls = (picker.geometry === 'circle') ? (lwcls + '-circle') : '';
+			return '<div class="' + picker.componentCls + ' x-combo-list-item">'
+				+ '<div class="' + lwcls + ' ' + lwccls + '" style="'+style+'"></div>'
+				+ '<span>{'+displayField+'}</span>'
+				+ '</div>';
+		} else {
+			return '<span style="'+style+'">{' + displayField + '}</span>';
+		}
 	},
 	
 	/**
@@ -98,44 +108,8 @@ Ext.define('Sonicle.form.field.ColorComboBox', {
 	 */
 	onChange: function(newVal, oldVal) {
 		var me = this;
-		me.updateSwatch(newVal, oldVal);
+		me.updateColor(newVal, oldVal);
 		me.callParent(arguments);
-	},
-	
-	/**
-	 * @private
-	 */
-	generateSwatchStyle: function(color) {
-		if (Ext.isEmpty(color)) {
-			return '';
-		} else {
-			return Ext.dom.Helper.generateStyles({
-				backgroundColor: color,
-				border: '1px solid black'
-			});
-		}
-	},
-	
-	/**
-	 * @private
-	 * Gets iconClass for specified value.
-	 */
-	getColorByValue: function(value) {
-		var me = this,
-				rec = me.findRecordByValue(value);
-		return (rec) ? rec.get(me.colorField) : '';
-	},
-	
-	/**
-	 * @private
-	 * Replaces old swatch with the new one.
-	 */
-	updateSwatch: function(nv, ov) {
-		var me = this, color;
-		if(me.swatchEl) {
-			color = me.getColorByValue(nv);
-			me.swatchEl.applyStyles(me.generateSwatchStyle(color));
-		}
 	},
 	
 	onBindStore: function(store, initial){
@@ -149,12 +123,72 @@ Ext.define('Sonicle.form.field.ColorComboBox', {
 	updateEditable: function(editable, oldEditable) {
 		var me = this;
 		me.callParent(arguments);
-		if(me.swatchEl) {
-			if(!editable) {
+		if (me.swatchEl) {
+			if (!editable) {
 				me.swatchEl.on('click', me.onTriggerClick, me);
 			} else {
 				me.swatchEl.un('click', me.onTriggerClick, me);
 			}
+		}
+	},
+	
+	privates: {
+		updateColor: function(nv, ov) {
+			var me = this,
+					colorizeGeometry = (me.colorize === 'geometry'),
+					style = me.getStyleForItem(colorizeGeometry, me.getColorByValue(nv));
+			
+			if (colorizeGeometry) {
+				if (me.swatchEl) me.swatchEl.applyStyles(style);
+			} else {
+				if (me.inputEl) me.inputEl.applyStyles(style);
+			}
+		},
+		
+		getStyleForItem: function(colorizeGeometry, color) {
+			if (colorizeGeometry) {
+				return Ext.dom.Helper.generateStyles({
+					backgroundColor: color,
+					border: '1px solid black'
+				});
+			} else {
+				return Ext.dom.Helper.generateStyles({
+					color: color
+				});
+			}
+		},
+		
+		genStyleForListItem: function(colorizeGeometry, colorField) {
+			if (colorizeGeometry) {
+				return Ext.dom.Helper.generateStyles({
+					backgroundColor: '{'+colorField+'}',
+					border: '1px solid black'
+				});
+			} else {
+				return Ext.dom.Helper.generateStyles({
+					color: '{'+colorField+'}'
+				});
+			}
+		},
+		
+		generateSwatchStyle: function(color) {
+			if (Ext.isEmpty(color)) {
+				return '';
+			} else {
+				return Ext.dom.Helper.generateStyles({
+					backgroundColor: color,
+					border: '1px solid black'
+				});
+			}
+		},
+		
+		/**
+		 * Gets iconClass for specified value.
+		 */
+		getColorByValue: function(value) {
+			var me = this,
+					rec = me.findRecordByValue(value);
+			return (rec) ? rec.get(me.colorField) : '';
 		}
 	}
 });

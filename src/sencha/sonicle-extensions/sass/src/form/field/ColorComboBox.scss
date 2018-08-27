@@ -1,4 +1,4 @@
-.so-colorcombo input {
+.so-colorcombo-swatch-spacer > input {
 	padding-left: 23px;
 }
 .so-colorcombo-swatch-wrap {
@@ -10,7 +10,7 @@
 }
 .so-colorcombo-swatch {
 	position: absolute;
-	top: 0px;
+	top: 2px;
 	bottom: 0px;
 	margin: auto;
 	width: 16px;
