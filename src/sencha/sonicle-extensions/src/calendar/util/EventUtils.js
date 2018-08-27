@@ -120,7 +120,7 @@ Ext.define('Sonicle.calendar.util.EventUtils', {
 
 	durationInHours: function(start, end) {
 		var SoDate = Sonicle.Date;
-		return SoDate.diff(start, end, 'hours');
+		return SoDate.diff(start, end, 'hours', true);
 	},
 
 	/**

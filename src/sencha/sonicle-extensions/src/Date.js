@@ -204,19 +204,20 @@ Ext.define('Sonicle.Date', {
 	
 	/**
 	 * Calculate the `Date.timezoneOffset()` difference between two dates.
-	 * @param {Date} dt1 The first date.
-	 * @param {Date} dt2 The second date.
+	 * @param {Date} start The first date.
+	 * @param {Date} end The second date.
 	 * @param {String} [unit] The time unit to return. Valid values are 'minutes' (the default), 'seconds' or 'millis'.
 	 * @returns {Number} The time difference between the timezoneOffset values in the units specified by the unit param.
 	 */
-	diffTimezones: function(dt1, dt2, unit) {
-		var diff = dt1.getTimezoneOffset() - dt2.getTimezoneOffset(); // minutes
-		if (unit === 's' || unit === 'seconds') {
-			return diff * 60;
-		} else if (unit === 'ms' || unit === 'millis') {
-			return diff * 60 * 1000;	
+	diffTimezones: function(start, end, unit) {
+		var XDate = Ext.Date,
+				miDiff = start.getTimezoneOffset() - end.getTimezoneOffset(); // minutes
+		if (unit === XDate.SECOND || unit === 'seconds') {
+			return miDiff * 60;
+		} else if (unit === XDate.MILLI || unit === 'millis') {
+			return miDiff * 60 * 1000;	
 		}
-		return diff;
+		return miDiff;
 	},
 	
 	/**
@@ -224,25 +225,43 @@ Ext.define('Sonicle.Date', {
 	 * calendar days (ignoring time) between two dates use {@link Extensible.Date.diffDays diffDays} instead.
 	 * @param {Date} start The start date
 	 * @param {Date} end The end date
-	 * @param {String} unit (optional) The time unit to return. Valid values are 'millis' (the default),
+	 * @param {String} [unit=millis] The time unit to return. Valid values are 'millis' (the default),
 	 * 'seconds', 'minutes' or 'hours'.
+	 * {Boolean} [preventDstAdjust=false] `true` to prevent adjustments when crossing DST boundaries.
 	 * @return {Number} The time difference between the dates in the units specified by the unit param,
 	 * rounded to the nearest even unit via Math.round().
 	 */
-	diff: function (start, end, unit) {
-		var denom = 1,
-				diff = end.getTime() - start.getTime();
-
-		if (unit === 's' || unit === 'seconds') {
+	diff: function (start, end, unit, preventDstAdjust) {
+		var XDate = Ext.Date,
+				msDiff = preventDstAdjust ? (XDate.localToUtc(end).getTime() - XDate.localToUtc(start).getTime()) : (end.getTime() - start.getTime()),
+				denom = 1;
+				
+		if (unit === XDate.SECOND || unit === 'seconds') {
 			denom = 1000;
-		}
-		else if (unit === 'm' || unit === 'minutes') {
+		} else if (unit === XDate.MINUTE || unit === 'minutes') {
 			denom = 1000 * 60;
-		}
-		else if (unit === 'h' || unit === 'hours') {
+		} else if (unit === XDate.HOUR || unit === 'hours') {
 			denom = 1000 * 60 * 60;
 		}
-		return Math.round(diff / denom);
+		return Math.round(msDiff / denom);
+		
+		/*
+		var XDate = Ext.Date,
+				msDiff = end.getTime() - start.getTime(),
+				msTzOff = preventDstAdjust ? this.diffTimezones(start, end, XDate.MILLI) : 0,
+				denom = 1,
+				diff;
+
+		if (unit === XDate.SECOND || unit === 'seconds') {
+			denom = 1000;
+		} else if (unit === XDate.MINUTE || unit === 'minutes') {
+			denom = 1000 * 60;
+		} else if (unit === XDate.HOUR || unit === 'hours') {
+			denom = 1000 * 60 * 60;
+		}
+		diff = Math.round(msDiff / denom);
+		return (msTzOff !== 0) ? (diff + Math.round(msTzOff / denom)) : diff;
+		*/
 	},
 	
 	/**
@@ -276,16 +295,16 @@ Ext.define('Sonicle.Date', {
 	/**
 	 * Copies the date value from one date object into another without altering the target's
 	 * date value. This function returns a new Date instance without modifying either original value.
-	 * @param {Date} fromDt The original date from which to copy the date
-	 * @param {Date} toDt The target date to copy the date to
+	 * @param {Date} from The original date from which to copy the date
+	 * @param {Date} to The target date to copy the date to
 	 * @returns {Date} The new date/time value
 	 */
-	copyDate: function(fromDt, toDt) {
-		var dt = Ext.Date.clone(toDt);
+	copyDate: function(from, to) {
+		var dt = Ext.Date.clone(to);
 		dt.setFullYear(
-				fromDt.getFullYear(),
-				fromDt.getMonth(),
-				fromDt.getDate()
+				from.getFullYear(),
+				from.getMonth(),
+				from.getDate()
 		);
 		return dt;
 	},
@@ -293,17 +312,17 @@ Ext.define('Sonicle.Date', {
 	/**
 	 * Copies the time value from one date object into another without altering the target's
 	 * date value. This function returns a new Date instance without modifying either original value.
-	 * @param {Date} fromDt The original date from which to copy the time
-	 * @param {Date} toDt The target date to copy the time to
+	 * @param {Date} from The original date from which to copy the time
+	 * @param {Date} to The target date to copy the time to
 	 * @return {Date} The new date/time value
 	 */
-	copyTime: function(fromDt, toDt) {
-		var dt = Ext.Date.clone(toDt);
+	copyTime: function(from, to) {
+		var dt = Ext.Date.clone(to);
 		dt.setHours(
-				fromDt.getHours(),
-				fromDt.getMinutes(),
-				fromDt.getSeconds(),
-				fromDt.getMilliseconds()
+				from.getHours(),
+				from.getMinutes(),
+				from.getSeconds(),
+				from.getMilliseconds()
 		);
 		return dt;
 	},
@@ -316,22 +335,66 @@ Ext.define('Sonicle.Date', {
 	
 	/**
 	 * Compares two dates and returns a value indicating how they relate to each other.
-	 * @param {Date} dt1 The first date
-	 * @param {Date} dt2 The second date
-	 * @param {Boolean} precise (optional) If true, the milliseconds component is included in the comparison,
-	 * else it is ignored (the default).
-	 * @return {Number} The number of milliseconds difference between the two dates. If the dates are equal
-	 * this will be 0. If the first date is earlier the return value will be positive, and if the second date
-	 * is earlier the value will be negative.
+	 * @param {Date} date1 The first date.
+	 * @param {Date} date2 The second date.
+	 * @param {Boolean} [precise] `true` to include milliseconds in the comparison.
+	 * @param {Boolean} preventDstAdjust `true` to prevent adjustments when crossing DST boundaries.
+	 * @returns {Number} A negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
 	 */
-	compare: function(dt1, dt2, precise) {
+	compare: function(date1, date2, precise, preventDstAdjust) {
+		var XDate = Ext.Date,
+				dt1 = XDate.clone(date1),
+				dt2 = XDate.clone(date2);
+		
 		if (precise !== true) {
-			dt1 = Ext.Date.clone(dt1);
 			dt1.setMilliseconds(0);
-			dt2 = Ext.Date.clone(dt2);
 			dt2.setMilliseconds(0);
 		}
-		return dt2.getTime() - dt1.getTime();
+		if (preventDstAdjust === true) {
+			dt1 = XDate.localToUtc(dt1);
+			dt2 = XDate.localToUtc(dt2);
+		}
+		return dt1.getTime() - dt2.getTime();
+	},
+	
+	/**
+	 * Checks if the first date is before the second one.
+	 * @param {Date} date1 The first date.
+	 * @param {Date} date2 The second date.
+	 * @returns {Boolean}
+	 */
+	isBefore: function(date1, date2) {
+		return this.compare(date1, date2, false, true) < 0;
+	},
+	
+	/**
+	 * Checks if the first date is before or equal to the second one.
+	 * @param {Date} date1 The first date.
+	 * @param {Date} date2 The second date.
+	 * @returns {Boolean}
+	 */
+	isBeforeOrEqual: function(date1, date2) {
+		return this.compare(date1, date2, false, true) <= 0;
+	},
+	
+	/**
+	 * Checks if the first date is after the second one.
+	 * @param {Date} date1 The first date.
+	 * @param {Date} date2 The second date.
+	 * @returns {Boolean}
+	 */
+	isAfter: function(date1, date2) {
+		return this.compare(date1, date2, false, true) > 0;
+	},
+	
+	/**
+	 * Checks if the first date is after or equal to the second one.
+	 * @param {Date} date1 The first date.
+	 * @param {Date} date2 The second date.
+	 * @returns {Boolean}
+	 */
+	isAfterOrEqual: function(date1, date2) {
+		return this.compare(date1, date2, false, true) >= 0;
 	},
 	
 	/**
@@ -454,8 +517,8 @@ Ext.define('Sonicle.Date', {
 	 *			minutes: 30
 	 *		});
 	 * 
-	 * @param {Date} dt The starting date to which to add time
-	 * @param {Object} opts A config object that can contain one or more of the 
+	 * @param {Date} date The starting date to which to add time
+	 * @param {Object} intervals A config object that can contain one or more of the 
 	 * following properties, each with an integer value:
 	 * 
 	 *	* millis
@@ -467,42 +530,41 @@ Ext.define('Sonicle.Date', {
 	 *	* months
 	 *	* years
 	 *	
-	 *	You can also optionally include the property "clearTime: true" which 
-	 *	will perform all of the date addition first, then clear the time value 
-	 *	of the final date before returning it.
+	 *	@param {Boolean} [preventDstAdjust=false] `true` to prevent adjustments when crossing DST boundaries.
 	 *	@return {Date} A new date instance containing the resulting date/time value
 	 */
-	add: function(dt, opts) {
-		if (!opts) return dt;
+	add: function(date, intervals, preventDstAdjust) {
+		if (!intervals) return date;
+		if (preventDstAdjust === undefined) preventDstAdjust = false;
 		var XDate = Ext.Date,
 				dateAdd = XDate.add,
-				newDt = XDate.clone(dt);
+				ndt = XDate.clone(date);
 
-		if (opts.years) {
-			newDt = dateAdd(newDt, XDate.YEAR, opts.years);
+		if (intervals.years) {
+			ndt = dateAdd(ndt, XDate.YEAR, intervals.years, preventDstAdjust);
 		}
-		if (opts.months) {
-			newDt = dateAdd(newDt, XDate.MONTH, opts.months);
+		if (intervals.months) {
+			ndt = dateAdd(ndt, XDate.MONTH, intervals.months, preventDstAdjust);
 		}
-		if (opts.weeks) {
-			opts.days = (opts.days || 0) + (opts.weeks * 7);
+		if (intervals.weeks) {
+			ndt = dateAdd(ndt, XDate.DAY, (intervals.days || 0) + (intervals.weeks * 7), preventDstAdjust);
 		}
-		if (opts.days) {
-			newDt = dateAdd(newDt, XDate.DAY, opts.days);
+		if (intervals.days) {
+			ndt = dateAdd(ndt, XDate.DAY, intervals.days, preventDstAdjust);
 		}
-		if (opts.hours) {
-			newDt = dateAdd(newDt, XDate.HOUR, opts.hours);
+		if (intervals.hours) {
+			ndt = dateAdd(ndt, XDate.HOUR, intervals.hours, preventDstAdjust);
 		}
-		if (opts.minutes) {
-			newDt = dateAdd(newDt, XDate.MINUTE, opts.minutes);
+		if (intervals.minutes) {
+			ndt = dateAdd(ndt, XDate.MINUTE, intervals.minutes, preventDstAdjust);
 		}
-		if (opts.seconds) {
-			newDt = dateAdd(newDt, XDate.SECOND, opts.seconds);
+		if (intervals.seconds) {
+			ndt = dateAdd(ndt, XDate.SECOND, intervals.seconds, preventDstAdjust);
 		}
-		if (opts.millis) {
-			newDt = dateAdd(newDt, XDate.MILLI, opts.millis);
+		if (intervals.millis) {
+			ndt = dateAdd(ndt, XDate.MILLI, intervals.millis, preventDstAdjust);
 		}
-		return (opts.clearTime === true) ? XDate.clearTime(newDt): newDt;
+		return ndt;
 	},
 	
 	getFirstDateOfWeek: function(date, startDay) {

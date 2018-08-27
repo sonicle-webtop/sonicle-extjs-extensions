@@ -1706,15 +1706,16 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	// private
 	doShiftEvent: function(rec, newStartDate, moveOrCopy) {
 		var me = this,
+				XDate = Ext.Date,
 				SoDate = Sonicle.Date,
 				EM = Sonicle.calendar.data.EventMappings,
 				start = rec.data[EM.StartDate.name],
 				end = rec.data[EM.EndDate.name],
-				startDiff = SoDate.diff(start, newStartDate),
-				newEndDate = SoDate.add(start, {millis: startDiff}),
-				tzOffset = SoDate.diffTimezones(end, newEndDate);
-		
-		if (tzOffset) newEndDate = SoDate.add(newEndDate, {minutes: -tzOffset});
+				miDiff = SoDate.diff(start, end, XDate.MINUTE, true),
+				//tzOffset = SoDate.diffTimezones(start, end),
+				newEndDate = XDate.add(newStartDate, XDate.MINUTE, miDiff, true);
+				
+		//if (tzOffset !== 0) newEndDate = XDate.add(newEndDate, XDate.MINUTE, tzOffset, true);
 		
 		rec.beginEdit();
 		rec.set(EM.StartDate.name, newStartDate);

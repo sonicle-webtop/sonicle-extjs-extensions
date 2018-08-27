@@ -40,7 +40,9 @@ Ext.define('Sonicle.calendar.dd.DayDropZone', {
 	
 	onNodeOver: function(n, dd, e, data) {
 		var me = this,
-				soDate = Sonicle.Date,
+				XDate = Ext.Date,
+				SoDate = Sonicle.Date,
+				EM = Sonicle.calendar.data.EventMappings,
 				box,endDt,diff,curr,
 				start,end,evtEl,dayCol;
 
@@ -66,16 +68,16 @@ Ext.define('Sonicle.calendar.dd.DayDropZone', {
 			if (e.xy[1] < box.y) {
 				box.height += n.timeBox.height;
 				box.y = box.y - box.height + n.timeBox.height;
-				endDt = soDate.add(me.dragCreateDt, {minutes: me.ddIncrement});
+				endDt = XDate.add(me.dragCreateDt, XDate.MINUTE, me.ddIncrement, true);
 			} else {
-				n.date = soDate.add(n.date, {minutes: me.ddIncrement});
+				n.date = XDate.add(n.date, XDate.MINUTE, me.ddIncrement, true);
 			}
 			me.shim(me.dragCreateDt, box);
 			
-			diff = soDate.diff(me.dragCreateDt, n.date);
-			curr = soDate.add(me.dragCreateDt, {millis: diff});
-			me.dragStartDate = soDate.min(me.dragCreateDt, curr);
-			me.dragEndDate = endDt || soDate.max(me.dragCreateDt, curr);
+			diff = SoDate.diff(me.dragCreateDt, n.date, XDate.MINUTE, true);
+			curr = XDate.add(me.dragCreateDt, XDate.MINUTE, diff, true);
+			me.dragStartDate = SoDate.min(me.dragCreateDt, curr);
+			me.dragEndDate = endDt || SoDate.max(me.dragCreateDt, curr);
 			return me.updateProxy(e, data, me.dragStartDate, me.dragEndDate);
 			
 		} else {
@@ -103,10 +105,52 @@ Ext.define('Sonicle.calendar.dd.DayDropZone', {
 				return me.updateProxy(e, data, n.date, n.date);
 				
 			} else if (data.type === 'eventresize') {
+				var units, newy;
+				if (!me.resizeDt) me.resizeDt = n.date;
+				box.x = dayCol.getLeft();
+				
+				if (data.direction === 'bottom') {
+					if (e.getY() <= box.y) {
+						units = 1;
+					} else {
+						units = Math.ceil(Math.abs(e.getY() - box.y) / n.timeBox.height);
+						n.date = XDate.add(n.date, XDate.MINUTE, me.ddIncrement, true);
+					}
+					newy = box.y;
+					start = XDate.clone(data.eventStart);
+					end = XDate.add(XDate.clone(start), XDate.MINUTE, units * me.ddIncrement, true);
+					
+				} else if (data.direction === 'top') {
+					if (e.getY() >= (box.y + box.height)) {
+						units = 1;
+					} else {
+						units = Math.ceil(Math.abs(e.getY() - (box.y + box.height)) / n.timeBox.height);
+						n.date = XDate.add(n.date, XDate.MINUTE, -me.ddIncrement, true);
+					}
+					newy = (box.y + box.height) - (n.timeBox.height * units);
+					end = XDate.clone(data.eventEnd);
+					start = XDate.add(XDate.clone(end), XDate.MINUTE, units * -me.ddIncrement, true);
+				}
+				
+				box.y = newy;
+				box.height = n.timeBox.height * units;
+				me.shim(me.resizeDt, box);
+				
+				//data.resizeDates = {};
+				//data.resizeDates[EM.StartDate.name] = start;
+				//data.resizeDates[EM.EndDate.name] = end;
+				data.resizeDates = {
+					StartDate: start,
+					EndDate: end
+				};
+				
+				return me.updateProxy(e, data, start, end);
+				
+				/*
 				box.x = dayCol.getX();
 				
 				var units;
-				if(data.direction === 'bottom') {
+				if (data.direction === 'bottom') {
 					if (!me.resizeDt) {
 						me.resizeDt = n.date;
 						me.resizeBox = {
@@ -117,10 +161,10 @@ Ext.define('Sonicle.calendar.dd.DayDropZone', {
 					units = (e.xy[1] <= me.resizeBox.yRef) ? 1 : Math.ceil(Math.abs(e.xy[1] - me.resizeBox.yRef) / n.timeBox.height);
 					box.height = units * n.timeBox.height;
 					
-					if(e.xy[1] >= me.resizeBox.yRef) n.date = Ext.Date.add(n.date, Ext.Date.MINUTE, me.ddIncrement);
-					curr = soDate.copyTime(n.date, me.resizeDt);
+					if (e.xy[1] >= me.resizeBox.yRef) n.date = XDate.add(n.date, XDate.MINUTE, me.ddIncrement, true);
+					curr = SoDate.copyTime(n.date, me.resizeDt);
 					start = data.eventStart;
-					end = soDate.max(curr, soDate.add(data.eventStart, {minutes: me.ddIncrement}));
+					end = SoDate.max(curr, XDate.add(data.eventStart, XDate.MINUTE, me.ddIncrement, true));
 					
 				} else {
 					if (!me.resizeDt) {
@@ -136,9 +180,9 @@ Ext.define('Sonicle.calendar.dd.DayDropZone', {
 					box.y = me.resizeBox.yRef - (units * n.timeBox.height);
 					box.height = units * n.timeBox.height;
 					
-					if(e.xy[1] <= me.resizeBox.yRef) n.date = Ext.Date.add(n.date, Ext.Date.MINUTE, -me.ddIncrement);
-					curr = soDate.add(soDate.copyTime(n.date, me.resizeDt), {minutes: me.ddIncrement});
-					start = soDate.min(curr, soDate.add(data.eventEnd, {minutes: -me.ddIncrement}));
+					if (e.xy[1] <= me.resizeBox.yRef) n.date = XDate.add(n.date, XDate.MINUTE, -me.ddIncrement, true);
+					curr = XDate.add(SoDate.copyTime(n.date, me.resizeDt), XDate.MINUTE, me.ddIncrement, true);
+					start = SoDate.min(curr, SoDate.add(data.eventEnd, {minutes: -me.ddIncrement}, true));
 					end = data.eventEnd;
 				}
 				
@@ -149,12 +193,14 @@ Ext.define('Sonicle.calendar.dd.DayDropZone', {
 					EndDate: end
 				};
 				return me.updateProxy(e, data, start, end);
+				*/
 			}
 		}
 	},
 	
 	shim: function(dt, box) {
-		Ext.each(this.shims,
+		var me = this;
+		Ext.each(me.shims,
 				function(shim) {
 					if (shim) {
 						shim.isActive = false;
@@ -163,16 +209,16 @@ Ext.define('Sonicle.calendar.dd.DayDropZone', {
 				}
 		);
 
-		var shim = this.shims[0];
+		var shim = me.shims[0];
 		if (!shim) {
-			shim = this.createShim();
-			this.shims[0] = shim;
+			shim = me.createShim();
+			me.shims[0] = shim;
 		}
 
 		shim.isActive = true;
 		shim.show();
 		shim.setBox(box);
-		this.DDMInstance.notifyOccluded = true;
+		me.DDMInstance.notifyOccluded = true;
 	},
 	
 	onNodeDrop: function(n, dd, e, data) {

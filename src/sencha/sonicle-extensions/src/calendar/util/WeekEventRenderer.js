@@ -35,13 +35,14 @@ Ext.define('Sonicle.calendar.util.WeekEventRenderer', {
 		 * Render an individual event
 		 */
 		renderEvent: function(event, weekIndex, dayIndex, eventIndex, dayCount, currentDate, renderCfg) {
-			var EM = Sonicle.calendar.data.EventMappings,
-					EU = Sonicle.calendar.util.EventUtils,
+			var XDate = Ext.Date,
 					SoDate = Sonicle.Date,
+					EM = Sonicle.calendar.data.EventMappings,
+					EU = Sonicle.calendar.util.EventUtils,
 					data = event.data || event.event.data,
 					startOfWeek = Ext.Date.clearTime(currentDate, true),
-					endOfWeek = SoDate.add(startOfWeek, {days: dayCount - dayIndex, millis: -1}),
-					//endOfWeek = SoDate.utcTimezoneOffset(SoDate.add(startOfWeek, {days: dayCount - dayIndex, millis: -1})),
+					//endOfWeek = XDate.add(startOfWeek, XDate.DAY, dayCount - dayIndex, true),
+					endOfWeek = SoDate.add(startOfWeek, {days: dayCount - dayIndex, millis: -1}, true),
 					likeSingle = !data[EM.IsAllDay.name] && EU.isLikeSingleDay(data[EM.StartDate.name], data[EM.EndDate.name]),
 					daysToEventEnd = SoDate.diffDays(currentDate, data[EM.EndDate.name]) + 1,
 					// Restrict the max span to the current week only since this is for the current week's markup
@@ -52,8 +53,8 @@ Ext.define('Sonicle.calendar.util.WeekEventRenderer', {
 			// These are special data values that get passed back to the template.
 			data._weekIndex = weekIndex;
 			data._renderAsAllDay = data[EM.IsAllDay.name] || event.isSpanStart;
-			data.spanLeft = likeSingle ? false : data[EM.StartDate.name].getTime() < startOfWeek.getTime();
-			data.spanRight = likeSingle ? false : data[EM.EndDate.name].getTime() > endOfWeek.getTime();
+			data.spanLeft = likeSingle ? false : SoDate.isBefore(data[EM.StartDate.name], startOfWeek);
+			data.spanRight = likeSingle ? false : SoDate.isAfter(data[EM.EndDate.name], endOfWeek);
 			data._spanCls = (data.spanLeft ? (data.spanRight ? 'ext-cal-ev-spanboth' : 
 					'ext-cal-ev-spanleft') : (data.spanRight ? 'ext-cal-ev-spanright' : ''));
 			

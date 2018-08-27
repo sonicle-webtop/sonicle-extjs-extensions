@@ -32,11 +32,11 @@ Ext.define('Sonicle.calendar.dd.DropZone', {
 				copy = e.ctrlKey || e.altKey,
 				eventDragText = copy ? me.copyText: me.moveText,
 				start = (data.type === 'eventdrag') ? n.date: SoDate.min(data.start, n.date),
-				end = (data.type === 'eventdrag') ? SoDate.add(n.date, {days: SoDate.diffDays(data.eventStart, data.eventEnd)}) : SoDate.max(data.start, n.date);
+				end = (data.type === 'eventdrag') ? XDate.add(n.date, XDate.DAY, SoDate.diffDays(data.eventStart, data.eventEnd), true) : SoDate.max(data.start, n.date);
 
         if (!me.dragStartDate || !me.dragEndDate || (SoDate.diffDays(start, me.dragStartDate) !== 0) || (SoDate.diffDays(end, me.dragEndDate) !== 0)) {
             me.dragStartDate = start;
-			me.dragEndDate = XDate.clearTime(SoDate.add(end, {hours: 12}));
+			me.dragEndDate = XDate.clearTime(SoDate.add(end, {days: 1, millis: -1}, true));
             me.shim(start, end);
 			
             var range = XDate.format(start, me.dateFormat);
@@ -78,6 +78,7 @@ Ext.define('Sonicle.calendar.dd.DropZone', {
 
     shim: function(start, end) {
 		var me = this,
+				XDate = Ext.Date,
 				SoDate = Sonicle.Date,
 				dt = Ext.Date.clone(start),
 				cnt = SoDate.diffDays(dt, end) + 1,
@@ -116,7 +117,7 @@ Ext.define('Sonicle.calendar.dd.DropZone', {
 				}
 				shim.isActive = true;
 			}
-			dt = SoDate.add(dt, {days: 1});
+			dt = XDate.add(dt, XDate.DAY, 1, true);
 		}
 
 		Ext.each(me.shims, function (shim) {
@@ -183,12 +184,10 @@ Ext.define('Sonicle.calendar.dd.DropZone', {
 				return true;
 
 			} else if (data.type === 'caldrag') {
-				me.dragStartDate = SoDate.add(XDate.clearTime(data.start, true), {hours: 12});
-				if (me.dragEndDate) {
-					me.dragEndDate = SoDate.add(XDate.clearTime(me.dragEndDate), {hours: 13});
-				} else {
+				if (!me.dragEndDate) {
 					// this can occur on a long click where drag starts but onNodeOver is never executed
-					me.dragEndDate = SoDate.add(XDate.clone(me.dragStartDate), {hours: 1});
+					me.dragStartDate = XDate.clearTime(data.start, true);
+					me.dragEndDate = XDate.add(XDate.clone(me.dragStartDate), XDate.HOUR, 1, true);
 				}
 
 				me.view.onCalendarEndDrag(me.dragStartDate, me.dragEndDate,

@@ -453,7 +453,7 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 	
 	renderItems: function() {
 		var me = this,
-				SoDate = Sonicle.Date,
+				XDate = Ext.Date,
 				EM = Sonicle.calendar.data.EventMappings,
 				day = 0,
 				evts = [], evt;
@@ -469,7 +469,8 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 				
 				var item = evt.data || evt.event.data,
 						ad = item[EM.IsAllDay.name] === true,
-						span = me.isEventSpanning(evt.event || evt);
+						span = me.isEventSpanning(evt.event || evt),
+						date;
 				
 				//TODO: 24h threshold as config
 				if (ad || (span && (me.eventDurationInHours(evt.event || evt) >= 24))) {
@@ -481,9 +482,10 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 					cls: 'ext-cal-ev',
 					_positioned: true
 				});
+				date = XDate.add(me.viewStart, XDate.DAY, day, true);
 				evts.push({
-					data: me.getTemplateEventData(item, evt),
-					date: SoDate.add(me.viewStart, {days: day})
+					data: me.getTemplateEventData(item, date),
+					date: date
 				});
 			}
 		}
@@ -572,7 +574,8 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 				relY = y - viewBox.y - rowH + scroll.top,
 				rowIndex = Math.max(0, Math.ceil(relY / rowH)),
 				mins = rowIndex * (me.hourIncrement / me.incrementsPerHour),
-				dt = Sonicle.Date.add(me.viewStart, {days: dayIndex, minutes: mins, hours: me.viewStartHour}),
+				//dt = Sonicle.Date.add(me.viewStart, {days: dayIndex, minutes: mins, hours: me.viewStartHour}),
+				dt = Sonicle.Date.add(Ext.Date.clearTime(me.viewStart), {days: dayIndex, minutes: mins, hours: me.viewStartHour}, true),
 				el = me.getDayEl(dt),
 				timeX = x;
 

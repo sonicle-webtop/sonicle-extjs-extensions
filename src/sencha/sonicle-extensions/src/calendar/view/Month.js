@@ -415,13 +415,14 @@ Ext.define('Sonicle.calendar.view.Month', {
 	
 	getDayAt: function(x, y) {
 		var me = this,
+				XDate = Ext.Date,
 				box = me.el.getBox(),
 				padding = me.getViewPadding('tl'), // top/left only since we only want the xy offsets
 				daySize = me.getDaySize(),
 				dayL = Math.floor(((x - box.x - padding.width) / daySize.width)),
 				dayT = Math.floor(((y - box.y - padding.height) / daySize.height)),
 				days = (dayT * 7) + dayL,
-				dt = Sonicle.Date.add(me.viewStart, {days: days});
+				dt = XDate.add(XDate.clearTime(me.viewStart), XDate.DAY, days, true);
 		return {
 			date: dt,
 			el: me.getDayEl(dt)
