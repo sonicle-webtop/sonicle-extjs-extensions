@@ -16,7 +16,7 @@ Ext.define('Sonicle.Sound', {
 	
 	/**
 	 * @readonly
-	 * @property {Boolean} isAvailIonSound
+	 * @property {Boolean} ionSoundLoaded
 	 * `true` if ion.sound library is available, `false` otherwise.
 	 */
 	
@@ -24,7 +24,7 @@ Ext.define('Sonicle.Sound', {
 		var me = this;
 		me.initConfig(cfg);
 		me.callParent([cfg]);
-		me.isAvailIonSound = Ext.isDefined(window['ion']);
+		me.ionSoundLoaded = Ext.isDefined(window['ion']);
 	},
 	
 	/**
@@ -33,7 +33,8 @@ Ext.define('Sonicle.Sound', {
 	 */
 	add: function(sounds) {
 		var me = this;
-		me.checkAvail();
+		me.checkLib();
+		if (!me.ionSoundLoaded) return;
 		ion.sound({
 			sounds: Ext.isArray(sounds) ? sounds : [sounds],
 			path: me.getPath(),
@@ -44,23 +45,26 @@ Ext.define('Sonicle.Sound', {
 	
 	play: function(name, opts) {
 		opts = opts || {};
-		this.checkAvail();
+		this.checkLib();
+		if (!this.ionSoundLoaded) return;
 		ion.sound.play(name, opts);
 	},
 	
 	pause: function(name) {
-		this.checkAvail();
+		this.checkLib();
+		if (!this.ionSoundLoaded) return;
 		ion.sound.pause(name);
 	},
 	
 	stop: function(name) {
-		this.checkAvail();
+		this.checkLib();
+		if (!this.ionSoundLoaded) return;
 		ion.sound.stop(name);
 	},
 	
 	privates: {
-		checkAvail: function() {
-			if (!this.isAvailIonSound) Ext.raise('Library ion.sound is required (see https://github.com/IonDen/ion.sound)');
+		checkLib: function() {
+			if (!this.ionSoundLoaded) Ext.warn('Library ion.sound is required (see https://github.com/IonDen/ion.sound)');
 		}
 	}
 });

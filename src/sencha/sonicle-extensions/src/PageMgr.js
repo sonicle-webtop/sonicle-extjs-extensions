@@ -12,9 +12,10 @@ Ext.define('Sonicle.PageMgr', {
 	
 	/**
 	 * @readonly
-	 * @property {Boolean} api
+	 * @property {Boolean} visibiltyApi
+	 * `true` if Visibility API is supported, `false` otherwise.
+	 * https://caniuse.com/#search=visibilitychange
 	 */
-	visApi: false,
 	
 	/**
 	 * @readonly
@@ -44,26 +45,17 @@ Ext.define('Sonicle.PageMgr', {
 	 */
 	
 	constructor: function(cfg) {
-		var me = this, chk;
+		var me = this, test;
 		me.initConfig(cfg);
 		me.mixins.observable.constructor.call(me, cfg);
 		me.callParent([cfg]);
-		
-		chk = me.checkVisApi();
-		if (chk) {
-			me.visApi = true;
-			me.hiddenProp = chk[0];
-			me.visibilityEvent = chk[1];
+		test = me.testVisibilityApi();
+		if (test) {
+			me.visibiltyApi = true;
+			me.hiddenProp = test[0];
+			me.visibilityEvent = test[1];
 			document.addEventListener(me.visibilityEvent, me.onVisibilityChange.bind(me));
 		}
-	},
-	
-	/**
-	 * Checks if Visibility API is supported.
-	 * @return {Boolean}
-	 */
-	isVisSupported: function() {
-		return this.visApi;
 	},
 	
 	/**
@@ -71,7 +63,7 @@ Ext.define('Sonicle.PageMgr', {
 	 * @returns {Boolean}
 	 */
 	isHidden: function() {
-		return !this.isVisSupported() ? false : document[this.hiddenProp];
+		return !this.visibiltyApi ? false : document[this.hiddenProp];
 	},
 	
 	/**
@@ -101,11 +93,7 @@ Ext.define('Sonicle.PageMgr', {
 	},
 	
 	privates: {
-		onVisibilityChange: function() {
-			this.fireEvent('visibilitychange');
-		},
-		
-		checkVisApi: function() {
+		testVisibilityApi: function() {
 			try {
 				if('hidden' in document) {
 					return ['hidden','visibilitychange'];
@@ -121,6 +109,10 @@ Ext.define('Sonicle.PageMgr', {
 			} catch (e) {
 				return false;
 			}
+		},
+		
+		onVisibilityChange: function() {
+			this.fireEvent('visibilitychange');
 		}
 	}
 });
