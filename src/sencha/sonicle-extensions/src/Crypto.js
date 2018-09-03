@@ -21,6 +21,22 @@ Ext.define('Sonicle.Crypto', {
 		me.sparkMd5Loaded = Ext.isDefined(window['SparkMD5']);
 	},
 	
+	/**
+	 * Generates a random string of specified length.
+	 * @param {Number} len The required length.
+	 * @param {String} [charSet] The set for charaters to use. Defaults to [a-zA-Z0-9].
+	 * @returns {String} The random string.
+	 */
+	randomString: function(len, charSet) {
+		charSet = charSet || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		var s = '';
+		for (var i = 0; i < len; i++) {
+			var rnd = Math.floor(Math.random() * charSet.length);
+			s += charSet.substring(rnd, rnd+1);
+		}
+		return s;
+	},
+	
 	getRandomBytes: function(size) {
 		var win = window,
 				crypto = (win.crypto || win.msCrypto),
