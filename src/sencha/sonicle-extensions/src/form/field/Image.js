@@ -154,6 +154,7 @@ Ext.define('Sonicle.form.field.Image', {
 	
 	onClearClick: function(me) {
 		me.setValue(null);
+		me.fireEvent('clear', me);
 	},
 	
 	onUploadClick: function(me) {
