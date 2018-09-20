@@ -250,6 +250,9 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 	},
 	
 	createTinyMCE: function(){
+		var themeName=Ext.themeName;
+		if (themeName && themeName.endsWith("-touch")) themeName=themeName.substring(0,themeName.length-6);
+		
 		this.tmce=Ext.create({
 			xtype: 'tinymce_textarea',
 			region: 'center',
@@ -268,7 +271,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 				paste_block_drop: true,
 				paste_data_images: true,
 				language: this.language,
-				skin: Ext.themeName || 'lightgray',
+				skin: themeName || 'lightgray',
 				toolbar: false,
 				statusbar: false,
 				relative_urls: false,
