@@ -1697,8 +1697,8 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 		} else {
 			newRec = rec.copy(null);
 		}
-
-		if (me.fireEvent('beforeevent' + moveOrCopy, me, newRec, Ext.Date.clone(newStartDate)) !== false) {
+		
+		if (me.fireEvent('beforeevent' + moveOrCopy, me, rec, Ext.Date.clone(newStartDate), newRec) !== false) {
 			me.doShiftEvent(newRec, newStartDate, moveOrCopy);
 		}
 	},

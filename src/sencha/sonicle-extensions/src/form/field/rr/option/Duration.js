@@ -20,18 +20,16 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 		}
 	},
 	
+	layout: 'hbox',
+	defaults: {
+		style: {marginRight: '5px'}
+	},
+	
 	initComponent: function() {
 		var me = this;
 		me.callParent(arguments);
 		me.add([{
-			xtype: 'fieldcontainer',
-			layout: 'hbox',
-			defaults: {
-				style: {marginRight: '5px'},
-				flex: 1
-			},
-			items: [{
-				xtype: 'radiofield',
+			xtype: 'radiofield',
 				itemId: 'opt1',
 				name: me.id + '-endmode',
 				bind: '{opt1}',
@@ -91,10 +89,6 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 					scope: me
 				},
 				width: 120
-			}],
-			hideLabel: Ext.isEmpty(me.endsText),
-			labelWidth: 60,
-			fieldLabel: me.endsText
 		}]);
 	},
 	

@@ -514,7 +514,7 @@ Ext.define('Sonicle.calendar.Panel', {
 				// relay the view events so that app code only has to handle them in one place
 				this.relayEvents(c, ['contextmenu', 
 					'eventsrendered', 'eventclick', 'eventdblclick', 'eventover', 'eventout', 
-					'eventcontextmenu', 'eventmove', 'eventdelete', 'eventresize', 
+					'eventcontextmenu', 'beforeeventmove', 'eventmove', 'eventdelete', 'beforeeventresize', 'eventresize', 'beforeeventcopy',
 					'dayclick', 'daydblclick', 'daycontextmenu',
 					'datechange', 'rangeselect', 'initdrag']);
 			},

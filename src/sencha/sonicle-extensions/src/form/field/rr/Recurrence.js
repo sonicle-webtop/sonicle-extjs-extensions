@@ -20,10 +20,7 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
         field: 'Ext.form.field.Field'
     },
 	
-	layout: 'anchor',
-	defaults: {
-		anchor: '100%'
-	},
+	layout: 'container',
 	defaultBindProperty: 'value',
 	
 	config: {
@@ -62,7 +59,6 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 	 */
 	freqOptions: [RRule.DAILY, RRule.WEEKLY, RRule.MONTHLY, RRule.YEARLY],
 	
-	repeatsText: 'Repeats',
 	endsText: 'Ends',
 	frequencyTexts: {
 		'none': 'Does not repeat',
@@ -116,43 +112,38 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		var me = this;
 		
 		me.items = [{
-			xtype: 'container',
-			layout: 'form',
+			xtype: 'fieldcontainer',
+			layout: 'anchor',
 			items: [{
-				xtype: 'fieldcontainer',
-				layout: 'hbox',
-				items: [{
-					xtype: 'combo',
-					itemId: 'freqcbo',
-					editable: false,
-					typeAhead: false,
-					forceSelection: true,
-					triggerAction: 'all',
-					store: {
-						type: 'array',
-						autoLoad: true,
-						fields: [
-							{name: 'id', type: 'string'},
-							{name: 'desc', type: 'string'}
-						],
-						data: me.buildFreqComboData(me.freqOptions)
-					},
-					valueField: 'id',
-					displayField: 'desc',
-					listeners: {
-						beforeselect: function(s, rec) {
-							if ((rec.get('id') === 'raw') && (me.getAllowRawFreqSelection() === false)) {
-								return false;
-							} else {
-								return true;
-							}
-						},
-						select: function(s, rec) {
-							me.onFrequencyChange(rec.get('id'));
+				xtype: 'combo',
+				itemId: 'freqcbo',
+				editable: false,
+				typeAhead: false,
+				forceSelection: true,
+				triggerAction: 'all',
+				store: {
+					type: 'array',
+					autoLoad: true,
+					fields: [
+						{name: 'id', type: 'string'},
+						{name: 'desc', type: 'string'}
+					],
+					data: me.buildFreqComboData(me.freqOptions)
+				},
+				valueField: 'id',
+				displayField: 'desc',
+				listeners: {
+					beforeselect: function(s, rec) {
+						if ((rec.get('id') === 'raw') && (me.getAllowRawFreqSelection() === false)) {
+							return false;
+						} else {
+							return true;
 						}
+					},
+					select: function(s, rec) {
+						me.onFrequencyChange(rec.get('id'));
 					}
-				}],
-				fieldLabel: me.repeatsText
+				}
 			}]
 		}, {
 			xtype: 'container',
@@ -219,7 +210,14 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 				}
 			},
 			items: [{
+				xtype: 'fieldset',
+				collapsed: true,
+				anchor: '100%',
+				width: '100%',
+				title: me.endsText
+			}, {
 				xtype: 'sorrduration',
+				itemId: 'dur',
 				endsText: me.endsText,
 				endsNeverText: me.endsNeverText,
 				endsAfterText: me.endsAfterText,
@@ -250,7 +248,8 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 						}
 					}
 				}
-			}
+			},
+			width: '100%'
 		}];
 		me.callParent(arguments);
 		me.initField();
@@ -286,13 +285,13 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 				item.setStartDate(newValue);
 			});
 			durCt = me.getComponent('durct');
-			durCt.getComponent(0).setStartDate(newValue);
+			durCt.getComponent('dur').setStartDate(newValue);
 		}
 	},
 	
 	configureUi: function(freq, rrule) {
 		var me = this,
-				freqCbo = me.getComponent(0).getComponent(0).getComponent('freqcbo'),
+				freqCbo = me.getComponent(0).getComponent('freqcbo'),
 				optsCt = me.getComponent('optsct'),
 				durCt = me.getComponent('durct'),
 				rawFld = me.getComponent('rawfld');
@@ -313,7 +312,7 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 			var ok = true;
 			if (rrule !== undefined) {
 				ok = optsCt.getComponent(me.optsCtItemId(freq)).setRRule(rrule);
-				if (ok) durCt.getComponent(0).setRRule(rrule);
+				if (ok) durCt.getComponent('dur').setRRule(rrule);
 			}
 			if (ok) {
 				optsCt.setActiveItem(me.optsCtItemId(freq));
@@ -358,14 +357,14 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 				freqCbo, optsCt, durCt, freqCmp;
 		
 		if (!freqCfg) {
-			freqCbo = me.getComponent(0).getComponent(0).getComponent('freqcbo');
+			freqCbo = me.getComponent(0).getComponent('freqcbo');
 			optsCt = me.getComponent('optsct');
 			freqCmp = optsCt.getComponent(me.optsCtItemId(freqCbo.getValue()));
 			if (freqCmp) freqCfg = freqCmp.getRRuleConfig();
 		}
 		if (!durCfg) {
 			durCt = me.getComponent('durct');
-			durCfg = durCt.getComponent(0).getRRuleConfig();
+			durCfg = durCt.getComponent('dur').getRRuleConfig();
 		}
 		return Ext.apply(freqCfg, durCfg);
 	},
