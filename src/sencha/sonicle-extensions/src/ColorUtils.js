@@ -4,7 +4,7 @@
  * sonicle@sonicle.com
  * http://www.sonicle.com
  */
-Ext.define('Sonicle.ColorUtils', function (ColorUtils) {
+Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
     var oldIE = Ext.isIE && Ext.ieVersion < 10;
 
     return {
@@ -349,33 +349,43 @@ Ext.define('Sonicle.ColorUtils', function (ColorUtils) {
                 v: v
             };
         },
-
-        /**
-         *
-         * @param r
-         * @param g
-         * @param b
-         * @return {String}
-         */
-        rgb2hex: function(r, g, b) {
-            r = r.toString(16);
-            g = g.toString(16);
-            b = b.toString(16);
-
-            if (r.length < 2) {
-                r = '0' + r;
-            }
-
-            if (g.length < 2) {
-                g = '0' + g;
-            }
-
-            if (b.length < 2) {
-                b = '0' + b;
-            }
-
-            return (r + g + b).toUpperCase();
-        },
+		
+		/**
+		 * Converts RGB color values into HEX notation.
+		 * @param {Integer/Object} r The red component (0-255), or an RGB color object.
+		 * @param {Integer} g The green component (0-255).
+		 * @param {Integer} b The blue component (0-255).
+		 * @param {Boolean} hash `True` to prepend # symbol.
+		 * @returns {String} The HEX color string
+		 */
+		rgb2hex: function(r, g, b, hash) {
+			if (Ext.isObject(r)) {
+				hash = g;
+				b = r.b;
+				g = r.g;
+				r = r.r;
+			}
+			var pad = function(s) {
+				return Ext.String.leftPad(s, 2, '0');
+			};
+			return (hash ? '#' : '') + (pad(r.toString(16)) + pad(g.toString(16)) + pad(b.toString(16))).toUpperCase();
+			//return (hash ? '#' : '') + (g | (b << 8) | (r << 16)).toString(16);
+		},
+		
+		/**
+		 * Tweaks the brightness (lighten/darken) of a HEX color by a specified amount.
+		 * @param {String} hex The HEX color string.
+		 * @param {Integer} amount The amount value (-255 to 255).
+		 * @returns {String} The lighten or darken HEX color string
+		 */
+		lightenDarken: function(hex, amount) {
+			var cObj = this.parseColor(hex);
+			return this.rgb2hex({
+				r: Math.min(cObj.r + amount, 255),
+				g: Math.min(cObj.g + amount, 255),
+				b: Math.min(cObj.b + amount, 255)
+			}, hex[0] === '#');
+		},
 
         colorMap: {
             aliceblue:              [240, 248, 255],
@@ -528,7 +538,7 @@ Ext.define('Sonicle.ColorUtils', function (ColorUtils) {
         }
     };
 },
-function (ColorUtils) {
+function(ColorUtils) {
     var formats = ColorUtils.formats,
         lowerized = {};
 
@@ -541,10 +551,10 @@ function (ColorUtils) {
     };
 
     Ext.Object.each(formats, function (name, fn) {
-        lowerized[name.toLowerCase()] = function (color) {
+        lowerized[name.toLowerCase()] = function(color) {
             var ret = fn(color);
             return ret.toLowerCase();
-        }
+        };
     });
 
     Ext.apply(formats, lowerized);
