@@ -287,6 +287,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 				forced_root_block_attrs: {
 					'style' : 'padding: 0; margin: 0;'
 				},
+				valid_children: "+body[style]",
 				extended_valid_elements: 'span[style]',
 				images_dataimg_filter: function(img) {
 					return img.hasAttribute('internal-blob');
