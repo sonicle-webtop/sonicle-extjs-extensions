@@ -1,0 +1,14 @@
+.so-avatarcolumn .so-avatar-wrap {
+	position: relative;
+	vertical-align: middle;
+	text-align: center;
+	flex: 0 0 auto;
+}
+.so-avatarcolumn .so-avatar-picture {
+	position: relative;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: cover;
+	background-clip: padding-box;
+	background-origin: padding-box;
+}

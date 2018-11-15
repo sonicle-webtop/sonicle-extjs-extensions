@@ -131,11 +131,13 @@ Ext.define('Sonicle.form.field.Image', {
 		me.callParent();
 	},
 	
+	/*
 	getSubTplData: function(fieldData) {
 		var ret = this.callParent(arguments);
 		ret.fieldStyle = this.getFieldStyles() + ret.fieldStyle;
 		return ret;
 	},
+	*/
 	
 	/**
 	 * Sets the read-only state of this field.

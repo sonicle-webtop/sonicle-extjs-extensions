@@ -1,26 +1,51 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2015 Sonicle S.r.l.
+ * Copyright (C) 2018 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
  */
 Ext.define('Sonicle.form.field.DisplayImage', {
 	extend: 'Ext.form.field.Text',
-	alias: ['widget.sodisplayimagefield'],
+	alias: ['widget.sodisplayimage', 'widget.sodisplayimagefield'],
 	
 	ariaRole: 'img',
 	focusable: false,
 	maskOnDisable: false,
 	
+	config: {
+		baseImageUrl: '',
+		urlParam: 'id',
+		placeholderImageUrl: Ext.BLANK_IMAGE_URL,
+		usePlaceholder: true
+	},
+	
 	/**
-	 * @cfg {String} [fieldCls="x-form-image-field"]
+	 * @cfg {Number} [imageWidth=100]
+	 * The pixel width of image.
+	 */
+	imageWidth: 100,
+	
+	/**
+	 * @cfg {Number} [imageHeight=100]
+	 * The pixel height of image.
+	 */
+	imageHeight: 100,
+	
+	/**
+	 * @cfg {circle|square} [geometry=circle]
+	 * Changes avatar's geomerty.
+	 */
+	geometry: 'square',
+	
+	/**
+	 * @cfg {String} [fieldCls="so-form-displayimage-field"]
 	 * The default CSS class for the field.
 	 */
-	fieldCls: Ext.baseCSSPrefix + 'form-image-field',
-	fieldBodyCls: Ext.baseCSSPrefix + 'form-image-field-body',
+	fieldCls: 'so-' + 'form-displayimage-field',
+	fieldBodyCls: 'so-' + 'form-displayimage-field-body',
 	
 	fieldSubTpl: [
-		'<div id="{id}" role="{role}" {inputAttrTpl}',
+		'<div id="{id}" role="{role}" data-ref="inputEl" {inputAttrTpl}',
 		'<tpl if="fieldStyle"> style="{fieldStyle}"</tpl>',
 		' class="{fieldCls} {fieldCls}-{ui}"></div>',
 		{
@@ -29,89 +54,57 @@ Ext.define('Sonicle.form.field.DisplayImage', {
 		}
 	],
 	
-	config: {
-		imageUrl: '',
-		urlParam: 'id',
-		blankImageUrl: Ext.BLANK_IMAGE_URL,
-		imageWidth: 100,
-		imageHeight: 100,
-		geometry: 'square'
+	/**
+	 * Overrides the method from the Ext.form.field.Base
+	 */
+	getFieldStyle: function() {
+		var me = this,
+				style = me.callParent(),
+				styles = Ext.isString(style) ? Ext.dom.Element.parseStyles(style) : style,
+				radius = me.buildRadius();
+		
+		styles.width = me.imageWidth + 'px';
+		styles.height = me.imageHeight + 'px';
+		if (!Ext.isEmpty(radius)) styles.borderRadius = radius;
+		return Ext.DomHelper.generateStyles(styles, null, true);
 	},
 	
-	getFieldStyles: function() {
-		var styles = {
-			position: 'relative',
-			verticalAlign: 'bottom',
-			backgroundColor: '#FFFFFF',
-			backgroundRepeat: 'no-repeat',
-			backgroundPosition: 'center',
-			backgroundSize: 'cover',
-			backgroundClip: 'padding-box',
-			backgroundOrigin: 'padding-box'
-		};
-		Ext.apply(styles, this.getBorderRadius());
-		return Ext.dom.Helper.generateStyles(styles);
-	},
-	
-	getBorderRadius: function() {
-		return (this.getGeometry() === 'circle') ? {borderRadius: '50%'} : {};
+	getValueStyles: function(value) {
+		var bgImage = this.buildBgImage(value);
+		return !Ext.isEmpty(bgImage) ? {backgroundImage: bgImage} : {};
 	},
 	
 	onRender: function() {
 		var me = this;
 		me.callParent();
-		if(me.inputWrap) me.inputWrap.applyStyles({padding: '5px'});
-		if(me.inputEl && me.value) me.loadImage(me.inputEl, me.value);
+		if (me.triggerWrap && (me.border === false)) me.triggerWrap.applyStyles({border: 'none'});
+		if (me.inputWrap) me.inputWrap.applyStyles({padding: '5px'});
+		if (me.inputEl) me.inputEl.applyStyles(me.getValueStyles(me.value));
 	},
 	
 	setValue: function(value) {
 		var me = this;
-		if(me.inputEl) me.loadImage(me.inputEl, value);
+		if (me.inputEl) me.inputEl.applyStyles(me.getValueStyles(value));
 		me.callParent(arguments);
 		return me;
 	},
 	
-	loadImage: function(el, value) {
-		var me = this, url;
+	privates: {
+		buildRadius: function() {
+			return (this.geometry === 'circle') ? '50%' : null;
+		},
 		
-		el.applyStyles({
-			width: me.getImageWidth() + 'px',
-			height: me.getImageHeight() + 'px'
-		});
-		if (!Ext.isEmpty(value)) {
-			url = me.buildBackgroundUrl(value);
-			me.displayLoading(true);
-			Ext.Ajax.request({
-				method: 'GET',
-				url: url,
-				success: function() {
-					me.displayLoading(false);
-					el.setStyle('background-image', 'url(' + url + ')');
-				},
-				failure: function() {
-					me.displayLoading(false);
-				}
-			});
-		} else {
-			el.setStyle('background-image', 'url(' + me.getBlankImageUrl() + ')');
-		}	
-	},
-	
-	/*
-	 * @private
-	 */
-	displayLoading: function(visible) {
-		var me = this, obj = false;
-		if(visible) obj = {msg: '', msgWrapCls: ''};
-		me.setLoading(obj);
-	},
-	
-	/*
-	 * @private
-	 */
-	buildBackgroundUrl: function(value) {
-		var params = {};
-		params[this.getUrlParam()] = value;
-		return Ext.String.urlAppend(this.getImageUrl(), Ext.Object.toQueryString(params));
+		buildBgImage: function(value) {
+			var me = this, args = [','];
+			if (!Ext.isEmpty(value)) args.push('url(' + me.buildUrl(value) + ')');
+			if (me.getUsePlaceholder()) args.push('url(' + me.getPlaceholderImageUrl() + ')');
+			return Sonicle.String.join.apply(null, args);
+		},
+		
+		buildUrl: function(value) {
+			var obj = {};
+			obj[this.getUrlParam()] = value;
+			return Ext.String.urlAppend(this.getBaseImageUrl(), Ext.Object.toQueryString(obj));
+		}
 	}
 });	
