@@ -1281,7 +1281,7 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 			var a = evtA.data,
 					b = evtB.data,
 					M = Sonicle.calendar.data.EventMappings;
-
+			
 			// Always sort all day events before anything else
 			if (a[M.IsAllDay.name]) {
 				return -1;
@@ -1307,18 +1307,27 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 						return a[M.StartDate.name].getTime() - b[M.StartDate.name].getTime();
 					}
 					return -1;
-				}
-				else if (diff(b[M.StartDate.name], b[M.EndDate.name]) > 0) {
+					
+				} else if (diff(b[M.StartDate.name], b[M.EndDate.name]) > 0) {
 					return 1;
 				}
-				return a[M.StartDate.name].getTime() - b[M.StartDate.name].getTime();
-			}
-			else {
+				
+				if (a[M.CalendarId.name] === b[M.CalendarId.name]) {
+					return a[M.StartDate.name].getTime() - b[M.StartDate.name].getTime();
+				} else {
+					return (a[M.CalendarId.name] < b[M.CalendarId.name]) ? -1 : 1;
+				}
+				
+			} else {
 				// Doing this allows span and non-span events to intermingle but
 				// remain sorted sequentially by start time. This seems more proper
 				// but can make for a less visually-compact layout when there are
 				// many such events mixed together closely on the calendar.
-				return a[M.StartDate.name].getTime() - b[M.StartDate.name].getTime();
+				if (a[M.CalendarId.name] === b[M.CalendarId.name]) {
+					return a[M.StartDate.name].getTime() - b[M.StartDate.name].getTime();
+				} else {
+					return (a[M.CalendarId.name] < b[M.CalendarId.name]) ? -1 : 1;
+				}
 			}
 		}, this));
 	},
