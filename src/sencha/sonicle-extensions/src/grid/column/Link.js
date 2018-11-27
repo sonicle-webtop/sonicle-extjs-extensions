@@ -26,7 +26,7 @@ Ext.define('Sonicle.grid.column.Link', {
 	
 	processEvent: function(type, view, cell, recordIndex, cellIndex, e, record, row) {
 		var me = this, ret;
-		if ((e.type === 'click') && (e.target.tagName.toLowerCase() === 'span') && (e.target.className === me.linkCls)) {
+		if ((e.type === 'click') && (e.target.tagName.toLowerCase() === 'span') && (e.target.className.indexOf(me.linkCls) !== -1)) {
 			me.fireEvent('linkclick', me, recordIndex, record);
 		} else {
 			ret = me.callParent(arguments);
@@ -36,11 +36,9 @@ Ext.define('Sonicle.grid.column.Link', {
 	
 	defaultRenderer: function(value) {
 		var me = this,
-				val = Ext.String.htmlEncode(value),
-				cls = me.linkCls;
+				val = Ext.String.htmlEncode(value);
 		if (me.preserveWhitespaces) val = Sonicle.String.htmlEncodeWhitespaces(val);
-		if (Ext.isString(me.cls)) cls += (' '+me.cls);
-		return '<span class="' + cls + '">' + val + '</span>';
+		return '<span class="' + me.linkCls + '">' + val + '</span>';
 	},
 	
 	updater: function(cell, value) {
