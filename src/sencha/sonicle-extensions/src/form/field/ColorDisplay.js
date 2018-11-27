@@ -18,13 +18,10 @@ Ext.define('Sonicle.form.field.ColorDisplay', {
 	fieldBodyCls: 'so-' + 'form-colordisplay-field-body',
 	
 	onRender: function() {
-		var me = this,
-				size = 16;
+		var me = this;
 		me.callParent();
 		if (me.inputEl) {
 			me.inputEl.applyStyles({
-				//width: size + 'px',
-				//height: size + 'px',
 				borderRadius: me.buildRadius()
 			});
 		}

@@ -26,7 +26,7 @@ Ext.define('Sonicle.grid.column.Link', {
 	
 	processEvent: function(type, view, cell, recordIndex, cellIndex, e, record, row) {
 		var me = this, ret;
-		if ((e.type === 'click') && (e.target.tagName === 'span') && (e.target.className === me.linkCls)) {
+		if ((e.type === 'click') && (e.target.tagName.toLowerCase() === 'span') && (e.target.className === me.linkCls)) {
 			me.fireEvent('linkclick', me, recordIndex, record);
 		} else {
 			ret = me.callParent(arguments);

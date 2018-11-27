@@ -118,11 +118,25 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
-	 * Converts line-breaks to HTML representation (in HTML5 <br> is preferred).
-	 * @returns {String}
+	 * Converts white-space char (' ') into its HTML character equivalent for literal display in web pages.
+	 * @param {String} value The string to encode.
+	 * @returns {String} The encoded text.
 	 */
+	htmlEncodeWhitespaces: function(value) {
+		return !Ext.isString(value) ? value : value.replace(/ /g, '&nbsp;');
+	},
+	
+	/**
+	 * Converts line-break char ('\n') into its HTML character equivalent for literal display in web pages.
+	 * @param {String} value The string to encode.
+	 * @returns {String} The encoded text.
+	 */
+	htmlEncodeLineBreaks: function(value) {
+		return !Ext.isString(value) ? value : value.replace(/\n/g, '<br>');
+	},
+	
 	htmlLineBreaks: function(s) {
-		return Ext.isString(s) ? s.replace(/\n/g, '<br>') : s;
+		return this.htmlEncodeLineBreaks(s);
 	},
 	
 	/**
