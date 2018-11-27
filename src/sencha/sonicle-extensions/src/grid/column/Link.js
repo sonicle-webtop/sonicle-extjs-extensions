@@ -9,6 +9,14 @@ Ext.define('Sonicle.grid.column.Link', {
 	alias: 'widget.solinkcolumn',
 	
 	/**
+	 * @cfg {Boolean} [preserveWhitespaces=false]
+	 * `True` to encode whitespaces in order to preserve them in the HTML output.
+	 */
+	preserveWhitespaces: false,
+	
+	linkCls: 'so-'+'grid-linkcolumn',
+	
+	/**
 	 * @event linkclick
 	 * Fires when the link is clicked
 	 * @param {Sonicle.grid.column.Link} this LinkColumn
@@ -18,7 +26,7 @@ Ext.define('Sonicle.grid.column.Link', {
 	
 	processEvent: function(type, view, cell, recordIndex, cellIndex, e, record, row) {
 		var me = this, ret;
-		if((e.type === 'click') && (e.target.tagName === 'A')) {
+		if ((e.type === 'click') && (e.target.tagName === 'span') && (e.target.className === me.linkCls)) {
 			me.fireEvent('linkclick', me, recordIndex, record);
 		} else {
 			ret = me.callParent(arguments);
@@ -27,7 +35,12 @@ Ext.define('Sonicle.grid.column.Link', {
 	},
 	
 	defaultRenderer: function(value) {
-		return '<a href="javascript:Ext.EmptyFn" class="so-grid-linkcolumn">'+value+'</a>';
+		var me = this,
+				val = Ext.String.htmlEncode(value),
+				cls = me.linkCls;
+		if (me.preserveWhitespaces) val = Sonicle.String.htmlEncodeWhitespaces(val);
+		if (Ext.isString(me.cls)) cls += (' '+me.cls);
+		return '<span class="' + cls + '">' + val + '</span>';
 	},
 	
 	updater: function(cell, value) {
