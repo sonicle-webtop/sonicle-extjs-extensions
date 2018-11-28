@@ -29,10 +29,24 @@ Ext.define('Sonicle.grid.plugin.DragDrop', {
 	 */
 	
 	/**
+	 * @cfg {String/String[]} [dropGroup]
+	 * The {@link #ddGroup} to which the DropZone will belong.
+	 * 
+	 * This defines which other DragZones the DropZone will interact with. Drag/DropZones only interact with other
+	 * Drag/DropZones which are members of the same {@link #ddGroup}.
+	 */
+	
+	/**
 	 * @cfg {Boolean} enableDrag 
 	 * `false` to disallow dragging items from the View.
 	 */
 	enableDrag: true,
+	
+	/**
+	 * @cfg {Boolean} enableDrop 
+	 * `false` to disallow dropping items from the View.
+	 */
+	enableDrop: true,
 	
 	/**
 	 * `true` to register this container with the Scrollmanager for auto scrolling during drag operations.
@@ -72,6 +86,16 @@ Ext.define('Sonicle.grid.plugin.DragDrop', {
 	 */
 	getDragText: Ext.emptyFn,
 	
+	/**
+	 * @property {Sonicle.grid.DragZone} dragZone
+	 * An DragZone which handles mousedown and dragging of records from the grid.
+	 */
+	
+	/**
+	 * @property {Ext.grid.ViewDropZone} dropZone
+	 * An DropZone which handles mouseover and dropping records in any grid which shares the same {@link #dropGroup}.
+	 */
+	
 	init: function(view) {
 		view.on('render', this.onViewRender, this, {single: true});
 	},
@@ -79,7 +103,7 @@ Ext.define('Sonicle.grid.plugin.DragDrop', {
 	destroy: function() {
 		var me = this;
 		me.dragZone = Ext.destroy(me.dragZone);
-		//me.dropZone = Ext.destroy(me.dropZone);
+		me.dropZone = Ext.destroy(me.dropZone);
 		me.callParent();
 	},
 	
@@ -88,11 +112,9 @@ Ext.define('Sonicle.grid.plugin.DragDrop', {
 		if (me.dragZone) {
 			me.dragZone.unlock();
 		}
-		/*
 		if (me.dropZone) {
 			me.dropZone.unlock();
 		}
-		*/
 		me.callParent();
 	},
 	
@@ -101,11 +123,9 @@ Ext.define('Sonicle.grid.plugin.DragDrop', {
 		if (me.dragZone) {
 			me.dragZone.lock();
 		}
-		/*
 		if (me.dropZone) {
 			me.dropZone.lock();
 		}
-		*/
 		me.callParent();
 	},
 	
@@ -128,6 +148,20 @@ Ext.define('Sonicle.grid.plugin.DragDrop', {
 				getDragItemData: me.getDragData,
 				getDragItemText: me.getDragText
 			}, me.dragZone));
+		}
+		if (me.enableDrop) {
+			var group = (Ext.isArray(me.dropGroup) && (me.dropGroup.length > 0)) ? me.dropGroup[0] : me.dropGroup;
+			me.dropZone = new Ext.grid.ViewDropZone(Ext.apply({
+				view: view,
+				ddGroup: group || me.ddGroup
+			}, me.dropZone));
+			// Adds remaining groups to the drop zone
+			if (Ext.isArray(me.dropGroup)) {
+				for (var i=1; i<me.dropGroup.length; i++) {
+					me.dropZone.addToGroup(me.dropGroup[i]);
+				}
+			}
+				
 		}
 	}
 });
