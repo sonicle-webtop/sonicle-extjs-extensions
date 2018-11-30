@@ -27,6 +27,11 @@ Ext.define('Sonicle.grid.column.Link', {
 	processEvent: function(type, view, cell, recordIndex, cellIndex, e, record, row) {
 		var me = this, ret;
 		if ((e.type === 'click') && (e.target.tagName.toLowerCase() === 'span') && (e.target.className.indexOf(me.linkCls) !== -1)) {
+			// FixMe
+			// Sometimes this event will fire also at the drop-click ending a 
+			// drag operation when source and target elements are the same.
+			// I was not able to find a way to filter out this situations.
+			// We will dig into this later...
 			me.fireEvent('linkclick', me, recordIndex, record);
 		} else {
 			ret = me.callParent(arguments);
