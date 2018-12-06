@@ -4,20 +4,20 @@
  * sonicle@sonicle.com
  * http://www.sonicle.com
  */
-Ext.define('Sonicle.grid.DragZone', {
+Ext.define('Sonicle.grid.ViewDragZone', {
 	extend: 'Ext.view.DragZone',
 	
 	/**
 	 * @template
-	 * An false function by default, but provided so that you can disable dragging 
-	 * below some custom conditions.
+	 * A `true` function by default, but provided so that you can disable dragging 
+	 * under some custom conditions.
 	 * @param {Ext.view.View} view The underlyning view object
 	 * @param {Ext.data.Model} record The record mousedowned upon.
 	 * @param {HTMLElement} item The grid row mousedowned upon.
 	 * @param {Ext.event.Event} e The mousedown event.
-	 * @return {Boolean} `true` to disallow dragging, `false` otherwise
+	 * @return {Boolean} `false` to disallow dragging, `true` otherwise
 	 */
-	isDragDisallowed: Ext.returnFalse,
+	isDragAllowed: Ext.returnTrue,
 	
 	/**
 	 * @template
@@ -40,7 +40,7 @@ Ext.define('Sonicle.grid.DragZone', {
 	
 	isPreventDrag: function(e, record, item, index) {
 		var me = this;
-		return me.callParent(arguments) || me.isDragDisallowed(me.view, record, item, index, e);
+		return me.callParent(arguments) || !me.isDragAllowed(me.view, record, item, index, e);
 	},
 	
 	getDragData: function(e) {

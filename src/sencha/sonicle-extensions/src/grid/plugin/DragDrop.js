@@ -8,7 +8,8 @@ Ext.define('Sonicle.grid.plugin.DragDrop', {
 	extend: 'Ext.plugin.Abstract',
 	alias: 'plugin.sogridviewdragdrop',
 	uses: [
-		'Sonicle.grid.DragZone'
+		'Sonicle.grid.ViewDragZone',
+		'Sonicle.grid.ViewDropZone'
 	],
 	
 	/**
@@ -57,15 +58,15 @@ Ext.define('Sonicle.grid.plugin.DragDrop', {
 	
 	/**
 	 * @template
-	 * An false function by default, but provided so that you can disable dragging 
-	 * below some custom conditions.
+	 * A `true` function by default, but provided so that you can disable dragging 
+	 * under some custom conditions.
 	 * @param {Ext.view.View} view The underlyning view object
 	 * @param {Ext.data.Model} record The record mousedowned upon.
 	 * @param {HTMLElement} item The grid row mousedowned upon.
 	 * @param {Ext.event.Event} e The mousedown event.
-	 * @return {Boolean} `true` to disallow dragging, `false` otherwise
+	 * @return {Boolean} `false` to disallow dragging, `true` otherwise
 	 */
-	isDragDisallowed: Ext.returnFalse,
+	isDragAllowed: Ext.returnTrue,
 	
 	/**
 	 * @template
@@ -85,6 +86,19 @@ Ext.define('Sonicle.grid.plugin.DragDrop', {
 	 * @return {String} The drag text to display
 	 */
 	getDragText: Ext.emptyFn,
+	
+	/**
+	 * @template
+	 * A `true` function by default, but provided so that you can disable dragging 
+	 * under some custom conditions.
+	 * @param {Ext.view.View} view The underlyning view object
+	 * @param {Ext.data.Model} record The record mouseovered upon.
+	 * @param {HTMLElement} item The grid row mouseovered upon.
+	 * @param {Object} data The drag data.
+	 * @param {Ext.event.Event} e The mouseover event.
+	 * @return {Boolean} `false` to disallow dropping, `true` otherwise
+	 */
+	isDropAllowed: Ext.returnTrue,
 	
 	/**
 	 * @property {Sonicle.grid.DragZone} dragZone
@@ -139,21 +153,22 @@ Ext.define('Sonicle.grid.plugin.DragDrop', {
 			if (me.containerScroll) {
 				scrollEl = view.getEl();
 			}
-			me.dragZone = new Sonicle.grid.DragZone(Ext.apply({
+			me.dragZone = new Sonicle.grid.ViewDragZone(Ext.apply({
 				view: view,
 				ddGroup: me.dragGroup || me.ddGroup,
 				containerScroll: me.containerScroll,
 				scrollEl: scrollEl,
-				isDragDisallowed: me.isDragDisallowed,
+				isDragAllowed: me.isDragAllowed,
 				getDragItemData: me.getDragData,
 				getDragItemText: me.getDragText
 			}, me.dragZone));
 		}
 		if (me.enableDrop) {
 			var group = (Ext.isArray(me.dropGroup) && (me.dropGroup.length > 0)) ? me.dropGroup[0] : me.dropGroup;
-			me.dropZone = new Ext.grid.ViewDropZone(Ext.apply({
+			me.dropZone = new Sonicle.grid.ViewDropZone(Ext.apply({
 				view: view,
-				ddGroup: group || me.ddGroup
+				ddGroup: group || me.ddGroup,
+				isDropAllowed: me.isDropAllowed
 			}, me.dropZone));
 			// Adds remaining groups to the drop zone
 			if (Ext.isArray(me.dropGroup)) {
