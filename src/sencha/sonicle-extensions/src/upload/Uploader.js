@@ -91,15 +91,15 @@ Ext.define('Sonicle.upload.Uploader', {
 	
 	statics: {
 		/**
-		 * Adds passed mimeType and related extensions to mOxie internal 
-		 * structures. (see mOxie.Mime.addMimeType() method)
+		 * Adds passed mimeType and related extensions to moxie internal 
+		 * structures. (see moxie.core.utils.Mime.addMimeType() method)
 		 * @param {String} mimeType The content mimeType.
 		 * @param {String/String[]} extension File extensions to register within mimeType.
 		 */
 		registerMimeType: function(mimeType, extension) {
-			if(!mOxie) return;
+			if(!moxie) return;
 			if(!Ext.isArray(extension)) extension = [extension];
-			var mm = mOxie.Mime,
+			var mm = moxie.core.utils.Mime,
 					exts = mm.extensions[mimeType] || [];
 			
 			Ext.iterate(extension, function(ext) {
@@ -497,12 +497,12 @@ Ext.define('Sonicle.upload.Uploader', {
 	
 	_Error: function(plu, data) {
 		var me = this, cause = null;
-		
 		if (data.file) {
 			data.file.status = 4;
 			me.failed.push(data.file);
 			me.updateStore(data.file);
 		}
+		if (data.code === -500) return; // Simply ignore init errors
 		if (data.code === -600) cause = 'size';
 		if (data.code === -700) cause = 'ext';
 		me.fireEvent('uploaderror', me, data.file, cause, null);
