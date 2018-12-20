@@ -101,6 +101,15 @@ Ext.define('Sonicle.grid.plugin.DragDrop', {
 	isDropAllowed: Ext.returnTrue,
 	
 	/**
+	 * @template
+	 * A function to effectively handle the data/record involved in drag operation.
+	 * @param {Object} data The drag data.
+	 * @param {Ext.data.Model} overRecord The Model over which the drop gesture took place.
+	 * @param {String} dropPosition `"before"` or `"after"` depending on whether the cursor is above or below the mid-line of the node.
+	 */
+	handleNodeDrop: Ext.emptyFn,
+	
+	/**
 	 * @property {Sonicle.grid.DragZone} dragZone
 	 * An DragZone which handles mousedown and dragging of records from the grid.
 	 */
@@ -168,7 +177,8 @@ Ext.define('Sonicle.grid.plugin.DragDrop', {
 			me.dropZone = new Sonicle.grid.ViewDropZone(Ext.apply({
 				view: view,
 				ddGroup: group || me.ddGroup,
-				isDropAllowed: me.isDropAllowed
+				isDropAllowed: me.isDropAllowed,
+				handleNodeDrop: me.handleNodeDrop
 			}, me.dropZone));
 			// Adds remaining groups to the drop zone
 			if (Ext.isArray(me.dropGroup)) {
