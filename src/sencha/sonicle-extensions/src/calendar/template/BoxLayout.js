@@ -107,7 +107,7 @@ Ext.define('Sonicle.calendar.template.BoxLayout', {
 					if (isToday) {
 						title = me.getTodayText();
 					} else {
-						title = XDate.format(dt, me.dayCount === 1 ? 'l, F j, Y' : (first ? 'M j, Y' : 'M j'));
+						title = XDate.format(dt, me.dayCount === 1 ? 'l, F j, Y' : (first ? 'D, M j, Y' : 'M j'));
 					}
 				} else {
 					var dayFmt = (w === 0 && me.showHeader !== true) ? 'D j' : 'j';
