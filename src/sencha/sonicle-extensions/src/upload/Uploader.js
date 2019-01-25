@@ -131,6 +131,7 @@ Ext.define('Sonicle.upload.Uploader', {
 	fileExtraParams: null,
 	
 	pluOptions: null,
+	plu: null,
 	
 	constructor: function(owner, cfg) {
 		var me = this;
@@ -158,13 +159,13 @@ Ext.define('Sonicle.upload.Uploader', {
 	
 	destroy: function() {
 		var me = this;
-		if(me.uploader) {
-			me.uploader.unbindAll();
-			me.uploader.destroy();
-			me.uploader = null;
+		if (me.plu) {
+			me.plu.unbindAll();
+			me.plu.destroy();
+			me.plu = null;
 			me.pluOptions = null;
 		}
-		if(me.store) {
+		if (me.store) {
 			me.store.destroy();
 			me.store = null;
 		}
@@ -198,22 +199,22 @@ Ext.define('Sonicle.upload.Uploader', {
 	
 	removeFile: function(id) {
 		var me = this,
-				file = me.uploader.getFile(id);
-		if(file) {
-			me.uploader.removeFile(file);
+				file = me.plu.getFile(id);
+		if (file) {
+			me.plu.removeFile(file);
 		} else {
 			me.store.remove(me.store.getById(id));
 		}
 	},
 	
 	cancel: function() {
-		this.uploader.stop();
+		this.plu.stop();
 	},
 	
 	start: function() {
 		var me = this;
 		me.fireEvent('beforeuploaderstart', me);
-		me.uploader.start();
+		me.plu.start();
 	},
 	
 	/**
@@ -226,12 +227,23 @@ Ext.define('Sonicle.upload.Uploader', {
 	/**
 	 * @private
 	 */
-	buildPluOptions: function() {
-		var me = this, pluopts;
+	createPluOptions: function() {
+		var me = this, opts = {};
 		
-		pluopts = Ext.apply({}, me.getPluploadConfig() || {}, {
-			browse_button: me.getBrowseButton(),
+		if (!Ext.isEmpty(me.getContainer())) {
+			opts.container = me.getContainer();
+		}
+		if (!Ext.isEmpty(me.getBrowseButton())) {
+			opts.browse_button = me.getBrowseButton();
+		}
+		if (!Ext.isEmpty(me.getDropElement())) {
+			opts.drop_element = me.getDropElement();
+		}
+		opts = Ext.apply(opts, me.getPluploadConfig() || {}, {
 			url: me.buildPluploadUrl(me.getUrl(), me.getExtraParams()),
+			runtimes: me.getRuntimes(),
+			flash_swf_url: me.getFlashSwfUrl(),
+			silverlight_xap_url: me.getSilverlightXapUrl(),
 			filters: {
 				mime_types: me.getMimeTypes(),
 				max_file_size: me.getMaxFileSize(),
@@ -244,51 +256,66 @@ Ext.define('Sonicle.upload.Uploader', {
 			resize: null,
 			multi_selection: me.getMultiSelection(),
 			required_features: null,
-			unique_names: me.getUniqueNames(),
-			runtimes: me.getRuntimes(),
-			container: me.getContainer(),
-			drop_element: me.getDropElement(),
-			flash_swf_url: me.getFlashSwfUrl(),
-			silverlight_xap_url: me.getSilverlightXapUrl()
+			unique_names: me.getUniqueNames()
 		});
 		
-		if(!pluopts.runtimes) {
+		if (!opts.runtimes) {
 			var runtimes = ['html5'];
-			pluopts.flash_swf_url && runtimes.push('flash');
-			pluopts.silverlight_xap_url && runtimes.push('silverlight');
+			opts.flash_swf_url && runtimes.push('flash');
+			opts.silverlight_xap_url && runtimes.push('silverlight');
 			runtimes.push('html4');
-			pluopts.runtimes = runtimes.join(',');
-		}
-		if(!pluopts.container) {
-			pluopts.container = Ext.fly(pluopts.browse_button).parent().id;
+			opts.runtimes = runtimes.join(',');
 		}
 		
-		return pluopts;
+		return opts;
 	},
 	
 	refreshPluOptions: function() {
-		var me = this, opt;
-		if(me.inited) {
-			me.pluOptions = me.buildPluOptions();
-			if(me.uploader) {
-				me.uploader.setOption('url', me.pluOptions.url);
-				/*
-				for(opt in me.pluOptions) {
-					me.uploader.setOption(opt, me.pluOptions[opt]);
-				}
-				*/
+		var me = this;
+		if (me.plu) {
+			me.pluOptions = me.createPluOptions();
+			me.plu.setOption('url', me.pluOptions.url);
+			/*
+			for(opt in me.pluOptions) {
+				me.plu.setOption(opt, me.pluOptions[opt]);
 			}
+			*/
 		}
 	},
 	
-	/**
-	 * @private
-	 */
 	init: function() {
-		var me = this;
-		if(!me.inited) {
-			me.inited = true;
-			me.initUploader();
+		var me = this, de;
+		if (!me.plu) {
+			me.buildPlu(me.createPluOptions());
+			
+			var ts = new Date().getTime(),
+				initOnReady = function() {
+					if (me.pluOptions && me.pluOptions.drop_element && !me.checkDropElsReady(me.pluOptions.drop_element)) {
+						if ((new Date().getTime() - ts) > 10*1000) {
+							// Do not wait for dropElement ready more that 10s
+							Ext.raise('Some dropElements are nor ready!');
+							return;
+						}
+						Ext.Function.requestAnimationFrame(initOnReady, me);
+					} else {
+						me.plu.init();
+					}
+				};
+			
+			initOnReady();
+		}
+	},
+	
+	privates: {
+		
+		checkDropElsReady: function(dropElOption) {
+			var dEls = Ext.isArray(dropElOption) ? dropElOption : [dropElOption],
+					el;
+			for (var i=0; i<dEls.length; i++) {
+				el = Ext.get(dEls[i]);
+				if (!el) return false;
+			}
+			return true;
 		}
 	},
 	
@@ -297,7 +324,7 @@ Ext.define('Sonicle.upload.Uploader', {
 	 */
 	fireOverallProgress: function() {
 		var me = this,
-				progress = me.uploader.total,
+				progress = me.plu.total,
 				speed = progress.bytesPerSec,
 				total = me.store.data.length,
 				failed = me.failed.length,
@@ -341,7 +368,7 @@ Ext.define('Sonicle.upload.Uploader', {
 		var me = this;
 		
 		if(sto.count() <= 0) {
-			me.uploader.total.reset();
+			me.plu.total.reset();
 			me.fireEvent('storeempty', me);
 		}
 		
@@ -371,11 +398,10 @@ Ext.define('Sonicle.upload.Uploader', {
 	/**
 	 * @private
 	 */
-	initUploader: function() {
+	buildPlu: function(opts) {
 		var me = this;
-		
-		me.pluOptions = me.buildPluOptions();
-		me.uploader = Ext.create('plupload.Uploader', me.pluOptions);
+		me.plu = new plupload.Uploader(opts);
+		me.pluOptions = opts;
 		
 		Ext.each([
 			'Init',
@@ -392,10 +418,8 @@ Ext.define('Sonicle.upload.Uploader', {
 			'FilesRemoved',
 			'Error'
 		], function (v) {
-			me.uploader.bind(v, eval("me._" + v), me);
+			me.plu.bind(v, eval("me._" + v), me);
 		}, me);
-
-		me.uploader.init();
 	},
 	
 	_Init: function(plu, data) {

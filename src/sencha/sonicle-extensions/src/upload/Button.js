@@ -22,9 +22,12 @@ Ext.define('Sonicle.upload.Button', {
 		unselectable: 'on'
 	},
 	
-	config: {
-		uploaderAutoInit: true
-	},
+	/**
+	 * @cfg {Boolean} [uploaderAutoInit = true]
+	 * `False` to disable internal uploader component auto-initialization.
+	 * A manual call to {@link #initUploader} is then required.
+	 */
+	uploaderAutoInit: true,
 	
 	uploader: null,
 	
@@ -33,18 +36,6 @@ Ext.define('Sonicle.upload.Button', {
 		me.callParent(arguments);
 		
 		me.uploader = Ext.create('Sonicle.upload.Uploader', me, me.initialConfig.uploaderConfig);
-		if(me.getUploaderAutoInit()) {
-			if(me.uploader.getDropElement() && (e = Ext.getCmp(me.uploader.getDropElement()))) {
-				e.addListener('afterRender', function() {
-					me.initUploader();
-				}, {single: true});
-			} else {
-				me.on('afterrender', function() {
-					me.initUploader();
-				}, {single: true});
-			}
-		}
-		
 		me.relayEvents(me.uploader, [
 			'uploaderready',
 			'beforeuploaderstart',
@@ -64,17 +55,24 @@ Ext.define('Sonicle.upload.Button', {
 	
 	destroy: function() {
 		var me = this;
-		if(me.uploader) {
+		if (me.uploader) {
 			me.uploader.destroy();
 			me.uploader = null;
 		}
 		me.callParent();
 	},
 	
-	initUploader: function(buttonId) {
+	onRender: function() {
 		var me = this;
-		buttonId = buttonId || me.getId();
-		me.uploader.setBrowseButton(buttonId);
+		me.callParent(arguments);
+		if (me.uploaderAutoInit) {
+			me.initUploader();
+		}
+	},
+	
+	initUploader: function() {
+		var me = this;
+		me.uploader.setBrowseButton(me.getId());
 		me.uploader.init();
 	}
 });
