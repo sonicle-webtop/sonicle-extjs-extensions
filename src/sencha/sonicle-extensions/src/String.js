@@ -52,7 +52,7 @@ Ext.define('Sonicle.String', {
 	 * @returns {String} The substring with the string removed if found, null if null String input
 	 */
 	removeEnd: function(s, remove, ignoreCase) {
-		return Ext.String.endsWith(s, remove, ignoreCase) ? s.slice(-remove.length) : s;
+		return Ext.String.endsWith(s, remove, ignoreCase) ? s.slice(0, -remove.length) : s;
 	},
 	
 	/**
@@ -80,19 +80,20 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
-	 * Joins passed values into a string of values delimited by provided separator.
+	 * Joins passed values into a string of values delimited by provided 
+	 * separator. Empty or null values will be ignored.
 	 * @param {String} separator The separator.
 	 * @param {Mixed...} values Values to join.
 	 * @returns {String} The joined string
 	 */
 	join: function(separator, values) {
-		var sep = separator || '',
-				s = '', i;
-		for(i=1; i<arguments.length; i++) {
-			if(Ext.isEmpty(arguments[i])) continue;
-			s = s.concat(arguments[i] || '', (i === arguments.length-1) ? '' : sep);
+		var s = '', i;
+		for (i=1; i<arguments.length; i++) {
+			if (!Ext.isEmpty(arguments[i])) {
+				s = s.concat(arguments[i], separator || '');
+			}
 		}
-		return Ext.String.trim(s);
+		return s.slice(0, -sep.length);
 	},
 	
 	/**
