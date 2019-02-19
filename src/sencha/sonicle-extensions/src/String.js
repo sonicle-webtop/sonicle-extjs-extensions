@@ -87,10 +87,11 @@ Ext.define('Sonicle.String', {
 	 * @returns {String} The joined string
 	 */
 	join: function(separator, values) {
-		var s = '', i;
+		var sep = separator || '',
+				s = '', i;
 		for (i=1; i<arguments.length; i++) {
 			if (!Ext.isEmpty(arguments[i])) {
-				s = s.concat(arguments[i], separator || '');
+				s = s.concat(arguments[i], sep);
 			}
 		}
 		return s.slice(0, -sep.length);
