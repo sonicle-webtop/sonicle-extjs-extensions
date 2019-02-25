@@ -15,6 +15,19 @@ Ext.define('Sonicle.grid.column.Icon', {
 	iconTextCls: 'so-'+'iconcolumn-text',
 	
 	/**
+	 * @cfg {String} cellClsField
+	 * The fieldName for getting the CSS class to apply to the cell area.
+	 * To determine the class dynamically, configure the column with a `getCellCls` function.
+	 */
+	cellClsField: null,
+	
+	/**
+	 * @cfg {Function} getCellCls
+	 * A function which returns the CSS class to apply to the cell area.
+	 */
+	getCellCls: null,
+
+	/**
 	 * @cfg {String} iconClsField
 	 * The fieldName for getting the CSS class to apply to the icon image.
 	 * To determine the class dynamically, configure the column with a `getIconCls` function.
@@ -86,7 +99,11 @@ Ext.define('Sonicle.grid.column.Icon', {
 	},
 	
 	defaultRenderer: function(value, cellValues) {
-		return this.buildHtml(value, cellValues ? cellValues.record : null);
+		var me=this,
+			rec=cellValues ? cellValues.record : null,
+			cellCls = me.evalValue(me.getCellCls, me.cellClsField, value, rec);
+		if (cellCls && cellValues) cellValues.tdCls += cellCls;
+		return this.buildHtml(value, rec);
 	},
 	
 	updater: function(cell, value, rec) {
