@@ -13,25 +13,30 @@ Ext.define('Sonicle.grid.plugin.DDOrdering', {
 		var me = this,
 				gp = view.grid;
 		me.callParent(arguments);
-		gp.on('drop', me._onGripDrop, me);
+		gp.on('drop', me.onGripDrop, me);
 	},
 	
 	destroy: function() {
 		var me = this,
 				gp = me.getCmp().grid;
-		gp.un('drop', me._onGripDrop, me);
+		gp.un('drop', me.onGripDrop, me);
 		me.callParent(arguments);
 	},
 	
-	_onGripDrop: function() {
-		var me = this,
-				of = me.orderField,
-				gp = me.getCmp().grid,
-				sto = gp.getStore();
-		if (sto && of) {
-			sto.each(function(rec, indx) {
-				rec.set(of, indx+1);
-			});
+	privates: {
+		onGripDrop: function() {
+			var me = this,
+					gp = me.getCmp().grid,
+					sto = gp.getStore(),
+					of = me.orderField;
+
+			if (sto && of) {
+				sto.beginUpdate();
+				sto.each(function(rec, indx) {
+					rec.set(of, indx+1);
+				});
+				sto.endUpdate();
+			}
 		}
 	}
 });
