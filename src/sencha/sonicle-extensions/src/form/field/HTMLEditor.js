@@ -732,7 +732,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 	getComputedProperty: function(propname) {
 		var ed=this.getTinyMCEEditor();
 		var sel=ed.getDoc().getSelection();
-		if (sel.rangeCount>0) {
+		if (sel && sel.rangeCount>0) {
 			var el=sel.getRangeAt(0).commonAncestorContainer;
 			if (el.nodeType == 3) {
 				el=el.parentElement;
