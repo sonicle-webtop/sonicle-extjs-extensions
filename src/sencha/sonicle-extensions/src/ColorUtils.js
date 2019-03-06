@@ -9,6 +9,7 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
 
     return {
         singleton: true,
+		uses: ['Sonicle.Number'],
 
         constructor: function () {
             ColorUtils = this;
@@ -191,26 +192,6 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
 
             return Ext.apply(ret, hsv);
         },
-		
-		/**
-		 * Calculates best contrast color depending on passed background color.
-		 * A luminance boundary value of 125 is used as default.
-		 * @param {type} color Background color value.
-		 * @param {type} [lumBound] Luminance boundary value.
-		 * @returns {String} Color value in hex form. (#FFFFFF or #000000)
-		 */
-		getBestContrast: function(color, lumBound) {
-			lumBound = lumBound || 125;
-			var cobj = this.parseColor(color);
-			if(!cobj) return '#000000';
-			// Counting the perceptive luminance - human eye favors green color...
-			//if(Math.round(((cobj.r * 299) + (cobj.g * 587) + (cobj.b * 114))/1000) > lumBound) { // W3 formula (http://www.w3.org/TR/AERT#color-contrast)
-			if(Math.round(((cobj.r * 212) + (cobj.g * 715) + (cobj.b * 73))/1000) > lumBound) { // ITU-R BT.709 (https://en.wikipedia.org/wiki/Relative_luminance)
-				return '#000000';
-			} else {
-				return '#FFFFFF';
-			}
-		},
 
         /**
          *
@@ -373,18 +354,31 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
 		},
 		
 		/**
-		 * Tweaks the brightness (lighten/darken) of a HEX color by a specified amount.
-		 * @param {String} hex The HEX color string.
-		 * @param {Integer} amount The amount value (-255 to 255).
-		 * @returns {String} The lighten or darken HEX color string
+		 * Computes the relative luminance (human eye favors green color), 
+		 * white color has 100% black color 0%, other colors are between.
+		 * @param {String} color A color value.
+		 * @param {Integer} [precision=2] Desired decimal places
+		 * @returns {Number} Value between 0..1 indicating the luminance.
 		 */
-		lightenDarken: function(hex, amount) {
-			var cObj = this.parseColor(hex);
-			return this.rgb2hex({
-				r: Math.min(cObj.r + amount, 255),
-				g: Math.min(cObj.g + amount, 255),
-				b: Math.min(cObj.b + amount, 255)
-			}, hex[0] === '#');
+		luminance: function(color, precision) {
+			if (!Number.isInteger(precision)) precision = 2;
+			var cobj = this.parseColor(color),
+					//lum = (cobj.r * 0.299) + (cobj.g * 0.587) + (cobj.b * 0.114); // W3 formula (http://www.w3.org/TR/AERT#color-contrast)
+					lum = (cobj.r * 0.2126) + (cobj.g * 0.7152) + (cobj.b * 0.0722); // ITU-R BT.709 (https://en.wikipedia.org/wiki/Relative_luminance)
+			return Sonicle.Number.round(lum/255, precision);
+		},
+		
+		/**
+		 * Calculate the best foreground color for the specified background.
+		 * A background color with a luminance below the bound value will be 
+		 * considered dark and so white forecolor is returned, otherwise black. 
+		 * @param {String} bgColor A color value.
+		 * @param {Number} [threshold=0.5] Luminance threshold value.
+		 * @returns {String} `#000000` or `#FFFFFF`
+		 */
+		bestForeColor: function(bgColor, threshold) {
+			if (!Ext.isNumber(threshold) || (threshold < 0) || (threshold > 1)) threshold = 0.5;
+			return (this.luminance(bgColor, 2) > threshold) ? '#000000' : '#FFFFFF';
 		},
 
         colorMap: {

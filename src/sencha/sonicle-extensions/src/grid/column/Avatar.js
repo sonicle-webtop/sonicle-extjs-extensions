@@ -139,7 +139,7 @@ Ext.define('Sonicle.grid.column.Avatar', {
 	
 	_getSpanStyles: function(bgColor) {
 		return {
-			color: Sonicle.ColorUtils.lightenDarken(bgColor, this.lighten),
+			color: Sonicle.form.field.InitialsAvatar.lightenDarken(bgColor, this.lighten),
 			fontSize: Math.floor(this.avatarSize/2) + 'px'
 		};
 	},

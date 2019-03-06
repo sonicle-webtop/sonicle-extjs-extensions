@@ -138,13 +138,13 @@ Ext.define('Sonicle.calendar.Panel', {
 	eventTextColor: 'auto',
 	
 	/**
-	 * @cfg {Number} colorLuminance [colorLuminance=163]
-	 * Integer number (from 0 to 255) expressing color lumimance boundary value, 
+	 * @cfg {Number} colorLuminance [colorLuminance=0.64]
+	 * Number (0..1) expressing color lumimance threshold value, 
 	 * used to set the appropriate text color (black or white) depending on
 	 * event's background color. This config is only useful if 
 	 * {@link #eventTextColor} is equal to 'auto'.
 	 */
-	colorLuminance: 163, // for W3 formula: 195
+	colorLuminance: 0.64,//163, // for W3 formula: 195
 	
 	/**
      * @cfg {Object} viewCfg

@@ -105,7 +105,7 @@ Ext.define('Sonicle.form.field.InitialsAvatar', {
 	
 	_getSpanStyles: function(bgColor) {
 		return {
-			color: Sonicle.ColorUtils.lightenDarken(bgColor, this.lighten),
+			color: this.self.lightenDarken(bgColor, this.lighten),
 			fontSize: Math.floor(this.avatarSize/2) + 'px'
 		};
 	},
@@ -154,6 +154,12 @@ Ext.define('Sonicle.form.field.InitialsAvatar', {
 				ini = ini.replace(/[a-z]+/g, '');
 			}
 			return ini.substr(0, 3).toUpperCase();
+		},
+		
+		lightenDarken: function(color, amount) {
+			var co = Ext.util.Color.create(color);
+			co.setRGB(co.r + amount, co.g + amount, co.b + amount);
+			return co.toHex();
 		}
 	}
 });	
