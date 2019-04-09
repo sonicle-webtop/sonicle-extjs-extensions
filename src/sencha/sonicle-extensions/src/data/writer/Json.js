@@ -26,28 +26,51 @@ Ext.define('Sonicle.data.writer.Json', {
 	
 	getRecordData: function(record, operation) {
 		var me = this,
-				writeAsso = me.getWriteAssociated(),
-				writeCha = me.getWriteChanges(),
-				data, asso, assoData, sto, cname, cha;
-		data = this.callParent(arguments);
+				writeAssociated = me.getWriteAssociated(),
+				writeChanges = me.getWriteChanges(),
+				data = me.callParent(arguments),
+				changes, store, model, modelCN, associatedData;
 		
-		if(writeAsso) {
-			if(record.session && writeCha) {
-				cha = record.session.getChanges();
-				Ext.iterate(record.associations, function(name) {
-					asso = record.associations[name];
-					sto = record[asso.getterName]();
-					cname = Ext.getClassName(sto.getModel());
-					data[asso.role] = cha[cname];
-				});
-			} else {
-				assoData = record.getAssociatedData();
-				Ext.iterate(record.associations, function(name) {
-					asso = record.associations[name];
-					data[asso.role] = assoData[asso.role];
-				});
-			}
+		if (writeAssociated) {
+			if (record.session && writeChanges) changes = record.session.getChanges();
+			associatedData = record.getAssociatedData();
+			Ext.iterate(record.associations, function(key, association) {
+				store = record[association.getterName]();
+				model = store.getModel();
+				modelCN = Ext.getClassName(model);
+				if (changes && changes[modelCN]) {
+					data[association.role] = me.extractAssociatedData(store, model.getFieldsMap(), changes[modelCN]);
+				} else {
+					data[association.role] = me.extractAssociatedData(store, model.getFieldsMap(), associatedData[association.role]);
+				}
+			});
 		}
 		return data;
+	},
+	
+	extractAssociatedData: function(store, fieldsMap, arrData) {
+		var me = this,
+				dateFormat = me.getDateFormat(),
+				ret = arrData,
+				record, field, key, value, i;
+		
+		for (i=0; i<arrData.length; i++) {
+			record = store.getAt(i);
+			for (key in arrData[i]) {
+				value = arrData[i][key];
+				if ((field = fieldsMap[key])) {
+					// Allow this Writer to take over formatting date values if it has a
+					// dateFormat specified. Only check isDate on fields declared as dates
+					// for efficiency.
+					if (field.isDateField && dateFormat && Ext.isDate(value)) {
+						value = Ext.Date.format(value, dateFormat);
+					} else if (field.serialize) {
+						value = field.serialize(value, record);
+					}
+				}
+				ret[i][key] = value;
+			}
+		}
+		return ret;
 	}
 });
