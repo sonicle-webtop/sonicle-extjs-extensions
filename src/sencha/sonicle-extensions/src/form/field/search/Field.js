@@ -49,6 +49,8 @@ Ext.define('Sonicle.form.field.search.Field', {
 			}
 		});
 		me.callParent([cfg]);
+		me.isAvailSearchString = Ext.isDefined(window['SearchString']);
+		me.checkAvail();
 	},
 	
 	initComponent: function() {
@@ -171,6 +173,12 @@ Ext.define('Sonicle.form.field.search.Field', {
 		}
 		me.collapse();
 		me.fireEvent('query', me, value, searchObj);
+	},
+	
+	privates: {
+		checkAvail: function() {
+			if (!this.isAvailSearchString) Ext.raise('Library search-string is required (see https://github.com/mixmaxhq/search-string).');
+		}
 	},
 	
 	statics: {
