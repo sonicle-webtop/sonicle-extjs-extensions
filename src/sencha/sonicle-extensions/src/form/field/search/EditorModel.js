@@ -7,6 +7,9 @@
 Ext.define('Sonicle.form.field.search.EditorModel', {
 	extend: 'Ext.app.ViewModel',
 	alias: 'viewmodel.sosearcheditormodel',
+	uses: [
+		'Sonicle.SearchString'
+	],
 	
 	data: {
 		values: {},
@@ -31,16 +34,17 @@ Ext.define('Sonicle.form.field.search.EditorModel', {
 	
 	setSearchStringValue: function(s) {
 		var me = this,
-				ss = SearchString.parse(s),
-				texts = ss.getTextSegments(),
+				SoSS = Sonicle.SearchString,
+				ss = SoSS.parse(s),
 				parsed = ss.getParsedQuery(),
-				value, kw;
+				value, kw, txt;
 		
 		Ext.iterate(me.fields, function(field) {
 			kw = field.name;
 			value = null;
 			if (field.textSink) {
-				if (texts.length > 0) value = me.extractTextSegments(texts);
+				txt = SoSS.getAllText(ss, false);
+				if (!Ext.isEmpty(txt)) value = txt;
 			} else if (field.type === 'boolean') {
 				kw = field.boolKeyword || 'has';
 				if (Ext.isArray(parsed[kw])) value = parsed[kw].indexOf(field.name) > -1;
@@ -53,21 +57,9 @@ Ext.define('Sonicle.form.field.search.EditorModel', {
 		});
 	},
 	
-	extractTextSegments: function(texts) {
-		var txt = '', i;
-		for (i=0; i<texts.length; i++) {
-			txt += (texts[i].text + ' ');
-		}
-		return txt.trim();
-	},
-	
 	updateSearchString: function() {
 		var ss = this.createSearchString(),
-				obj = {
-					value: ss.toString(),
-					conditionArray: ss.getConditionArray(),
-					parsedQuery: ss.getParsedQuery()
-				};
+				obj = Sonicle.SearchString.toResult(ss);
 		this.set('searchString', obj);
 		return obj;
 	},
@@ -75,7 +67,7 @@ Ext.define('Sonicle.form.field.search.EditorModel', {
 	createSearchString: function() {
 		var me = this,
 				values = me.get('values'),
-				ss = SearchString.parse(),
+				ss = Sonicle.SearchString.parse(),
 				value, kw;
 		
 		Ext.iterate(me.fields, function(field) {

@@ -13,6 +13,9 @@ Ext.define('Sonicle.form.field.search.Field', {
 		'Sonicle.form.trigger.Clear',
 		'Sonicle.plugin.FieldTooltip'
 	],
+	uses: [
+		'Sonicle.SearchString'
+	],
 	
 	selectOnFocus: true,
 	matchFieldWidth: false,
@@ -30,12 +33,14 @@ Ext.define('Sonicle.form.field.search.Field', {
      */
 	
 	constructor: function(cfg) {
-		var me = this;
+		var me = this,
+				searchText = cfg.searchText || me.searchText,
+				clearText = cfg.clearText || me.clearText;
 		cfg.triggers = Ext.apply(cfg.triggers || {}, {
 			search: {
 				cls: Ext.baseCSSPrefix + 'form-search-trigger',
 				position: 'left', // possible thanks to custom override!!!
-				tooltip: me.searchText,
+				tooltip: searchText,
 				handler: function(s) {
 					me.doQuery(s.getValue());
 				}
@@ -43,14 +48,12 @@ Ext.define('Sonicle.form.field.search.Field', {
 			clear: {
 				type: 'soclear',
 				weight: -1,
-				tooltip: me.clearText,
+				tooltip: clearText,
 				hideWhenEmpty: true,
 				hideWhenMouseOut: true
 			}
 		});
 		me.callParent([cfg]);
-		me.isAvailSearchString = Ext.isDefined(window['SearchString']);
-		me.checkAvail();
 	},
 	
 	initComponent: function() {
@@ -133,7 +136,7 @@ Ext.define('Sonicle.form.field.search.Field', {
 	
 	onExpand: function() {
 		var me = this;
-		me.queryPicker.setPreviousValue(me.self.toRawQuery(me.value, 'in'));
+		me.queryPicker.setPreviousValue(Sonicle.SearchString.toRawQuery(me.value));
 		me.queryPicker.focusField();
 	},
 	
@@ -149,7 +152,7 @@ Ext.define('Sonicle.form.field.search.Field', {
 	
 	onPickerOk: function(s, rawValue, searchObj) {
 		var me = this,
-				value = me.self.toHumanQuery(rawValue, 'out');
+				value = Sonicle.SearchString.toHumanQuery(rawValue);
 		me.setValue(value);
 		me.doQuery(value, searchObj);
 	},
@@ -167,45 +170,12 @@ Ext.define('Sonicle.form.field.search.Field', {
 	},
 
 	doQuery: function(value, searchObj) {
-		var me = this;
+		var me = this,
+				SoSS = Sonicle.SearchString;
 		if (arguments.length === 1) {
-			searchObj = me.self.parseHumanQuery(value);
+			searchObj = SoSS.toResult(SoSS.parseHumanQuery(value));
 		}
 		me.collapse();
 		me.fireEvent('query', me, value, searchObj);
-	},
-	
-	privates: {
-		checkAvail: function() {
-			if (!this.isAvailSearchString) Ext.raise('Library search-string is required (see https://github.com/mixmaxhq/search-string).');
-		}
-	},
-	
-	statics: {
-		parseHumanQuery: function(s) {
-			return SearchString.parse(this.toRawQuery(s));
-		},
-		
-		/**
-		 * Translate a human-readable query into a raw one, replacing 
-		 * round-parentesis notation with double-quotes:
-		 *     (abcd) (efgh) -> "abcd" "efgh"
-		 * @param {String} s Source string
-		 * @returns {String} Output query
-		 */
-		toRawQuery: function(s) {
-			return !Ext.isEmpty(s) ? s.replace(/"\((.*?)\)"/g, '"$1"') : s;
-		},
-		
-		/**
-		 * Translate a raw query into a human-readable one, replacing 
-		 * double-quotes notation with round-parentesis:
-		 *     abcd" "efgh" -> (abcd) (efgh)
-		 * @param {String} s Source string
-		 * @returns {String} Output query
-		 */
-		toHumanQuery: function(s) {
-			return !Ext.isEmpty(s) ? s.replace(/"(.*?)"/g, '($1)') : s;
-		}
 	}
 });
