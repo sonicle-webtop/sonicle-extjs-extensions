@@ -29,7 +29,7 @@ Ext.define('Sonicle.form.field.search.Field', {
 	 * Fires when the user presses the ENTER key or clicks on the search icon.
 	 * @param {Ext.form.field.Text} this
 	 * @param {String} value Human-readable query text
-	 * @param {Object} searchObject Parsed query-text result
+	 * @param {Object} queryObject Query exploded into components
      */
 	
 	constructor: function(cfg) {
@@ -150,11 +150,11 @@ Ext.define('Sonicle.form.field.search.Field', {
 		this.collapse();
 	},
 	
-	onPickerOk: function(s, rawValue, searchObj) {
+	onPickerOk: function(s, rawValue, queryObject) {
 		var me = this,
 				value = Sonicle.SearchString.toHumanQuery(rawValue);
 		me.setValue(value);
-		me.doQuery(value, searchObj);
+		me.doQuery(value, queryObject);
 	},
 	
 	onPickerCancel: function(s) {
@@ -169,13 +169,13 @@ Ext.define('Sonicle.form.field.search.Field', {
 		if (e.getKey() === e.ENTER) this.doQuery(s.getValue());
 	},
 
-	doQuery: function(value, searchObj) {
+	doQuery: function(value, queryObject) {
 		var me = this,
 				SoSS = Sonicle.SearchString;
 		if (arguments.length === 1) {
-			searchObj = SoSS.toResult(SoSS.parseHumanQuery(value));
+			queryObject = SoSS.toResult(SoSS.parseHumanQuery(value));
 		}
 		me.collapse();
-		me.fireEvent('query', me, value, searchObj);
+		me.fireEvent('query', me, value, queryObject);
 	}
 });
