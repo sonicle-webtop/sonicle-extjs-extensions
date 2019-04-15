@@ -17,6 +17,8 @@ Ext.define('Sonicle.menu.StoreMenu', {
 		textAsHtml: false,
 		textField: 'text',
 		tagField: null,
+		iconField: null,
+		iconClsField: null,
 		staticItems: null
 	},
 	
@@ -43,8 +45,8 @@ Ext.define('Sonicle.menu.StoreMenu', {
 	 */
 	onBindStore: function(store, initial) {
 		// We're being bound, not unbound...
-		if(store) {
-			if(store.autoCreated) this.textField = 'field1';
+		if (store) {
+			if (store.autoCreated) this.textField = 'field1';
 		}
 	},
 	
@@ -64,7 +66,7 @@ Ext.define('Sonicle.menu.StoreMenu', {
 	 */
 	_loadMenuItems: function() {
 		var me = this;
-		if(me.store && !me.store.loaded) me.store.load();
+		if (me.store && !me.store.loaded) me.store.load();
 	},
 	
 	onStoreDataChanged: function() {
@@ -72,23 +74,27 @@ Ext.define('Sonicle.menu.StoreMenu', {
 	},
 	
 	onStoreLoad: function(store, records, success) {
-		if(success) this.updateMenuItems();
+		if (success) this.updateMenuItems();
 	},
 	
 	updateMenuItems: function() {
 		var me = this,
+			tagField = me.getTagField(),
 			textField = me.getTextField(),
-			tagField = me.getTagField();
+			iconField = me.getIconField(),
+			iconClsField = me.getIconClsField();
 		
-		if(me.store) {
+		if (me.store) {
 			Ext.suspendLayouts();
 			me.removeAll();
 			if (me.staticItems) me.add(me.staticItems);
 			me.store.each(function(rec) {
 				me.add(Ext.create(me.getItemClass(),{
 					itemId: rec.getId(),
-					tag: tagField?rec.get(tagField):undefined,
-					text: rec.get(textField)
+					tag: tagField ? rec.get(tagField) : undefined,
+					text: rec.get(textField),
+					icon: iconField ? rec.get(iconField) : undefined,
+					iconCls: iconClsField ? rec.get(iconClsField) : undefined
 				}));
 			});
 			Ext.resumeLayouts(true);
