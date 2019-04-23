@@ -129,7 +129,8 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 			data.count = rrCfg.count;
 		} else if (me.isOpt3(rrCfg)) {
 			data.opt3 = true;
-			data.until = Ext.Date.utcToLocal(rrCfg.until);
+			data.until = rrCfg.until;
+			//data.until = Ext.Date.utcToLocal(rrCfg.until);
 		} else {
 			data.opt1 = true;
 		}
