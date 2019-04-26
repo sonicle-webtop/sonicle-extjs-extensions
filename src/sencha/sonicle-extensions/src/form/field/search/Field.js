@@ -9,6 +9,7 @@ Ext.define('Sonicle.form.field.search.Field', {
 	xtype: 'sosearchfield',
 	requires: [
 		'Ext.layout.container.Fit',
+		'Sonicle.ExtUtils',
 		'Sonicle.form.field.search.Editor',
 		'Sonicle.form.trigger.Clear',
 		'Sonicle.plugin.FieldTooltip'
@@ -19,7 +20,6 @@ Ext.define('Sonicle.form.field.search.Field', {
 	
 	selectOnFocus: true,
 	matchFieldWidth: false,
-	plugins: ['sofieldtooltip'],
 	
 	searchText: 'Search',
 	clearText: 'Clear',
@@ -34,9 +34,12 @@ Ext.define('Sonicle.form.field.search.Field', {
 	
 	constructor: function(cfg) {
 		var me = this,
+				SoEU = Sonicle.ExtUtils,
 				searchText = cfg.searchText || me.searchText,
 				clearText = cfg.clearText || me.clearText;
-		cfg.triggers = Ext.apply(cfg.triggers || {}, {
+		
+		cfg.plugins = SoEU.mergePlugins(cfg, 'sofieldtooltip');
+		cfg.triggers = SoEU.mergeTriggers(cfg, {
 			search: {
 				cls: Ext.baseCSSPrefix + 'form-search-trigger',
 				position: 'left', // possible thanks to custom override!!!
