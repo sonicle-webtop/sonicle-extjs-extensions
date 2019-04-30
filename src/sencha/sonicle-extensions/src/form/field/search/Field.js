@@ -19,7 +19,8 @@ Ext.define('Sonicle.form.field.search.Field', {
 	],
 	
 	selectOnFocus: true,
-	matchFieldWidth: false,
+	matchFieldWidth: true,
+	pickerAlign: 'tr-br?',
 	
 	searchText: 'Search',
 	clearText: 'Clear',

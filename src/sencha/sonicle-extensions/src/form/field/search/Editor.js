@@ -37,6 +37,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 	 * @param {top|left} [labelAlign=top] Controls the position and alignment of the {@link Ext.form.field.Base#fieldLabel}.
 	 * @param {String} [label] The label for the field.
 	 * @param {Boolean} [textSink] `true` to use this field as destination field for alone text portions in query.
+	// * @param {Boolean} [clearTextSink] `true` to reset value of the field marked as textSink.
 	 * @param {Object} [fieldCfg] A custom {@link Ext.form.field.Field} config to apply.
 	 */
 	
