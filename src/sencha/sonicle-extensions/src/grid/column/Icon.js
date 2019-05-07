@@ -74,12 +74,29 @@ Ext.define('Sonicle.grid.column.Icon', {
 	 */
 	stopSelection: false,
 	
+	/**
+	 * @cfg {Function/String} handler
+	 * A function called when the thread collapse/expand icon is clicked.
+	 * @cfg {Ext.view.Table} handler.view The owning TableView.
+	 * @cfg {Number} handler.rowIndex The row index clicked on.
+	 * @cfg {Number} handler.colIndex The column index clicked on.
+	 * @cfg {Event} handler.e The click event.
+	 * @cfg {Ext.data.Model} handler.record The Record underlying the clicked row.
+	 * @cfg {HTMLElement} handler.row The table row clicked upon.
+	 */
+	
+	/**
+	 * @cfg {Object} scope
+	 * The scope (`this` reference) in which the `{@link #handler}`
+	 * functions are executed.
+	 * Defaults to this Column.
+	 */
+	
 	constructor: function(cfg) {
-		var me=this;
-		
-		me.scope = me;
+		var me = this;
 		me.origScope = cfg.scope || me.scope;
-		me.callParent([ cfg ]);
+		me.scope = cfg.scope = null;
+		me.callParent([cfg]);
 	},
 	
 	buildHtml: function(value, rec) {
@@ -121,43 +138,26 @@ Ext.define('Sonicle.grid.column.Icon', {
 		}
 	},
 	
-    /**
-	 * @private
-	 * Process and re-fire events routed from the Ext.panel.Table's processEvent method.
-	 * Also fires any configured click handlers. By default, cancels the mousedown event to prevent selection.
-	 * Returns the event handler's status to allow canceling of GridView's bubbling process.
-	 */
-	processEvent: function (type, view, cell, recordIndex, cellIndex, e, record, row) {
+	processEvent: function(type, view, cell, recordIndex, cellIndex, e, record, row) {
 		var me = this,
-				target = e.getTarget(),
-				key = type === 'keydown' && e.getKey(),
-				match;
-
-		// Flag event to tell SelectionModel not to process it. 
-		e.stopSelection = !key && me.stopSelection;
-
-		// If the target was not within a cell (ie it's a keydown event from the View), then 
-		// rely on the selection data injected by View.processUIEvent to grab the 
-		// first action icon from the selected cell. 
-		if (key && !Ext.fly(target).findParent(view.getCellSelector())) {
-			target = Ext.fly(cell).down('.' + me.iconIconCls, true);
-		}
-
-		// NOTE: The statement below tests the truthiness of an assignment. 
-		if (target && (match = target.className.match(me.actionIdRe))) {
-			if (type === 'click' || (key === e.ENTER || key === e.SPACE)) {
-				Ext.callback(me.handler, me.origScope, [view, recordIndex, cellIndex, e, record, row], undefined, me);
-
-				// Handler could possibly destroy the grid, so check we're still available. 
-				//  
-				// If the handler moved focus outside of the view, do not allow this event to propagate 
-				// to cause any navigation. 
-				if (!view.isDestroyed && !view.el.contains(Ext.Element.getActiveElement())) {
-					return false;
+			iconSelector = '.' + me.iconIconCls,
+			isClick = type === 'click',
+			disabled = me.disabled,
+			ret;
+		
+		if (!disabled && isClick) {
+			if (e.getTarget(iconSelector)) {
+				// Flag event to tell SelectionModel not to process it.
+				e.stopSelection = me.stopSelection;
+				// Do not allow focus to follow from this mousedown unless the grid is already in actionable mode 
+				if (isClick && !view.actionableMode) {
+					e.preventDefault();
 				}
+				Ext.callback(me.handler, me.origScope, [view, recordIndex, cellIndex, e, record, row], undefined, me);
 			}
+		} else {
+			ret = me.callParent(arguments);
 		}
-
-		return me.callParent(arguments);
+		return ret;
 	}
 });

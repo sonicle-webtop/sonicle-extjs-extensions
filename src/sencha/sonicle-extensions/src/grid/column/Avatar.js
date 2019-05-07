@@ -47,6 +47,11 @@ Ext.define('Sonicle.grid.column.Avatar', {
 	lighten: 80,
 	
 	/**
+	 * @cfg {Function} getName
+	 * A function which returns a computed name.
+	 */
+	
+	/**
 	 * @cfg {Function} getPictureUrl
 	 * A function which returns a computed picture URL.
 	 */
