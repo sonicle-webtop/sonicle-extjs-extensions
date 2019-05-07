@@ -62,8 +62,8 @@ Ext.define('Sonicle.grid.column.Avatar', {
 	 */
 	
 	/**
-	 * @cfg {String} [emptyColor=CCCCCC]
-	 * A 6-digit color hex code to be applied when initials cannot be computed.
+	 * @cfg {String} [emptyColor=#F1F3F4]
+	 * A 7-chars color hex code to be applied when initials cannot be computed.
 	 */
 	emptyColor: '#F1F3F4',
 	
@@ -71,7 +71,7 @@ Ext.define('Sonicle.grid.column.Avatar', {
 	
 	/**
 	 * @property {String[]} colors
-	 * An array of 6-digit color hex code strings (without the # symbol).
+	 * An array of 7-chars color hex code strings (with leading # symbol).
 	 * This array can contain any number of colors, and each hex code should be unique.
 	 */
 	colors: [

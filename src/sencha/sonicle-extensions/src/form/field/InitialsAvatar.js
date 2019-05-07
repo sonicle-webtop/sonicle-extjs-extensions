@@ -125,7 +125,7 @@ Ext.define('Sonicle.form.field.InitialsAvatar', {
 		 * Compute initials of a name
 		 * These rule will be followed:
 		 *  - divide the username on space and hyphen
-		 *  - use the first letter of each parts
+		 *  - use the first letter of each parts ignoring any text inside brackets
 		 *  - never use more than three letters as initials
 		 *  - if the username is divided in more than three parts and has part 
 		 *    starting with an uppercase, skip parts starting with a lowercase
@@ -138,6 +138,8 @@ Ext.define('Sonicle.form.field.InitialsAvatar', {
 			if (Ext.isEmpty(name)) return null;
 			var parts = name.split(/[ -]/),
 					sntz = function(s) {
+						// Skip any text inside brackets
+						s = s.replace(/\(.*\)|\[.*\]|{.*}/, '');
 						// Returns the first letter or digit.
 						var match = s.match(/[a-zA-Z0-9]/);
 						return (match !== null) ? match[0] : '';
