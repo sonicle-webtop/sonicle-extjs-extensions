@@ -50,7 +50,7 @@ Ext.define('Sonicle.Bytes', {
 				mul = (uni === 'si') ? 1000: 1024,
 				sym = this.unitSymbols[(uni === 'iec') ? 'iec' : 'si'],
 				sep = opts.separator || ' ',
-				dec = opts.decimals || 2,
+				dec = Ext.isDefined(opts.decimals) ? opts.decimals : 2,
 				u = -1;
 		
 		if (uni === 'err') sym[0] = sym[0].toUpperCase();
