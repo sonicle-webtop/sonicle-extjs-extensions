@@ -12,6 +12,24 @@ Ext.define('Sonicle.String', {
 	],
 	
 	/**
+	 * Returns the string value converted to lower case.
+	 * @param {String} s The String
+	 * @returns {String} The lowercase String, null if null String input.
+	 */
+	toLowerCase: function(s) {
+		return Ext.isEmpty(s) ? s : s.toLowerCase();
+	},
+	
+	/**
+	 * Returns the string value converted to upper case.
+	 * @param {String} s The String
+	 * @returns {String} The uppercase String, null if null String input.
+	 */
+	toUpperCase: function(s) {
+		return Ext.isEmpty(s) ? s : s.toUpperCase();
+	},
+	
+	/**
 	 * Gets the leftmost len characters of a String.
 	 * @param {String} s The String to get a substring from, may be null.
 	 * @param {Integer} len The length of the required String.
