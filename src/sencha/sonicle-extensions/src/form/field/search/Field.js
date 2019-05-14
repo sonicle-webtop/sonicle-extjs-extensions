@@ -26,6 +26,14 @@ Ext.define('Sonicle.form.field.search.Field', {
 	clearText: 'Clear',
 	
 	/**
+     * @event enterkeypress
+	 * Fires when the user presses the ENTER key.
+	 * Return false to stop subsequent query operations.
+	 * @param {Ext.form.field.Text} this
+	 * @param {Object} event The event object
+     */
+	
+	/**
      * @event query
 	 * Fires when the user presses the ENTER key or clicks on the search icon.
 	 * @param {Ext.form.field.Text} this
@@ -170,7 +178,11 @@ Ext.define('Sonicle.form.field.search.Field', {
 	},
 
 	onSpecialKey: function(s, e) {
-		if (e.getKey() === e.ENTER) this.doQuery(s.getValue());
+		if (e.getKey() === e.ENTER) {
+			if (s.fireEvent('enterkeypress', s, e) !== false) {
+				s.doQuery(s.getValue());
+			}
+		}
 	},
 
 	doQuery: function(value, queryObject) {
