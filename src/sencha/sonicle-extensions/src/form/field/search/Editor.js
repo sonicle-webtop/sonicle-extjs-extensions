@@ -59,7 +59,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 			items: me.createFields(childViewModel, cfg.fields),
 			bbar: [{
 				xtype: 'button',
-				text: me.okText,
+				text: cfg.okText || me.okText,
 				handler: me.onOk,
 				scope: me
 			}]
