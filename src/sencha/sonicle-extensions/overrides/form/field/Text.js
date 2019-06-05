@@ -36,4 +36,10 @@ Ext.define('Sonicle.overrides.form.field.Text', {
 			}
 		}
     ]
+	
+	/*
+	.x-form-trigger-wrap > .x-form-trigger:first-child {
+	border-left: 1px solid #b5b8c8;
+}
+	*/
 });

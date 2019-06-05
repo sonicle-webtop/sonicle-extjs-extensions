@@ -91,12 +91,12 @@ Ext.define('Sonicle.button.Toggle', {
 		if (pressed) {
 			if (me.onIconCls) me.setIconCls(me.onIconCls);
 			if (me.onGlyph) me.setGlyph(me.onGlyph);
-			if (me.onText) setText(me.onText);
+			if (me.onText) me.setText(me.onText);
 			if (me.onTooltip) me.setTooltip(me.onTooltip);
 		} else {
 			if (me.offIconCls) me.setIconCls(me.offIconCls);
 			if (me.offGlyph) me.setGlyph(me.offGlyph);
-			if (me.offText) setText(me.offText);
+			if (me.offText) me.setText(me.offText);
 			if (me.offTooltip) me.setTooltip(me.offTooltip);
 		}
 	}
