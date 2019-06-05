@@ -29,19 +29,33 @@ Ext.define('Sonicle.data.writer.Json', {
 				writeAssociated = me.getWriteAssociated(),
 				writeChanges = me.getWriteChanges(),
 				data = me.callParent(arguments),
-				changes, store, model, modelCN, associatedData;
+				changes, assoObj, model, modelCN, associatedData;
 		
 		if (writeAssociated) {
 			if (record.session && writeChanges) changes = record.session.getChanges();
 			associatedData = record.getAssociatedData();
 			Ext.iterate(record.associations, function(key, association) {
-				store = record[association.getterName]();
-				model = store.getModel();
-				modelCN = Ext.getClassName(model);
-				if (changes && changes[modelCN]) {
-					data[association.role] = me.extractAssociatedData(store, model.getFieldsMap(), changes[modelCN]);
-				} else {
-					data[association.role] = me.extractAssociatedData(store, model.getFieldsMap(), associatedData[association.role]);
+				// Depending on the association type, the extracted object can be:
+				// - store : for 1-n relations (defined by hasMany)
+				// - model : for 1-1 relation (defined by hasOne)
+				assoObj = record[association.getterName]();
+				if (assoObj.isStore) {
+					model = assoObj.getModel();
+					modelCN = Ext.getClassName(model);
+					if (changes && changes[modelCN]) {
+						data[association.role] = me.extractAssociatedData(assoObj, model.getFieldsMap(), changes[modelCN]);
+					} else {
+						data[association.role] = me.extractAssociatedData(assoObj, model.getFieldsMap(), associatedData[association.role]);
+					}
+					
+				} else if (assoObj.isModel) {
+					modelCN = Ext.getClassName(assoObj);
+					if (changes && changes[modelCN]) {
+						data[association.role] = changes[modelCN]
+					} else {
+						data[association.role] = associatedData[association.role];
+					}
+					
 				}
 			});
 		}
