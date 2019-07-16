@@ -1312,22 +1312,30 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 					return 1;
 				}
 				
+				return a[M.StartDate.name].getTime() - b[M.StartDate.name].getTime();
+				// Revert back old fix for WTCALENDAR-53
+				/*
 				if (a[M.CalendarId.name] === b[M.CalendarId.name]) {
 					return a[M.StartDate.name].getTime() - b[M.StartDate.name].getTime();
 				} else {
 					return (a[M.CalendarId.name] < b[M.CalendarId.name]) ? -1 : 1;
 				}
+				*/
 				
 			} else {
 				// Doing this allows span and non-span events to intermingle but
 				// remain sorted sequentially by start time. This seems more proper
 				// but can make for a less visually-compact layout when there are
 				// many such events mixed together closely on the calendar.
+				return a[M.StartDate.name].getTime() - b[M.StartDate.name].getTime();
+				// Revert back old fix for WTCALENDAR-53
+				/*
 				if (a[M.CalendarId.name] === b[M.CalendarId.name]) {
 					return a[M.StartDate.name].getTime() - b[M.StartDate.name].getTime();
 				} else {
 					return (a[M.CalendarId.name] < b[M.CalendarId.name]) ? -1 : 1;
 				}
+				*/
 			}
 		}, this));
 	},
