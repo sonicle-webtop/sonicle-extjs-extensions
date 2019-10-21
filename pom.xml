@@ -10,13 +10,11 @@
 	<parent>
 		<groupId>com.sonicle.extjs</groupId>
 		<artifactId>sonicle-superpom-senchapkg</artifactId>
-		<version>6</version>
+		<version>7</version>
 	</parent>
 	
     <properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
 		
 		<!-- SENCHA CONFIGURATION -->
 		<sencha.package.name>sonicle-extensions</sencha.package.name>
