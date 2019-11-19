@@ -1,0 +1,51 @@
+.so-boundlist-groupitem {
+	border-bottom: 1px solid #b5b8c8;
+	margin-bottom: 5px;
+	cursor: default;
+}
+.so-boundlist-icon {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	margin-top: auto;
+	margin-bottom: auto;
+	width: 16px;
+	height: 16px;
+	margin-left: 5px;
+}
+.so-boundlist-swatch {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	margin-top: auto;
+	margin-bottom: auto;
+	width: 15px;
+	height: 15px;
+}
+.so-boundlist-swatch-rounded {
+	border-radius: 2px;
+}
+.so-boundlist-swatch-circle {
+	border-radius: 50%;
+}
+.so-boundlist-display {
+	white-space: pre;
+}
+.so-boundlist-sourcewrap {
+	float: left;
+	white-space: pre;
+}
+.so-boundlist-source {
+	text-align: right;
+	white-space: pre;
+	/*width: 100%;*/
+}
+.so-boundlist-groupitem .so-boundlist-display {
+	font-weight: bold;
+}
+.so-boundlist-swatchitem .so-boundlist-display {
+	padding-left: 21px;
+}
+.so-boundlist-item .so-boundlist-icon {
+	margin-left: 0px;
+}
