@@ -160,6 +160,23 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
+	 * Converts html into pure text rapresentation.
+	 * @param {String} value The html content.
+	 * @returns {String} The pure text rapresentation.
+	 */
+	htmlToText: function(html) {
+		var el = document.createElement("div"), text=null;
+		el.innerHTML=html;
+		el.style.position="absolute";
+		el.style.left="-100000";
+		el.style.top="-100000";
+		document.getElementsByTagName("body")[0].append(el);
+		text=el.innerText;
+		el.remove();
+		return text;
+	},
+		
+	/**
 	 * Appends content to the query string of a URL, handling logic for whether 
 	 * to place a question mark or ampersand.
 	 * @param {String} url The URL to append to.
