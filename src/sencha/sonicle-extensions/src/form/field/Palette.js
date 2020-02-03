@@ -34,20 +34,24 @@ Ext.define('Sonicle.form.field.Palette', {
 	},
 	
 	updateColor: function(color) {
-		var el = this.inputEl;
-		if(el && !Ext.isEmpty(color)) {
-			el.setStyle({
-				color: color,
-				backgroundColor: color,
-				backgroundImage: 'none',
-				boxShadow: '0px 0px 0px 1px white inset'
-			});
+		var el = this.inputEl,
+				style = this.hideTrigger ? {cursor: 'pointer'} : {};
+		if (el) {
+			if (!Ext.isEmpty(color)) {
+				Ext.apply(style, {
+					color: color,
+					backgroundColor: color,
+					backgroundImage: 'none',
+					boxShadow: '0px 0px 0px 1px white inset'
+				});
+			}
+			el.setStyle(style);
 		}
 	},
 	
 	createPicker: function() {
 		var me = this, cfg = {};
-		if(Ext.isArray(me.colors)) {
+		if (Ext.isArray(me.colors)) {
 			cfg = Ext.apply(cfg, {
 				colors: me.colors
 			});
@@ -69,7 +73,7 @@ Ext.define('Sonicle.form.field.Palette', {
 			
 	onExpand: function() {
 		var value = this.getValue();
-		if(value) this.picker.select(value, true);
+		if (value) this.picker.select(value, true);
 	},
 	
 	onCollapse: function() {
