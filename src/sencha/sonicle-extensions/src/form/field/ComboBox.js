@@ -1,7 +1,8 @@
 /* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Sonicle ExtJs UX
+ * Copyright (C) 2019 Sonicle S.r.l.
+ * sonicle@sonicle.com
+ * http://www.sonicle.com
  */
 Ext.define('Sonicle.form.field.ComboBox', {
 	extend: 'Ext.form.field.ComboBox',
@@ -48,13 +49,29 @@ Ext.define('Sonicle.form.field.ComboBox', {
 	comboInputSwatchCls: 'so-'+'combo-input-swatch',
 	iconCls: 'so-'+'combo-icon',
 	
+	/*
 	preSubTpl: [
-		'<tpl if="hasSwatch">',
+        '<div id="{cmpId}-triggerWrap" data-ref="triggerWrap"',
+                '<tpl if="ariaEl == \'triggerWrap\'">',
+                    '<tpl foreach="ariaElAttributes"> {$}="{.}"</tpl>',
+                '<tpl else>',
+                    ' role="presentation"',
+                '</tpl>',
+                ' class="{triggerWrapCls} {triggerWrapCls}-{ui}">',
+            '<div id={cmpId}-inputWrap data-ref="inputWrap"',
+                ' role="presentation" class="{inputWrapCls} {inputWrapCls}-{ui}">'
+    ],
+	*/
+	
+	/**
+	 * Override original tpl (as Ext.form.field.Text, see above) to add swatchEl
+	 */
+	preSubTpl: [
+		'<tpl if="hasSwatch">', // <-- Modified adding swatch markup if necessary
 			'<div id="{cmpId}-swatchWrap" data-ref="swatchWrap" class="{swatchWrapCls}">',
 				'<div id="{cmpId}-swatchEl" data-ref="swatchEl" class="{swatchCls} {geomSwatchCls}"></div>',
 			'</div>',
 		'</tpl>',
-		// Original tpl (as Ext.form.field.Text) with customized wrap cls added!
 		'<div id="{cmpId}-triggerWrap" data-ref="triggerWrap"',
 				'<tpl if="ariaEl == \'triggerWrap\'">',
 					'<tpl foreach="ariaElAttributes"> {$}="{.}"</tpl>',
