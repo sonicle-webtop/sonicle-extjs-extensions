@@ -36,6 +36,6 @@ Ext.define('Sonicle.data.identifier.NegativeString', {
 	alias: 'data.identifier.negativestring',
 	
 	generate: function() {
-		return new String(this.callParent(arguments));
+		return '' + this.callParent(arguments);
 	}
 });
