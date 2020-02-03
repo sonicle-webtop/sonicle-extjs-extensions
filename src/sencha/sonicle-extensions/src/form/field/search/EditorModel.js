@@ -1,6 +1,6 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2015 Sonicle S.r.l.
+ * Copyright (C) 2019 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
  */
@@ -11,12 +11,12 @@ Ext.define('Sonicle.form.field.search.EditorModel', {
 		'Sonicle.SearchString'
 	],
 	
+	fields: null,
+	
 	data: {
 		values: {},
 		searchString: null
 	},
-	
-	fields: null,
 	
 	constructor: function(cfg) {
 		var me = this, values = {}, hiddens = {};
@@ -50,6 +50,8 @@ Ext.define('Sonicle.form.field.search.EditorModel', {
 				if (Ext.isArray(parsed[kw])) value = parsed[kw].indexOf(field.name) > -1;
 			} else if (field.type === 'date') {
 				if (Ext.isArray(parsed[kw])) value = Ext.Date.parse(parsed[kw][0], 'Y/m/d');
+			} else if (field.type === 'tag[]') {
+				if (Ext.isArray(parsed[kw])) value = parsed[kw];
 			} else {
 				if (Ext.isArray(parsed[kw])) value = parsed[kw][0];
 			}
@@ -80,6 +82,13 @@ Ext.define('Sonicle.form.field.search.EditorModel', {
 				if (value === true) ss.addEntry(kw, field.name, false);
 			} else if (field.type === 'date') {
 				if (Ext.isDate(value)) ss.addEntry(kw, Ext.Date.format(value, 'Y/m/d'), false);
+			} else if (field.type === 'tag[]') {
+				if (!Ext.isEmpty(value)) {
+					//value2 = values[field.name+'_raw'];
+					Ext.iterate(value, function(tag) {
+						ss.addEntry(kw, tag, false);
+					});
+				}
 			} else {
 				if (!Ext.isEmpty(value)) ss.addEntry(kw, value, false);
 			}

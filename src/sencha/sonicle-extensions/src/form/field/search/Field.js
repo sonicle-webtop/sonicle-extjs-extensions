@@ -1,6 +1,6 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2015 Sonicle S.r.l.
+ * Copyright (C) 2019 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
  */
@@ -23,6 +23,7 @@ Ext.define('Sonicle.form.field.search.Field', {
 	pickerAlign: 'tr-br?',
 	
 	searchText: 'Search',
+	searchTooltip: undefined,
 	clearText: 'Clear',
 	
 	/**
@@ -51,7 +52,7 @@ Ext.define('Sonicle.form.field.search.Field', {
 		cfg.triggers = SoEU.mergeTriggers(cfg, {
 			search: {
 				cls: Ext.baseCSSPrefix + 'form-search-trigger',
-				position: 'left', // possible thanks to custom override!!!
+				position: 'left', // this is possible thanks to custom override!!!
 				tooltip: searchText,
 				handler: function(s) {
 					me.doQuery(s.getValue());
@@ -96,7 +97,8 @@ Ext.define('Sonicle.form.field.search.Field', {
 						reference: 'editor',
 						bodyPadding: '0 10 0 10',
 						fields: me.fields,
-						okText: me.searchText
+						okText: me.searchText,
+						okTooltip: me.searchTooltip
 					},
 					minWidth: 200
 				};

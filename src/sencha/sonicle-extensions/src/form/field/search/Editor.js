@@ -1,6 +1,6 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2015 Sonicle S.r.l.
+ * Copyright (C) 2019 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
  */
@@ -13,6 +13,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 		'Ext.form.field.Checkbox',
 		'Ext.form.field.Number',
 		'Ext.form.field.Text',
+		'Sonicle.form.field.Tag',
 		'Sonicle.form.field.search.EditorModel',
 		'Sonicle.form.trigger.Clear'
 	],
@@ -56,15 +57,16 @@ Ext.define('Sonicle.form.field.search.Editor', {
 				childViewModel = Ext.Factory.viewModel('sosearcheditormodel', {fields: cfg.fields});
 		me.childViewModel = childViewModel;
 		Ext.apply(me, {
-			items: me.createFields(childViewModel, cfg.fields),
-			bbar: [{
+			items: me.createFieldsCfg(childViewModel, cfg.fields),
+			bbar: ['->', {
 				xtype: 'button',
 				text: cfg.okText || me.okText,
+				tooltip: cfg.okTooltip,
 				handler: me.onOk,
 				scope: me
 			}]
 		});
-		me.callParent(arguments);
+		me.callParent([cfg]);
 	},
 	
 	destroy: function() {
@@ -115,7 +117,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 		this.setValue(value);
 	},
 	
-	createFields: function(vm, fields) {
+	createFieldsCfg: function(vm, fields) {
 		var me = this, arr = [];
 		Ext.iterate(fields, function(field) {
 			var cfg = null;
@@ -129,6 +131,8 @@ Ext.define('Sonicle.form.field.search.Editor', {
 				cfg = me.createDateField(field);
 			} else if (field.type === 'boolean') {
 				cfg = me.createCheckboxField(field);
+			} else if (field.type === 'tag[]') {
+				cfg = me.createTagField(field);
 			}
 			if (cfg) {
 				arr.push(Ext.apply(cfg, {
@@ -147,6 +151,25 @@ Ext.define('Sonicle.form.field.search.Editor', {
 				value: '{values.'+field.name+'}',
 				hidden: '{hiddens.'+field.name+'}'
 			},
+			labelAlign: field.labelAlign || 'top',
+			fieldLabel: field.label || field.name
+		});
+	},
+	
+	createTagField: function(field) {
+		return Ext.apply(field.customConfig || {}, {
+			xtype: 'sotagfield',
+			reference: field.name,
+			bind: {
+				value: '{values.'+field.name+'_raw}',
+				labelValue: '{values.'+field.name+'}',
+				hidden: '{hiddens.'+field.name+'}'
+			},
+			createNewOnEnter: false,
+			createNewOnBlur: false,
+			filterPickList: true,
+			forceSelection: true,
+			queryMode: 'local',
 			labelAlign: field.labelAlign || 'top',
 			fieldLabel: field.label || field.name
 		});
