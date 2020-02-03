@@ -12,6 +12,54 @@ Ext.define('Sonicle.String', {
 	],
 	
 	/**
+	 * Returns passed string if it isn't empty (@link Ext#isEmpty), ifValue otherwise.
+	 * @param {String} s The value
+	 * @param {String} ifEmpty The fallback value
+	 * @returns {String} Returned value
+	 */
+	deflt: function(s, ifEmpty) {
+		return Ext.isEmpty(s) ? ifEmpty : s;
+	},
+	
+	/**
+	 * Returns first non-NULL value of provided arguments.
+	 * @param {Mixed...} values List of values
+	 * @returns {Mixed} The first non-NULL value
+	 */
+	coalesce: function(values) {
+		for (var i=0; i<arguments.length; i++) {
+			if ((arguments[i] !== null) && (arguments[i] !== undefined)) return arguments[i];
+		}
+		return null;
+	},
+	
+	/**
+	 * Checks if string is in passed list.
+	 * @param {String} s The value
+	 * @param {String[]} values Values to search in.
+	 * @returns {Boolean} `true` if string is found in passed list, `false` otherwise.
+	 */
+	isIn: function(s, values) {
+		if (Ext.isEmpty(s) || !Ext.isArray(values)) return false;
+		return values.indexOf(s) !== -1;
+	},
+	
+	/**
+	 * Compares two String arrays looking for differences: any string not 
+	 * contained in each other array is marked as difference.
+	 * @param {String[]} values1 First value set.
+	 * @param {String[]} values2 Second value set.
+	 * @returns {String[]} The different string elements.
+	 */
+	difference: function(values1, values2) {
+		if (!Ext.isArray(values1) || !Ext.isArray(values2)) return [];
+		var arrdiff = Ext.Array.difference,
+				diff1 = arrdiff(values1, values2),
+				diff2 = arrdiff(values2, values1);
+		return diff1.concat(diff2);
+	},
+	
+	/**
 	 * Returns the string value converted to lower case.
 	 * @param {String} s The String
 	 * @returns {String} The lowercase String, null if null String input.
@@ -88,13 +136,27 @@ Ext.define('Sonicle.String', {
 	/**
 	 * Gets the substring before the first occurrence of a separator. The separator is not returned.
 	 * @param {String} s The String to get a substring from, may be null.
-	 * @param {String} sep The String to search for, may be null.
+	 * @param {String} separator The String to search for, may be null.
 	 * @returns {String} The substring before the first occurrence of the separator, null if null String input.
 	 */
-	substrBeforeLast: function(s, sep) {
+	substrBeforeLast: function(s, separator) {
 		if (Ext.isEmpty(s)) return s;
-		var lio = s.lastIndexOf(sep);
+		var lio = s.lastIndexOf(separator);
 		return (lio === -1) ? s : s.substring(0, lio);
+	},
+	
+	/**
+	 * Splits a `String` object into an array of strings by separating the string into substrings.
+	 * @param {String} s The String to be splitted.
+	 * @param {String} separator Specifies the character to use for separating the string.
+	 * The separator is treated as a string or a regular expression. If separator is omitted, the array returned contains one element consisting of the entire string.
+	 * @param {Number} limit Integer specifying a limit on the number of splits to be found.
+	 * The split method still splits on every match of separator, but it truncates the returned array to at most limit elements.
+	 * @returns {String[]} Substrings are returned in an array.
+	 */
+	split: function(s, separator, limit) {
+		if (Ext.isEmpty(s)) return [];
+		return s.split(separator, limit);
 	},
 	
 	/**
@@ -106,35 +168,12 @@ Ext.define('Sonicle.String', {
 	 */
 	join: function(separator, values) {
 		var sep = separator || '',
+				arr = Ext.isArray(values) ? values : Ext.Array.slice(arguments, 1),
 				s = '', i;
-		for (i=1; i<arguments.length; i++) {
-			if (!Ext.isEmpty(arguments[i])) {
-				s = s.concat(arguments[i], sep);
-			}
+		for (i=0; i<arr.length; i++) {
+			if (!Ext.isEmpty(arr[i])) s = s.concat(arr[i], sep);
 		}
 		return s.slice(0, -sep.length);
-	},
-	
-	/**
-	 * Returns passed string if it isn't empty (@link Ext#isEmpty), ifValue otherwise.
-	 * @param {String} s The value
-	 * @param {String} ifEmpty The fallback value
-	 * @returns {String} Returned value
-	 */
-	deflt: function(s, ifEmpty) {
-		return Ext.isEmpty(s) ? ifEmpty : s;
-	},
-	
-	/**
-	 * Returns first non-NULL value of provided arguments.
-	 * @param {Mixed...} values List of values
-	 * @returns {Mixed} The first non-NULL value
-	 */
-	coalesce: function(values) {
-		for(var i=0; i<arguments.length; i++) {
-			if((arguments[i] !== null) && (arguments[i] !== undefined)) return arguments[i];
-		}
-		return null;
 	},
 	
 	/**
