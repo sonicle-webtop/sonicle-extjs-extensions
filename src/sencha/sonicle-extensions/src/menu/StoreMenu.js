@@ -1,6 +1,6 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2015 Sonicle S.r.l.
+ * Copyright (C) 2020 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
  */
@@ -12,15 +12,80 @@ Ext.define('Sonicle.menu.StoreMenu', {
 		'Ext.util.StoreHolder'
 	],
 	
+	/**
+	 * @cfg {Boolean} useItemIdPrefix
+	 * `true` to add a prefix to item record ID in order to avoid errors.
+	 * We cannot add this by default due compatibility issues, so please use it with `true`.
+	 */
+	useItemIdPrefix: false,
+	
 	config: {
-		itemClass: 'Ext.menu.Item',
-		textAsHtml: false,
-		textField: 'text',
-		tagField: null,
-		iconField: null,
-		iconClsField: null,
-		staticItems: null
+		/**
+		 * @cfg {Mixed|Mixed[]} checkedItems
+		 * IDs of menu items to mark as checked.
+		 */
+		checkedItems: null
 	},
+	
+	/**
+	 * @cfg {String} [itemClass]
+	 * The customized class type to use during the creation of store items.
+	 * If not specified `Ext.menu.Item` will be used.
+	 */
+	
+	/**
+	 * @cfg {Function} [itemCfgCreator]
+	 * A function which is used as a item config creation function, it can be 
+	 * used to customize default item config.
+	 * @param {Ext.data.Model} rec The item's record
+	 * @return {Object} The item config
+	 */
+	
+	/**
+	 * @cfg {String} [textField=text]
+	 * The underlying {@link Ext.data.Field#name data field name} to bind as text.
+	 */
+	textField: 'text',
+	
+	/**
+	 * @cfg {String} tagField
+	 * The underlying {@link Ext.data.Field#name data field name} to bind as tag data.
+	 */
+	tagField: null,
+	
+	/**
+	 * @cfg {String} iconField
+	 * The underlying {@link Ext.data.Field#name data field name} to bind as icon.
+	 */
+	iconField: null,
+	
+	/**
+	 * @cfg {String} iconClsField
+	 * The underlying {@link Ext.data.Field#name data field name} to bind as iconCls.
+	 */
+	iconClsField: null,
+	
+	/**
+	 * @cfg {Object/Object[]} topStaticItems
+	 * A single item, or an array of child Components to be added to this menu before store items.
+	 */
+	topStaticItems: undefined,
+	
+	/**
+	 * @cfg {Object/Object[]} bottomStaticItems
+	 * A single item, or an array of child Components to be added to this menu after store items.
+	 */
+	bottomStaticItems: undefined,
+	
+	/**
+	 * @private
+	 */
+	itemIdPrefix: 'stoitm-',
+	
+	/**
+	 * @private
+	 * @property {Boolean} itemsInitialized
+	 */
 	
 	initComponent: function() {
 		var me = this, sto;
@@ -77,27 +142,58 @@ Ext.define('Sonicle.menu.StoreMenu', {
 		if (success) this.updateMenuItems();
 	},
 	
+	updateCheckedItems: function(nv, ov) {
+		var me = this,
+				arr = Ext.isArray(nv) ? nv : [nv];
+		if (me.store && (me.itemsInitialized === true)) {
+			me.store.each(function(rec) {
+				var chk = arr.indexOf(rec.getId()) !== -1 ? true : false,
+						itm = me.getComponent(me.buildItemId(rec));
+				if (itm) itm.setChecked(chk, false);
+			});
+		}
+	},
+	
 	updateMenuItems: function() {
 		var me = this,
-			tagField = me.getTagField(),
-			textField = me.getTextField(),
-			iconField = me.getIconField(),
-			iconClsField = me.getIconClsField();
+			topItems = me.topStaticItems || me.staticItems,
+			bottomItems = me.bottomStaticItems;
 		
 		if (me.store) {
 			Ext.suspendLayouts();
 			me.removeAll();
-			if (me.staticItems) me.add(me.staticItems);
+			if (topItems) me.add(topItems);
 			me.store.each(function(rec) {
-				me.add(Ext.create(me.getItemClass(),{
-					itemId: rec.getId(),
-					tag: tagField ? rec.get(tagField) : undefined,
-					text: rec.get(textField),
-					icon: iconField ? rec.get(iconField) : undefined,
-					iconCls: iconClsField ? rec.get(iconClsField) : undefined
-				}));
+				me.add(me.createStoreItem(rec));
 			});
+			if (bottomItems) me.add(bottomItems);
 			Ext.resumeLayouts(true);
+			me.itemsInitialized = true;
+		}
+	},
+	
+	createStoreItem: function(rec) {
+		var me = this,
+				textFld = me.textField,
+				iconFld = me.iconField,
+				iconClsFld = me.iconClsField,
+				tagFld = me.tagField,
+				cfg = Ext.callback(me.itemCfgCreator, me, [rec]);
+		
+		return Ext.apply({
+			itemId: me.buildItemId(rec),
+			text: rec.get(textFld),
+			icon: iconFld ? rec.get(iconFld) : undefined,
+			iconCls: iconClsFld ? rec.get(iconClsFld) : undefined,
+			tag: tagFld ? rec.get(tagFld) : undefined
+		}, Ext.isObject(cfg) ? cfg : {}, {
+			xclass: me.itemClass || 'Ext.menu.Item'
+		});
+	},
+	
+	privates: {
+		buildItemId: function(rec) {
+			return this.useItemIdPrefix ? this.itemIdPrefix + rec.getId() : rec.getId();
 		}
 	}
 });
