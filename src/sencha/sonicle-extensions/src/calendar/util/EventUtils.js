@@ -3,7 +3,10 @@
  */
 Ext.define('Sonicle.calendar.util.EventUtils', {
 	singleton: true,
-	requires: ['Sonicle.Date'],
+	requires: [
+		'Sonicle.Date',
+		'Sonicle.grid.column.Tag'
+	],
 	
 	dateFmt: function() {
 		return 'd/m/Y';
@@ -129,7 +132,7 @@ Ext.define('Sonicle.calendar.util.EventUtils', {
 	* @param {String} timeFmt Desired time format string.
 	* @return {Object} An object containing title and tooltip properties.
 	*/
-	buildDisplayInfo: function(edata, dateFmt, timeFmt) {
+	buildDisplayInfo: function(edata, tdata, dateFmt, timeFmt) {
 		var EM = Sonicle.calendar.data.EventMappings,
 				XDate = Ext.Date,
 				SoDate = Sonicle.Date,
@@ -144,7 +147,7 @@ Ext.define('Sonicle.calendar.util.EventUtils', {
 				edate = XDate.format(evEndDt, dateFmt),
 				etime = XDate.format(edata[EM.EndDate.name], timeFmt),
 				tit = Ext.isEmpty(evLoc) ? evTit : Ext.String.format('{0} @{1}', evTit, evLoc),
-				tip;
+				tip, thtml;
 
 		if (SoDate.diffDays(evStaDt, evEndDt) === 0) {
 			tip = sdate + (evIsAD ? '' : ' ' + stime + ' - ' + etime);
@@ -154,10 +157,12 @@ Ext.define('Sonicle.calendar.util.EventUtils', {
 			//tip = startd + ' ' + startt + '<br>' + endd + ' ' + endt;
 		}
 		if (!Ext.isEmpty(evOwn)) tip += ('<br>(' + evOwn + ')');
+		thtml = Sonicle.form.field.Tag.generateTagsMarkup(tdata);
+		if (!Ext.isEmpty(thtml)) tip += '<br>' + thtml;
 
 		return {
 			title: tit,
-			tooltip: tip
+			tooltip: Ext.String.htmlEncode(tip)
 		};
 	}
 });

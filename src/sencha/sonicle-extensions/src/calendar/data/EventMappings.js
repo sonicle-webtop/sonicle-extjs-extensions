@@ -115,6 +115,11 @@ Sonicle.calendar.data.EventMappings = {
 		name: 'isNtf',
 		type: 'boolean'
 	},
+	Tags: {
+		name: 'tags',
+		//mapping: 'owner',
+		type: 'string'
+	},
 	Owner: {
 		name: '_owner',
 		//mapping: 'owner',

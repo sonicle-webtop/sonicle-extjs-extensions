@@ -15,6 +15,9 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		'Sonicle.calendar.dd.DayDragZone',
 		'Sonicle.calendar.dd.DayDropZone'
 	],
+	uses: [
+		'Sonicle.grid.column.Tag'
+	],
 	
 	hourIncrement: 60,
 	
@@ -276,7 +279,12 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 				'<tpl if="_hasComments">',
 				'<i class="ext-cal-ic {_commIconCls}">&#160;</i>',
 				'</tpl>',
-				'{Title}'
+				'{Title}',
+				'<tpl for="_tags">',
+				'<span style="color:{color};margin:0 0 0 2px">',
+					'<i class="fa fa-tag"></i>',
+				'</span>',
+				'</tpl>'
 			].join('');
 		}
 		return this.eventBodyMarkup;
@@ -369,7 +377,8 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 				selector = me.getEventSelectorCls(evt[EM.Id.name]),
 				start = evt[EM.StartDate.name],
 				end = evt[EM.EndDate.name],
-				dinfo,
+				dtags = Sonicle.form.field.Tag.buildTagsData(me.tagsStore, me.tagNameField, me.tagColorField, -1, evt[EM.Tags.name]),
+				dinfo = EU.buildDisplayInfo(evt, dtags, EU.dateFmt(), EU.timeFmt(me.use24HourTime)),
 				data = {};
 		
 		if(isSpan) {
@@ -387,7 +396,6 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 				data[EM.StartDate.name] = start = soDate.setTime(date, 0, 0, 0);
 			}
 		}
-		dinfo = EU.buildDisplayInfo(evt, EU.dateFmt(), EU.timeFmt(me.use24HourTime));
 		Ext.apply(evt, me.getTemplateEventBox(start, end));
 		data._elId = selector + (evt._weekIndex ? '-' + evt._weekIndex : '');
 		data._selectorCls = selector;
@@ -409,6 +417,7 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		data._attIconCls = me.attendeesIconCls;
 		data._recIconCls = (evt[EM.IsBroken.name] === true) ? me.recurrenceBrokenIconCls : me.recurrenceIconCls;
 		data._commIconCls = me.commentsIconCls;
+		data._tags = dtags,
 		data.isSpan = isSpan;
 		data.spanTop = spanTop;
 		data.spanBottom = spanBottom;

@@ -60,6 +60,12 @@ Ext.define('Sonicle.grid.column.Icon', {
 	iconSize: 16,
 	
 	/**
+	 * @cfg {Function} getText
+	 * A function which returns the text to display next to the icon image.
+	 */
+	getText: null,
+	
+	/**
 	 * @cfg {Boolean} hideText
 	 * False to display column's value next to the icon.
 	 */
@@ -110,7 +116,7 @@ Ext.define('Sonicle.grid.column.Icon', {
 				text = '', style;
 		
 		if (ico) clsico += ' ' + ico;
-		if (!me.hideText) text = '<span class="'+clstxt+'">' + Sonicle.String.deflt(value, '') + '</span>';
+		if (!me.hideText) text = '<span class="'+clstxt+'">' + Sonicle.String.deflt(me.evalValue(me.getText, me.dataIndex, value, rec), '') + '</span>';
 		if (Ext.isFunction(me.handler)) style += 'cursor:pointer;';
 		return '<div class="'+clsico+'" style="' + style + '"' + (ttip ? ' data-qtip="' + ttip + '"' : '') + '></div>' + text;
 	},

@@ -7,6 +7,9 @@
 Ext.define('Sonicle.grid.column.Tag', {
 	extend: 'Ext.grid.column.Column',
 	alias: 'widget.sotagcolumn',
+	requires: [
+		'Sonicle.form.field.Tag'
+	],
 	
 	config: {
 		/**
@@ -17,16 +20,33 @@ Ext.define('Sonicle.grid.column.Tag', {
 	},
 	
 	/**
-	 * @cfg {String} nameField
-	 * The underlying {@link Ext.data.Field#name data field name} to bind as name.
+	 * @cfg {String} tagsValueField
+	 * The underlying {@link Ext.data.Field#name data field name} to bind as tag values.
 	 */
-	nameField: 'name',
+	tagsValueField: 'tags',
 	
 	/**
-	 * @cfg {String} colorField
-	 * The underlying {@link Ext.data.Field#name data field name} to bind as color.
+	 * @cfg {Boolean} hideValueText
+	 * `false` to display column's text value next to tags, {@link #dataIndex} will be used as source field.
 	 */
-	colorField: 'color',
+	hideValueText: true,
+	
+	/**
+	 * @cfg {Function} getValueText
+	 * A function which returns the text to display next to tags icons.
+	 */
+	
+	/**
+	 * @cfg {String} tagNameField
+	 * The underlying {@link Ext.data.Field#name data field name} of {@link #tagsStore} to bind as name.
+	 */
+	tagNameField: 'name',
+	
+	/**
+	 * @cfg {String} tagColorField
+	 * The underlying {@link Ext.data.Field#name data field name} of {@link #tagsStore} to bind as color.
+	 */
+	tagColorField: 'color',
 	
 	/**
 	 * @cfg {Number} [maxTags=-1]
@@ -34,14 +54,23 @@ Ext.define('Sonicle.grid.column.Tag', {
 	 */
 	maxTags: -1,
 	
+	/**
+	 * @cfg {String} delimiter
+	 * The character(s) used to separate tag values.
+	 */
+	delimiter: '|',
+	
 	sortable: false,
 	groupable: false,
 	
 	tpl: [
+		'<tpl if="textValue">',
+		'<span>{textValue}</span>',
+		'</tpl>',
 		'<tpl for="tags">',
-			'<span style="color:{color};margin:0 0 0 2px" data-qtip="{tooltip}">',
-				'<i class="fa fa-tag"></i>',
-			'</span>',
+		'<span style="color:{color};margin:0 0 0 2px" data-qtip="{name}">',
+			'<i class="fa fa-tag"></i>',
+		'</span>',
 		'</tpl>'
 	],
 	
@@ -53,7 +82,7 @@ Ext.define('Sonicle.grid.column.Tag', {
 	},
 	
 	doDestroy: function() {
-		this.setStore(null);
+		this.setTagsStore(null);
 		this.callParent();
 	},
 	
@@ -65,33 +94,33 @@ Ext.define('Sonicle.grid.column.Tag', {
 	},
 	
 	defaultRenderer: function(val, meta, rec, ridx, cidx, sto) {
-		return this.tpl.apply(this.prepareTplData(val));
+		return this.tpl.apply(this.prepareTplData(val, rec));
 	},
 	
 	updater: function(cell, val, rec) {
-		cell.firstChild.innerHTML = this.tpl.apply(this.prepareTplData(val));
+		cell.firstChild.innerHTML = this.tpl.apply(this.prepareTplData(val, rec));
 	},
 	
-	prepareTplData: function(tags) {
-		var me = this;
+	prepareTplData: function(val, rec) {
+		var me = this,
+				text = !me.hideValueText ? me.evalValue(val, rec, me.getValueText, me.dataIndex, null) : null,
+				tags = rec.get(me.tagsValueField);
 		//TODO: handle store not ready case -> issue view update after the first load!
 		return {
-			tags: Sonicle.grid.column.Tag.buildTagsData(me.tagsStore, me.nameField, me.colorField, me.maxTags, tags)
+			textValue: text,
+			tags: Sonicle.form.field.Tag.buildTagsData(me.tagsStore, me.tagNameField, me.tagColorField, me.maxTags, tags, me.delimiter)
 		};
 	},
 	
-	statics: {
-		buildTagsData: function(tagsStore, nameField, colorField, max, tags) {
-			var ids = Sonicle.String.split(tags, '|'),
-					arr = [];
-			if ((ids.length > 0) && tagsStore) {
-				Ext.iterate(ids, function(id) {
-					if ((max !== -1) && (arr.length >= max)) return false;
-					var rec = tagsStore.getById(id);
-					if (rec) arr.push({color: rec.get(colorField), tooltip: rec.get(nameField)});
-				});
+	privates: {
+		evalValue: function(value, rec, getFn, field, fallback) {
+			if (rec && Ext.isFunction(getFn)) {
+				return getFn.apply(this, [value, rec]);
+			} else if (rec && !Ext.isEmpty(field)) {
+				return rec.get(field);
+			} else {
+				return (fallback === undefined) ? value : fallback;
 			}
-			return arr;
 		}
 	}
 });

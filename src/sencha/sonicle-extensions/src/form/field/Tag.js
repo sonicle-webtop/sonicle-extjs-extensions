@@ -251,5 +251,51 @@ Ext.define('Sonicle.form.field.Tag', {
 		if (me.rendered && !me.getErrors().length) {
 			me.publishState('labelValue', me.getLabelValue());
 		}
+	},
+	
+	statics: {
+		buildTagsData: function(tagsStore, tagNameField, tagColorField, max, tags, delimiter) {
+			var ids = Ext.isArray(tags) ? tags : Sonicle.String.split(tags, delimiter || '|'),
+					arr = [];
+			if ((ids.length > 0) && tagsStore) {
+				Ext.iterate(ids, function(id) {
+					if ((max !== -1) && (arr.length >= max)) return false;
+					var rec = tagsStore.getById(id);
+					if (rec) arr.push({color: rec.get(tagColorField), name: rec.get(tagNameField)});
+				});
+			}
+			return arr;
+		},
+		
+		generateTagsMarkup: function(data) {
+			var html = '';
+			Ext.iterate(data, function(tag) {
+				var styleObj = Sonicle.form.field.Tag.computeTagStyle(tag.color),
+					style = Ext.DomHelper.generateStyles(Ext.apply(styleObj.styles, {
+						margin: '0 0 0 2px',
+						padding: '0 2px 0 2px',
+						fontSize: '0.9em'
+					}));
+				html += '<span style="' + style + '">' + tag.name + '</span>';
+			});
+			return html;
+		},
+		
+		computeTagStyle: function(color, colorLuminance) {
+			var bgco = color || '#FFFFFF',
+					txtco = Sonicle.ColorUtils.bestForeColor(bgco, colorLuminance),
+					styles = {
+						color: txtco,
+						backgroundColor: bgco,
+						border: '1px solid',
+						borderRadius: '3px',
+						borderColor: bgco === '#FFFFFF' ? '#A8A8A8' : bgco
+					};
+			return {
+				color: txtco,
+				bgColor: bgco,
+				styles: styles
+			};
+		}
 	}
 });

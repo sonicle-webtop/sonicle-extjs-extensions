@@ -25,6 +25,14 @@ Ext.define('Sonicle.calendar.Panel', {
 		deferredRender: true
 	},
 	
+	config: {
+		/**
+		 * @cfg {Ext.data.Store} tagsStore
+		 * The Store that this column should use as its data source
+		 */
+		tagsStore: null
+	},
+	
 	/**
 	 * @cfg {Boolean} showDayView
 	 * True to include the day view (and toolbar button), false to hide them (defaults to true).
@@ -126,6 +134,18 @@ Ext.define('Sonicle.calendar.Panel', {
 	 * or 24 hour / military format.
 	 */
 	use24HourTime: false,
+	
+	/**
+	 * @cfg {String} tagNameField
+	 * The underlying {@link Ext.data.Field#name data field name} of {@link #tagsStore} to bind as name.
+	 */
+	tagNameField: 'name',
+	
+	/**
+	 * @cfg {String} tagColorField
+	 * The underlying {@link Ext.data.Field#name data field name} of {@link #tagsStore} to bind as color.
+	 */
+	tagColorField: 'color',
 	
 	/**
 	 * @cfg {String} activeView [activeView=d]
@@ -414,7 +434,10 @@ Ext.define('Sonicle.calendar.Panel', {
 			showToday: me.showToday,
 			showTodayText: me.showTodayText,
 			showTime: me.showTime,
-			store: me.store
+			store: me.store,
+			tagsStore: me.tagsStore,
+			tagNameField: me.tagNameField,
+			tagColorField: me.tagColorField
 		};
 		
 		// do not allow override
@@ -481,6 +504,18 @@ Ext.define('Sonicle.calendar.Panel', {
 			me.initEventRelay(mv);
 			me.add(mv);
 		}
+	},
+	
+	doDestroy: function() {
+		this.setTagsStore(null);
+		this.callParent();
+	},
+	
+	applyTagsStore: function(store) {
+		if (store) {
+			store = Ext.data.StoreManager.lookup(store);
+		}
+		return store;
 	},
 	
 	/**

@@ -13,6 +13,9 @@ Ext.define('Sonicle.calendar.view.Month', {
 		'Sonicle.calendar.util.WeekEventRenderer',
 		'Sonicle.calendar.view.MonthDayDetail'
 	],
+	uses: [
+		'Sonicle.grid.column.Tag'
+	],
 	
 	/**
 	 * @cfg {Boolean} showTime
@@ -231,7 +234,12 @@ Ext.define('Sonicle.calendar.view.Month', {
 				'<tpl if="_hasComments">',
 				'<i class="ext-cal-ic {_commIconCls}">&#160;</i>',
 				'</tpl>',
-				'{Title}'
+				'{Title}',
+				'<tpl for="_tags">',
+				'<span style="color:{color};margin:0 0 0 2px">',
+					'<i class="fa fa-tag"></i>',
+				'</span>',
+				'</tpl>'
 			].join('');
 		}
 		return me.eventBodyMarkup;
@@ -279,7 +287,8 @@ Ext.define('Sonicle.calendar.view.Month', {
 				EU = Sonicle.calendar.util.EventUtils,
 				selector = me.getEventSelectorCls(evt[EM.Id.name]),
 				bgColor = (evt[EM.Color.name] || ''),
-				dinfo = EU.buildDisplayInfo(evt, EU.dateFmt(), EU.timeFmt(me.use24HourTime));
+				dtags = Sonicle.form.field.Tag.buildTagsData(me.tagsStore, me.tagNameField, me.tagColorField, -1, evt[EM.Tags.name]),
+				dinfo = EU.buildDisplayInfo(evt, dtags, EU.dateFmt(), EU.timeFmt(me.use24HourTime));
 		
 		return Ext.applyIf({
 			_elId: selector + '-' + evt._weekIndex,
@@ -301,6 +310,7 @@ Ext.define('Sonicle.calendar.view.Month', {
 			_attIconCls: me.attendeesIconCls,
 			_recIconCls: (evt[EM.IsBroken.name] === true) ? me.recurrenceBrokenIconCls : me.recurrenceIconCls,
 			_commIconCls: me.commentsIconCls,
+			_tags: dtags,
 			Title: dinfo.title,
 			Tooltip: dinfo.tooltip
 		},
