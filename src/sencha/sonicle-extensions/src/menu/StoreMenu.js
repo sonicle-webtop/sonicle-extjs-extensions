@@ -112,6 +112,7 @@ Ext.define('Sonicle.menu.StoreMenu', {
 		// We're being bound, not unbound...
 		if (store) {
 			if (store.autoCreated) this.textField = 'field1';
+			this.updateMenuItems();
 		}
 	},
 	
@@ -124,14 +125,6 @@ Ext.define('Sonicle.menu.StoreMenu', {
 			datachanged: me.onStoreDataChanged,
 			load: me.onStoreLoad
 		};
-	},
-	
-	/**
-	 * private
-	 */
-	_loadMenuItems: function() {
-		var me = this;
-		if (me.store && !me.store.loaded) me.store.load();
 	},
 	
 	onStoreDataChanged: function() {
@@ -158,18 +151,18 @@ Ext.define('Sonicle.menu.StoreMenu', {
 		var me = this,
 			topItems = me.topStaticItems || me.staticItems,
 			bottomItems = me.bottomStaticItems;
-		
+	
+		Ext.suspendLayouts();
+		me.removeAll();
+		if (topItems) me.add(topItems);
 		if (me.store) {
-			Ext.suspendLayouts();
-			me.removeAll();
-			if (topItems) me.add(topItems);
 			me.store.each(function(rec) {
 				me.add(me.createStoreItem(rec));
 			});
-			if (bottomItems) me.add(bottomItems);
-			Ext.resumeLayouts(true);
-			me.itemsInitialized = true;
 		}
+		if (bottomItems) me.add(bottomItems);
+		Ext.resumeLayouts(true);
+		me.itemsInitialized = true;
 	},
 	
 	createStoreItem: function(rec) {
