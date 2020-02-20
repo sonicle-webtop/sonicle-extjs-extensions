@@ -21,13 +21,13 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 	iconColor: '#B3B3B3',
 	
 	/*
-	 * @cfg {Number} width
+	 * @cfg {Number} iconWidth
 	 * The width in pixel of the icon.
 	 */
 	iconWidth: 16,
 	
 	/*
-	 * @cfg {Number} height
+	 * @cfg {Number} iconHeight
 	 * The height in pixel of the icon.
 	 */
 	iconHeight: 16,

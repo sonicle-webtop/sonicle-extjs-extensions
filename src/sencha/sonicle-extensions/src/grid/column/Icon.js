@@ -121,23 +121,23 @@ Ext.define('Sonicle.grid.column.Icon', {
 		return '<div class="'+clsico+'" style="' + style + '"' + (ttip ? ' data-qtip="' + ttip + '"' : '') + '></div>' + text;
 	},
 	
-	defaultRenderer: function(value, cellValues) {
+	defaultRenderer: function(value, cellValues, record, rowIdx, colIdx, store, view) {
 		var me=this,
 			rec=cellValues ? cellValues.record : null,
-			cellCls = me.evalValue(me.getCellCls, me.cellClsField, value, rec);
+			cellCls = me.evalValue(view, me.getCellCls, me.cellClsField, value, rec);
 		if (cellCls && cellValues) cellValues.tdCls += cellCls;
 		return this.buildHtml(value, rec);
 	},
 	
-	updater: function(cell, value, rec) {
+	updater: function(cell, value, record, view, dataSource) {
 		//TODO: valutare un metodo di aggiornamento parziale
-		cell.firstChild.innerHTML = this.buildHtml(value, rec);
+		cell.firstChild.innerHTML = this.buildHtml(value, record);
 	},
 	
 	evalValue: function(getFn, field, value, rec, fallback) {
-		if(rec && Ext.isFunction(getFn)) {
+		if (rec && Ext.isFunction(getFn)) {
 			return getFn.apply(this, [value, rec]);
-		} else if(rec && !Ext.isEmpty(field)) {
+		} else if (rec && !Ext.isEmpty(field)) {
 			return rec.get(field);
 		} else {
 			return (fallback === undefined) ? value : fallback;

@@ -117,6 +117,18 @@ Ext.define('Sonicle.form.field.Tag', {
         }
     ],
 	
+	/*
+	/**
+	 * Override original method in order to fix delimiter used
+	 *
+	getRawValue: function() {
+		var me = this,
+				delim = me.delimiter,
+				s = me.callParent();
+		return delim !== ',' ? s.replace(/,/g, delim) : s;
+	},
+	/*
+	
 	/**
 	 * Override original method in order to handle read-only status and add coloring support
 	 */
