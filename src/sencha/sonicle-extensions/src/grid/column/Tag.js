@@ -49,6 +49,17 @@ Ext.define('Sonicle.grid.column.Tag', {
 	tagColorField: 'color',
 	
 	/**
+	 * @cfg {String} emptyText
+	 * The default text to place into an empty column.
+	 */
+	emptyText: '',
+	
+	/**
+	 * @cfg {String} emptyCls
+	 * The CSS class to apply to an empty column to style the **{@link #emptyText}**.
+	 */
+	
+	/**
 	 * @cfg {Number} [maxTags=-1]
 	 * The maximum number of visible tags.
 	 */
@@ -66,6 +77,9 @@ Ext.define('Sonicle.grid.column.Tag', {
 	tpl: [
 		'<tpl if="textValue">',
 		'<span>{textValue}</span>',
+		'</tpl>',
+		'<tpl if="emptyText">',
+		'<span class="{emptyCls}">{emptyText}</span>',
 		'</tpl>',
 		'<tpl for="tags">',
 		'<span style="color:{color};margin:0 0 0 2px" data-qtip="{name}">',
@@ -104,10 +118,14 @@ Ext.define('Sonicle.grid.column.Tag', {
 	prepareTplData: function(val, rec) {
 		var me = this,
 				text = !me.hideValueText ? me.evalValue(val, rec, me.getValueText, me.dataIndex, null) : null,
-				tags = rec.get(me.tagsValueField);
+				tags = rec.get(me.tagsValueField),
+				empty = (Ext.isEmpty(tags) && !Ext.isEmpty(me.emptyText)) ? me.emptyText : null,
+				emptyCls = !Ext.isEmpty(me.emptyCls) ? me.emptyCls : '';
 		//TODO: handle store not ready case -> issue view update after the first load!
 		return {
 			textValue: text,
+			emptyText: empty,
+			emptyCls: emptyCls,
 			tags: Sonicle.form.field.Tag.buildTagsData(me.tagsStore, me.tagNameField, me.tagColorField, me.maxTags, tags, me.delimiter)
 		};
 	},
