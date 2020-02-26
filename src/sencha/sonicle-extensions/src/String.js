@@ -204,15 +204,19 @@ Ext.define('Sonicle.String', {
 	 * @returns {String} The pure text rapresentation.
 	 */
 	htmlToText: function(html) {
-		var el = document.createElement("div"), text=null;
-		el.innerHTML=html;
-		el.style.position="absolute";
-		el.style.left="-100000";
-		el.style.top="-100000";
-		document.getElementsByTagName("body")[0].append(el);
-		text=el.innerText;
-		el.remove();
-		return text;
+		var text, h2tId = Ext.id(null, 'so-h2t-'), h2tDomEl;
+		// Do not use newer .append API on DOM element, it may not work on older browsers. Use Ext's appendChild!
+		h2tDomEl = Ext.getBody().appendChild({
+			id: h2tId,
+			tag: 'div',
+			html: html,
+			style: 'visibility:hidden;pointer-events:none;border:none;position:absolute;top:-100000px;left:-100000px'
+		}, true);
+		if (h2tDomEl) {
+			text = h2tDomEl.textContent || h2tDomEl.innerText;
+			h2tDomEl.remove();
+		}
+		return text || '';
 	},
 		
 	/**
