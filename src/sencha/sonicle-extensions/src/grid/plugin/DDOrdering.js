@@ -8,6 +8,7 @@ Ext.define('Sonicle.grid.plugin.DDOrdering', {
 	alias: 'plugin.sogridviewddordering',
 	
 	orderField: null,
+	zeroBased: true,
 	
 	init: function(view) {
 		var me = this,
@@ -28,12 +29,13 @@ Ext.define('Sonicle.grid.plugin.DDOrdering', {
 			var me = this,
 					gp = me.getCmp().grid,
 					sto = gp.getStore(),
-					of = me.orderField;
+					of = me.orderField,
+					zb = me.zeroBased;
 
 			if (sto && of) {
 				sto.beginUpdate();
 				sto.each(function(rec, indx) {
-					rec.set(of, indx+1);
+					rec.set(of, zb ? indx : indx+1);
 				});
 				sto.endUpdate();
 			}
