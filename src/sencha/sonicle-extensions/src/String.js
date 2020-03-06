@@ -206,14 +206,15 @@ Ext.define('Sonicle.String', {
 	htmlToText: function(html) {
 		var text, h2tId = Ext.id(null, 'so-h2t-'), h2tDomEl;
 		// Do not use newer .append API on DOM element, it may not work on older browsers. Use Ext's appendChild!
+		// Do not use hiddene style here, because we need it to be rendered to have the correct innerText
 		h2tDomEl = Ext.getBody().appendChild({
 			id: h2tId,
 			tag: 'div',
 			html: html,
-			style: 'visibility:hidden;pointer-events:none;border:none;position:absolute;top:-100000px;left:-100000px'
+			style: 'pointer-events:none;border:none;position:absolute;top:-100000px;left:-100000px'
 		}, true);
 		if (h2tDomEl) {
-			text = h2tDomEl.textContent || h2tDomEl.innerText;
+			text = h2tDomEl.innerText;
 			h2tDomEl.remove();
 		}
 		return text || '';
