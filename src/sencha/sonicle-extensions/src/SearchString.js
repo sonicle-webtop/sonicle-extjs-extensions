@@ -14,7 +14,7 @@ Ext.define('Sonicle.SearchString', {
 		me.checkAvail();
 	},
 	
-	parse: function(s) {
+	parseRaw: function(s) {
 		this.checkAvail();
 		return SearchString.parse(s);
 	},
@@ -24,7 +24,7 @@ Ext.define('Sonicle.SearchString', {
 		return SearchString.parse(this.toRawQuery(s));
 	},
 	
-	toResult: function(ss) {
+	toQueryObject: function(ss) {
 		return {
 			value: ss.toString(),
 			conditionArray: ss.getConditionArray(),
@@ -52,7 +52,7 @@ Ext.define('Sonicle.SearchString', {
 	/**
 	 * Translate a raw query into a human-readable one, replacing 
 	 * double-quotes notation with round-parentesis:
-	 *     abcd" "efgh" -> (abcd) (efgh)
+	 *     "abcd" "efgh" -> (abcd) (efgh)
 	 * @param {String} s Source string
 	 * @returns {String} Output query
 	 */

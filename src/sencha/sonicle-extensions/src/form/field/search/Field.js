@@ -22,9 +22,38 @@ Ext.define('Sonicle.form.field.search.Field', {
 	matchFieldWidth: true,
 	pickerAlign: 'tr-br?',
 	
+	trueValue: 'y',
+	falseValue: 'n',
+	trueText: 'Yes',
+	falseText: 'No',
 	searchText: 'Search',
 	searchTooltip: undefined,
 	clearText: 'Clear',
+	
+	/**
+	 * @private
+	 */
+	storeCache: null,
+	
+	/**
+	 * @cfg {Object[]} fields
+	 * An Array of fields config object containing some properties:
+	 * @param {String} name The name by which the field is referenced (used as keyword).
+	 * @param {String} mapping The keyword name to use (instead of above name) when producing the conditionArray in result.
+	 * @param {string|integer|number|boolean|date|time|combo|tag} type Controls the type of field derived class used to manage values.
+	 * @param {String} [boolKeyword] Keyword to be associated to boolean field, instead of field name (eg. `has` or `is` verbs).
+	 * @param {top|left} [labelAlign=top] Controls the position and alignment of the {@link Ext.form.field.Base#fieldLabel}.
+	 * @param {String} [label] The label for the field.
+	 * @param {Boolean} [textSink] `true` to use this field as destination field for alone text portions in query.
+	 * @param {Object} [fieldCfg] A custom {@link Ext.form.field.Field} config to apply.
+	 */
+	
+	/**
+	 * @cfg {Object[]} tabs
+	 * An Array of tabs config object containing some properties:
+	 * @param {String} title The title text for the tab.
+	 * @param {String[]} fields An array of {@link #fields field names} declared above to include in this Tab.
+	 */
 	
 	/**
      * @event enterkeypress
@@ -71,13 +100,33 @@ Ext.define('Sonicle.form.field.search.Field', {
 	
 	initComponent: function() {
 		var me = this;
+		me.storeCache = {};
 		me.callParent(arguments);
+		
+		Ext.iterate(me.fields, function(field) {
+			var cc = field.customConfig, sto;
+			if (cc) {
+				if (field.type === 'tag') {
+					sto = Ext.data.StoreManager.lookup(cc.store);
+					if (sto) {
+						me.storeCache[field.name] = Ext.create('Ext.data.ChainedStore', {source: sto});
+					}
+				}
+			}
+		});
+		
 		me.on('clear', me.onClear, me);
 		me.on('specialkey', me.onSpecialKey, me);
 	},
 	
 	destroy: function() {
 		var me = this;
+		
+		Ext.iterate(me.storeCache, function(key, val) {
+			val.destroy();
+		});
+		me.storeCache = null;
+		
 		me.un('clear', me.onClear);
 		me.un('specialkey', me.onSpecialKey);
 		me.callParent();
@@ -95,8 +144,12 @@ Ext.define('Sonicle.form.field.search.Field', {
 					items: {
 						xtype: 'sosearcheditor',
 						reference: 'editor',
-						bodyPadding: '0 10 0 10',
 						fields: me.fields,
+						tabs: me.tabs,
+						trueValue: me.trueValue,
+						falseValue: me.falseValue,
+						trueText: me.trueText,
+						falseText: me.falseText,
 						okText: me.searchText,
 						okTooltip: me.searchTooltip
 					},
@@ -191,9 +244,35 @@ Ext.define('Sonicle.form.field.search.Field', {
 		var me = this,
 				SoSS = Sonicle.SearchString;
 		if (arguments.length === 1) {
-			queryObject = SoSS.toResult(SoSS.parseHumanQuery(value));
+			queryObject = SoSS.toQueryObject(SoSS.parseHumanQuery(value));
 		}
 		me.collapse();
-		me.fireEvent('query', me, value, queryObject);
+		me.fireEvent('query', me, value, me.remapQueryObject(queryObject));
+	},
+	
+	remapQueryObject: function(qobj) {
+		var me = this,
+				cond, field, fcc, i;
+		for (i=0; i<qobj.conditionArray.length; i++) {
+			cond = qobj.conditionArray[i];
+			field = Ext.Array.findBy(me.fields, function(item) { return cond.keyword === item.name; });
+			if (field) {
+				fcc = field.customConfig;
+				if (!Ext.isEmpty(field.mapping)) {
+					cond.keyword = field.mapping;
+				}
+				if (field.type === 'boolean') {
+					if (!field.boolKeyword) cond.value = me.trueValue === cond.value ? true : false;
+					
+				} else if (field.type === 'tag') {
+					var sto = me.storeCache[field.name], rec;
+					if (sto && fcc) {
+						rec = sto.findRecord(fcc.displayField || fcc.valueField, cond.value, 0, false, true, true);
+						if (rec) cond.value = rec.get(fcc.valueField);
+					}
+				}
+			}
+		}
+		return qobj;
 	}
 });

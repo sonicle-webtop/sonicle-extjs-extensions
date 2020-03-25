@@ -7,6 +7,13 @@
 Ext.define('Sonicle.ExtUtils', {
     singleton: true,
 	
+	/*
+	getConfig: function(classInst, cfg, cfgName) {
+		if (Ext.isDefined(cfg[cfgName])) return cfg[cfgName];
+		return classInst.getInitialConfig(cfgName);
+	},
+	*/
+	
 	/**
 	 * Merges some other triggers into initial configuration.
 	 * @param {Object} cfg The config passed to class constructor.

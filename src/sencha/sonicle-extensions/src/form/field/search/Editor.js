@@ -19,26 +19,40 @@ Ext.define('Sonicle.form.field.search.Editor', {
 	],
 	
 	border: false,
+	/*
 	layout: {
 		type: 'vbox',
 		align: 'stretch'
 	},
+	*/
 	
 	config: {
 		value: null
 	},
+	trueValue: 'y',
+	falseValue: 'n',
+	trueText: 'Yes',
+	falseText: 'No',
 	okText: 'Search',
 	
 	/**
 	 * @cfg {Object[]} fields
 	 * An Array of fields config object containing some properties:
 	 * @param {String} name The name by which the field is referenced.
-	 * @param {string|integer|number|boolean|date} type Controls the type of field derived class used to manage values.
-	 * @param {String} [boolKeyword=has] Custom keyword to be associated to boolean field. Defaults to `has`, otherwise a suitable verb should be used (eg. `is`).
+	 * @param {String} mapping The keyword name to use (instead of above name) when producing the conditionArray in result.
+	 * @param {string|integer|number|boolean|date|time|combo|tag} type Controls the type of field derived class used to manage values.
+	 * @param {String} [boolKeyword] Keyword to be associated to boolean field, instead of field name (eg. `has` or `is` verbs).
 	 * @param {top|left} [labelAlign=top] Controls the position and alignment of the {@link Ext.form.field.Base#fieldLabel}.
 	 * @param {String} [label] The label for the field.
 	 * @param {Boolean} [textSink] `true` to use this field as destination field for alone text portions in query.
 	 * @param {Object} [fieldCfg] A custom {@link Ext.form.field.Field} config to apply.
+	 */
+	
+	/**
+	 * @cfg {Object[]} tabs
+	 * An Array of tabs config object containing some properties:
+	 * @param {String} title The title text for the tab.
+	 * @param {String[]} fields An array of {@link #fields field names} declared above to include in this Tab.
 	 */
 	
 	referenceHolder: true,
@@ -54,19 +68,103 @@ Ext.define('Sonicle.form.field.search.Editor', {
 	
 	constructor: function(cfg) {
 		var me = this,
-				childViewModel = Ext.Factory.viewModel('sosearcheditormodel', {fields: cfg.fields});
+				childViewModel = Ext.Factory.viewModel('sosearcheditormodel', {fields: cfg.fields, trueValue: cfg.trueValue, falseValue: cfg.falseValue}),
+				layout, items;
+		
 		me.childViewModel = childViewModel;
-		Ext.apply(me, {
-			items: me.createFieldsCfg(childViewModel, cfg.fields),
-			bbar: ['->', {
-				xtype: 'button',
-				text: cfg.okText || me.okText,
-				tooltip: cfg.okTooltip,
-				handler: me.onOk,
-				scope: me
-			}]
-		});
+		
+		if (Ext.isArray(cfg.tabs) && !Ext.isEmpty(cfg.tabs)) {
+			var tbitems = [], usedFields = [];
+			Ext.iterate(cfg.tabs, function(tabCfg) {
+				var cfgFields = Ext.Array.filter(cfg.fields, function(item) {
+						console.log('Checking ' + item.name);
+						return tabCfg.fields.indexOf(item.name) !== -1 && usedFields.indexOf(item.name) === -1;
+					}, me);
+				tbitems.push({
+					xtype: 'panel',
+					layout: {type: 'vbox', align: 'stretch'},
+					scrollable: true,
+					//scrollable: tbitems.length === 0 ? null : true,
+					border: false,
+					bodyPadding: '0 10 0 10',
+					title: Sonicle.String.deflt(tabCfg.title, ''),
+					items: me.createFieldsCfg(childViewModel, cfgFields)
+				});
+			});
+			layout = 'fit';
+			items = [{
+				xtype: 'tabpanel',
+				border: false,
+				tabPosition: 'bottom',
+				activeTab: 0,
+				deferredRender: false,
+				items: tbitems
+			}];
+		
+			Ext.apply(me, {
+				layout: 'fit',
+				items: [
+					{
+						xtype: 'tabpanel',
+						border: false,
+						tabPosition: 'bottom',
+						activeTab: 0,
+						deferredRender: false,
+						items: tbitems,
+						tabBar:	{
+							items: [
+								{
+									xtype: 'tbfill'
+								}, {
+									xtype: 'button',
+									text: cfg.okText || me.okText,
+									tooltip: cfg.okTooltip,
+									handler: me.onOk,
+									scope: me
+								}
+							]
+						}
+					}
+				]
+			});
+			
+		} else {
+			Ext.apply(me, {
+				layout: {type: 'vbox', align: 'stretch'},
+				bodyPadding: '0 10 0 10',
+				items: me.createFieldsCfg(childViewModel, cfg.fields),
+				bbar: [
+					{
+						xtype: 'tbfill'
+					}, {
+						xtype: 'button',
+						text: cfg.okText || me.okText,
+						tooltip: cfg.okTooltip,
+						handler: me.onOk,
+						scope: me
+					}
+				]
+			});
+		}
 		me.callParent([cfg]);
+		
+		// Find the defined height of first tab and then set it as 
+		// the maximum height for the remaining tabs.
+		if (Ext.isArray(cfg.tabs) && !Ext.isEmpty(cfg.tabs)) {
+			me.on('boxready', function(s) {
+				var tab = me.getComponent(0), h;
+				if (tab && tab.isXType('tabpanel')) {
+					tab.items.each(function(item, indx) {
+						if (indx === 0) {
+							h = item.getHeight();
+						} else {
+							item.setMinHeight(h);
+							item.setMaxHeight(h);
+						}
+					});
+				}
+			}, me);
+		}
 	},
 	
 	destroy: function() {
@@ -76,9 +174,9 @@ Ext.define('Sonicle.form.field.search.Editor', {
 	
 	onOk: function() {
 		var me = this,
-				ss = me.childViewModel.updateSearchString();
-		me.setValue(ss.value);
-		me.fireEvent('ok', me, ss.value, ss);
+				qobj = me.childViewModel.updateQueryObject();
+		me.setValue(qobj.value);
+		me.fireEvent('ok', me, qobj.value, qobj);
 	},
 	
 	onCancel: function() {
@@ -129,9 +227,17 @@ Ext.define('Sonicle.form.field.search.Editor', {
 				cfg = me.createNumberField(field, false);
 			} else if (field.type === 'date') {
 				cfg = me.createDateField(field);
+			} else if (field.type === 'time') {
+				cfg = me.createTimeField(field);
 			} else if (field.type === 'boolean') {
-				cfg = me.createCheckboxField(field);
-			} else if (field.type === 'tag[]') {
+				if (field.boolKeyword) {
+					cfg = me.createCheckboxField(field);
+				} else {
+					cfg = me.createBooleanComboField(field);
+				}
+			} else if (field.type === 'combo') {
+				cfg = me.createComboField(field);
+			} else if (field.type === 'tag') {
 				cfg = me.createTagField(field);
 			}
 			if (cfg) {
@@ -151,25 +257,6 @@ Ext.define('Sonicle.form.field.search.Editor', {
 				value: '{values.'+field.name+'}',
 				hidden: '{hiddens.'+field.name+'}'
 			},
-			labelAlign: field.labelAlign || 'top',
-			fieldLabel: field.label || field.name
-		});
-	},
-	
-	createTagField: function(field) {
-		return Ext.apply(field.customConfig || {}, {
-			xtype: 'sotagfield',
-			reference: field.name,
-			bind: {
-				value: '{values.'+field.name+'_raw}',
-				labelValue: '{values.'+field.name+'}',
-				hidden: '{hiddens.'+field.name+'}'
-			},
-			createNewOnEnter: false,
-			createNewOnBlur: false,
-			filterPickList: true,
-			forceSelection: true,
-			queryMode: 'local',
 			labelAlign: field.labelAlign || 'top',
 			fieldLabel: field.label || field.name
 		});
@@ -210,6 +297,27 @@ Ext.define('Sonicle.form.field.search.Editor', {
 		});
 	},
 	
+	createTimeField: function(field) {
+		return Ext.apply(field.customConfig || {}, {
+			xtype: 'timefield',
+			reference: field.name,
+			bind: {
+				value: '{values.'+field.name+'}',
+				hidden: '{hiddens.'+field.name+'}'
+			},
+			labelAlign: field.labelAlign || 'top',
+			fieldLabel: field.label || field.name,
+			triggers: {
+				clear: {
+					type: 'soclear',
+					weight: -1,
+					hideWhenEmpty: true,
+					hideWhenMouseOut: true
+				}
+			}
+		});
+	},
+	
 	createCheckboxField: function(field) {
 		return Ext.apply(field.customConfig || {}, {
 			xtype: 'checkboxfield',
@@ -220,6 +328,71 @@ Ext.define('Sonicle.form.field.search.Editor', {
 			},
 			hideEmptyLabel: true,
 			boxLabel: field.label || field.name
+		});
+	},
+	
+	createComboField: function(field) {
+		return Ext.apply(field.customConfig || {}, {
+			xtype: 'combo',
+			reference: field.name,
+			bind: {
+				value: '{values.'+field.name+'}',
+				hidden: '{hiddens.'+field.name+'}'
+			},
+			labelAlign: field.labelAlign || 'top',
+			fieldLabel: field.label || field.name,
+			triggers: {
+				clear: {
+					type: 'soclear',
+					weight: -1,
+					hideWhenEmpty: true,
+					hideWhenMouseOut: true
+				}
+			}
+		});
+	},
+	
+	createBooleanComboField: function(field) {
+		return Ext.apply(field.customConfig || {}, {
+			xtype: 'combo',
+			reference: field.name,
+			bind: {
+				value: '{values.'+field.name+'}',
+				hidden: '{hiddens.'+field.name+'}'
+			},
+			store: [
+				[this.trueValue, this.trueText],
+				[this.falseValue, this.falseText]
+			],
+			labelAlign: 'left',
+			fieldLabel: field.label || field.name,
+			triggers: {
+				clear: {
+					type: 'soclear',
+					weight: -1,
+					hideWhenEmpty: true,
+					hideWhenMouseOut: true
+				}
+			}
+		});
+	},
+	
+	createTagField: function(field) {
+		return Ext.apply(field.customConfig || {}, {
+			xtype: 'sotagfield',
+			reference: field.name,
+			bind: {
+				value: '{values.'+field.name+'_raw}', //FIXME: is this still useful after introducing remapQueryObject?
+				labelValue: '{values.'+field.name+'}',
+				hidden: '{hiddens.'+field.name+'}'
+			},
+			createNewOnEnter: false,
+			createNewOnBlur: false,
+			filterPickList: true,
+			forceSelection: true,
+			queryMode: 'local',
+			labelAlign: field.labelAlign || 'top',
+			fieldLabel: field.label || field.name
 		});
 	}
 });
