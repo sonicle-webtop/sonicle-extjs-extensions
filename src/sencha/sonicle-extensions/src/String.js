@@ -206,7 +206,7 @@ Ext.define('Sonicle.String', {
 	htmlToText: function(html) {
 		var text, h2tId = Ext.id(null, 'so-h2t-'), h2tDomEl;
 		// Do not use newer .append API on DOM element, it may not work on older browsers. Use Ext's appendChild!
-		// Do not use hiddene style here, because we need it to be rendered to have the correct innerText
+		// Make sure that this el is always visible (eg. do not use visibility:hidden) otherwise below innerText will return empty value.
 		h2tDomEl = Ext.getBody().appendChild({
 			id: h2tId,
 			tag: 'div',
@@ -214,6 +214,8 @@ Ext.define('Sonicle.String', {
 			style: 'pointer-events:none;border:none;position:absolute;top:-100000px;left:-100000px'
 		}, true);
 		if (h2tDomEl) {
+			// Use innerText here: we are looking for the real text layout with new-lines.
+			// (textContent will not produce the same output)
 			text = h2tDomEl.innerText;
 			h2tDomEl.remove();
 		}
@@ -245,6 +247,24 @@ Ext.define('Sonicle.String', {
 				base = url.substr(Math.max(iofq, 0)),
 				remaining = (iofq !== -1) ? url.substr(iofq) : '';
 		return me.removeEnd(base, '/', false) + '/' + me.removeStart(path, '/', false) + remaining;
+	},
+	
+	/**
+	 * Parses a string as a boolean value:
+	 *  - `true`, `t`, `yes`, `y`, `1` are treated as `true` boolean value
+	 *  - `false`, `f`, `no`, `n`, `0` are treated as `false` boolean value
+	 * @param {String} s The source string to parse.
+	 * @param {Boolean} [defValue=false] Default boolean value to return in case of no match, or null. Defaults to `false`.
+	 * @returns {Boolean} The parsed value.
+	 */
+	parseBoolean: function(s, defValue) {
+		if (arguments.length === 1) defValue = false;
+		if (s === null) return defValue;
+		switch(s.toLowerCase().trim()) {
+			case 'true': case 't': case 'yes': case 'y': case '1': return true;
+			case 'false': case 'f': case 'no': case 'n': case '0': return false;
+			default: defValue;
+		}
 	},
 	
 	/**
