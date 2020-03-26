@@ -29,11 +29,13 @@ Ext.define('Sonicle.form.field.search.Field', {
 	searchText: 'Search',
 	searchTooltip: undefined,
 	clearText: 'Clear',
+	usageText: 'manual syntax: "{0}:{1}"',
 	
 	/**
-	 * @private
+	 * @cfg {Number} fieldsLabelWidth
+	 * The default width of the fieldLabel in pixels.
 	 */
-	storeCache: null,
+	fieldsLabelWidth: 110,
 	
 	/**
 	 * @cfg {Object[]} fields
@@ -52,6 +54,7 @@ Ext.define('Sonicle.form.field.search.Field', {
 	 * @cfg {Object[]} tabs
 	 * An Array of tabs config object containing some properties:
 	 * @param {String} title The title text for the tab.
+	 * @param {Number} [labelWidth] The width of the fieldLabel (in pixels) for this tab.
 	 * @param {String[]} fields An array of {@link #fields field names} declared above to include in this Tab.
 	 */
 	
@@ -70,6 +73,11 @@ Ext.define('Sonicle.form.field.search.Field', {
 	 * @param {String} value Human-readable query text
 	 * @param {Object} queryObject Query exploded into components
      */
+	
+	/**
+	 * @private
+	 */
+	storeCache: null,
 	
 	constructor: function(cfg) {
 		var me = this,
@@ -151,7 +159,9 @@ Ext.define('Sonicle.form.field.search.Field', {
 						trueText: me.trueText,
 						falseText: me.falseText,
 						okText: me.searchText,
-						okTooltip: me.searchTooltip
+						okTooltip: me.searchTooltip,
+						usageText: me.usageText,
+						labelWidth: me.fieldsLabelWidth
 					},
 					minWidth: 200
 				};

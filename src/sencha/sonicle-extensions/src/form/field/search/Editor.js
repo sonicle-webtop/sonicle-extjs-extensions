@@ -15,16 +15,11 @@ Ext.define('Sonicle.form.field.search.Editor', {
 		'Ext.form.field.Text',
 		'Sonicle.form.field.Tag',
 		'Sonicle.form.field.search.EditorModel',
-		'Sonicle.form.trigger.Clear'
+		'Sonicle.form.trigger.Clear',
+		'Sonicle.plugin.FieldTooltip'
 	],
 	
 	border: false,
-	/*
-	layout: {
-		type: 'vbox',
-		align: 'stretch'
-	},
-	*/
 	
 	config: {
 		value: null
@@ -34,6 +29,8 @@ Ext.define('Sonicle.form.field.search.Editor', {
 	trueText: 'Yes',
 	falseText: 'No',
 	okText: 'Search',
+	usageText: 'manual syntax: "{0}:{1}"',
+	labelWidth: 110,
 	
 	/**
 	 * @cfg {Object[]} fields
@@ -71,24 +68,30 @@ Ext.define('Sonicle.form.field.search.Editor', {
 				childViewModel = Ext.Factory.viewModel('sosearcheditormodel', {fields: cfg.fields, trueValue: cfg.trueValue, falseValue: cfg.falseValue}),
 				layout, items;
 		
+		if (cfg.trueValue) me.trueValue = cfg.trueValue;
+		if (cfg.falseValue) me.falseValue = cfg.falseValue;
+		if (cfg.trueText) me.trueText = cfg.trueText;
+		if (cfg.falseText) me.falseText = cfg.falseText;
+		if (cfg.okText) me.okText = cfg.okText;
+		if (cfg.usageText) me.usageText = cfg.usageText;
+		
 		me.childViewModel = childViewModel;
 		
 		if (Ext.isArray(cfg.tabs) && !Ext.isEmpty(cfg.tabs)) {
 			var tbitems = [], usedFields = [];
 			Ext.iterate(cfg.tabs, function(tabCfg) {
 				var cfgFields = Ext.Array.filter(cfg.fields, function(item) {
-						console.log('Checking ' + item.name);
 						return tabCfg.fields.indexOf(item.name) !== -1 && usedFields.indexOf(item.name) === -1;
 					}, me);
 				tbitems.push({
 					xtype: 'panel',
-					layout: {type: 'vbox', align: 'stretch'},
+					layout:'anchor',
 					scrollable: true,
 					//scrollable: tbitems.length === 0 ? null : true,
 					border: false,
 					bodyPadding: '0 10 0 10',
 					title: Sonicle.String.deflt(tabCfg.title, ''),
-					items: me.createFieldsCfg(childViewModel, cfgFields)
+					items: me.createFieldsCfg(childViewModel, tabCfg.labelWidth || me.labelWidth, cfgFields)
 				});
 			});
 			layout = 'fit';
@@ -111,6 +114,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 						activeTab: 0,
 						deferredRender: false,
 						items: tbitems,
+						layout: 'anchor',
 						tabBar:	{
 							items: [
 								{
@@ -130,9 +134,9 @@ Ext.define('Sonicle.form.field.search.Editor', {
 			
 		} else {
 			Ext.apply(me, {
-				layout: {type: 'vbox', align: 'stretch'},
+				layout:'anchor',
 				bodyPadding: '0 10 0 10',
-				items: me.createFieldsCfg(childViewModel, cfg.fields),
+				items: me.createFieldsCfg(childViewModel, me.labelWidth, cfg.fields),
 				bbar: [
 					{
 						xtype: 'tbfill'
@@ -215,7 +219,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 		this.setValue(value);
 	},
 	
-	createFieldsCfg: function(vm, fields) {
+	createFieldsCfg: function(vm, labelWidth, fields) {
 		var me = this, arr = [];
 		Ext.iterate(fields, function(field) {
 			var cfg = null;
@@ -241,8 +245,12 @@ Ext.define('Sonicle.form.field.search.Editor', {
 				cfg = me.createTagField(field);
 			}
 			if (cfg) {
+				if (!cfg.anchor && !cfg.width) cfg.anchor = '100%';
 				arr.push(Ext.apply(cfg, {
-					viewModel: vm
+					viewModel: vm,
+					labelWidth: labelWidth,
+					tooltip: Ext.isEmpty(cfg.tooltip) ? me.generateUsage(field) : me.generateUsage(field) + '\n' + cfg.tooltip,
+					plugins: [{ptype: 'sofieldtooltip', tooltipTarget: 'label'}]
 				}));
 			}
 		});
@@ -364,7 +372,8 @@ Ext.define('Sonicle.form.field.search.Editor', {
 				[this.trueValue, this.trueText],
 				[this.falseValue, this.falseText]
 			],
-			labelAlign: 'left',
+			//labelAlign: 'left',
+			labelAlign: field.labelAlign || 'top',
 			fieldLabel: field.label || field.name,
 			triggers: {
 				clear: {
@@ -394,5 +403,24 @@ Ext.define('Sonicle.form.field.search.Editor', {
 			labelAlign: field.labelAlign || 'top',
 			fieldLabel: field.label || field.name
 		});
+	},
+	
+	generateUsage: function(field) {
+		var kw = field.name, value = '&lt;text&gt;';
+		if (field.type === 'boolean' && field.boolKeyword) {
+			kw = field.boolKeyword;
+			value = field.name;
+		} else if (field.type === 'boolean') {
+			value = '&lt;y|n&gt;';
+		} else if (field.type === 'date') {
+			value = '&lt;YYYY-MM-DD&gt;';
+		} else if (field.type === 'time') {
+			value = '&lt;HH:MM&gt;';
+		} else if (field.type === 'combo') {
+			value = '&lt;ID&gt;';
+		}  else if (field.type === 'tag') {
+			value = '&lt;tag1&gt;,...,&lt;tagN&gt;';
+		}
+		return Ext.String.format(this.usageText, kw, value);
 	}
 });

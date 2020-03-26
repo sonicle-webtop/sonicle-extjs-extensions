@@ -54,7 +54,7 @@ Ext.define('Sonicle.form.field.search.EditorModel', {
 					if (Ext.isArray(parsed[kw])) value = Sonicle.String.parseBoolean(parsed[kw][0]) === true ? me.trueValue : me.falseValue;
 				}
 			} else if (field.type === 'date') {
-				if (Ext.isArray(parsed[kw])) value = Ext.Date.parse(parsed[kw][0], 'Y/m/d');
+				if (Ext.isArray(parsed[kw])) value = Ext.Date.parse(parsed[kw][0], 'Y-m-d');
 			} else if (field.type === 'time') {
 				if (Ext.isArray(parsed[kw])) value = Ext.Date.parse(parsed[kw][0], 'H:i:s');
 			} else if (field.type === 'tag') {
@@ -92,7 +92,7 @@ Ext.define('Sonicle.form.field.search.EditorModel', {
 					if (!Ext.isEmpty(value)) ss.addEntry(kw, value.toString(), false);
 				}
 			} else if (field.type === 'date') {
-				if (Ext.isDate(value)) ss.addEntry(kw, Ext.Date.format(value, 'Y/m/d'), false);
+				if (Ext.isDate(value)) ss.addEntry(kw, Ext.Date.format(value, 'Y-m-d'), false);
 			} else if (field.type === 'time') {
 				if (Ext.isDate(value)) ss.addEntry(kw, Ext.Date.format(value, 'H:i'), false);
 			} else if (field.type === 'tag') {
