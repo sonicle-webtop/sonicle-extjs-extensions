@@ -115,10 +115,15 @@ Ext.define('Sonicle.form.field.search.Field', {
 			var cc = field.customConfig, sto;
 			if (cc) {
 				if (field.type === 'tag') {
-					sto = Ext.data.StoreManager.lookup(cc.store);
-					if (sto) {
-						me.storeCache[field.name] = Ext.create('Ext.data.ChainedStore', {source: sto});
-					}
+					if (cc.store.source && cc.store.source.isStore) {
+						// passed store is chained, so build the new chained store over the original source
+						me.storeCache[field.name] = Ext.create('Ext.data.ChainedStore', {source: cc.store.source});
+					} else {
+						sto = Ext.data.StoreManager.lookup(cc.store);
+						if (sto) {
+							me.storeCache[field.name] = Ext.create('Ext.data.ChainedStore', {source: sto});
+						}
+					}	
 				}
 			}
 		});
