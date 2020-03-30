@@ -20,6 +20,7 @@ Ext.define('Sonicle.grid.feature.RowLookup', {
 		var me = this,
 				view = me.view = grid.getView();
 		
+		me.setLookupStore(me.lookupStore);
 		view.rowLookupFeature = me;
 		view.renderRow = Ext.Function.interceptBefore(view, 'renderRow', function(record, rowIdx, out) {
 			if (record) {
@@ -44,10 +45,24 @@ Ext.define('Sonicle.grid.feature.RowLookup', {
 	},
 	
 	applyLookupStore: function(store) {
+		var me = this;
 		if (store) {
 			store = Ext.data.StoreManager.lookup(store);
+			if (store.loadCount === 0) {
+				me.view.blockRefresh = true;
+				store.on('load', me.onLookupStoreLoad, me, {single: true});
+			}
+		} else {
+			if (me.lookupStore) {
+				me.lookupStore.un('load', me.onLookupStoreLoad, me);
+			}
 		}
 		return store;
+	},
+	
+	onLookupStoreLoad: function() {
+		this.view.blockRefresh = false;
+		this.view.refresh();
 	},
 	
 	getLookupRecord: function(id) {
