@@ -1,6 +1,6 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2015 Sonicle S.r.l.
+ * Copyright (C) 2020 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
  */
@@ -12,16 +12,6 @@ Ext.define('Sonicle.picker.List', {
 	],
 	
 	referenceHolder: true,
-	
-	groupText: '',
-	emptyText: 'No items to display',
-	searchText: 'Search...',
-	okText: 'Ok',
-	cancelText: 'Cancel',
-	
-	valueField: null,
-	displayField: null,
-	searchField: null,
 	
 	/**
 	 * @cfg {Boolean} [enableGrouping=false]
@@ -69,6 +59,37 @@ Ext.define('Sonicle.picker.List', {
 	 */
 	
 	/**
+	 * @cfg {String} valueField
+	 * The underlying {@link Ext.data.Field#name data field name} to bind as value.
+	 */
+	valueField: null,
+	
+	/**
+	 * @cfg {String} displayField
+	 * The underlying {@link Ext.data.Field#name data field name} to bind as display value.
+	 */
+	displayField: null,
+	
+	/**
+	 * @cfg {String} searchField
+	 * The underlying {@link Ext.data.Field#name data field name} to bind as field used in searches.
+	 */
+	searchField: null,
+	
+	/**
+	 * @cfg {Mixed[]} skipValues
+	 * Array of values whose matching items will be removed from visualization.
+	 */
+	skipValues: null,
+	
+	groupText: '',
+	emptyText: 'No items to display',
+	searchText: 'Search...',
+	selectedText: '{0} items selected',
+	okText: 'Ok',
+	cancelText: 'Cancel',
+	
+	/**
 	 * @event cancelclick
 	 * Fires when the cancel button is pressed.
 	 * @param {Sonicle.picker.List} this
@@ -92,10 +113,7 @@ Ext.define('Sonicle.picker.List', {
 		var me = this,
 				multi = (me.allowMultiSelection === true);
 		
-		me.selModel = {
-			type: 'rowmodel',
-			mode: multi ? 'MULTI' : 'SINGLE'
-		};
+		me.selModel = multi ? 'checkboxmodel' : 'rowmodel';
 		me.viewConfig = {
 			deferEmptyText: false,
 			emptyText: me.emptyText
@@ -119,53 +137,56 @@ Ext.define('Sonicle.picker.List', {
 			me.dockedItems = me.buildDockedItems();
 		}
 		
-		me.buttons = [{
-			text: me.cancelText,
-			handler: function() {
-				me.fireEvent('cancelclick', me);
-			}
-		}];
-		if (multi) {
-			me.buttons.unshift({
+		me.fbar = [
+			{
+				xtype: 'tbtext',
+				reference: 'txtselected'
+			},
+			'->', {
+				xtype: 'button',
+				reference: 'btnok',
 				text: me.okText,
+				disabled: true,
 				handler: function() {
 					me.fireEvent('okclick', me);
 					me.firePick(me.getSelection());
 				}
-			});
-		}
+			}, {
+				xtype: 'button',
+				text: me.cancelText,
+				handler: function() {
+					me.fireEvent('cancelclick', me);
+				}
+			}
+		];
 		
 		me.callParent(arguments);
+		if (me.store) me.applySkipFilter(me.skipValues);
+		
+		me.on('selectionchange', me.onSelectionChange, me);
 		me.on('rowdblclick', me.onRowDblClick, me);
 		me.on('afterrender', function() {
 			me.lookupReference('searchField').focus();
 		}, me, {single: true});
 	},
 	
-	search: function(text) {
-		var me = this,
-				filters = me.getStore().getFilters(),
-				filter = me.searchFilter;
-
-		if (text) {
-			filters.beginUpdate();
-			if (filter) {
-				filter.setValue(text);
-			} else {
-				me.searchFilter = filter = new Ext.util.Filter({
-					id: 'search',
-					anyMatch: me.anyMatch,
-					caseSensitive: me.caseSensitiveMatch,
-					property: me.searchField,
-					value: text
-				});
-			}
-			filters.add(filter);
-			filters.endUpdate();
-			
-		} else if (filter) {
-			filters.remove(filter);
+	destroy: function() {
+		var me = this;
+		if (me.store) {
+			me.applySearchFilter(null);
+			me.applySkipFilter(null);
 		}
+		me.callParent();
+	},
+	
+	setSkipValues: function(skipValues) {
+		var me = this;
+		me.skipValues = skipValues;
+		if (me.store) me.applySkipFilter(skipValues);
+	},
+	
+	search: function(text) {
+		this.applySearchFilter(text);
 	},
 	
 	firePick: function(recs) {
@@ -209,12 +230,63 @@ Ext.define('Sonicle.picker.List', {
 			}];
 		},
 		
+		applySkipFilter: function(valuesToSkip) {
+			var me = this,
+					field = me.valueField,
+					filters = me.getStore().getFilters(),
+					fi = filters.getByKey('solistpicker-skip');
+
+			filters.beginUpdate();
+			if (fi) filters.remove(fi);
+			if (field && Ext.isArray(valuesToSkip)) {
+				filters.add(new Ext.util.Filter({
+					id: 'solistpicker-skip',
+					filterFn: function(rec) {
+						return valuesToSkip.indexOf(rec.get(field)) === -1;
+					}
+				}));
+			}
+			filters.endUpdate();
+		},
+		
+		applySearchFilter: function(value) {
+			var me = this,
+					filters = me.getStore().getFilters(),
+					fi = filters.getByKey('solistpicker-search');
+			
+			if (value) {
+				filters.beginUpdate();
+				if (fi) {
+					fi.setValue(value);
+				} else {
+					filters.add(new Ext.util.Filter({
+						id: 'solistpicker-search',
+						anyMatch: me.anyMatch,
+						caseSensitive: me.caseSensitiveMatch,
+						property: me.searchField,
+						value: value
+					}));
+				}
+				filters.endUpdate();
+			} else if (fi) {
+				filters.remove(fi);
+			}
+		},
+		
 		onSearchChange: function(s) {
 			this.search(s.getValue());
 		},
 		
 		onSearchSpecialkey: function(s, e) {
 			if (e.getKey() === e.DOWN) this.getSelectionModel().select(0);
+		},
+		
+		onSelectionChange: function(s, sel) {
+			var me = this;
+			me.lookupReference('btnok').setDisabled(sel.length === 0);
+			if (me.allowMultiSelection && sel) {
+				me.lookupReference('txtselected').setHtml(Ext.String.htmlEncode(Ext.String.format(me.selectedText, sel.length)));
+			}
 		},
 		
 		onRowDblClick: function(s, rec) {
