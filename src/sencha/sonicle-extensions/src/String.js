@@ -145,9 +145,27 @@ Ext.define('Sonicle.String', {
 		return (lio === -1) ? s : s.substring(0, lio);
 	},
 	
+	prepend: function(s, prefix, safe) {
+		if (Ext.isEmpty(s)) return s;
+		return !safe ? prefix + s : prefix + this.removeStart(s, prefix);
+	},
+	
+	/**
+	 * Searches a string for a specified value, or a regular expression, and 
+	 * returns a new string where the specified values are replaced.
+	 * @param {String} s The String to be modified, may be null.
+	 * @param {String} searchvalue The value, or regular expression, that will be replaced by the new value.
+	 * @param {String} newvalue The value to replace the search value with.
+	 * @returns {String} A new String, where the specified value(s) has been replaced by the new value.
+	 */
+	replace: function(s, searchvalue, newvalue) {
+		if (Ext.isEmpty(s)) return s;
+		return s.replace(searchvalue, newvalue);
+	},
+	
 	/**
 	 * Splits a `String` object into an array of strings by separating the string into substrings.
-	 * @param {String} s The String to be splitted.
+	 * @param {String} s The String to be splitted, may be null.
 	 * @param {String} separator Specifies the character to use for separating the string.
 	 * The separator is treated as a string or a regular expression. If separator is omitted, the array returned contains one element consisting of the entire string.
 	 * @param {Number} limit Integer specifying a limit on the number of splits to be found.

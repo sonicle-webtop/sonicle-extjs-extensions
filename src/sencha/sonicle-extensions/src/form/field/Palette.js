@@ -1,25 +1,36 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2015 Sonicle S.r.l.
+ * Copyright (C) 2020 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
  */
 Ext.define('Sonicle.form.field.Palette', {
 	extend: 'Ext.form.field.Picker',
 	alias: ['widget.sopalettefield'],
-	
-	editable: false,
-	regex: /^\#[0-9A-F]{6}$/i,
-	invalidText: "Colors must be in hex format (like #FFFFFF)",
-	matchFieldWidth: false,
+	uses: [
+		'Sonicle.picker.Color'
+	],
 	
 	/**
-	 * @property {String[]} colors
-	 * An array of 6-digit color hex code strings (without the # symbol). This array can contain any number of colors,
-	 * and each hex code should be unique. You can override individual colors if needed.
-	 * Defaults to.
+	 * @cfg {Boolean} useHash
+	 * `True` to prepend # symbol.
 	 */
-	colors: null,
+	useHash: true,
+	
+	/**
+	 * @cfg {Number} tilesPerRow
+	 * The desired number tiles to display for each row.
+	 */
+	
+	/**
+	 * @cfg {String[]} colors
+	 * An array of 6-digit color hex code strings (WITHOUT the # symbol and UPPERCASE).
+	 */
+	
+	editable: false,
+	regex: /^[\#]?[0-9A-F]{6}$/i,
+	invalidText: "Colors must be in hex format (like [#]FFFFFF)",
+	matchFieldWidth: false,
 	
 	afterRender: function() {
 		var me = this;
@@ -34,13 +45,14 @@ Ext.define('Sonicle.form.field.Palette', {
 	},
 	
 	updateColor: function(color) {
-		var el = this.inputEl,
+		var SoS = Sonicle.String,
+				el = this.inputEl,
 				style = this.hideTrigger ? {cursor: 'pointer'} : {};
 		if (el) {
 			if (!Ext.isEmpty(color)) {
 				Ext.apply(style, {
-					color: color,
-					backgroundColor: color,
+					color: SoS.prepend(color, '#', true),
+					backgroundColor: SoS.prepend(color, '#', true),
 					backgroundImage: 'none',
 					boxShadow: '0px 0px 0px 1px white inset'
 				});
@@ -51,18 +63,13 @@ Ext.define('Sonicle.form.field.Palette', {
 	
 	createPicker: function() {
 		var me = this, cfg = {};
-		if (Ext.isArray(me.colors)) {
-			cfg = Ext.apply(cfg, {
-				colors: me.colors
-			});
-		}
+		if (Ext.isArray(me.colors)) cfg.colors = me.colors;
+		if (Ext.isNumber(me.tilesPerRow)) cfg.tilesPerRow = me.tilesPerRow;
 		return Ext.create(Ext.apply(cfg, {
-			xtype: 'colorpicker',
+			xtype: 'socolorpicker',
 			pickerField: me,
 			floating: true,
 			focusable: false, // Key events are listened from the input field which is never blurred
-			minWidth: 195,
-			maxWidth: 195,
 			listeners: {
 				select: function() {
 					me.collapse();
@@ -77,7 +84,10 @@ Ext.define('Sonicle.form.field.Palette', {
 	},
 	
 	onCollapse: function() {
-		// Picker does not prepend #, let's add it!
-		this.setValue('#'+this.picker.getValue());
+		var me = this,
+			SoS = Sonicle.String,
+			value = me.picker.getValue();
+		me.setValue(me.useHash ? SoS.prepend(value, '#', true) : SoS.removeStart(value, '#'));
+		//this.setValue(this.picker.getValue());
 	}
 });

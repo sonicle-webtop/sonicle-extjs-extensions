@@ -41,6 +41,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
     },
 	alias: ['widget.sohtmleditor'],
 	requires: [
+		'Sonicle.Utils',
 		'Sonicle.form.field.TinyMCETextArea'
 	],
 	
@@ -460,9 +461,26 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 				arrowVisible:false,
 				menu: Ext.widget('menu', {
 					plain: true,
-					
+					items: [
+						Sonicle.Utils.applyIfDefined({
+							xtype: 'socolorpicker',
+							allowReselect: true,
+							focus: Ext.emptyFn,
+							value: '000000',
+							plain: true,
+							clickEvent: 'mousedown',
+							handler: function(cp, color) {
+								me.execCommand('forecolor', false, Ext.isWebKit || Ext.isIE || Ext.isGecko ? '#'+color : color);
+								this.up('menu').hide();
+							}
+						}, {
+							colors: me.colors ? me.colors : undefined,
+							tilesPerRow:  me.colors ? me.tilesPerRow : undefined
+						})
+					]
+					/*
 					items: [{
-                            xtype: 'colorpicker',
+                            xtype: 'socolorpicker',
                             allowReselect: true,
                             focus: Ext.emptyFn,
                             value: '000000',
@@ -473,6 +491,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
                                 this.up('menu').hide();
                             }
                         }]
+					*/
 				})
 			}, {
 				itemId: 'backcolor',
@@ -484,9 +503,33 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
 				arrowVisible:false,
 				menu: Ext.widget('menu', {
 					plain: true,
-					
+					items: [
+						Sonicle.Utils.applyIfDefined({
+							xtype: 'socolorpicker',
+                            focus: Ext.emptyFn,
+                            value: 'FFFFFF',
+                            plain: true,
+                            allowReselect: true,
+                            clickEvent: 'mousedown',
+                            handler: function(cp, color) {
+                                if (Ext.isGecko) {
+                                    me.execCommand('useCSS', false, false);
+                                    me.execCommand('hilitecolor', false, '#'+color);
+                                    me.execCommand('useCSS', false, true);
+                                    me.deferFocus();
+                                } else {
+                                    me.execCommand(Ext.isOpera ? 'hilitecolor' : 'backcolor', false, Ext.isWebKit || Ext.isIE || Ext.isOpera ? '#'+color : color);
+                                }
+                                this.up('menu').hide();
+                            }
+						}, {
+							colors: me.colors ? me.colors : undefined,
+							tilesPerRow:  me.colors ? me.tilesPerRow : undefined
+						})
+					]
+					/*
 					items: [{
-                            xtype: 'colorpicker',
+                            xtype: 'socolorpicker',
                             focus: Ext.emptyFn,
                             value: 'FFFFFF',
                             plain: true,
@@ -504,6 +547,7 @@ Ext.define('Sonicle.form.field.HTMLEditor', {
                                 this.up('menu').hide();
                             }
                         }]
+					*/
 				}) 
 			}
 					);
