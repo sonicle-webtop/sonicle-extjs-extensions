@@ -8,6 +8,7 @@ Ext.define('Sonicle.form.field.Palette', {
 	extend: 'Ext.form.field.Picker',
 	alias: ['widget.sopalettefield'],
 	uses: [
+		'Sonicle.String',
 		'Sonicle.picker.Color'
 	],
 	
@@ -38,10 +39,19 @@ Ext.define('Sonicle.form.field.Palette', {
 		me.updateColor(me.value);
 	},
 	
+	getValue: function() {
+		var me = this,
+			SoS = Sonicle.String,
+			value = me.callParent();
+		return me.useHash ? SoS.prepend(value, '#', true) : SoS.removeStart(value, '#');
+	},
+	
 	setValue: function(color) {
-		var me = this;
-		me.callParent(arguments);
-		me.updateColor(color);
+		var me = this,
+			SoS = Sonicle.String,
+			value = me.useHash ? SoS.prepend(color, '#', true) : SoS.removeStart(color, '#');
+		me.callParent([value]);
+		me.updateColor(value);
 	},
 	
 	updateColor: function(color) {
@@ -84,10 +94,6 @@ Ext.define('Sonicle.form.field.Palette', {
 	},
 	
 	onCollapse: function() {
-		var me = this,
-			SoS = Sonicle.String,
-			value = me.picker.getValue();
-		me.setValue(me.useHash ? SoS.prepend(value, '#', true) : SoS.removeStart(value, '#'));
-		//this.setValue(this.picker.getValue());
+		this.setValue(this.picker.getValue());
 	}
 });
