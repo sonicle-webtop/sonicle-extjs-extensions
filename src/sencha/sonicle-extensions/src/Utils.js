@@ -22,5 +22,44 @@ Ext.define('Sonicle.Utils', {
 			}
 		}
 		return Ext.apply(object, dconfig, defaults);
+	},
+	
+	/**
+	 * 
+	 * @param {Object} object The receiver of the property.
+	 * @param {String} name The property name to set in target object.
+	 * @param {Mixed} value The value to set.
+	 * @returns {Object} returns `object`.
+	 */
+	setProp: function(object, name, value) {
+		if (Ext.isObject(object) && Ext.isString(name)) {
+			object[name] = value;
+		}
+		return object;
+	},
+	
+	/**
+	 * Copies the specified property value from 'source' into the target `object`.
+	 * Undefined values will be ignored, unless applyIfEmpty is active.
+	 * @param {Object} object The receiver of the property.
+	 * @param {Boolean} applyIfEmpty `true` to process empty/undefined values, `false` otherwise.
+	 * @param {Object} config The primary source of the properties.
+	 * @param {String} name The property name to look-for in source object.
+	 * @param {String} [newName] The new property name to use in target object, as the above if not specified.
+	 * @param {Function} [parseFn] Optional function used to modify value before writing it.
+	 * @param {Object} [scope] The scope (`this` reference) in which the `parseFn` function will be called.
+	 * @return {Object} returns `object`.
+	 */
+	applyProp: function(object, applyIfEmpty, config, name, newName, parseFn, scope) {
+		if (arguments.length === 4) {
+			newName = name;
+		} else if (arguments.length === 5 && Ext.isFunction(newName)) {
+			parseFn = newName;
+			newName = name;
+		}
+		if (Ext.isObject(object) && Ext.isObject(config) && Ext.isString(name) && (config[name] !== undefined) && (!applyIfEmpty && !Ext.isEmpty(config[name]))) {
+			object[newName] = Ext.isFunction(parseFn) ? Ext.callback(parseFn, scope || this, [config[name]]) : config[name];
+		}
+		return object;
 	}
 });

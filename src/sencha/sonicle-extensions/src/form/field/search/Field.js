@@ -29,7 +29,7 @@ Ext.define('Sonicle.form.field.search.Field', {
 	searchText: 'Search',
 	searchTooltip: undefined,
 	clearText: 'Clear',
-	usageText: 'manual syntax: "{0}:{1}"',
+	usageText: 'Manual syntax: "{0}:{1}"',
 	
 	/**
 	 * @cfg {Number} fieldsLabelWidth
