@@ -1,29 +1,32 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2015 Sonicle S.r.l.
+ * Copyright (C) 2020 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
  */
 Ext.define('Sonicle.form.field.ColorDisplay', {
 	extend: 'Ext.form.field.Display',
 	alias: ['widget.socolordisplayfield'],
+	uses: [
+		'Sonicle.String'
+	],
 	
 	/**
-	 * @cfg {square|circle} [geometry=square]
+	 * @cfg {rounded|square|circle} [swatchGeometry=rounded]
 	 * Sets the color marker geomerty.
 	 */
-	geometry: 'square',
+	swatchGeometry: 'rounded',
 	
-	fieldCls: 'so-' + 'form-colordisplay-field',
-	fieldBodyCls: 'so-' + 'form-colordisplay-field-body',
+	fieldCls: 'so-' + 'colordisplay-field',
+	fieldBodyCls: 'so-' + 'colordisplay-field-body',
+	swatchCls: 'so-'+'colordisplay-swatch',
+	outlineBaseCls: 'so-'+'colordisplay-outline',
 	
 	onRender: function() {
 		var me = this;
 		me.callParent();
 		if (me.inputEl) {
-			me.inputEl.applyStyles({
-				borderRadius: me.buildRadius()
-			});
+			me.inputEl.addCls(me.swatchCls + '-' + me.swatchGeometry);
 		}
 	},
 	
@@ -33,6 +36,11 @@ Ext.define('Sonicle.form.field.ColorDisplay', {
 			me.inputEl.applyStyles({
 				backgroundColor: value
 			});
+			if (Sonicle.String.iequals(value, '#FFFFFF')) {
+				me.inputEl.addCls(me.outlineBaseCls + '-light');
+			} else {
+				me.inputEl.removeCls(me.outlineBaseCls + '-light');
+			}
 		}
 		return me.callParent(arguments);
 	},
@@ -45,12 +53,6 @@ Ext.define('Sonicle.form.field.ColorDisplay', {
 			return display;
 		} else {
 			return '<div />';
-		}
-	},
-	
-	privates: {
-		buildRadius: function() {
-			return (this.geometry === 'circle') ? '50%' : null;
 		}
 	}
 });

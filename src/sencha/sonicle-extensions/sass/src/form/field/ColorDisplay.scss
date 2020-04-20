@@ -1,9 +1,20 @@
-.so-form-colordisplay-field {
-	border: 1px solid black;
+.so-colordisplay-field {
 	width: 16px;
 	height: 16px;
 }
-.so-form-colordisplay-field-default {
+.so-colordisplay-field-default {
 	margin-top: 4px;
 	margin-right: 5px;
+}
+.so-colordisplay-outline-light {
+	border: 1px solid #A8A8A8;
+}
+.so-colordisplay-outline-dark {
+	border: 1px solid #F5F5F5;
+}
+.so-colordisplay-swatch-rounded {
+	border-radius: 2px;
+}
+.so-colordisplay-swatch-circle {
+	border-radius: 50%;
 }

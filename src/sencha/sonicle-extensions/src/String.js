@@ -45,6 +45,16 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
+	 * Compare two strings, ignoring case.
+	 * @param {String} s1 The 1st value, may be null.
+	 * @param {String} s2 The 2nd value, may be null.
+	 * @returns {Boolean} `true` if strings are equal, `false` otherwise.
+	 */
+	iequals: function(s1, s2) {
+		return this.toLowerCase(s1) === this.toLowerCase(s2);
+	},
+	
+	/**
 	 * Compares two String arrays looking for differences: any string not 
 	 * contained in each other array is marked as difference.
 	 * @param {String[]} values1 First value set.
