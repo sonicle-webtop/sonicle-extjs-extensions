@@ -288,6 +288,7 @@ Ext.define('Sonicle.String', {
 	parseBoolean: function(s, defValue) {
 		if (arguments.length === 1) defValue = false;
 		if (s === null) return defValue;
+		if (Ext.isBoolean(s)) return s;
 		switch(s.toLowerCase().trim()) {
 			case 'true': case 't': case 'yes': case 'y': case '1': return true;
 			case 'false': case 'f': case 'no': case 'n': case '0': return false;
