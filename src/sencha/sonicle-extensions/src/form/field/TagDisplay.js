@@ -22,11 +22,13 @@ Ext.define('Sonicle.form.field.TagDisplay', {
 	
 	constructor: function(cfg) {
 		var me = this, 
-				icfg = Ext.apply({}, cfg, me.getInitialConfig());
+				icfg = Ext.apply({}, cfg, me.getInitialConfig()), ttpl;
 		
 		// Define proper tipTpl using configured displayField
 		if (icfg.displayField) {
-			Ext.apply(cfg, {tipTpl: '{' + icfg.displayField + '}'});
+			ttpl = '{' + icfg.displayField + '}';
+			if (Ext.isString(icfg.sourceField)) ttpl += '<tpl if="' + icfg.sourceField + ' == \'\'"><tpl else> ({' + icfg.sourceField + '})</tpl>'
+			cfg.tipTpl = ttpl;
 		}
 		me.callParent([cfg]);
 	},

@@ -8,7 +8,8 @@ Ext.define('Sonicle.form.field.Tag', {
 	extend: 'Ext.form.field.Tag',
 	alias: 'widget.sotagfield',
 	uses: [
-		'Sonicle.ColorUtils'
+		'Sonicle.ColorUtils',
+		'Sonicle.Data'
 	],
 	
 	/**
@@ -16,6 +17,12 @@ Ext.define('Sonicle.form.field.Tag', {
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as tag color.
 	 */
 	colorField: null,
+	
+	sourceField: null,
+	
+	htmlEncodeListDisplay: false,
+	
+	sourceCls: null,
 	
 	/**
 	 * @cfg {Number} colorLuminance [colorLuminance=0.64]
@@ -116,6 +123,34 @@ Ext.define('Sonicle.form.field.Tag', {
             disableFormats: true
         }
     ],
+	
+	initComponent: function() {
+		var me = this;
+		me.listConfig = Ext.apply(this.listConfig || {}, {
+			getInnerTpl: function(displayField) {
+				var picker = this.pickerField,
+						enc = picker.htmlEncodeListDisplay ? ':htmlEncode' : '',
+						sourceCls = Sonicle.String.deflt(picker.sourceCls, ''),
+						icon = '';
+				
+				// TODO: here we have no way to check color value like in getColor 
+				// method of multiSelectItemTpl where a fallback color is checked
+				// (and eventually provided) for each row.
+				if (!Ext.isEmpty(picker.colorField)) {
+					icon = '<span style="color:{color};margin-right:5px;"><i class="fa fa-tag"></i></span>';
+				}
+				return '<span style="float:left;white-space:pre;">'
+					+ icon
+					+ '{'+displayField+enc+'}'
+					+ '</span>'
+					+ '<span style="float:right;" class="' + sourceCls + '">'
+					+ '{'+picker.sourceField+enc+'}'
+					+ '</span>'
+					+ '<div style="clear:both;"></div>';
+			}
+		});
+		me.callParent(arguments);
+	},
 	
 	/*
 	/**
@@ -244,14 +279,25 @@ Ext.define('Sonicle.form.field.Tag', {
 	setLabelValue: function(value) {
 		var me = this,
 				SoS = Sonicle.String,
-				values = [], dvalues, rec;
-
+				SoD = Sonicle.Data,
+				bind, valueBind,
+				values = [], dvalues, recs;
+		
+		// Here we check if the setValue is being called by bind getting synced
+		// if this is the case while the field has focus. If this is the case, we
+		// don't want to change the field value. (like Ext.form.field.ComboBox's setValue)
+		if (me.hasFocus) {
+			bind = me.getBind();
+			valueBind = bind && bind.labelValue;
+			if (valueBind && valueBind.syncing) return;
+		}
+		
 		if (me.store) {
 			dvalues = Ext.isArray(value) ? value : SoS.split(value, me.delimiter);
 			Ext.iterate(dvalues, function(dvalue) {
-				rec = me.store.findRecord(me.displayField, dvalue, 0, false, true, true);
-				if (!rec) rec = me.valueStore.findRecord(me.displayField, dvalue, 0, false, true, true);
-				if (rec) values.push(rec.get(me.valueField));
+				recs = SoD.findRecords(me.store, me.displayField, dvalue, false, true, true);
+				Ext.Array.push(recs, SoD.findRecords(me.valueStore, me.displayField, dvalue, false, true, true));
+				if (recs.length > 0) Ext.Array.push(values, SoD.collectValues(recs, me.valueField));
 			});
 			me.setValue(SoS.deflt(SoS.join(me.delimiter, values), null));
 		}

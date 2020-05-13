@@ -3,7 +3,7 @@
  * Copyright (C) 2020 Sonicle S.r.l.
  * sonicle@sonicle.com
  */
-Ext.define('Sonicle.DataUtils', {
+Ext.define('Sonicle.Data', {
     singleton: true,
 	
 	/**
@@ -47,5 +47,30 @@ Ext.define('Sonicle.DataUtils', {
 			if (vals.indexOf(copied) === -1) return copied;
 		}
 		return undefined;
+	},
+	
+	/**
+	 * Finds the matching Records in the store by a specific field value.
+	 * When store is filtered, finds records only within filter.
+	 * 
+	 * @param {Ext.data.Store} store The data store.
+	 * @param {String} fieldName The name of the Record field to test.
+	 * @param {String/RegExp} value Either a string that the field value should begin with, or a RegExp to test against the field.
+	 * @param {Boolean} [anyMatch=false] True to match any part of the string, not just the beginning.
+	 * @param {Boolean} [caseSensitive=false] True for case sensitive comparison.
+	 * @param {Boolean} [exactMatch=false] True to force exact match (^ and $ characters added to the regex). Ignored if `anyMatch` is `true`.
+	 * @returns {Ext.data.Model[]} The matched records or an empty array.
+	 */
+	findRecords: function(store, fieldName, value, anyMatch, caseSentitive, exactMatch) {
+		var recs = [],
+				iof = -1, start = 0, rec;
+		while (true) {
+			rec = store.findRecord(fieldName, value, start, anyMatch, caseSentitive, exactMatch);
+			iof = store.indexOf(rec);
+			if (iof === -1) break;
+			recs.push(rec);
+			start = iof+1;
+		}
+		return recs;
 	}
 });

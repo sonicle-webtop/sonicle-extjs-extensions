@@ -267,9 +267,9 @@ Ext.define('Sonicle.form.field.search.Field', {
 	
 	remapQueryObject: function(qobj) {
 		var me = this,
-				cond, field, fcc, i;
-		for (i=0; i<qobj.conditionArray.length; i++) {
-			cond = qobj.conditionArray[i];
+				conds = Ext.Array.clone(qobj.conditionArray),
+				field, fcc, iof;
+		Ext.iterate(conds, function(cond, i) {
 			field = Ext.Array.findBy(me.fields, function(item) { return cond.keyword === item.name; });
 			if (field) {
 				fcc = field.customConfig;
@@ -280,14 +280,22 @@ Ext.define('Sonicle.form.field.search.Field', {
 					if (!field.boolKeyword) cond.value = me.trueValue === cond.value ? true : false;
 					
 				} else if (field.type === 'tag') {
-					var sto = me.storeCache[field.name], rec;
+					var sto = me.storeCache[field.name], recs, newConds = [];
 					if (sto && fcc) {
-						rec = sto.findRecord(fcc.displayField || fcc.valueField, cond.value, 0, false, true, true);
-						if (rec) cond.value = rec.get(fcc.valueField);
+						recs = Sonicle.Data.findRecords(sto, fcc.displayField || fcc.valueField, cond.value, false, true, true);
+						if (recs.length > 0) {
+							iof = qobj.conditionArray.indexOf(cond);
+							Ext.iterate(recs, function(rec) {
+								newConds.push(Ext.apply(Ext.clone(cond), {
+									value: rec.get(fcc.valueField)
+								}));
+							});
+							Ext.Array.replace(qobj.conditionArray, iof, 1, newConds);
+						}
 					}
 				}
 			}
-		}
+		});
 		return qobj;
 	}
 });
