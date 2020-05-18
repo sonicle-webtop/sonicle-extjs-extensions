@@ -15,6 +15,7 @@ Ext.define('Sonicle.form.field.DisplayImage', {
 	config: {
 		baseImageUrl: '',
 		urlParam: 'id',
+		urlExtraParams: null,
 		placeholderImageUrl: Ext.BLANK_IMAGE_URL,
 		usePlaceholder: true
 	},
@@ -89,6 +90,11 @@ Ext.define('Sonicle.form.field.DisplayImage', {
 		return me;
 	},
 	
+	updateUrlExtraParams: function(nv, ov) {
+		var me = this;
+		if (me.rendered) me.setValue(me.getValue());
+	},
+	
 	privates: {
 		buildRadius: function() {
 			return (this.geometry === 'circle') ? '50%' : null;
@@ -102,8 +108,11 @@ Ext.define('Sonicle.form.field.DisplayImage', {
 		},
 		
 		buildUrl: function(value) {
-			var obj = {};
-			obj[this.getUrlParam()] = value;
+			var me = this,
+					defltParams = {},
+					obj;
+			defltParams[this.getUrlParam()] = value;
+			obj = Ext.apply(me.urlExtraParams || {}, defltParams);
 			return Ext.String.urlAppend(this.getBaseImageUrl(), Ext.Object.toQueryString(obj));
 		}
 	}
