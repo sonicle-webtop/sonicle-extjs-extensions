@@ -129,7 +129,13 @@ Ext.define('Sonicle.view.BoundList', {
 			);
 			
 		} else { // Setup original BoundList template
-			me.callParent(arguments);
+			// We cannot use callParent here because we have to inject our listItemCls 
+			// in order to make hovering and selection compatible with new item selector.
+			me.tpl = new Ext.XTemplate(
+				'<tpl for=".">',
+					'<li role="option" unselectable="on" class="' + me.itemCls + ' ' + me.listItemCls + '">' + me.getInnerTpl(me.displayField) + '</li>',
+				'</tpl>'
+			);
 		}		
 	},
 	
