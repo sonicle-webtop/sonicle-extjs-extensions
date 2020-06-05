@@ -13,7 +13,24 @@ Ext.define('Sonicle.grid.column.Lookup', {
 	],
 	producesHTML: false,
 	
+	/**
+	 * @cfg {String} displayField
+	 * The fieldName for getting the text to display.
+	 */
 	displayField: '',
+	
+	/**
+	 * @cfg {String} tooltipField
+	 * The fieldName for getting the tooltip to apply to displayed text.
+	 * To calculate value dynamically, configure the column with a `getTooltip` function.
+	 */
+	tooltipField: null,
+	
+	/**
+	 * @cfg {Function} getTooltip
+	 * A function which returns a computed tooltip.
+	 */
+	getTooltip: null,
 	
 	/**
 	 * @private
@@ -70,7 +87,8 @@ Ext.define('Sonicle.grid.column.Lookup', {
 	defaultRenderer: function(value, meta, rec, ri, ci, sto, vw) {
 		var me = this;
 		if (me.getStore().loadCount > 0) {
-			return me._storeValue(value);
+			return me.buildHtml(value);
+			//return me._storeValue(value);
 		} else {
 			me.delayRefresh = vw;
 			return '';
@@ -78,11 +96,46 @@ Ext.define('Sonicle.grid.column.Lookup', {
 	},
 	
 	updater: function(cell, value) {
-		cell.firstChild.innerHTML = this._storeValue(value);
+		cell.firstChild.innerHTML = this.buildHtml(value);
+		//cell.firstChild.innerHTML = this.findRecordValue(value, this.displayField);
 	},
 	
+	buildHtml: function(value) {
+		var me = this,
+				lrec = me.findLookupRecord(value),
+				ttip = me.evalValue(value, lrec, me.tooltipField, me.getTooltip, null),
+				s = '';
+		if (ttip) s += '<span data-qtip="' + ttip + '">';
+		s += me.findLookupValue(value, me.displayField, lrec);
+		if (ttip) s += '<\span>';
+		return s;
+	},
+	
+	/*
 	_storeValue: function(value) {
 		var mo = this.getStore().getById(value);
 		return mo ? mo.get(this.displayField) : value;
-	}
+	},
+	*/
+	
+	privates: {
+		findLookupRecord: function(value) {
+			return this.getStore().getById(value);
+		},
+		
+		findLookupValue: function(value, lookupField, rec) {
+			if (!rec) rec = this.findLookupRecord(value);
+			return rec ? rec.get(lookupField) : value;
+		},
+		
+		evalValue: function(value, rec, field, getFn, fallbackValue) {
+			if (rec && Ext.isFunction(getFn)) {
+				return getFn.apply(this, [value, rec]);
+			} else if (rec && !Ext.isEmpty(field)) {
+				return rec.get(field);
+			} else {
+				return (fallbackValue === undefined) ? value : fallbackValue;
+			}
+		}
+	}	
 });
