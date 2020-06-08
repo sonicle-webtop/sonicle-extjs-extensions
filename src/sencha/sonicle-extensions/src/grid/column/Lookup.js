@@ -107,7 +107,7 @@ Ext.define('Sonicle.grid.column.Lookup', {
 				s = '';
 		if (ttip) s += '<span data-qtip="' + ttip + '">';
 		s += me.findLookupValue(value, me.displayField, lrec);
-		if (ttip) s += '<\span>';
+		if (ttip) s += '</span>';
 		return s;
 	},
 	
