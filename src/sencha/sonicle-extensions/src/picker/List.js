@@ -28,6 +28,11 @@ Ext.define('Sonicle.picker.List', {
 	allowMultiSelection: false,
 	
 	/**
+	 * @cfg {Number} [maxSelections=Number.MAX_VALUE] Maximum number of selections allowed.
+	 */
+	maxSelections: Number.MAX_VALUE,
+	
+	/**
 	 * @cfg {Boolean} [anyMatch=true]
 	 * Configure as `false` to disallow matching of the typed characters at any 
 	 * position in the {@link #searchField}'s value.
@@ -163,6 +168,7 @@ Ext.define('Sonicle.picker.List', {
 		me.callParent(arguments);
 		if (me.store) me.applySkipFilter(me.skipValues);
 		
+		me.on('beforeselect', me.onBeforeSelect, me);
 		me.on('selectionchange', me.onSelectionChange, me);
 		me.on('rowdblclick', me.onRowDblClick, me);
 		me.on('afterrender', function() {
@@ -281,6 +287,13 @@ Ext.define('Sonicle.picker.List', {
 			if (e.getKey() === e.DOWN) this.getSelectionModel().select(0);
 		},
 		
+		onBeforeSelect: function(s) {
+			var me = this;
+			if (me.allowMultiSelection && s.getCount()+1 > me.maxSelections) {
+				return false;
+			}
+		},
+		
 		onSelectionChange: function(s, sel) {
 			var me = this;
 			me.lookupReference('btnok').setDisabled(sel.length === 0);
@@ -290,7 +303,9 @@ Ext.define('Sonicle.picker.List', {
 		},
 		
 		onRowDblClick: function(s, rec) {
-			this.firePick([rec]);
+			if (!this.allowMultiSelection) {
+				this.firePick([rec]);
+			}
 		}
 	}
 });

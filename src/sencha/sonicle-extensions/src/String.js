@@ -23,14 +23,24 @@ Ext.define('Sonicle.String', {
 	
 	/**
 	 * Returns first non-NULL value of provided arguments.
-	 * @param {Mixed...} values List of values
-	 * @returns {Mixed} The first non-NULL value
+	 * @param {Mixed...} values List of values.
+	 * @returns {Mixed} The first non-NULL value.
 	 */
 	coalesce: function(values) {
 		for (var i=0; i<arguments.length; i++) {
 			if ((arguments[i] !== null) && (arguments[i] !== undefined)) return arguments[i];
 		}
 		return null;
+	},
+	
+	/**
+	 * Checks if value is contained in passed string.
+	 * @param {String} s The value, may be null.
+	 * @param {String} value The value to look for.
+	 * @returns {Boolean} `true` if value is found in string, `false` otherwise.
+	 */
+	contains: function(s, value) {
+		return Ext.isString(s) ? s.indexOf(value) !== -1 : false;
 	},
 	
 	/**
