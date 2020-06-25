@@ -113,12 +113,17 @@ Ext.define('Sonicle.grid.column.Icon', {
 				ico = me.evalValue(me.getIconCls, me.iconClsField, value, rec),
 				ttip = me.evalValue(me.getTip, me.tipField, value, rec, null),
 				style = 'width:'+size+'px;height:'+size+'px;',
-				text = '', style;
+				text = '', sttip = '';
 		
 		if (ico) clsico += ' ' + ico;
 		if (!me.hideText) text = '<span class="'+clstxt+'">' + Sonicle.String.deflt(me.evalValue(me.getText, me.dataIndex, value, rec), '') + '</span>';
 		if (Ext.isFunction(me.handler)) style += 'cursor:pointer;';
-		return '<div class="'+clsico+'" style="' + style + '"' + (ttip ? ' data-qtip="' + ttip + '"' : '') + '></div>' + text;
+		if (Ext.isString(ttip)) {
+			sttip = ' data-qtip="' + ttip + '"';
+		} else if (ttip) {
+			sttip = ' data-qtitle="' + ttip.title + '" data-qtip="' + ttip.text + '"';
+		}
+		return '<div class="'+clsico+'" style="' + style + '"' + sttip + '></div>' + text;
 	},
 	
 	defaultRenderer: function(value, cellValues, record, rowIdx, colIdx, store, view) {
