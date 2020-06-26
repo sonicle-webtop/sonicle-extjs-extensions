@@ -460,7 +460,178 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		};
 	},
 	
+	/**
+	 * Render events.
+	 * The event layout is based on this article: http://stackoverflow.com/questions/11311410/ and this sample
+	 * implementation http://jsbin.com/detefuveta/5/edit?html,js,output     *
+	 */
 	renderItems: function() {
+		var me = this;
+		
+		// This is legacy rendering (instead of 2 sentences below), here for easy revert-back! (WT-680)
+		//me.legacyRenderItems();
+		
+		me.layoutAndRenderItems(me.filterEventsToRender());
+		me.fireEvent('eventsrendered', me);
+     },
+	 
+	/**
+	 * @protected
+	 * Filters events and returns a list of events that need to be displayed by the day body view.
+	 * For example, all-day events and multi-day events are filtered out because they are not
+	 * displayed in the body. This is a private helper function.
+	 * @returns {Array} An array of events.
+	 */
+	filterEventsToRender: function() {
+		var me = this,
+				EM = Sonicle.calendar.data.EventMappings,
+				evt,
+				evts = [];
+		
+		for (var day = 0; day < me.dayCount; day++) {
+			var ev = 0,
+					d = me.eventGrid[0][day],
+					ct = d ? d.length : 0;
+			
+			for (; ev < ct; ev++) {
+				evt = d[ev];
+                if (!evt) continue;
+				
+				var item = evt.data || evt.event.data,
+						ad = item[EM.IsAllDay.name] === true,
+						span = me.isEventSpanning(evt.event || evt),
+						renderAsAllDay = ad || (span && (me.eventDurationInHours(evt.event || evt) >= 24)),
+						date;
+				
+				// this event is already rendered in the header view
+				if (renderAsAllDay) continue;
+				
+				Ext.apply(item, {
+					cls: 'ext-cal-ev',
+					_positioned: true
+				});
+                
+				date = Sonicle.Date.add(me.viewStart, {days: day});
+				evts.push({
+					data: me.getTemplateEventData(item, date),
+					date: date
+				});
+			}
+		}
+		return evts;
+	},
+	
+	/**
+	 * @protected
+	 * Layout events and render to DOM.
+	 * @param {Array} events An array of events.
+	 */
+	layoutAndRenderItems: function(evts) {
+		var me = this,
+				EM = Sonicle.calendar.data.EventMappings,
+				i = 0,
+				j = 0,
+				l = evts.length,
+				evt,
+				minEventDuration = (me.minEventDisplayMinutes || 0) * 60 * 1000,
+				lastEventEnding = 0,
+				columns = [], // virtual columns for placement of the events
+				eventGroups = [];
+		
+		for (i=0; i<l; i++) {
+			evt =  evts[i];
+			if (lastEventEnding !== 0 && evt.data[EM.StartDate.name].getTime() >= lastEventEnding) {
+				// This event does not overlap with the current event group. Start a new event group.
+				eventGroups.push(columns);
+				columns = [];
+				lastEventEnding = 0;
+            }
+            
+			var placed = false;
+			for (j = 0; j < columns.length; j++) {
+				var col = columns[j];
+				if (!me.isOverlapping(col[col.length-1], evt)) {
+					col.push(evt);
+					placed = true;
+					break;
+				}
+			}
+			if (!placed) columns.push([evt]);
+			
+            // Remember the last event time of the event group.
+			// Very short events have a minimum duration on screen (we can't see a one minute event).
+			var eventDuration = evt.data[EM.EndDate.name].getTime() - evt.data[EM.StartDate.name].getTime(),
+					eventEnding;
+            
+			if (eventDuration < minEventDuration) {
+				eventEnding = evt.data[EM.StartDate.name].getTime() + minEventDuration;
+			} else {
+				eventEnding = evt.data[EM.EndDate.name].getTime();
+			}
+			if (eventEnding > lastEventEnding) lastEventEnding = eventEnding;
+		}
+		
+		// Push the last event group, if there is one.
+		if (columns.length > 0) eventGroups.push(columns);
+
+		// Rendering loop
+		l = eventGroups.length;
+		
+		// Loop over all the event groups.
+		for (i = 0; i < l; i++) {
+			var evtGroup = eventGroups[i],
+					numColumns = evtGroup.length;
+			
+			// Loop over all the virtual columns of an event group
+			for (j = 0; j < numColumns; j++) {
+				col = evtGroup[j];
+				
+				// Loop over all the events of a virtual column
+				for (var k = 0; k < col.length; k++) {
+					evt = col[k];
+					
+					// Check if event is rightmost of a group and can be expanded to the right
+					var colSpan = me.expandEvent(evt, j, evtGroup);
+					
+					evt.data._width = (100 * colSpan / numColumns);
+					evt.data._left = (j / numColumns) * 100;
+					var markup = me.getEventTemplate().apply(evt.data),
+							target = target = me.getDayId(evt.date, null, evt.data.CalendarId);
+					Ext.DomHelper.append(target, markup);
+				}
+			}
+		}
+	},
+	
+	/**
+	 * @private
+	 * Expand events at the far right to use up any remaining space.
+	 * @param {Object} evt Event to process.
+	 * @param {int} iColumn Virtual column to where the event will be rendered.
+	 * @param {Array} columns List of virtual colums for event group. Each column contains a list of events.
+	 * @return {Number}
+	 */
+	expandEvent: function(evt, iColumn, columns) {
+		var me = this,
+				colSpan = 1;
+		
+		// To see the output without event expansion, uncomment
+		// the line below. Watch column 3 in the output.
+		// return colSpan;
+		
+		for (var i = iColumn + 1; i < columns.length; i++) {
+			var col = columns[i];
+			for (var j = 0; j < col.length; j++) {
+				var evt1 = col[j];
+				if (me.isOverlapping(evt, evt1)) return colSpan;
+			}
+			colSpan++;
+		}
+		return colSpan;
+	},
+	
+	/*
+	legacyRenderItems: function() {
 		var me = this,
 				XDate = Ext.Date,
 				EM = Sonicle.calendar.data.EventMappings,
@@ -546,6 +717,7 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		
 		me.fireEvent('eventsrendered', me);
 	},
+	*/
 	
 	getDayColumn: function(date) {
 		return this.el.down('#' + this.tpl.dayColumnId(date));
