@@ -15,6 +15,7 @@ Ext.define('Sonicle.grid.column.Icon', {
 	iconTextCls: 'so-'+'iconcolumn-text',
 	
 	/**
+	 * @deprecated What about using usingDefaultRenderer and renderer like DomainLicenses?
 	 * @cfg {String} cellClsField
 	 * The fieldName for getting the CSS class to apply to the cell area.
 	 * To determine the class dynamically, configure the column with a `getCellCls` function.
@@ -22,6 +23,7 @@ Ext.define('Sonicle.grid.column.Icon', {
 	cellClsField: null,
 	
 	/**
+	 * @deprecated What about using usingDefaultRenderer and renderer like DomainLicenses?
 	 * @cfg {Function} getCellCls
 	 * A function which returns the CSS class to apply to the cell area.
 	 */
@@ -127,11 +129,10 @@ Ext.define('Sonicle.grid.column.Icon', {
 	},
 	
 	defaultRenderer: function(value, cellValues, record, rowIdx, colIdx, store, view) {
-		var me=this,
-			rec=cellValues ? cellValues.record : null,
-			cellCls = me.evalValue(view, me.getCellCls, me.cellClsField, value, rec);
-		if (cellCls && cellValues) cellValues.tdCls += cellCls;
-		return this.buildHtml(value, rec);
+		var me = this,
+			cellCls = me.evalValue(me.getCellCls, me.cellClsField, value, record, null);
+		if (cellValues && Ext.isString(cellCls)) cellValues.tdCls += cellCls;
+		return this.buildHtml(value, record);
 	},
 	
 	updater: function(cell, value, record, view, dataSource) {
