@@ -378,7 +378,7 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
 		 */
 		bestForeColor: function(bgColor, threshold) {
 			if (!Ext.isNumber(threshold) || (threshold < 0) || (threshold > 1)) threshold = 0.5;
-			return (this.luminance(bgColor, 2) > threshold) ? '#000000' : '#FFFFFF';
+			return Ext.isEmpty(bgColor) || (this.luminance(bgColor, 2) > threshold) ? '#000000' : '#FFFFFF';
 		},
 
         colorMap: {
