@@ -42,28 +42,39 @@ Ext.define('Sonicle.menu.StoreMenu', {
 	 */
 	
 	/**
+	 * @cfg {String} [idField]
+	 * The underlying {@link Ext.data.Field#name data field name} to get the ID.
+	 * Defaults to {@link Ext.data.Model#getId} value.
+	 */
+	
+	/**
 	 * @cfg {String} [textField=text]
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as text.
 	 */
 	textField: 'text',
 	
 	/**
+	 * @cfg {String} tooltip
+	 * The underlying {@link Ext.data.Field#name data field name} to bind as tooltip.
+	 */
+	
+	/**
 	 * @cfg {String} tagField
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as tag data.
 	 */
-	tagField: null,
+	//tagField: null,
 	
 	/**
 	 * @cfg {String} iconField
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as icon.
 	 */
-	iconField: null,
+	//iconField: null,
 	
 	/**
 	 * @cfg {String} iconClsField
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as iconCls.
 	 */
-	iconClsField: null,
+	//iconClsField: null,
 	
 	/**
 	 * @cfg {Object/Object[]} topStaticItems
@@ -78,9 +89,19 @@ Ext.define('Sonicle.menu.StoreMenu', {
 	bottomStaticItems: undefined,
 	
 	/**
+	 * @cfg {String} emptyText
+	 * Default text (HTML tags are accepted) to display in the Menu body when the Store is empty.
+	 */
+	
+	/**
 	 * @private
 	 */
 	itemIdPrefix: 'stoitm-',
+	
+	/**
+	 * @private
+	 */
+	emptyItemIdentifier: 'emptyItem',
 	
 	/**
 	 * @private
@@ -140,7 +161,8 @@ Ext.define('Sonicle.menu.StoreMenu', {
 				arr = Ext.isArray(nv) ? nv : [nv];
 		if (me.store && (me.itemsInitialized === true)) {
 			me.store.each(function(rec) {
-				var chk = arr.indexOf(rec.getId()) !== -1 ? true : false,
+				var id = Ext.isString(me.idField) ? rec.get(me.idField) : rec.getId(),
+						chk = arr.indexOf(id) !== -1 ? true : false,
 						itm = me.getComponent(me.buildItemId(rec));
 				if (itm) itm.setChecked(chk, false);
 			});
@@ -159,6 +181,13 @@ Ext.define('Sonicle.menu.StoreMenu', {
 			me.store.each(function(rec) {
 				me.add(me.createStoreItem(rec));
 			});
+			if (Ext.isString(me.emptyText) && me.store.getCount() === 0) {
+				me.add({
+					itemId: me.buildItemId(me.emptyItemIdentifier),
+					text: me.emptyText,
+					disabled: true
+				});
+			}
 		}
 		if (bottomItems) me.add(bottomItems);
 		Ext.resumeLayouts(true);
@@ -167,15 +196,18 @@ Ext.define('Sonicle.menu.StoreMenu', {
 	
 	createStoreItem: function(rec) {
 		var me = this,
+				idFld = me.idField,
 				textFld = me.textField,
+				tipFld = me.tooltipField,
 				iconFld = me.iconField,
 				iconClsFld = me.iconClsField,
 				tagFld = me.tagField,
 				cfg = Ext.callback(me.itemCfgCreator, me, [rec]);
 		
 		return Ext.apply({
-			itemId: me.buildItemId(rec),
+			itemId: me.buildItemId(Ext.isString(idFld) ? rec.get(idFld) : rec.getId()),
 			text: rec.get(textFld),
+			tooltip: (!cfg || !cfg.tooltip) && Ext.isString(tipFld) ? rec.get(tipFld) : undefined,
 			icon: iconFld ? rec.get(iconFld) : undefined,
 			iconCls: iconClsFld ? rec.get(iconClsFld) : undefined,
 			tag: tagFld ? rec.get(tagFld) : undefined
@@ -184,9 +216,17 @@ Ext.define('Sonicle.menu.StoreMenu', {
 		});
 	},
 	
+	findStoreRecordByItemId: function(id) {
+		var me = this,
+				sto = me.store;
+		if (sto) {
+			return Ext.isString(me.idField) ? sto.findRecord(me.idField, id, 0, false, true, true) : sto.getById(id);
+		}
+	},
+	
 	privates: {
-		buildItemId: function(rec) {
-			return this.useItemIdPrefix ? this.itemIdPrefix + rec.getId() : rec.getId();
+		buildItemId: function(id) {
+			return this.useItemIdPrefix ? this.itemIdPrefix + id : id;
 		}
 	}
 });
