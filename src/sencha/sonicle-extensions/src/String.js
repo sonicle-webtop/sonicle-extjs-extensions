@@ -11,6 +11,103 @@ Ext.define('Sonicle.String', {
 		'Sonicle.Bytes'
 	],
 	
+	// https://www.sitepoint.com/community/t/phone-number-regular-expression-validation/2204/2 
+	rePhone: new RegExp(
+		'^ *' +
+		// optional country code 
+		'(?:' +
+			'\\+?' + // maybe + prefix 
+			'(\\d{1,3})' +
+			// optional separator 
+			'[- .]?' +
+		')?' +
+		// optional area code 
+		'(?:' +
+			'(?:' +
+				'(\\d{3})' + //without () 
+				'|' +
+				'\\((\\d{3})\\)' + //with () 
+			')?'+
+			// optional separator 
+			'[- .]?'+
+		')' +
+		// CO code (3 digit prefix) 
+		'(?:' +
+			'([2-9]\\d{2})'+
+			// optional separator 
+			'[- .]?' +
+		')' +
+		// line number (4 digits) 
+		'(\\d{4})' +
+		// optional extension 
+		'(?: *(?:e?xt?) *(\\d*))?' +
+		' *$'
+	),
+	
+	// URL validator that works is non-trivial
+	// There are numerous examples online but not all pass rigoruous test: 
+	//      https://mathiasbynens.be/demo/url-regex 
+	// The only one that looks to be comprehensive and bulletproof is this one: 
+	//      https://gist.github.com/dperini/729294 
+	//      which requires inclusion of a copyright header 
+	reSimpleURL: /^(http:\/\/|https:\/\/|ftp:\/\/|\/\/)([-a-zA-Z0-9@:%_\+.~#?&//=])+$/,
+	
+	// http://stackoverflow.com/questions/23483855/javascript-regex-to-validate-ipv4-and-ipv6-address-no-hostnames 
+	reIPAddress: new RegExp(
+		'^(' +
+		// ipv4 
+		'((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)' +
+		'|' +
+		// ipv6 
+		'((([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])))' +
+		')$'
+	),
+	
+	// https://github.com/flipjs/cidr-regex 
+	// http://www.regexpal.com/93987 
+	reCIDRv4: /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$/,
+	reCIDRv6: /^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*(\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))?$/,
+	
+	/**
+	 * Convert certain characters to their HTML character equivalents for literal display in web pages.
+	 * @param {String} s The string to encode
+	 * @returns {String} The resulting string
+	 */
+	htmlEncode: function(s) {
+		return Ext.String.htmlEncode(s);
+	},
+	
+	/**
+	 * Convert certain characters from their HTML character equivalents.
+	 * @param {String} s The string to decode
+	 * @returns {String} The resulting string
+	 */
+	htmlDecode: function(s) {
+		return Ext.String.htmlDecode(s);
+	},
+	
+	/**
+	 * Checks if a string starts with a substring
+	 * @param {String} s The original string
+	 * @param {String} start The substring to check
+	 * @param {Boolean} [ignoreCase=false] True to ignore the case in the comparison
+	 * @returns {Boolean}
+	 */
+	startsWith: function(s, start, ignoreCase) {
+		return Ext.String.startsWith(s, start, ignoreCase);
+	},
+	
+	/**
+	 * Checks if a string ends with a substring
+	 * @param {String} s The original string
+	 * @param {String} end The substring to check
+	 * @param {Boolean} [ignoreCase=false] True to ignore the case in the comparison
+	 * @returns {Boolean}
+	 */
+	endsWith: function(s, end, ignoreCase) {
+		return Ext.String.endsWith(s, end, ignoreCase);
+	},
+	
 	/**
 	 * Returns passed string if it isn't empty (@link Ext#isEmpty), ifValue otherwise.
 	 * @param {String} s The value
@@ -142,22 +239,50 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
-	 * Gets the substring after the last occurrence of a separator. The separator is not returned.
+	 * Gets the substring after the first occurrence of a separator. The separator is not returned.
 	 * @param {String} s The String to get a substring from, may be null.
-	 * @param {String} sep The String to search for, may be null.
-	 * @returns {String} The substring after the last occurrence of the separator, null if null String input.
+	 * @param {String} separator The String to search for, may be null.
+	 * @param {Boolean} [strict=true] `false` to return String itself in case of no match.
+	 * @returns {String} The substring after the first occurrence of the separator, null if null String input or the String itself.
 	 */
-	substrAfterLast: function(s, sep) {
+	substrAfter: function(s, separator, strict) {
+		if (arguments.length < 3) strict = true;
 		if (Ext.isEmpty(s)) return s;
-		var lio = s.lastIndexOf(sep);
-		return (lio === -1) ? '' : s.substring(lio + sep.length);
+		var lio = s.indexOf(separator);
+		return (lio === -1) ? (strict === false ? s : '') : s.substring(lio + separator.length);
 	},
 	
 	/**
 	 * Gets the substring before the first occurrence of a separator. The separator is not returned.
 	 * @param {String} s The String to get a substring from, may be null.
 	 * @param {String} separator The String to search for, may be null.
+	 * @param {Boolean} [strict=true] `false` to return String itself in case of no match.
 	 * @returns {String} The substring before the first occurrence of the separator, null if null String input.
+	 */
+	substrBefore: function(s, separator, strict) {
+		if (arguments.length < 3) strict = true;
+		if (Ext.isEmpty(s)) return s;
+		var lio = s.indexOf(separator);
+		return (lio === -1) ? (strict === false ? s : '') : s.substring(0, lio);
+	},
+	
+	/**
+	 * Gets the substring after the last occurrence of a separator. The separator is not returned.
+	 * @param {String} s The String to get a substring from, may be null.
+	 * @param {String} separator The String to search for, may be null.
+	 * @returns {String} The substring after the last occurrence of the separator, null if null String input.
+	 */
+	substrAfterLast: function(s, separator) {
+		if (Ext.isEmpty(s)) return s;
+		var lio = s.lastIndexOf(separator);
+		return (lio === -1) ? '' : s.substring(lio + separator.length);
+	},
+	
+	/**
+	 * Gets the substring before the last occurrence of a separator. The separator is not returned.
+	 * @param {String} s The String to get a substring from, may be null.
+	 * @param {String} separator The String to search for, may be null.
+	 * @returns {String} The substring before the last occurrence of the separator, null if null String input.
 	 */
 	substrBeforeLast: function(s, separator) {
 		if (Ext.isEmpty(s)) return s;

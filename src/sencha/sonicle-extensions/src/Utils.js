@@ -5,6 +5,35 @@
  */
 Ext.define('Sonicle.Utils', {
     singleton: true,
+	uses: [
+		'Sonicle.Object'
+	],
+	
+	/**
+	 * 
+	 * @param {Ext.Base} classInst The class instance.
+	 * @param {Object} constructorConfig The config object passed to constructor.
+	 * @param {String[]|String|Object|Object[]|Mixed[]} names Array of config names to get value for.
+	 * If the item is an object like "{name:boolean}" instead of String value
+	 * @returns {Object} The resulting values object.
+	 */
+	getConstructorConfigs: function(classInst, constructorConfig, names) {
+		var namesMap = {}, icfg = {};
+		Ext.iterate(Ext.Array.from(names, false), function(name) {
+			if (Ext.isString(name)) {
+				namesMap[name] = false;
+			} else if (Ext.isObject(name)) {
+				var keys = Ext.Object.getKeys(name);
+				if (keys.length > 0) {
+					namesMap[keys[0]] = name[keys[0]] === true;
+				}
+			}
+		});
+		Ext.iterate(namesMap, function(key, isProp) {
+			icfg[key] = isProp ? classInst[key] : classInst.getInitialConfig(key);
+		});
+		return Ext.apply(icfg, Sonicle.Object.pluck(constructorConfig, Ext.Object.getKeys(namesMap)));
+	},
 	
 	/**
 	 * Copies all the defined properties of `config` to the specified `object`.
