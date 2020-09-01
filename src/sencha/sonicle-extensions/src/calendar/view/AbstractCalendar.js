@@ -1745,9 +1745,12 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	},
 	
 	doEventTitleUpdate: function(rec, newTitle) {
-		rec.beginEdit();
-		rec.set(Sonicle.calendar.data.EventMappings.Title.name, newTitle);
-		rec.endEdit();
-		this.fireEvent('eventTitleUpdate', this, rec);
+		var me = this;
+		if (me.fireEvent('beforeeventtitleupdate', me, rec, newTitle) !== false) {
+			rec.beginEdit();
+			rec.set(Sonicle.calendar.data.EventMappings.Title.name, newTitle);
+			rec.endEdit();
+			me.fireEvent('eventtitleupdate', me, rec, newTitle);
+		}
 	}
 });
