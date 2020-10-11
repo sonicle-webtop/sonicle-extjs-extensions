@@ -152,6 +152,17 @@ Ext.define('Sonicle.Date', {
 	},
 	
 	/**
+	 * Return itself if value is a Date, otherwise the Date specified as **else** parameter.
+	 * If **else** parameter is `true`, new Date object will be returned as fallback.
+	 * @param {Mixed} value Value to check.
+	 * @param {Date|Boolean} elseDateOrNew A Date value to return instead, or `true` to return a new Date object.
+	 * @returns {Date}
+	 */
+	idate: function(value, elseDateOrNew) {
+		return Ext.isDate(value) ? value : (true === elseDateOrNew || !Ext.isDate(elseDateOrNew) ? new Date() : elseDateOrNew);
+	},
+	
+	/**
 	 * Formats a date given the supplied format string. If the supplied value
 	 * is not a valid date object, null will be returned.
 	 * @param {Date} date The date to format
@@ -232,15 +243,16 @@ Ext.define('Sonicle.Date', {
 	 * rounded to the nearest even unit via Math.round().
 	 */
 	diff: function (start, end, unit, preventDstAdjust) {
-		var XDate = Ext.Date,
-				msDiff = preventDstAdjust ? (XDate.localToUtc(end).getTime() - XDate.localToUtc(start).getTime()) : (end.getTime() - start.getTime()),
-				denom = 1;
-				
-		if (unit === XDate.SECOND || unit === 'seconds') {
+		var XD = Ext.Date,
+				denom = 1, msDiff;
+		
+		if (!Ext.isDate(start) || !Ext.isDate(end)) return null;
+		msDiff = preventDstAdjust ? (XD.localToUtc(end).getTime() - XD.localToUtc(start).getTime()) : (end.getTime() - start.getTime());
+		if (unit === XD.SECOND || unit === 'seconds') {
 			denom = 1000;
-		} else if (unit === XDate.MINUTE || unit === 'minutes') {
+		} else if (unit === XD.MINUTE || unit === 'minutes') {
 			denom = 1000 * 60;
-		} else if (unit === XDate.HOUR || unit === 'hours') {
+		} else if (unit === XD.HOUR || unit === 'hours') {
 			denom = 1000 * 60 * 60;
 		}
 		return Math.round(msDiff / denom);
@@ -615,6 +627,46 @@ Ext.define('Sonicle.Date', {
 	 */
 	getNthWeekDayOfMonth: function(date) {
 		return Math.floor((date.getDate()+6)/7);
+	},
+	
+	/**
+	 * Formats a duration value into a String like XX:XX:XX.
+	 * @param {Integer} value Duration value in seconds.
+	 * @returns {String} Duration value string
+	 */
+	formatDuration: function(value) {
+		var h = 0, m = 0, s = 0, v = value,
+			fnPad = function(s) {
+				return Ext.String.leftPad(s, 2, '0');
+			};
+
+		if (Ext.isNumber(v)) {
+			h = Math.floor(v / 3600);
+			v = v % 3600;
+			m = Math.floor(v / 60);
+			s = Math.floor(v % 60);
+		}
+		return fnPad(h) + ':' + fnPad(m) + ':' + fnPad(s);
+	},
+	
+	/**
+	 * Parses a duration String like XX:XX:XX into the equivalend number of seconds.
+	 * @param {String} value Duration string.
+	 * @returns {Number} Duration value in seconds
+	 */
+	parseDuration: function(value) {
+		var tks = Sonicle.String.split(value, ':', 3),
+				mul = [3600, 60, 1],
+				fnParse = function(s) {
+					var int = parseInt(s);
+					return Ext.isNumeric(int) ? int : 0;
+				},
+				dur = 0, i;
+
+		for (i=0; i<tks.length; i++) {
+			dur += fnParse(tks[i]) * mul[i];
+		}
+		return dur;
 	}
 	
 	/*
