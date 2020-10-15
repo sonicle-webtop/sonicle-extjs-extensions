@@ -290,9 +290,29 @@ Ext.define('Sonicle.String', {
 		return (lio === -1) ? s : s.substring(0, lio);
 	},
 	
+	/**
+	 * Appends a suffix to passed String.
+	 * @param {String} s The String to be suffixed, may be null.
+	 * @param {String} suffix The suffix to add.
+	 * @param {Boolean} safe `true` to make sure suffix will not appended twice. 
+	 * @returns {String} The resulting String
+	 */
+	append: function(s, suffix, safe) {
+		if (Ext.isEmpty(s)) return s;
+		return (!safe ? s : this.removeEnd(s, suffix)) + suffix;
+	},
+	
+	/**
+	 * Prepends a prefix to passed String.
+	 * @param {String} s The String to be prefixed, may be null.
+	 * @param {String} prefix The prefix to add.
+	 * @param {Boolean} safe `true` to make sure prefix will not prepended twice. 
+	 * @returns {String} The resulting String
+	 */
 	prepend: function(s, prefix, safe) {
 		if (Ext.isEmpty(s)) return s;
-		return !safe ? prefix + s : prefix + this.removeStart(s, prefix);
+		return prefix + (!safe ? s : this.removeStart(s, prefix));
+		//return !safe ? prefix + s : prefix + this.removeStart(s, prefix);
 	},
 	
 	/**
