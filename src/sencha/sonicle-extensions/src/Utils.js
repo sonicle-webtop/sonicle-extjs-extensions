@@ -6,7 +6,8 @@
 Ext.define('Sonicle.Utils', {
     singleton: true,
 	uses: [
-		'Sonicle.Object'
+		'Sonicle.Object',
+		'Sonicle.String'
 	],
 	
 	/**
@@ -90,5 +91,27 @@ Ext.define('Sonicle.Utils', {
 			object[newName] = Ext.isFunction(parseFn) ? Ext.callback(parseFn, scope || this, [config[name]]) : config[name];
 		}
 		return object;
+	},
+	
+	/**
+	 * Generates HTML attriutes to display tooltip suitable to complete markup.
+	 * @param {String/Object} tooltip It can be a string to be used as innerHTML (html tags are accepted) or QuickTips config object.
+	 * @returns {String} The HTML attributes, or an empty string in case of misconfigurations.
+	 */
+	generateTooltipAttrs: function(tooltip) {
+		var qtips = Ext.quickTipsActive && Ext.tip.QuickTipManager.isEnabled(),
+				encode = Ext.String.htmlEncode;
+		
+		if (Ext.isString(tooltip)) {
+			return (qtips ? ' data-qtip' : ' title') + '="' + encode(tooltip) + '"';
+		} else if (Ext.isObject(tooltip)) {
+			if (qtips) {
+				return ' data-qtitle="' + encode(tooltip.title) + '" data-qtip="' + encode(tooltip.text) + '"';
+			} else {
+				return ' title' + '="' + encode(Sonicle.String.deflt(tooltip.text, tooltip.title)) + '"';
+			}
+		} else {
+			return '';
+		}
 	}
 });
