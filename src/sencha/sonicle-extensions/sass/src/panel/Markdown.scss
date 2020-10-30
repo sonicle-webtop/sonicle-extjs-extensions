@@ -1,0 +1,53 @@
+.so-markdownpanel-body-wrapper {
+	max-width: 800px;
+	/*font-size: 15px;*/
+}
+.so-markdownpanel-body-wrapper.regular {
+	max-width: 800px;
+}
+.so-markdownpanel-body-wrapper.max1024 {
+	max-width: 1024px;
+}
+.so-markdownpanel-body-wrapper.max1200 {
+	max-width: 1200px;
+}
+.so-markdownpanel-body-wrapper.max1650 {
+	max-width: 1650px;
+}
+.so-markdownpanel-body-wrapper.unlimited {
+	max-width: 100%;
+}
+.markdown-body a {
+	color: #0366d6;
+	text-decoration: none;
+}
+.markdown-body a:hover {
+	text-decoration: underline;
+}
+.markdown-body {
+	h4, h5 {
+		font-weight: bold;
+	}
+}
+.markdown-body img[lightbox] {
+	cursor: pointer;
+}
+.markdown-body img.bordered {
+	border: 1px solid #cfcfcf !important;
+	padding: 5px;
+}
+/* Small corrections above the default style */
+
+.markdown-body code {
+	padding: 0.2em 0.4em;
+	margin: 0;
+	font-size: 85%;
+	background-color: rgba(27, 31, 35, 0.14);
+	border-radius: 3px;
+}
+.markdown-body .highlight pre, .markdown-body pre {
+	font-size: 100% !important;
+	background-color: #fff !important;
+	border: 1px solid #f1f1f1;
+	border-radius: 0;
+}

@@ -9,6 +9,64 @@ Ext.define('Sonicle.CssUtils', {
     singleton: true,
 	
 	/**
+	 * Mapping between a Font Name and its Font Family.
+	 * Taken from defaults {@link Sonicle.form.field.tinymce.tool.FontSelect}
+	 */
+	fonts: {
+		'Andale Mono': "'andale mono',times",
+		'Arial': "arial,helvetica,sans-serif",
+		'Arial Black': "'arial black','avant garde'",
+		'Book Antiqua': "'book antiqua',palatino",
+		'Comic Sans MS': "'comic sans ms',sans-serif",
+		'Courier New': "'courier new',courier",
+		'Georgia': "georgia,palatino",
+		'Helvetica': "helvetica",
+		'Impact': "impact,chicago",
+		'Symbol': "symbol",
+		'Tahoma': "tahoma,arial,helvetica,sans-serif",
+		'Terminal': "terminal,monaco",
+		'Times New Roman': "'times new roman',times",
+		'Trebuchet MS': "'trebuchet ms',geneva",
+		'Verdana': "verdana,geneva",
+		'Webdings': "webdings",
+		'Wingdings': "wingdings,'zapf dingbats'"
+	},
+	
+	/**
+	 * Finds the corresponding font-family of a font name comparing tabled entries.
+	 * @param {String} name The font name.
+	 * @param {Boolean} [strict] Set as `false` to use wider lowercase comparison. Defaults to `true`.
+	 * @returns {String}
+	 */
+	findFontFamily: function(name, strict) {
+		if (arguments.length < 2) strict = true;
+		if (strict) {
+			return this.fonts[name];
+		} else {
+			var lower = Sonicle.String.lower,
+					comp = Ext.String.trim(lower(name)),
+					ret = undefined;
+			Ext.iterate(this.fonts, function(key, value) {
+				if (lower(key) === comp) {
+					ret = value;
+					return false;
+				}
+			});
+			return ret;
+		}
+	},
+	
+	/**
+	 * Converts a Font name to a value to be used in style definition.
+	 * @param {String} name The font name.
+	 * @returns {String} Family nave value.
+	 */
+	toFontFamily: function(name) {
+		var ff = Sonicle.String.lower(name.trim());
+		return ff.indexOf(' ') !== -1 ? "'"+ff+"'" : ff;
+	},
+	
+	/**
 	 * Adds new dynamic CSS rule.
 	 * @param {String} selector A CSS selector for matching
 	 * @param {String} style The style declaration.

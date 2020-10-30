@@ -181,7 +181,7 @@ Ext.define('Sonicle.String', {
 	 * @param {String} s The String
 	 * @returns {String} The lowercase String, null if null String input.
 	 */
-	toLowerCase: function(s) {
+	lower: function(s) {
 		return Ext.isEmpty(s) ? s : s.toLowerCase();
 	},
 	
@@ -190,7 +190,7 @@ Ext.define('Sonicle.String', {
 	 * @param {String} s The String
 	 * @returns {String} The uppercase String, null if null String input.
 	 */
-	toUpperCase: function(s) {
+	upper: function(s) {
 		return Ext.isEmpty(s) ? s : s.toUpperCase();
 	},
 	
