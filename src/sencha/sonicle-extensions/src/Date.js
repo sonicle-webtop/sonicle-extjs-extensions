@@ -658,8 +658,8 @@ Ext.define('Sonicle.Date', {
 		var tks = Sonicle.String.split(value, ':', 3),
 				mul = [3600, 60, 1],
 				fnParse = function(s) {
-					var int = parseInt(s);
-					return Ext.isNumeric(int) ? int : 0;
+					var x = parseInt(s);
+					return Ext.isNumeric(x) ? x : 0;
 				},
 				dur = 0, i;
 
