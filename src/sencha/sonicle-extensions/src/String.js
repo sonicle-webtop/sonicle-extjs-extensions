@@ -158,7 +158,7 @@ Ext.define('Sonicle.String', {
 	 * @returns {Boolean} `true` if strings are equal, `false` otherwise.
 	 */
 	iequals: function(s1, s2) {
-		return this.toLowerCase(s1) === this.toLowerCase(s2);
+		return this.lower(s1) === this.lower(s2);
 	},
 	
 	/**
