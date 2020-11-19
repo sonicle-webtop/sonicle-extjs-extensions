@@ -195,7 +195,13 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	 */
 	
 	/**
-	 * @cfg {Boolean} [pluginPowerPaste=true]
+	 * @cfg {Boolean} [pluginAdvCodeEditor=false]
+	 * Set to `true` to enable AdvanceCodeEditor plugin.
+	 */
+	pluginAdvCodeEditor: false,
+	
+	/**
+	 * @cfg {Boolean} [pluginPowerPaste=false]
 	 * Set to `true` to enable PowerPaste plugin.
 	 */
 	pluginPowerPaste: false,
@@ -751,7 +757,7 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 			me.enableLink ? 'link autolink' : '',
 			me.enableImage ? 'image' : '',
 			me.enableTable ? 'table' : '',
-			me.enableDevTools ? 'codesample code' : '',
+			me.enableDevTools ? 'codesample ' + (me.pluginAdvCodeEditor ? 'advcode' : 'code') : '',
 			me.showWordCount ? 'wordcount' : ''
 		].join(' ');
 	},
