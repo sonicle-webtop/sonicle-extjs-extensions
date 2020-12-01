@@ -39,8 +39,18 @@ Ext.define('Sonicle.form.field.ComboBox', {
 	 */
 	
 	/**
-	 * @cfg {String} sourceField
+	 * @cfg {String} [sourceField]
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as source.
+	 */
+	
+	/**
+	 * @cfg {String} [sourceCls]
+	 * An additional CSS class (or classes) to be added to source element.
+	 */
+	
+	/**
+	 * @cfg {Function} [getSource]
+	 * A function which returns the value of source.
 	 */
 	
 	componentCls: 'so-'+'combo',
@@ -105,7 +115,9 @@ Ext.define('Sonicle.form.field.ComboBox', {
 		if (me.store && me.store.grouper) me.listConfig.groupField = me.groupField;
 		me.listConfig.iconField = me.iconField;
 		me.listConfig.colorField = me.colorField;
+		me.listConfig.sourceCls = me.sourceCls;
 		me.listConfig.sourceField = me.sourceField;
+		me.listConfig.getSource = me.getSource;
 	},
 	
 	getSubTplData: function(fieldData) {
