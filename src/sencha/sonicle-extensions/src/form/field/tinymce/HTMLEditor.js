@@ -400,9 +400,15 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	 *     {
 	 *         mycustomtool: {
 	 *             xtype: 'x-mycustomtool',
+	 *             // With optional position...
+	 *             // pos: 18
 	 *             // ...
 	 *         }
 	 *     }
+	 * 
+	 * Position is affected by the enabling status of each tool and of built-in separators.
+	 * The sequence below may help to find the right pos value:
+	 * [fontselect][fontsizeselect][-,forecolor,backcolor][bold,italic,underline,formattools][-,[alignselect],[bulllistselect,numlistselect]],[[-],[link],[image],[emoticons],[symbols],[table]]
 	 * 
 	 * Useful only when {@link #wysiwyg} is `true`.
 	 */
@@ -905,18 +911,25 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 		}
 		if (Ext.isObject(me.customTools)) {
 			Ext.iterate(me.customTools, function(key, value) {
-				var ovflText = undefined;
+				var indx = Ext.isNumber(value.pos) ? value.pos-1 : -1,
+					ovflText = undefined,
+					item;
 				if (Ext.isString(value.tooltip)) {
 					ovflText = value.tooltip;
 				} else if (qtipsEnabled && Ext.isObject(value.tooltip)) {
 					ovflText = value.tooltip.title;
 				}
-				items.push(SoU.applyIfDefined(value, {
-					itemId: key
-				}, {
-					overflowText: ovflText,
-					tabIndex: -1
-				}));
+				item = SoU.applyIfDefined(value, {
+						itemId: key
+					}, {
+						overflowText: ovflText,
+						tabIndex: -1
+				});
+				if (indx > -1) {
+					items.splice(indx, -1, item);
+				} else {
+					items.push(item);
+				}
 			});
 		}
 		if (me.enableDevTools) {
