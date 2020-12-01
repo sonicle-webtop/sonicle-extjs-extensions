@@ -113,5 +113,15 @@ Ext.define('Sonicle.Utils', {
 		} else {
 			return '';
 		}
+	},
+	
+	rendererEvalValue: function(value, record, fieldName, getFn, fallbackValue) {
+		if (record && Ext.isFunction(getFn)) {
+			return getFn.apply(this, [value, record]);
+		} else if(record && !Ext.isEmpty(fieldName)) {
+			return record.get(fieldName);
+		} else {
+			return (fallbackValue === undefined) ? value : fallbackValue;
+		}
 	}
 });
