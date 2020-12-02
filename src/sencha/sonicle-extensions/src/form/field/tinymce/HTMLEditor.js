@@ -408,7 +408,7 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	 * 
 	 * Position is affected by the enabling status of each tool and of built-in separators.
 	 * The sequence below may help to find the right pos value:
-	 * [fontselect][fontsizeselect][-,forecolor,backcolor][bold,italic,underline,formattools][-,[alignselect],[bulllistselect,numlistselect]],[[-],[link],[image],[emoticons],[symbols],[table]]
+	 * [fontselect][fontsizeselect][-,forecolor,backcolor][bold,italic,underline,formattools][-,[alignselect],[bulllistselect,numlistselect]],[[-],[emoticons],[link],[image],[table],[symbols]]
 	 * 
 	 * Useful only when {@link #wysiwyg} is `true`.
 	 */
@@ -883,6 +883,11 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 		}
 		if (me.enableLink || me.enableImage || me.enableEmoticons || me.enableSymbols || me.enableTable) {
 			if (items.length > 0) items.push('-');
+			if (me.enableEmoticons) {
+				items.push(
+					tool('emoticons', 'so-tmcetoolemoticons')
+				);
+			}
 			if (me.enableLink) {
 				items.push(
 					tool('link', 'so-tmcetoollink')
@@ -893,19 +898,14 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 					tool('image', 'so-tmcetoolimage')
 				);
 			}
-			if (me.enableEmoticons) {
+			if (me.enableTable) {
 				items.push(
-					tool('emoticons', 'so-tmcetoolemoticons')
+					tool('table', 'so-tmcetooltable')
 				);
 			}
 			if (me.enableSymbols) {
 				items.push(
 					tool('symbols', 'so-tmcetoolsymbols')
-				);
-			}
-			if (me.enableTable) {
-				items.push(
-					tool('table', 'so-tmcetooltable')
 				);
 			}
 		}
