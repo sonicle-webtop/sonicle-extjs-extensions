@@ -406,14 +406,23 @@ Ext.define('Sonicle.String', {
 	},
 		
 	/**
-	 * Appends content to the query string of a URL, handling logic for whether 
-	 * to place a question mark or ampersand.
+	 * Alias of (@link Ext.String#urlAppend).
 	 * @param {String} url The URL to append to.
 	 * @param {String} string The content to append to the URL.
 	 * @returns {String} The resulting URL
 	 */
 	urlAppend: function(url, qstring) {
 		return Ext.String.urlAppend(url, qstring);
+	},
+	
+	/**
+	 * Alias of (@link Ext.String#repeat).
+	 * @param {String} pattern The pattern to repeat.
+	 * @param {Number} count The number of times to repeat the pattern (may be 0).
+	 * @param {String} sep An option string to separate each pattern.
+	 */
+	repeat: function(pattern, count, sep) {
+		return Ext.String.repeat(pattern, count, sep);
 	},
 	
 	/**
