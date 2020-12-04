@@ -386,8 +386,12 @@ Ext.define('Sonicle.String', {
 	 * @param {String} value The html content.
 	 * @returns {String} The pure text rapresentation.
 	 */
-	htmlToText: function(html) {
-		var text, h2tId = Ext.id(null, 'so-h2t-'), h2tDomEl;
+	htmlToText: function(html, opts) {
+		opts = opts || {};
+		var me = this,
+				presAHref = Ext.isBoolean(opts.preserveHyperlinksHref) ? opts.preserveHyperlinksHref : false,
+				presAHtml = Ext.isBoolean(opts.preserveHyperlinksName) ? opts.preserveHyperlinksName : true,
+				text, h2tId = Ext.id(null, 'so-h2t-'), h2tDomEl;
 		// Do not use newer .append API on DOM element, it may not work on older browsers. Use Ext's appendChild!
 		// Make sure that this el is always visible (eg. do not use visibility:hidden) otherwise below innerText will return empty value.
 		h2tDomEl = Ext.getBody().appendChild({
@@ -397,6 +401,15 @@ Ext.define('Sonicle.String', {
 			style: 'pointer-events:none;border:none;position:absolute;top:-100000px;left:-100000px'
 		}, true);
 		if (h2tDomEl) {
+			if (presAHref) {
+				var els = h2tDomEl.getElementsByTagName('a');
+				Ext.iterate(els, function(el) {
+					var href = el.getAttribute('href');
+					if (!Ext.isEmpty(href)) {
+						el.innerHTML = (presAHtml ? '[' + el.innerHTML + '] ' : '') + me.htmlEncode(href);
+					}
+				});
+			}
 			// Use innerText here: we are looking for the real text layout with new-lines.
 			// (textContent will not produce the same output)
 			text = h2tDomEl.innerText;
@@ -423,6 +436,17 @@ Ext.define('Sonicle.String', {
 	 */
 	repeat: function(pattern, count, sep) {
 		return Ext.String.repeat(pattern, count, sep);
+	},
+	
+	/**
+	 * Alias of (@link Ext.String#insert).
+	 * @param {String} s The original string.
+	 * @param {String} value The substring to insert.
+	 * @param {Number} index The index to insert the substring. Negative indexes will insert from the end.
+	 * @return {String} The value with the inserted substring
+	 */
+	insert: function(s, value, index) {
+		return Ext.String.insert(s, value, index);
 	},
 	
 	/**

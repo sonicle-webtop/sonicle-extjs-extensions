@@ -12,7 +12,7 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
     },
 	requires: [
 		'Sonicle.form.field.tinymce.TextArea',
-		'Sonicle.form.field.tinymce.TextAreaPlain',
+		'Sonicle.form.field.tinymce.PlainTextArea',
 		'Sonicle.form.field.tinymce.tool.base.Button',
 		'Sonicle.form.field.tinymce.tool.base.MenuItem',
 		'Sonicle.form.field.tinymce.tool.base.Select',
@@ -510,6 +510,20 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 		return ready;
 	},
 	
+	/**
+	 * Inserts content at caret position.
+	 * @param {String} content Content to insert.
+	 */
+	insertContent: function(content) {
+		var me = this,
+				cmp = me.getTextArea();
+		if (cmp && cmp.isXType('sotmcetextarea')) {
+			me.editorInsertContent(content, undefined, cmp.getEditor());
+		} else if (cmp) {
+			cmp.insertText(content, 'caret');
+		}
+	},
+	
 	resetHistoryBookmark: function() {
 		var me = this,
 				cmp = this.getTextArea();
@@ -631,8 +645,14 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 		var me = this;
 		// Only update the field if the value has changed
 		if (me.value !== value) {
-			me.getTextArea().setValue(value);
+			var cmp = me.getTextArea(),
+					first = me.value === undefined && value !== undefined;
+			cmp.setValue(value);
 			me.mixins.field.setValue.call(me, value);
+			// When wysiwyg is off (textarea is plain), we need to force caret
+			// to position 0. Otherwise, even the field was never focused, the 
+			// caret is at the max position underlined by its content.
+			if (first && cmp.isXType('sotmceplaintextarea')) cmp.resetCaretPosition();
 		}
 		return me;
 	},
@@ -1244,6 +1264,15 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 			if (color && color !== defaultColor) div += 'color:'+color+';';
 			div += '"></div>';
 			return div + div;
+		},
+		
+		generateInitialParagraph: function(innerContent, fontFamily, fontSize, color, defaultColor) {
+			var opendiv = '<div style="';
+			if (fontFamily) opendiv += 'font-family:'+fontFamily+';';
+			if (fontSize) opendiv += 'font-size:'+fontSize+';';
+			if (color && color !== defaultColor) opendiv += 'color:'+color+';';
+			opendiv += '">';
+			return opendiv + (innerContent || '') + '</div>' + opendiv + '</div>';
 		},
 		
 		getContentFontFamily: function(fonts, name) {

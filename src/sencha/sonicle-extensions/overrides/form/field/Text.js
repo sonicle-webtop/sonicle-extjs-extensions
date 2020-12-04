@@ -69,6 +69,37 @@ Ext.define('Sonicle.overrides.form.field.Text', {
         me.triggerWrap.addCls(me.triggerWrapFocusCls);
         me.inputWrap.addCls(me.inputWrapFocusCls);
         me.invokeTriggers('onFieldFocus', [e]);
-    }
-   
+    },
+	
+	/**
+	 * Gets the current inputEl cursor position.
+	 * @returns {Integer} The cursor position.
+	 */
+	getCaretPosition: function() {
+		var el = this.inputEl, rng, ii = -1;
+		if (el && typeof el.dom.selectionStart === 'number') {
+			ii = el.dom.selectionStart;
+		} else if (el && document.selection && el.dom.createTextRange) {
+			rng = document.selection.createRange();
+			rng.collapse(true);
+			rng.moveStart('character', -el.value.length);
+			ii = rng.text.length;
+		}
+		return ii;
+	},
+	
+	/**
+	 * Sets the inputEl cursor position.
+	 * @param {Integer} pos The desired cursor position.
+	 */
+	setCaretPosition: function(pos) {
+		var el = this.inputEl, rng;
+		if (el && typeof el.dom.selectionStart === 'number') {
+			el.dom.selectionStart = el.dom.selectionEnd = pos;
+		} else if (el && document.selection && el.dom.createTextRange) {
+			rng = document.selection.createRange();
+			rng.move('character', pos);
+			rng.select();
+		}
+	}
 });
