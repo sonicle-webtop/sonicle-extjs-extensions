@@ -98,8 +98,18 @@ Ext.define('Sonicle.view.BoundList', {
 				hasGroup = !Ext.isEmpty(me.groupField),
 				hasIcon = !Ext.isEmpty(me.iconField),
 				hasColor = !Ext.isEmpty(me.colorField),
-				fnGetSource = !Ext.isFunction(me.getSource) ? Ext.emptyFn : function(values) {
-					return me.getSource.apply(me, [values]);
+				sourceFn = function(getFn, field) {
+					if (Ext.isFunction(getFn)) {
+						return function(values) {
+							return Sonicle.String.deflt(getFn.apply(me, [values]), '&nbsp;');
+						};
+					} else if (!Ext.isEmpty(field)) {
+						return function(values) {
+							return Sonicle.String.deflt(values[field], '&nbsp;');
+						};
+					} else {
+						return Ext.emptyFn;
+					}
 				},
 				liCls;
 		
@@ -133,7 +143,7 @@ Ext.define('Sonicle.view.BoundList', {
 					generateDisplayColorStyles: function(values, colorField) {
 						return !Ext.isEmpty(colorField) ? Sonicle.view.BoundList.generateColorStyles('text', values[colorField]) : '';
 					},
-					getSource: fnGetSource
+					sourceValue: sourceFn(me.getSource, me.sourceField)
 				}
 			);
 			
@@ -145,7 +155,7 @@ Ext.define('Sonicle.view.BoundList', {
 					'<li role="option" unselectable="on" class="' + me.itemCls + ' ' + me.listItemCls + '">' + me.getInnerTpl(me.displayField) + '</li>',
 				'</tpl>',
 				{
-					getSource: fnGetSource
+					sourceValue: sourceFn(me.getSource, me.sourceField)
 				}
 			);
 		}		
@@ -168,7 +178,7 @@ Ext.define('Sonicle.view.BoundList', {
 			geomSwatchCls = me.itemSwatchCls + '-' + me.swatchGeometry;
 			swatchStyle = (hasColor && colorizeSwatch) ? '{[this.generateSwatchColorStyles(values, "' + me.colorField + '")]}' : '';
 			displayStyle = (hasColor && !colorizeSwatch) ? '{[this.generateDisplayColorStyles(values, "' + me.colorField + '")]}' : '';
-			source = Ext.isFunction(me.getSource) ? '[this.getSource(values)]' : me.sourceField;
+			source = '[this.sourceValue(values)]';
 			
 			return (hasSource ? '<div style="float:left; white-space: pre;">' : '')
 					+ (hasIcon ? '<div class="' + me.itemIconCls + ' {' + me.iconField + '}"></div>' : '')
