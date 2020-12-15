@@ -1494,7 +1494,11 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 			startDate: this.startDate,
 			dayCount: this.dayCount,
 			weekCount: this.weekCount,
-			title: this.getTitle()
+			title: this.getTitle(),
+			weekendCls: this.weekendCls,
+			prevMonthCls: this.prevMonthCls,
+			nextMonthCls: this.nextMonthCls,
+			todayCls: this.todayCls
 		};
 	},
 	
