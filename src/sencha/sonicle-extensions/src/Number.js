@@ -23,5 +23,9 @@ Ext.define('Sonicle.Number', {
 			if (+arr[1] + precision > 0) sig = '+';
 			return +(Math.round(+arr[0] + 'e' + sig + (+arr[1] + precision)) + 'e-' + precision);
 		}
+	},
+	
+	compare: function(number1, number2) {
+		return number1 < number2 ? -1 : (number1 > number2 ? 1 : 0);
 	}
 });

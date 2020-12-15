@@ -37,6 +37,41 @@ Ext.define('Sonicle.Utils', {
 	},
 	
 	/**
+	 * Merges some more triggers into new object.
+	 * @param {Object} triggers The original triggers object.
+	 * @param {Object} moreTriggers Triggers config objects to add. The values in this object
+	 * are {@link Ext.form.trigger.Trigger Trigger} configuration objects.
+	 * @returns {Object} Object to use as {@link Ext.form.field.Text#triggers}.
+	 */
+	mergeTriggers: function(triggers, moreTriggers) {
+		if (Ext.isArray(moreTriggers)) {
+			Ext.warn('Passed `moreTriggers` param should be an object.');
+			return triggers;
+		}
+		return Ext.apply(moreTriggers || {}, triggers);
+	},
+	
+	/**
+	 * Merges some more plugins into new array.
+	 * @param {Ext.plugin.Abstract[]/Ext.plugin.Abstract/Object[]/Object/Ext.enums.Plugin[]/Ext.enums.Plugin} plugins The original plugin set (for eg. that in config).
+	 * @param {Ext.plugin.Abstract[]/Ext.plugin.Abstract/Object[]/Object/Ext.enums.Plugin[]/Ext.enums.Plugin} morePlugins An array of plugins to add.
+	 * @returns {Array} Resulting plugin array
+	 */
+	mergePlugins: function(plugins, morePlugins) {
+		var oplu = plugins && !Ext.isArray(plugins) ? [plugins] : (plugins || []),
+				nplu = morePlugins && !Ext.isArray(morePlugins) ? [morePlugins] : (morePlugins || []),
+				arr = [];
+		
+		Ext.iterate(oplu, function(plu) {
+			arr.push(plu);
+		});
+		Ext.iterate(nplu, function(plu) {
+			arr.push(plu);
+		});
+		return arr;
+	},
+	
+	/**
 	 * Copies all the defined properties of `config` to the specified `object`.
 	 * @param {Object} object The receiver of the properties.
 	 * @param {Object} config The primary source of the properties.
