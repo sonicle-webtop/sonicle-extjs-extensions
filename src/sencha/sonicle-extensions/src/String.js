@@ -11,6 +11,18 @@ Ext.define('Sonicle.String', {
 		'Sonicle.Bytes'
 	],
 	
+	/**
+	 * Pattern that matches URLs in non trivial situations.
+	 * There are numerous examples online but not all pass rigoruous test: 
+	 *		https://mathiasbynens.be/demo/url-regex
+	 * The only one that looks to be comprehensive and bulletproof is this one:
+	 *		https://gist.github.com/dperini/729294
+	 *		(which requires inclusion of a copyright header )
+	 */
+	MATCH_SIMPLE_URL: '(?:http:\/\/|https:\/\/|ftp:\/\/|\/\/)(?:[-a-zA-Z0-9@:%_\+.~#?&\/=])+',
+	reSimpleURL: /(?:http:\/\/|https:\/\/|ftp:\/\/|\/\/)(?:[-a-zA-Z0-9@:%_\+.~#?&\/=])+/i,
+	reSimpleURLs: /(?:http:\/\/|https:\/\/|ftp:\/\/|\/\/)(?:[-a-zA-Z0-9@:%_\+.~#?&\/=])+/gi,
+	
 	// https://www.sitepoint.com/community/t/phone-number-regular-expression-validation/2204/2 
 	rePhone: new RegExp(
 		'^ *' +
@@ -43,14 +55,6 @@ Ext.define('Sonicle.String', {
 		'(?: *(?:e?xt?) *(\\d*))?' +
 		' *$'
 	),
-	
-	// URL validator that works is non-trivial
-	// There are numerous examples online but not all pass rigoruous test: 
-	//      https://mathiasbynens.be/demo/url-regex 
-	// The only one that looks to be comprehensive and bulletproof is this one: 
-	//      https://gist.github.com/dperini/729294 
-	//      which requires inclusion of a copyright header 
-	reSimpleURL: /^(http:\/\/|https:\/\/|ftp:\/\/|\/\/)([-a-zA-Z0-9@:%_\+.~#?&//=])+$/,
 	
 	// http://stackoverflow.com/questions/23483855/javascript-regex-to-validate-ipv4-and-ipv6-address-no-hostnames 
 	reIPAddress: new RegExp(
@@ -482,6 +486,52 @@ Ext.define('Sonicle.String', {
 			case 'false': case 'f': case 'no': case 'n': case '0': return false;
 			default: defValue;
 		}
+	},
+	
+	/**
+	 * Parses a string as array of values divided by a separator and returns 
+	 * them as an array of elements. If source is not a string the specified 
+	 * default value will be returned.
+	 * @param {String} s The source string to parse.
+	 * @param {Mixed} [defValue] Default value to return when source string is invalid.
+	 * @param {Function} [transformFn] Callback transform function for each item.
+	 * @param {String} transformFn.value Current element value.
+	 * @param {Number} transformFn.index Index of the element.
+	 * @param {String} [itemsSep] Custom items separator. Defaults to colon (,) character.
+	 * @returns {Array|Mixed} Resulting elements.
+	 */
+	parseArray: function(s, defValue, transformFn, itemsSep) {
+		if (!Ext.isString(itemsSep)) itemsSep = ',';
+		if (Ext.isEmpty(s)) defValue;
+		var fn = Ext.isFunction(transformFn) ? transformFn : function(value, index) {
+			return value;
+		};
+		return Ext.Array.map(s.split(itemsSep), function(value, idx) {
+			return fn.apply(this, [value.trim(), idx]);
+		});
+	},
+	
+	/**
+	 * 
+	 * @param {String} s The source string to parse.
+	 * @param {Mixed} [defValue] Default value to return when source string is invalid.
+	 * @param {Function} [transformFn] Callback transform function for each item.
+	 * @param {String[]} transformFn.values Current element values (separated by value separator char).
+	 * @param {Number} transformFn.index Index of the element.
+	 * @param {String} [itemsSep] Custom items separator. Defaults to colon (,) character.
+	 * @param {String} [valueSep] Custom items separator. Defaults to equal (=) character.
+	 * @returns {Array|Mixed} Resulting elements.
+	 */
+	parseKVArray: function(s, defValue, transformFn, itemsSep, valueSep) {
+		if (!Ext.isString(itemsSep)) itemsSep = ',';
+		if (!Ext.isString(valueSep)) valueSep = '=';
+		if (Ext.isEmpty(s)) defValue;
+		var fn = Ext.isFunction(transformFn) ? transformFn : function(values, index) {
+			return values.length > 1 ? [values[0], values[1]] : ['key'+index, values[0]];
+		};
+		return Ext.Array.map(s.split(itemsSep), function(value, idx) {
+			return fn.apply(this, [value.split(valueSep, 2), idx]);
+		});
 	},
 	
 	/**

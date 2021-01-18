@@ -7,6 +7,23 @@ Ext.define('Sonicle.Data', {
     singleton: true,
 	
 	/**
+	 * Returns an array of values for a given set of fields.
+	 * @param {Ext.data.Model} rec The record/model to use as source.
+	 * @param {String[]|String} fieldNames Names whose values will be extracted.
+	 * @returns {Mixed[]} An array of specified field values.
+	 */
+	modelMultiGet: function(rec, fieldNames) {
+		var arr = [],
+				names = Ext.isString(fieldNames) ? [fieldNames] : fieldNames;
+		if (Ext.isArray(names)) {
+			Ext.iterate(names, function(name) {
+				arr.push(rec.get(name));
+			});
+		}
+		return arr;
+	},
+	
+	/**
 	 * Collects underlying values of passed record collection.
 	 * @param {Ext.data.Store|Ext.data.Model[]} coll A {@link Ext.data.Store} or an array of {@link Ext.data.Model records} to use as source.
 	 * @param {String} [fieldName] A custom field name to get, otherwise {@link Ext.data.Model#getId} will be used.
