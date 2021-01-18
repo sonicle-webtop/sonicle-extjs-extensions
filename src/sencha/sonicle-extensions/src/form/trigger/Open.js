@@ -8,6 +8,7 @@ Ext.define('Sonicle.form.trigger.Open', {
 	extend: 'Sonicle.form.trigger.Hideable',
 	alias: 'trigger.soopen',
 	uses: [
+		'Sonicle.ClipboardMgr',
 		'Sonicle.URLMgr'
 	],
 	

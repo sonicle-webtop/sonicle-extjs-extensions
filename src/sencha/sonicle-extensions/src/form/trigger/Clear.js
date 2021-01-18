@@ -44,9 +44,11 @@ Ext.define('Sonicle.form.trigger.Clear', {
 	handler: function(cmp) {
 		if (Ext.isFunction(cmp.clearValue)) {
 			cmp.clearValue();
+			cmp.fireEvent('clear', cmp);
 		} else {
-			cmp.setValue(null);
+			if (cmp.fireEvent('clear', cmp) !== false) {
+				cmp.setValue(null);
+			}
 		}
-		cmp.fireEvent('clear', cmp);
 	}
 });
