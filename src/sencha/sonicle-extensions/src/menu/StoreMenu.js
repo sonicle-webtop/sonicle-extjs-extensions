@@ -163,7 +163,7 @@ Ext.define('Sonicle.menu.StoreMenu', {
 			me.store.each(function(rec) {
 				var id = Ext.isString(me.idField) ? rec.get(me.idField) : rec.getId(),
 						chk = arr.indexOf(id) !== -1 ? true : false,
-						itm = me.getComponent(me.buildItemId(rec));
+						itm = me.getComponent(me.buildItemId(id));
 				if (itm) itm.setChecked(chk, false);
 			});
 		}
