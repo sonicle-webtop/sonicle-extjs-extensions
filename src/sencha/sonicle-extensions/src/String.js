@@ -181,6 +181,56 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
+	 * Returns the levenshtein distance of the two passed strings.
+	 * https://gist.github.com/andrei-m/982927#gistcomment-2059365
+	 * @param {String} a The first string.
+	 * @param {String} b The second string.
+	 * @returns {Integer} The computed distance.
+	 */
+	levenshteinDistance: function(a, b) {
+		var tmp, sa = this.deflt(a, ''), sb = this.deflt(b, '');
+		if (sa.length === 0) return sb.length;
+		if (sb.length === 0) return sa.length;
+		if (sa.length > sb.length) {
+			tmp = sa;
+			sa = sb;
+			sb = tmp;
+		}
+		var i, j, res, alen = sa.length, blen = sb.length, row = Array(alen);
+		for (i = 0; i <= alen; i++) {
+			row[i] = i;
+		}
+		for (i = 1; i <= blen; i++) {
+			res = i;
+			for (j = 1; j <= alen; j++) {
+				tmp = row[j - 1];
+				row[j - 1] = res;
+				res = sb[i - 1] === sa[j - 1] ? tmp : Math.min(tmp + 1, Math.min(res + 1, row[j] + 1));
+			}
+		}
+		return res;
+	},
+	
+	/**
+	 * Analyzes a source string s and compares it with referenceString by 
+	 * building sub-string blocks of specified length and comparing them with 
+	 * the reference string. If any token is found, the source string is  
+	 * classified as similar returning true.
+	 * @param {String} s The source string being compared.
+	 * @param {String} ref The reference string in which look for tokens.
+	 * @param {Integer} tokenSize The choosen token size.
+	 * @returns {Boolean} True if string are classified as similar, false otherwise.
+	 */
+	containsSimilarTokens: function(s, ref, tokenSize) {
+		if (!Ext.isString(s) || !Ext.isString(ref)) return false;
+		if ((s.length < tokenSize) || (ref.length < tokenSize)) return false;
+		for (var i = 0; (i + tokenSize) < s.length; i++) {
+			if (ref.indexOf(s.substr(i, tokenSize)) !== -1) return true;
+		}
+		return false;
+	},
+	
+	/**
 	 * Returns the string value converted to lower case.
 	 * @param {String} s The String
 	 * @returns {String} The lowercase String, null if null String input.
