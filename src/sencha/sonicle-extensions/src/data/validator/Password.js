@@ -7,6 +7,7 @@
 Ext.define('Sonicle.data.validator.Password', {
 	extend: 'Ext.data.validator.Validator',
 	alias: 'data.validator.sopassword',
+	mixins: ['Sonicle.mixin.ConditionalValidator'],
 	
 	type: 'sopassword',
 	
@@ -35,13 +36,14 @@ Ext.define('Sonicle.data.validator.Password', {
 	
 	validate: function(v, rec) {
 		var me = this, count;
-		if(this.getComplex()) {
+		if (!me.shouldValidate(v, rec)) return true;
+		if (me.getComplex()) {
 			count = 0;
-			if(me.getComplexLenRe().test(v)) {
-				if(me.getComplexLwLRe().test(v)) count++;
-				if(me.getComplexUpLRe().test(v)) count++;
-				if(me.getComplexNumRe().test(v)) count++;
-				if(me.getComplexSpeRe().test(v)) count++;
+			if (me.getComplexLenRe().test(v)) {
+				if (me.getComplexLwLRe().test(v)) count++;
+				if (me.getComplexUpLRe().test(v)) count++;
+				if (me.getComplexNumRe().test(v)) count++;
+				if (me.getComplexSpeRe().test(v)) count++;
 			}
 			return (count >= 3) ? true : me.getComplexMessage();
 		} else {

@@ -1,4 +1,5 @@
 /*
+ * @deprecated Use default validator
  * Sonicle ExtJs UX
  * Copyright (C) 2015 Sonicle S.r.l.
  * sonicle@sonicle.com
