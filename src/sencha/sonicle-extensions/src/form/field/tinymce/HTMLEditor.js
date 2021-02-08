@@ -1188,8 +1188,11 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	 */
 	editorSetHtml: function(el, html, opts) {
 		opts = opts || {};
-		var ed = opts.editor || this.getEditor();
-		if (ed) ed.dom.setHTML(el, html);
+		var me = this, ed = opts.editor || me.getEditor();
+		if (ed) {
+			ed.dom.setHTML(el, html);
+			me.onTMCETextAreaEdChange(me, ed.getContent({format: 'html'}));
+		}
 	},
 	
 	/**
