@@ -70,6 +70,7 @@ Ext.define('Sonicle.button.Toggle', {
 		me.syncConfigs(me.pressed);
 	},
 	
+	/*
 	onMouseDown: function(e) {
 		var me = this;
 		me.callParent(arguments);
@@ -82,9 +83,12 @@ Ext.define('Sonicle.button.Toggle', {
 		var me = this;
 		me.callParent(arguments);
 		if (!me.destroyed && e.button === 0) {
-			me.syncConfigs(me.pressed);
+			if (!me.pressed) {
+				me.syncConfigs(me.pressed);
+			}
 		}
 	},
+	*/
 	
 	syncConfigs: function(pressed) {
 		var me = this;
