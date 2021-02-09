@@ -414,6 +414,30 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
+	 * Joins passed values and add an ellipsis ('...') to the end if it exceeds the specified number of joined values.
+	 * @param {String} separator The separator.
+	 * @param {Number} max Max number of non-empty joined values before truncating.
+	 * @param {Mixed[]} values Values to join.
+	 * @returns {String} The joined string
+	 */
+	ellipsisJoin: function(separator, max, values) {
+		var sep = separator || '',
+				arr = Ext.isArray(values) ? values : Ext.Array.slice(arguments, 1),
+				s = '', count = 0, ellipsed = false, i;
+		for (i=0; i<arr.length; i++) {
+			if (count > max) {
+				ellipsed = true;
+				break;
+			}
+			if (!Ext.isEmpty(arr[i])) {
+				count++;
+				s = s.concat(arr[i], sep);
+			}
+		}
+		return ellipsed ? s + '...' : s.slice(0, -sep.length);
+	},
+	
+	/**
 	 * Converts white-space char (' ') into its HTML character equivalent for literal display in web pages.
 	 * @param {String} value The string to encode.
 	 * @returns {String} The encoded text.
