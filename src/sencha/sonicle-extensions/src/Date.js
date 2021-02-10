@@ -163,6 +163,17 @@ Ext.define('Sonicle.Date', {
 	},
 	
 	/**
+	 * Creates and returns a new Date instance with the exact same date value 
+	 * as the called instance. If the supplied value is not a valid date object, 
+	 * null will be returned.
+	 * @param {Date} The date.
+	 * @returns {Date} The new Date instance.
+	 */
+	clone: function(date) {
+		return !Ext.isDate(date) ? null : Ext.Date.clone(date);
+	},
+	
+	/**
 	 * Formats a date given the supplied format string. If the supplied value
 	 * is not a valid date object, null will be returned.
 	 * @param {Date} date The date to format
@@ -170,7 +181,7 @@ Ext.define('Sonicle.Date', {
 	 * @returns {String} The formatted date or null if date parameter is not a JavaScript Date object
 	 */
 	format: function(date, format) {
-		return (!Ext.isDate(date)) ? null : Ext.Date.format(date, format);
+		return !Ext.isDate(date) ? null : Ext.Date.format(date, format);
 	},
 	
 	/**
