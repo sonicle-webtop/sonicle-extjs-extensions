@@ -22,7 +22,7 @@ Ext.define('Sonicle.grid.column.Action', {
 	
 	/**
 	 * Reserved space to add before and after when calculating column width. 
-	 * @param {Number} [itemsPadding=10]
+	 * @param {Number} [itemsPadding=5]
 	 */
 	itemsPadding: 5,
 	

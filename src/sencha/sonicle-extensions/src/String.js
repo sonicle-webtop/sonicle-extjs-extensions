@@ -12,6 +12,13 @@ Ext.define('Sonicle.String', {
 	],
 	
 	/**
+	 * Pattern that matches RegExp special characters that needs to be escaped 
+	 * in order to use the string as a RegExp pattern.
+	 */
+	reRegexSpecialChars: /([^a-zA-z0-9])/gi,
+	//reRegexSpecialChars: /([\[\]\^\$\|\(\)\\\+\*\?\{\}\=\!])/gi,
+	
+	/**
 	 * Pattern that matches URLs in non trivial situations.
 	 * There are numerous examples online but not all pass rigoruous test: 
 	 *		https://mathiasbynens.be/demo/url-regex
@@ -88,6 +95,15 @@ Ext.define('Sonicle.String', {
 	 */
 	htmlDecode: function(s) {
 		return Ext.String.htmlDecode(s);
+	},
+	
+	/**
+	 * Returns a literal pattern string for the specified string.
+	 * @param {String} s The string to encode as literal pattern.
+	 * @returns {String} The resulting string
+	 */
+	regexQuote: function(s) {
+		return Ext.isString(s) ? s.replace(this.reRegexSpecialChars, '\\$1') : s;
 	},
 	
 	/**
