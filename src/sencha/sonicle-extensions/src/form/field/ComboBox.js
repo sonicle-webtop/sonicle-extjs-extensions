@@ -196,7 +196,6 @@ Ext.define('Sonicle.form.field.ComboBox', {
 	},
 	
 	privates: {
-		
 		updateColor: function(nv, ov) {
 			var me = this,
 					BL = Sonicle.view.BoundList,

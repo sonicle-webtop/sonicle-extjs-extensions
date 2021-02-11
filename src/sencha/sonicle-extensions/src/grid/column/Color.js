@@ -1,40 +1,50 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2015 Sonicle S.r.l.
+ * Copyright (C) 2021 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
  */
 Ext.define('Sonicle.grid.column.Color', {
 	extend: 'Ext.grid.column.Column',
 	alias: 'widget.socolorcolumn',
+	require: [
+		'Sonicle.Utils',
+		'Sonicle.view.BoundList'
+	],
 	
 	tdCls: 'so-'+'grid-cell-colorcolumn',
 	innerCls: 'so-'+'grid-cell-inner-colorcolumn',
 	
 	/**
-	 * @cfg {String} colorField
-	 * The fieldName for getting the CSS color to apply to the marker.
-	 * To determine the color dynamically, configure the column with a `getColor` function.
+	 * @cfg {swatch|text} colorize [colorize=swatch]
+	 * Specify the target element on which apply the color: the marker itself or display text.
 	 */
-	colorField: null,
+	colorize: 'swatch',
 	
 	/**
-	 * @cfg {Function} getColor
-	 * A function which returns the CSS color to apply to the marker.
+	 * @cfg {rounded|square|circle} [swatchGeometry=rounded]
+	 * Changes the geometry of the swatch that displays the color.
 	 */
-	getColor: null,
+	swatchGeometry: 'rounded',
+	
+	/**
+	 * @cfg {String} colorField
+	 * The underlying {@link Ext.data.Field#name data field name} to bind as 
+	 * color swatch instead of using an icon. To determine the color dynamically, 
+	 * configure the column with a `getColor` function.
+	 */
+	
+	/**
+	 * @cfg {Function} [getColor]
+	 * A function which returns the value for color.
+	 */
 	
 	/**
 	 * @cfg {String} displayField
-	 * The fieldName for getting the value to display next to the color marker.
+	 * The underlying {@link Ext.data.Field#name data field name} to bind as display value.
 	 */
-	displayField: null,
 	
-	/**
-	 * @cfg {square|circle} [geometry=square]
-	 * Sets the color marker geomerty.
-	 */
-	geometry: 'square',
+	swatchCls: 'so-'+'grid-colorcolumn-swatch',
 	
 	constructor: function() {
 		this.scope = this;
@@ -43,33 +53,17 @@ Ext.define('Sonicle.grid.column.Color', {
 	
 	defaultRenderer: function(value, cellValues) {
 		var me = this,
-				cssPrefix = 'so-',
-				cls = cssPrefix + 'grid-colorcolumn',
+				BL = Sonicle.view.BoundList,
+				colorizeSwatch = (me.colorize === 'swatch'),
+				geomSwatchCls = me.swatchCls + '-' + me.swatchGeometry,
 				rec = cellValues ? cellValues.record : null,
-				color = me.evalValue(me.getColor, me.colorField, value, rec),
-				display = me.evalValue(null, me.displayField, value, rec, '');
-				style = {};
+				color = Sonicle.Utils.rendererEvalValue(value, rec, me.colorField, me.getColor),
+				display = Sonicle.Utils.rendererEvalValue(value, rec, me.displayField, null, '');
 		
-		if(me.geometry === 'circle') {
-			Ext.apply(style, {
-				borderRadius: '50%'
-			});
-		}
-		if(color) {
-			Ext.apply(style, {
-				backgroundColor: color
-			});
-		}
-		return '<div class="' + cls + '" style="' + Ext.dom.Helper.generateStyles(style) + '"></div>' + display;
-	},
-	
-	evalValue: function(getFn, field, value, rec, fallback) {
-		if(rec && Ext.isFunction(getFn)) {
-			return getFn.apply(this, [value, rec]);
-		} else if(rec && !Ext.isEmpty(field)) {
-			return rec.get(field);
+		if (colorizeSwatch) {
+			return '<div class="' + me.swatchCls + ' ' + geomSwatchCls + '" style="' + BL.generateColorStyles('swatch', color) + '"></div>' + display;
 		} else {
-			return (fallback === undefined) ? value : fallback;
+			return '<span style="' + BL.generateColorStyles('text', color) + '">' + display + '</span>';
 		}
 	}
 });

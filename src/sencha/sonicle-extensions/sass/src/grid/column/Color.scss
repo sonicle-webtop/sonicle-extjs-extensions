@@ -1,7 +1,12 @@
-.so-grid-colorcolumn {
+.so-grid-colorcolumn-swatch {
 	float: left;
-	width: 15px;
-	height: 15px;
-	border: 1px solid black;
-	margin-right: 5px;
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+}
+.so-grid-colorcolumn-swatch-rounded {
+	border-radius: 2px;
+}
+.so-grid-colorcolumn-swatch-circle {
+	border-radius: 50%;
 }
