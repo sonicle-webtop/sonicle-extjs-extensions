@@ -276,7 +276,9 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 				'<tpl if="_hasReminder">',
 				'<i class="ext-cal-ic {_remIconCls}">&#160;</i>',
 				'</tpl>',
-				'<tpl if="_hasComments">',
+				'<tpl if="_hasMeeting">',
+				'<i class="ext-cal-ic {_meetIconCls}">&#160;</i>',
+				'<tpl elseif="_hasComments">',
 				'<i class="ext-cal-ic {_commIconCls}">&#160;</i>',
 				'</tpl>',
 				'{Title}',
@@ -407,6 +409,7 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		data._hasTimezone = (evt[EM.HasTimezone.name] === true);
 		data._isPrivate = (evt[EM.IsPrivate.name] === true);
 		data._hasReminder = (evt[EM.Reminder.name] !== -1);
+		data._hasMeeting = !Ext.isEmpty(evt[EM.Meeting.name]);
 		data._hasAttendees = (evt[EM.HasAttendees.name] === true);
 		data._isRecurring = (evt[EM.IsRecurring.name] === true);
 		data._isBroken = (evt[EM.IsBroken.name] === true);
@@ -416,6 +419,7 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		data._remIconCls = me.reminderIconCls;
 		data._attIconCls = me.attendeesIconCls;
 		data._recIconCls = (evt[EM.IsBroken.name] === true) ? me.recurrenceBrokenIconCls : me.recurrenceIconCls;
+		data._meetIconCls = me.meetingIconCls;
 		data._commIconCls = me.commentsIconCls;
 		data._tags = dtags,
 		data.isSpan = isSpan;

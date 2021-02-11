@@ -55,6 +55,12 @@ Ext.define('Sonicle.calendar.view.Day', {
 	 */
 	
 	/**
+	 * @cfg {String} meetingIconCls
+	 * A css class which sets an image to be used as the icon for event that has meeting URL.
+	 * There are no default icon classes that come with this component.
+	 */
+	
+	/**
 	 * @cfg {String} commentsIconCls
 	 * A css class which sets an image to be used as the icon for event that has comments.
 	 * There are no default icon classes that come with this component.
@@ -305,6 +311,7 @@ Ext.define('Sonicle.calendar.view.Day', {
 		icfg.reminderIconCls = me.reminderIconCls;
 		icfg.recurrenceIconCls = me.recurrenceIconCls;
 		icfg.recurrenceBrokenIconCls = me.recurrenceBrokenIconCls;
+		icfg.meetingIconCls = me.meetingIconCls;
 		icfg.commentsIconCls = me.commentsIconCls;
 		icfg.use24HourTime = me.use24HourTime;
 		icfg.showTime = me.showTime;

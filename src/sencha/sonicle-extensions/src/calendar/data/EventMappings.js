@@ -61,6 +61,10 @@ Sonicle.calendar.data.EventMappings = {
         //mapping: 'loc',
         type: 'string'
     },
+	Meeting: {
+		name: 'meeting',
+		type: 'string'
+	},
     Notes: {
         name: 'notes',
         //mapping: 'notes',

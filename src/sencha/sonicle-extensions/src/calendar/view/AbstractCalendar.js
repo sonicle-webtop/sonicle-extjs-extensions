@@ -55,6 +55,12 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	 */
 	
 	/**
+	 * @cfg {String} meetingIconCls
+	 * A css class which sets an image to be used as the icon for event that has meeting URL.
+	 * There are no default icon classes that come with this component.
+	 */
+	
+	/**
 	 * @cfg {String} commentsIconCls
 	 * A css class which sets an image to be used as the icon for event that has comments.
 	 * There are no default icon classes that come with this component.
