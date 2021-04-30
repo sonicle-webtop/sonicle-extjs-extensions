@@ -923,3 +923,14 @@ td.ext-cal-dtitle-today div {
 .ext-dt-range .x-table-layout-cell {
     padding-right: 5px;
 }
+
+/*******************************************
+ * 
+ * Event tooltip styles
+ *
+ ******************************************/
+.ext-evt-tooltip-descriptor {
+	display: inline-block;
+	margin-left: 10px;
+	margin-right: 5px;
+}

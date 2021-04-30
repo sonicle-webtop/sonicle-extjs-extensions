@@ -32,6 +32,10 @@ Sonicle.calendar.data.EventMappings = {
         //mapping: 'cid',
         type: 'int'
     },
+	CalendarName: {
+		name: 'calendarName',
+		type: 'string'
+	},
 	Color: {
         name: 'color',
         //mapping: 'color',
@@ -42,6 +46,10 @@ Sonicle.calendar.data.EventMappings = {
         //mapping: 'tit',
         type: 'string'
     },
+	Description: {
+		name: 'description',
+		type: 'string'
+	},
     StartDate: {
         name: 'startDate',
         //mapping: 'start',

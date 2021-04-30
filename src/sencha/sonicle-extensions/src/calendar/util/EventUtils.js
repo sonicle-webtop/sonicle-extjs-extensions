@@ -136,7 +136,9 @@ Ext.define('Sonicle.calendar.util.EventUtils', {
 		var EM = Sonicle.calendar.data.EventMappings,
 				XDate = Ext.Date,
 				SoDate = Sonicle.Date,
+				calName = edata[EM.CalendarName.name],
 				evTit = edata[EM.Title.name],
+				evDesc = edata[EM.Description.name],
 				evLoc = edata[EM.Location.name],
 				evOwn = edata[EM.Owner.name],
 				evStaDt = edata[EM.StartDate.name],
@@ -147,18 +149,25 @@ Ext.define('Sonicle.calendar.util.EventUtils', {
 				edate = XDate.format(evEndDt, dateFmt),
 				etime = XDate.format(edata[EM.EndDate.name], timeFmt),
 				tit = Ext.isEmpty(evLoc) ? evTit : Ext.String.format('{0} @{1}', evTit, evLoc),
+				iconDate = 'fa fa-clock-o',
+				iconCalendar = 'fa fa-calendar-o',
 				tip, thtml;
 
 		if (SoDate.diffDays(evStaDt, evEndDt) === 0) {
-			tip = sdate + (evIsAD ? '' : ' ' + stime + ' - ' + etime);
+			tip = '<span class="ext-evt-tooltip-descriptor"><i class="' + iconDate + '"></i></span>' + sdate + (evIsAD ? '' : ' ' + stime + ' - ' + etime);
 			//tip = startd + ' ' + startt + ' - ' + endt;
 		} else {
-			tip = sdate + (evIsAD ? '' : ' ' + stime) + '<br>' + edate + (evIsAD ? '' : ' ' + etime);
+			tip = '<span class="ext-evt-tooltip-descriptor"><i class="' + iconDate + '"></i></span>' + sdate + (evIsAD ? '' : ' ' + stime) + 
+					'<br><span class="ext-evt-tooltip-descriptor"><i class="' + iconDate + '"></i></span>' + edate + (evIsAD ? '' : ' ' + etime);
 			//tip = startd + ' ' + startt + '<br>' + endd + ' ' + endt;
 		}
-		if (!Ext.isEmpty(evOwn)) tip += ('<br>(' + evOwn + ')');
+		tip += '<br><span class="ext-evt-tooltip-descriptor"><i class="' + iconCalendar + '"></i></span>' + calName;
+		if (!Ext.isEmpty(evOwn)) tip += ' (' + evOwn + ')';
+		
+		if (!Ext.isEmpty(evDesc)) tip += '<br><br>' + evDesc;
+		
 		thtml = Sonicle.form.field.Tag.generateTagsMarkup(tdata);
-		if (!Ext.isEmpty(thtml)) tip += '<br>' + thtml;
+		if (!Ext.isEmpty(thtml)) tip += '<br><br>' + thtml;
 
 		return {
 			title: tit,
