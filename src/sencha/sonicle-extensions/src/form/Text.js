@@ -15,23 +15,41 @@ Ext.define('Sonicle.form.Text', {
 		tag: 'div'
 	},
 	
-	componentCls: 'x-unselectable',
+	/**
+	 * @cfg {info|warn|error} iconType
+	 * An optional icon do display before text.
+	 */
+	iconType: null,
 	
+	/**
+	 *  @cfg {String} iconExtraCls
+	 *  An additional CSS class (or classes) to be added to the icon's element.
+	 */
+	iconExtraCls: null,
+	
+	// Make component unselectable and force a minimal height
+	componentCls: 'x-unselectable x-form-item-body-default',
+	
+	/**
+	 * Overrides default implementation of {@link Ext.form.Label#getElConfig}.
+	 * This allows prepending htmlEncodeLineBreaks call.
+	 */
 	getElConfig: function() {
+		//NOTE: check this override during ExtJs upgrade!
 		var me = this;
 		me.html = me.text ? Ext.util.Format.htmlEncode(Sonicle.String.htmlEncodeLineBreaks(me.text)) : (me.html || '');
-		return me.callParent();
+		me.html = me.genIconMarkup(me.iconType, me.iconExtraCls) + me.html; // Add support to icons
+		return Ext.apply(Sonicle.form.Text.superclass.superclass.getElConfig.apply(me, arguments), {
+			htmlFor: me.forId || ''
+		});
 	},
 	
 	/**
-	 * Updates the label's innerHTML with the specified string.
-	 * @param {String} text The new label text
-	 * @param {Boolean} [encode=true] False to skip HTML-encoding the text when rendering it
-	 * to the label. This might be useful if you want to include tags in the label's innerHTML rather
-	 * than rendering them as string literals per the default logic.
-	 * @return {Ext.form.Label} this
+	 * Overrides default implementation of {@link Ext.form.Label#setText}.
+	 * This allows prepending htmlEncodeLineBreaks call.
 	 */
 	setText: function(text, encode) {
+		//NOTE: check this override during ExtJs upgrade!
 		var me = this;
 
 		encode = encode !== false;
@@ -45,8 +63,23 @@ Ext.define('Sonicle.form.Text', {
 
 		if (me.rendered) {
 			me.el.dom.innerHTML = encode !== false ? Ext.util.Format.htmlEncode(Sonicle.String.htmlEncodeLineBreaks(text)) : text;
+			me.el.dom.innerHTML = me.genIconMarkup(me.iconType, me.iconExtraCls) + me.el.dom.innerHTML; // Add support to icons
 			me.updateLayout();
 		}
 		return me;
+	},
+	
+	privates: {
+		genIconMarkup: function(type, extraCls) {
+			var cls;
+			if ('info' === type) {
+				cls = 'fa fa-info-circle';
+			} else if ('warn' === type) {
+				cls = 'fa fa-exclamation-triangle';
+			} else if ('error' === type) {
+				cls = 'fa fa-times-circle';
+			}
+			return cls ? '<i class="' + cls + ' ' + Sonicle.String.deflt(extraCls, '') + '" aria-hidden="true"></i>&nbsp;' : '';
+		}
 	}
 });

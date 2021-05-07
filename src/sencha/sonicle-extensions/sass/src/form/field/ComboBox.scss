@@ -26,6 +26,9 @@
 	height: 16px;
 	margin-left: 5px;
 }
+.so-combo-icon:before {
+    vertical-align: sub; /* Support centered alignment for FontAwesome icons! */
+}
 .so-combo-swatch-rounded {
 	border-radius: 2px;
 }

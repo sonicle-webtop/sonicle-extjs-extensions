@@ -97,6 +97,13 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 	rawFieldEmptyText: 'Paste here a RRULE string that follows iCalendar RFC',
 	
 	/**
+     * @event select
+	 * Fires when the user selects a frequency for this recurrence.
+	 * @param {Sonicle.form.field.rr.Recurrence} this
+	 * @param {none|raw|Strinn} event The Rule frequency
+     */
+	
+	/**
 	 * @private
 	 */
 	rrule: null,
@@ -339,7 +346,8 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		} else {
 			cfg = me.buildRRuleCfg(null, null);
 			me.setValue(new RRule(cfg).toString());
-		}	
+		}
+		me.fireEvent('select', me, freq);
 	},
 	
 	onRRuleCfgChange: function(s, rrCfg) {
