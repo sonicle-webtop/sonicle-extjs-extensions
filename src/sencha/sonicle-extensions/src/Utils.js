@@ -158,5 +158,24 @@ Ext.define('Sonicle.Utils', {
 		} else {
 			return (fallbackValue === undefined) ? value : fallbackValue;
 		}
+	},
+	
+	/**
+	 * Iterates specified item IDs as components into passed menu and sets 
+	 * menu-item checked status.
+	 * @param {Ext.menu.Menu} menu The menu holding the item/s.
+	 * @param {String/String[]} itemId The itemId or a collection of IDs to set together.
+	 * @param {Boolean} checked Checked value to set.
+	 */
+	checkMenuItem: function(menu, itemId, checked) {
+		if (!menu || !menu.isXType('menu')) return;
+		if (!Ext.isBoolean(checked)) checked = true;
+		var itemIds = Ext.Array.from(itemId), cmp;
+		Ext.iterate(itemIds, function(iid) {
+			cmp = menu.getComponent(iid);
+			if (cmp && cmp.isXType('menucheckitem')) {
+				cmp.setChecked(checked);
+			}
+		});
 	}
 });

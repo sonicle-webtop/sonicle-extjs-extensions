@@ -39,7 +39,9 @@ Ext.define('Sonicle.picker.Color', {
 	},
 	
 	/**
-	 * Override original method in order to check item before calling Ext.fly
+	 * @override select
+	 * Override default implementation in order to:
+	 * - check item before calling Ext.fly
 	 */
 	select: function(color, suppressEvent) {
 		var me = this,

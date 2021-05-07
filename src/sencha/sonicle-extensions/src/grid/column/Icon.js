@@ -38,9 +38,15 @@ Ext.define('Sonicle.grid.column.Icon', {
 	
 	/**
 	 * @cfg {Function} getIconCls
-	 * A function which returns the CSS class to apply to the icon image.
+	 * A function which returns the CSS class to apply to the icon element.
 	 */
 	getIconCls: null,
+	
+	/**
+	 * @cfg {Function} getIconColor
+	 * A function which returns the color to apply to the icon element.
+	 */
+	getIconColor: null,
 	
 	/**
 	 * @cfg {String} tipField
@@ -109,28 +115,31 @@ Ext.define('Sonicle.grid.column.Icon', {
 	
 	buildHtml: function(value, rec) {
 		var me = this,
+				SoU = Sonicle.Utils,
 				clsico = me.iconIconCls,
 				clstxt = me.iconTextCls,
 				size = me.iconSize,
-				ico = me.evalValue(me.getIconCls, me.iconClsField, value, rec),
-				ttip = me.evalValue(me.getTip, me.tipField, value, rec, null),
-				style = 'width:'+size+'px;height:'+size+'px;',
+				ico = SoU.rendererEvalValue(value, rec, me.iconClsField, me.getIconCls),
+				icoColor = SoU.rendererEvalValue(value, rec, null, me.getIconColor),
+				ttip = SoU.rendererEvalValue(value, rec, me.tipField, me.getTip, null),
+				icoStyle = 'width:'+size+'px;height:'+size+'px;',
 				text = '', sttip = '';
 		
+		if (icoColor) icoStyle += 'color:'+icoColor+';';
 		if (ico) clsico += ' ' + ico;
-		if (!me.hideText) text = '<span class="'+clstxt+'">' + Sonicle.String.deflt(me.evalValue(me.getText, me.dataIndex, value, rec), '') + '</span>';
-		if (Ext.isFunction(me.handler)) style += 'cursor:pointer;';
+		if (!me.hideText) text = '<span class="'+clstxt+'">' + Sonicle.String.deflt(SoU.rendererEvalValue(value, rec, me.dataIndex, me.getText), '') + '</span>';
+		if (Ext.isFunction(me.handler)) icoStyle += 'cursor:pointer;';
 		if (Ext.isString(ttip)) {
 			sttip = ' data-qtip="' + ttip + '"';
 		} else if (ttip) {
 			sttip = ' data-qtitle="' + ttip.title + '" data-qtip="' + ttip.text + '"';
 		}
-		return '<div class="'+clsico+'" style="' + style + '"' + sttip + '></div>' + text;
+		return '<div class="'+clsico+'" style="' + icoStyle + '"' + sttip + '></div>' + text;
 	},
 	
 	defaultRenderer: function(value, cellValues, record, rowIdx, colIdx, store, view) {
 		var me = this,
-			cellCls = me.evalValue(me.getCellCls, me.cellClsField, value, record, null);
+				cellCls = Sonicle.Utils.rendererEvalValue(value, record, me.cellClsField, me.getCellCls, null);
 		if (cellValues && Ext.isString(cellCls)) cellValues.tdCls += cellCls;
 		return this.buildHtml(value, record);
 	},
@@ -138,16 +147,6 @@ Ext.define('Sonicle.grid.column.Icon', {
 	updater: function(cell, value, record, view, dataSource) {
 		//TODO: valutare un metodo di aggiornamento parziale
 		cell.firstChild.innerHTML = this.buildHtml(value, record);
-	},
-	
-	evalValue: function(getFn, field, value, rec, fallback) {
-		if (rec && Ext.isFunction(getFn)) {
-			return getFn.apply(this, [value, rec]);
-		} else if (rec && !Ext.isEmpty(field)) {
-			return rec.get(field);
-		} else {
-			return (fallback === undefined) ? value : fallback;
-		}
 	},
 	
 	processEvent: function(type, view, cell, recordIndex, cellIndex, e, record, row) {

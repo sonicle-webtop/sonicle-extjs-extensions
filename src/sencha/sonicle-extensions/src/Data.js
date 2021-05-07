@@ -7,6 +7,34 @@ Ext.define('Sonicle.Data', {
     singleton: true,
 	
 	/**
+	 * Wrapper method for {@link Ext.data.Model#getData}. Like the original one, 
+	 * it gets all values for each field in this model and returns an object 
+	 * containing the current data.
+	 * @param {Ext.data.Model} rec The record/model to use as source.
+	 * @param {Object} opts An object containing options describing the data desired.
+	 * All options declared in wrapped method are valid. If undefined simply 
+	 * returns data as the original method with `true` param.
+	 * @param {Boolean} [opts.ignoreId=false] Pass `true` to remove model's 
+	 * idProperty value from result set.
+	 * @returns {Object} An object containing all the values in this model.
+	 */
+	getModelData: function(rec, opts) {
+		opts = opts || {};
+		if (rec.isModel) {
+			if (opts === undefined) {
+				return rec.getData(true);
+			} else {
+				var data = rec.getData(opts);
+				if (opts.ignoreId === true) {
+					delete data[rec.getIdProperty()];
+				}
+				return data;
+			}
+		}
+		return null;
+	},
+	
+	/**
 	 * Returns an array of values for a given set of fields.
 	 * @param {Ext.data.Model} rec The record/model to use as source.
 	 * @param {String[]|String} fieldNames Names whose values will be extracted.
