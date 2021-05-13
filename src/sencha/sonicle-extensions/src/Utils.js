@@ -150,10 +150,23 @@ Ext.define('Sonicle.Utils', {
 		}
 	},
 	
+	/**
+	 * Function to evaluate a return value based on parameters specified.
+	 * If both record and getFn are specified, it return the value returned by
+	 * getFn call. Otherwise if record and field name are specified, it returns
+	 * the corresponding field's value whose name is specified. Finally, if 
+	 * defined, it returns the fallback value is returned, otherwise the value itself.
+	 * @param {Mixed} value The value.
+	 * @param {Ext.data.Model} [record] A record related to value.
+	 * @param {String} [fieldName] The record field's name.
+	 * @param {Function} [getFn] The getter function.
+	 * @param {Mixed} [fallbackValue] If specified, the value to return as fallback instead of value param.
+	 * @returns {Mixed}
+	 */
 	rendererEvalValue: function(value, record, fieldName, getFn, fallbackValue) {
 		if (record && Ext.isFunction(getFn)) {
 			return getFn.apply(this, [value, record]);
-		} else if(record && !Ext.isEmpty(fieldName)) {
+		} else if (record && !Ext.isEmpty(fieldName)) {
 			return record.get(fieldName);
 		} else {
 			return (fallbackValue === undefined) ? value : fallbackValue;
@@ -177,5 +190,16 @@ Ext.define('Sonicle.Utils', {
 				cmp.setChecked(checked);
 			}
 		});
+	},
+	
+	/**
+	 * Checks, using the passed grid component, if the specified column is hidden or not.
+	 * @param {Ext.grid.Panel} grid The grid panel.
+	 * @param {String} itemId The column ID to check.
+	 * @returns {Boolean}
+	 */
+	isGridColumnHidden: function(grid, itemId) {
+		var col = grid.getView().getColumnManager().getHeaderById(itemId);
+		return (col && col.hidden) ? true : false;
 	}
 });
