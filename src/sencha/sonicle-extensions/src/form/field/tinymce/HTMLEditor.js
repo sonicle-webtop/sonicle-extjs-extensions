@@ -820,14 +820,12 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	
 	buildContentStyle: function() {
 		return [
+			//TODO: add support to custom style imports. Imports must be extracted an html snippet and then added to this style definition
+			//'@import url("https:/+/fonts.googleapis.com/css2?family=Archivo:wght@300&display=swap");',
 			'body{',
-				'margin:5px;',
-				'word-wrap:break-word;',
+				'margin:5px;', // Reduce default body margin to not loose too much space
+				'word-wrap:break-word;', // Make sure to break words (present in .mce-content-body class too)
 				this.generateDefaultStyles(),
-			'}',
-			'td, th, p{',
-				'font-family:inherit !important;',
-				'font-size:inherit !important;',
 			'}'
 		].join('');
 	},
