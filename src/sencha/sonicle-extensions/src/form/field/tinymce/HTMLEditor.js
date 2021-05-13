@@ -715,7 +715,7 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 					
 					valid_children: '+body[style],+div[style]',
 					entity_encoding : 'numeric', // Force numeric encoding usage, we cannot use 'named+numeric' due to this https://github.com/tinymce/tinymce/issues/3213
-					extended_valid_elements : 'a[name|href|target|title|onclick|dir],img[class|src|border=0|alt|title|hspace|vspace|width|height|align|onmouseover|onmouseout|name|style],table[style|dir|class|border=1|cellspacing|cellpadding|bgcolor|id],colgroup,col[style|dir|width],tbody,tr[style|dir|class],td[style|dir|class|colspan|rowspan|width|height],hr[class|width|size|noshade],font[face|size|color|style|dir],span[class|align|style|dir|br],p[class|style|dir|span|br]',
+					extended_valid_elements : 'a[name|href|target|title|onclick|dir|style],img[class|src|border=0|alt|title|hspace|vspace|width|height|align|onmouseover|onmouseout|name|style],table[style|dir|class|border=1|cellspacing|cellpadding|bgcolor|id],colgroup,col[style|dir|width],tbody,tr[style|dir|class],td[style|dir|class|colspan|rowspan|width|height],hr[class|width|size|noshade],font[face|size|color|style|dir],span[class|align|style|dir|br],p[class|style|dir|span|br]',
 					invalid_elements: 'object,iframe,script,embed', // Avoid unsafe elements
 					convert_fonts_to_spans: true, // Font elements are deprecated, avoid them!
 					end_container_on_empty_block: true, // Split blocks after pressing ENTER two times (eg. useful for spliting BLOCKQUOTEs)
