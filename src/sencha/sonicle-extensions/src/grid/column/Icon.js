@@ -120,7 +120,7 @@ Ext.define('Sonicle.grid.column.Icon', {
 				clstxt = me.iconTextCls,
 				size = me.iconSize,
 				ico = SoU.rendererEvalValue(value, rec, me.iconClsField, me.getIconCls),
-				icoColor = SoU.rendererEvalValue(value, rec, null, me.getIconColor),
+				icoColor = SoU.rendererEvalValue(value, rec, null, me.getIconColor, null),
 				ttip = SoU.rendererEvalValue(value, rec, me.tipField, me.getTip, null),
 				icoStyle = 'width:'+size+'px;height:'+size+'px;',
 				text = '', sttip = '';
