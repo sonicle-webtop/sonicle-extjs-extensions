@@ -54,8 +54,6 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 	init: function(field) {
 		var me = this;
 		me.setCmp(field);
-		field.on('render', me.onCmpRender, me, {single: true});
-		
 		Ext.apply(field, {
 			setIconCls: function(iconCls) {
 				me.setIconCls(iconCls);
@@ -64,6 +62,12 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 				me.setTooltip(tooltip);
 			}
 		});
+		
+		if (field.rendered) {
+			me.setup();
+		} else {
+			field.on('render', me.onCmpRender, me, {single: true});
+		}
 	},
 	
 	destroy: function() {
@@ -72,9 +76,10 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 		if (cmp.rendered) {
 			me.clearTip();
 		}
+		me.callParent();
 	},
 	
-	onCmpRender: function(s) {
+	setup: function() {
 		var me = this,
 				cmp = me.getCmp(),
 				isChk = cmp.isXType('checkbox'),
@@ -139,16 +144,20 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 		}
 		
 		cmp.iconEl = el;
-		if (me.tooltip) {
-			me.setTooltip(me.tooltip, true);
-		}
+		if (me.iconCls) me.setIconCls(me.iconCls);
+		if (me.tooltip) me.setTooltip(me.tooltip, true);
+	},
+	
+	onCmpRender: function(s) {
+		this.setup();
 	},
 	
 	setIconCls: function(iconCls) {
 		var me = this,
-				cmp = me.getCmp();
-		if (cmp.rendered) {
-			cmp.iconEl.replaceCls(me.iconCls, iconCls);
+				cmp = me.getCmp(),
+				el = cmp.iconEl;
+		if (cmp.rendered && el) {
+			el.replaceCls(me.iconCls, iconCls);
 		}
 		me.iconCls = iconCls;
 	},
@@ -162,17 +171,18 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 	 */
 	setTooltip: function(tooltip, initial) {
 		var me = this,
-				cmp = me.getCmp();
-		if (cmp.rendered) {
+				cmp = me.getCmp(),
+				el = cmp.iconEl;
+		if (cmp.rendered && el) {
 			if (!initial || !tooltip) me.clearTip();
 			if (tooltip) {
 				if (Ext.quickTipsActive && Ext.isObject(tooltip)) {
 					Ext.tip.QuickTipManager.register(Ext.apply({
-						target: cmp.iconEl.id
+						target: el.id
 					}, tooltip));
 					me.tooltip = tooltip;
 				} else {
-					cmp.iconEl.dom.setAttribute(me.getTipAttr(), tooltip);
+					el.dom.setAttribute(me.getTipAttr(), tooltip);
 				}
 				//cmp.iconEl.setStyle('cursor', 'pointer');
 			}
@@ -189,10 +199,12 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 		var me = this,
 				cmp = me.getCmp(),
 				el = cmp.iconEl;
-		if (Ext.quickTipsActive && Ext.isObject(me.tooltip)) {
-			Ext.tip.QuickTipManager.unregister(el);
-		} else {
-			el.dom.removeAttribute(me.getTipAttr());
+		if (cmp.rendered && el) {
+			if (Ext.quickTipsActive && Ext.isObject(me.tooltip)) {
+				Ext.tip.QuickTipManager.unregister(el);
+			} else {
+				el.dom.removeAttribute(me.getTipAttr());
+			}
 		}
 	},
 	
