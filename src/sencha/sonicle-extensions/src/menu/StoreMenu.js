@@ -12,13 +12,6 @@ Ext.define('Sonicle.menu.StoreMenu', {
 		'Ext.util.StoreHolder'
 	],
 	
-	/**
-	 * @cfg {Boolean} useItemIdPrefix
-	 * `true` to add a prefix to item record ID in order to avoid errors.
-	 * We cannot add this by default due compatibility issues, so please use it with `true`.
-	 */
-	useItemIdPrefix: false,
-	
 	config: {
 		/**
 		 * @cfg {Mixed|Mixed[]} checkedItems
@@ -26,6 +19,19 @@ Ext.define('Sonicle.menu.StoreMenu', {
 		 */
 		checkedItems: null
 	},
+	
+	/**
+	 * @cfg {Boolean} useItemIdPrefix
+	 * `true` to add a prefix to item record ID in order to avoid errors.
+	 * We cannot add this by default due compatibility issues, so please use it with `true`.
+	 */
+	useItemIdPrefix: false,
+	
+	/**
+	 * @cfg {Boolean} loadingIndicator
+	 * Set to `true` to show a loading item during data loading.
+	 */
+	loadingIndicator: false,
 	
 	/**
 	 * @cfg {String} [itemClass]
@@ -105,6 +111,14 @@ Ext.define('Sonicle.menu.StoreMenu', {
 	
 	/**
 	 * @private
+	 */
+	loadingItemIdentifier: 'loadingItem',
+	
+	loadingText: 'Loading...',
+	loadingIconCls: 'fa fa-spinner fa-spin',
+	
+	/**
+	 * @private
 	 * @property {Boolean} itemsInitialized
 	 */
 	
@@ -144,16 +158,21 @@ Ext.define('Sonicle.menu.StoreMenu', {
 		var me = this;
 		return {
 			datachanged: me.onStoreDataChanged,
+			beforeload: me.onStoreBeforeLoad,
 			load: me.onStoreLoad
 		};
 	},
 	
 	onStoreDataChanged: function() {
-		this.updateMenuItems();
+		this.updateMenuItems(false);
+	},
+	
+	onStoreBeforeLoad: function() {
+		if (this.loadingIndicator) this.updateMenuItems(true);
 	},
 	
 	onStoreLoad: function(store, records, success) {
-		if (success) this.updateMenuItems();
+		if (success) this.updateMenuItems(false);
 	},
 	
 	updateCheckedItems: function(nv, ov) {
@@ -169,29 +188,38 @@ Ext.define('Sonicle.menu.StoreMenu', {
 		}
 	},
 	
-	updateMenuItems: function() {
+	updateMenuItems: function(loading) {
 		var me = this,
 			topItems = me.topStaticItems || me.staticItems,
 			bottomItems = me.bottomStaticItems;
 	
 		Ext.suspendLayouts();
 		me.removeAll();
-		if (topItems) me.add(topItems);
-		if (me.store) {
-			me.store.each(function(rec) {
-				me.add(me.createStoreItem(rec));
+		if (loading) {
+			me.add({
+				itemId: me.buildItemId(me.loadingItemIdentifier),
+				text: me.loadingText,
+				iconCls: me.loadingIconCls,
+				disabled: true
 			});
-			if (Ext.isString(me.emptyText) && me.store.getCount() === 0) {
-				me.add({
-					itemId: me.buildItemId(me.emptyItemIdentifier),
-					text: me.emptyText,
-					disabled: true
+		} else {
+			if (topItems) me.add(topItems);
+			if (me.store) {
+				me.store.each(function(rec) {
+					me.add(me.createStoreItem(rec));
 				});
+				if (Ext.isString(me.emptyText) && me.store.getCount() === 0) {
+					me.add({
+						itemId: me.buildItemId(me.emptyItemIdentifier),
+						text: me.emptyText,
+						disabled: true
+					});
+				}
 			}
+			if (bottomItems) me.add(bottomItems);
 		}
-		if (bottomItems) me.add(bottomItems);
 		Ext.resumeLayouts(true);
-		me.itemsInitialized = true;
+		if (!loading) me.itemsInitialized = true;
 	},
 	
 	createStoreItem: function(rec) {
