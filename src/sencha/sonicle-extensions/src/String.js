@@ -106,6 +106,14 @@ Ext.define('Sonicle.String', {
 		return Ext.String.htmlDecode(s);
 	},
 	
+	htmlAttributeEncode: function(s) {
+		return !Ext.isString(s) ? s : s.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/"/g, '&#34;')
+				.replace(/'/g, '&#39;')
+		;
+	},
+	
 	/**
 	 * Returns a literal pattern string for the specified string.
 	 * @param {String} s The string to encode as literal pattern.
