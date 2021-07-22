@@ -134,8 +134,9 @@ Ext.define('Sonicle.Utils', {
 	 * @returns {String} The HTML attributes, or an empty string in case of misconfigurations.
 	 */
 	generateTooltipAttrs: function(tooltip) {
-		var qtips = Ext.quickTipsActive && Ext.tip.QuickTipManager.isEnabled(),
-				encode = Ext.String.htmlEncode;
+		var SoS = Sonicle.String,
+				qtips = Ext.quickTipsActive && Ext.tip.QuickTipManager.isEnabled(),
+				encode = SoS.htmlAttributeEncode;
 		
 		if (Ext.isString(tooltip)) {
 			return (qtips ? ' data-qtip' : ' title') + '="' + encode(tooltip) + '"';
@@ -143,7 +144,7 @@ Ext.define('Sonicle.Utils', {
 			if (qtips) {
 				return ' data-qtitle="' + encode(tooltip.title) + '" data-qtip="' + encode(tooltip.text) + '"';
 			} else {
-				return ' title' + '="' + encode(Sonicle.String.deflt(tooltip.text, tooltip.title)) + '"';
+				return ' title' + '="' + encode(SoS.deflt(tooltip.text, tooltip.title)) + '"';
 			}
 		} else {
 			return '';

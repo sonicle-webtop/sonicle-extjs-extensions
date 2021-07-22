@@ -20,6 +20,11 @@ Ext.define('Sonicle.toolbar.LinkItem', {
 	 */
 	disableNavigation: false,
 	
+	/**
+	 * @param {String/Object} tooltip
+	 * The tooltip for the button - can be a string to be used as innerHTML (html tags are accepted) or QuickTips config object.
+	 */
+	
 	link: '',
 	
 	syntaxRe: /^\[(.*)\]\((.*)\)$/,
@@ -79,7 +84,7 @@ Ext.define('Sonicle.toolbar.LinkItem', {
 				link = me.link,
 				value = Ext.isDefined(link) ? link + '' : link,
 				parse = me.parseLink(value);
-			return (me.preHtml || '') + me.self.genHtmlLink(me.disableNavigation ? null : parse.url, parse.text || parse.url, {cls: me.cls}) + (me.postHtml || '');
+			return (me.preHtml || '') + me.self.genHtmlLink(me.disableNavigation ? null : parse.url, parse.text || parse.url, me.tooltip, {cls: me.cls}) + (me.postHtml || '');
 		},
 		
 		parseLink: function(s) {
@@ -103,14 +108,14 @@ Ext.define('Sonicle.toolbar.LinkItem', {
 			return '[' + (text || url) + '](' + url + ')';
 		},
 		
-		genHtmlLink: function(url, text, opts) {
+		genHtmlLink: function(url, text, tooltip, opts) {
 			opts = opts || {};
 			var SoS = Sonicle.String,
 					target = 'self' === opts.target || Ext.isEmpty(url) ? '_self' : '_blank',
 					cls = opts.cls || '',
 					href = Ext.isString(url) ? SoS.htmlAttributeEncode(url) : 'javascript:Ext.EmptyFn',
 					displ = SoS.htmlEncode(text || '');
-			return '<a href="' + href + '" target="' + target + '" class="' + cls + '">' + displ + '</a>';
+			return '<a href="' + href + '" target="' + target + '" class="' + cls + '" ' + Sonicle.Utils.generateTooltipAttrs(tooltip) + '>' + displ + '</a>';
 		}
 	}
 });
