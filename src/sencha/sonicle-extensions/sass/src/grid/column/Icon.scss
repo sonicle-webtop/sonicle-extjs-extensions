@@ -1,3 +1,9 @@
+/* Generate problems with classic 16x16 icons
+.so-grid-cell-inner-iconcolumn {
+    display: flex;
+    align-items: center;
+}
+*/
 .so-grid-cell-inner-iconcolumn .so-iconcolumn-icon {
 	float: left;
 }

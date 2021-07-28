@@ -189,6 +189,20 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
+	 * Counts the number of occurrences of passed value in the source String.
+	 * @param {String} s The value
+	 * @param {String} value Values to search in.
+	 * @returns {Number} The number of occurrences.
+	 */
+	count: function(s, value) {
+		var count = -1, index;
+		if (!Ext.isEmpty(s) && !Ext.isEmpty(value)) {
+			for (count=-1,index=-2; index !== -1; count++, index=s.indexOf(value,index+1));
+		}
+		return count;
+	},
+	
+	/**
 	 * Compare two strings, ignoring case.
 	 * @param {String} s1 The 1st value, may be null.
 	 * @param {String} s2 The 2nd value, may be null.
@@ -406,13 +420,21 @@ Ext.define('Sonicle.String', {
 	 * Searches a string for a specified value, or a regular expression, and 
 	 * returns a new string where the specified values are replaced.
 	 * @param {String} s The String to be modified, may be null.
-	 * @param {String} searchvalue The value, or regular expression, that will be replaced by the new value.
+	 * @param {String/Object} searchvalue The value, or regular expression, that will be replaced by the new value; or a mapping object to replace many strings sequentially.
 	 * @param {String} newvalue The value to replace the search value with.
 	 * @returns {String} A new String, where the specified value(s) has been replaced by the new value.
 	 */
 	replace: function(s, searchvalue, newvalue) {
 		if (Ext.isEmpty(s)) return s;
-		return s.replace(searchvalue, newvalue);
+		if (arguments.length === 2 && Ext.isObject(searchvalue)) {
+			var ns = s + '';
+			Ext.iterate(searchvalue, function(sv, rv) {
+				ns = ns.replace(sv, rv);
+			});
+			return ns;
+		} else {
+			return s.replace(searchvalue, newvalue);
+		}
 	},
 	
 	/**

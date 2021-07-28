@@ -104,7 +104,7 @@ Ext.define('Sonicle.grid.column.Nest', {
 				html += '<i class="' + cls + ' fa ' + toolCls + '" data-qtip="'+ tip +'" style="' + style + '"></i>';
 			}
 		} else if (isChild) {
-			html += '<span class="' + me.hierarchySymbolExtraCls + '">' + Sonicle.grid.column.Nest.hierarchySvg + '</span>';
+			html += '<span class="' + me.hierarchySymbolExtraCls + '">' + Sonicle.grid.column.Nest.hierarchySvg() + '</span>';
 		}
 		html += '</div>';
 		return html + '<div class="' + wrapCls + '">' + ohtml + '</div>';
@@ -133,6 +133,20 @@ Ext.define('Sonicle.grid.column.Nest', {
 	},
 	
 	statics: {
-		hierarchySvg: '<svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M4.5 2A2.5 2.5 0 015 6.95V8.5a2.5 2.5 0 002.336 2.495L7.5 11h1.55a2.5 2.5 0 110 1H7.5a3.5 3.5 0 01-3.495-3.308L4 8.5V6.95A2.5 2.5 0 014.5 2zm7 8a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm-7-7a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"></path></svg>'
+		hierarchySvg: function(color, beginColor, endColor) {
+			var SoS = Sonicle.String,
+					base = SoS.deflt(color, 'currentcolor'),
+					replObj = {
+						'{line-color}': base,
+						'{circle1-color}': SoS.deflt(beginColor, base),
+						'{circle2-color}': SoS.deflt(endColor, base)
+					};
+			return SoS.replace(Sonicle.grid.column.Nest.hierarchySvgTpl, replObj);
+		},
+		hierarchySvgTpl: '<svg width="12" height="12" viewBox="0 0 12 12">' +
+				'<path fill="{line-color}" d="M3 4.95V6.5a2.5 2.5 0 002.336 2.495L5.5 9h1.55v1H5.5a3.5 3.5 0 01-3.495-3.308L2 6.5V4.95H3"></path>' +
+				'<path fill="{circle1-color}" d="M2.5 0A2.5 2.5 0 012.5 5V5A2.5 2.5 0 012.5 0zm0 1A1.5 1.5 0 102.5 4A1.5 1.5 0 002.5 1z"></path>' +
+				'<path fill="{circle2-color}" d="M7 9.5A2.5 2.5 0 1112 9.5A2.5 2.5 0 017 9.5zm2.5-1.5a1.5 1.5 0 100 3a1.5 1.5 0 000-3z"></path>' +
+				'</svg>'
 	}
 });
