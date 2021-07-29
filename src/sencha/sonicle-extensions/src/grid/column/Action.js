@@ -22,65 +22,128 @@ Ext.define('Sonicle.grid.column.Action', {
 	
 	/**
 	 * Reserved space to add before and after when calculating column width. 
-	 * @param {Number} [itemsPadding=5]
+	 * @param {Number} [extraSpace=0]
 	 */
-	itemsPadding: 5,
 	
 	constructor: function(cfg) {
 		var me = this,
 				items = cfg.items || me.items || [me],
 				width = cfg.width || me.width;
-		//if (Ext.isArray(items) && !width) {
-		//	cfg.width = (10 + (items.length * 16) + 10);
-		//}
 		me.callParent([cfg]);
 		
 		if (Ext.isArray(items) && !width) {
 			me.on('afterrender', function() {
-				me.setWidth(me.itemsPadding * 2 + ((me.autoWidth !== true && Ext.isNumber(me.autoWidth)) ? me.autoWidth : items.length) * me.measureActionWidth());
+				//TODO: find way to set flex=1 when column is visible and at last position: this
+				//allows a better display, stretching this column to the end of the table. Original
+				//size needs to be restored when the column is no more the last.
+				//var idx = me.getIndex(),
+				//	lidx = me.getRootHeaderCt().getVisibleGridColumns().length-1;
+				//console.log('index: '+idx);
+				//console.log('last-index: '+lidx);
+				if (me.autoWidth !== false) {
+					me.setWidth(me.calculateColumnWidth(items));
+				}
 			}, me, {single: true});
 		}
+		//me.on('move', me.onColumnMove, me);
 	},
 	
 	privates: {
-		measureActionWidth: function() {
+		onColumnMove: function(s, x, y) {
+			console.log('onColumnMove');
+			console.log('index: '+s.getIndex());
+			console.log('last-index: '+s.getRootHeaderCt().getVisibleGridColumns().length-1);
+		},
+		
+		calculateColumnWidth: function(items) {
+			var me = this,
+				cmeas = Sonicle.grid.column.Action.measureCell(),
+				imeas = me.measureActionItems(),
+				count = (me.autoWidth !== true && Ext.isNumber(me.autoWidth)) ? me.autoWidth : items.length;
+			return (count * imeas.width) + (count * imeas.midSpacing) + imeas.beforeSpacing + imeas.afterSpacing + cmeas.margin + cmeas.padding;
+		},
+		
+		measureActionItems: function() {
 			var me = this,
 					view = me.getView(),
 					sto = me.getView().getStore(),
-					html, width;
+					html, width, mid, before, after;
 			
-			if (sto) {
+			if (sto && me.items) {
 				try {
 					html = me.defaultRenderer(null, {}, sto.createModel({}), -1, -1, sto, view);
 				} catch (e) {}
+				
 				if (html) {
-					// If the first action is hidden dinamically programmatically, wrong measures
-					// are returned on the dummy element. Make sure to disarm here any visibility 
-					// modification in order to get the real width.
-					if (html.indexOf('style') === -1) {
-						html = html.replace('></', ' style="display:inline-block !important;"></');
-					} else {
-						html = html.replace('style="', 'style="display:inline-block !important;');
-					}
-					var ctxId = Ext.id(null, 'so-actioncolumn-dummy-'),
-							ctxEl = Ext.getBody().appendChild({
-								id: ctxId,
-								tag: 'div',
-								style: 'visibility:hidden;pointer-events:none;border:none;',
-								html: html
-							}),
-							act0El;
+					var sanitizeHtml = function(html) {
+							// Actions are rendered from configured items, if first action is hidden 
+							// programmatically, wrong measures are returned on the dummy element.
+							// Make sure to disarm here any visibility modification in order to get real measures.
+							if (html.indexOf('style') === -1) {
+								return html.replace('></', ' style="display:inline-block !important;"></');
+							} else {
+								return html.replace('style="', 'style="display:inline-block !important;');
+							}
+						},
+						getElWidth = function(el) {
+							return el ? el.getWidth(true) : 0;
+						},
+						getElMargin = function(el, side) {
+							return el ? el.getMargin(side) : 0;
+						},
+						ctxId = Ext.id(null, 'so-actioncolumn-dummyitems-'),
+						ctxEl = Ext.getBody().appendChild({
+							id: ctxId,
+							tag: 'div',
+							style: 'visibility:hidden;pointer-events:none;border:none;',
+							html: sanitizeHtml(html)
+						}),
+						act0El, actNEl;
 					
-					act0El = ctxEl.down('.x-action-col-0');
-					if (act0El) {
-						width = act0El.getWidth(true) + act0El.getMargin('lr') + act0El.getPadding('lr');
+					if (me.items.length === 1) {
+						act0El = ctxEl.down('.x-action-col-0');
+						width = getElWidth(act0El);
+						mid = 0;
+						before = getElMargin(act0El, 'l');
+						after = getElMargin(act0El, 'r');
+					} else if (me.items.length > 1) {
+						act0El = ctxEl.down('.x-action-col-0');
+						actNEl = ctxEl.down('.x-action-col-' + (me.items.length-1));
+						width = Math.max(getElWidth(act0El), getElWidth(actNEl));
+						mid = getElMargin(act0El, 'r') + getElMargin(actNEl, 'l');
+						before = getElMargin(act0El, 'l');
+						after = getElMargin(actNEl, 'r');
 					}
+					
 					Ext.defer(function() {
 						Ext.fly(ctxId).destroy();
 					}, 10);
 				}
 			}
-			return width || 16;
+			return {width: width || 16, midSpacing: mid || 0, beforeSpacing: before || 0, afterSpacing: after || 0};
+		}
+	},
+	
+	statics: {
+		measureCell: function() {
+			var ctxId = Ext.id(null, 'so-actioncolumn-dummycell-'),
+				ctxEl = Ext.getBody().appendChild({
+					id: ctxId,
+					tag: 'div',
+					style: 'visibility:hidden;pointer-events:none;border:none;',
+					html: '<div class="x-grid-cell-inner x-grid-cell-inner-action-col"></div>'
+				}),
+				cellEl = ctxEl.down('.x-grid-cell-inner-action-col'),
+				margin, padding;
+			
+			margin = cellEl.getMargin('lr');
+			padding = cellEl.getPadding('lr');
+			
+			Ext.defer(function() {
+				Ext.fly(ctxId).destroy();
+			}, 10);
+			
+			return {margin: margin || 0, padding: padding || 0};
 		}
 	}
 });
