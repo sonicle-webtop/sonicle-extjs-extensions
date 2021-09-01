@@ -28,6 +28,11 @@ Ext.define('Sonicle.picker.List', {
 	allowMultiSelection: false,
 	
 	/**
+	 * @cfg {Number} [minSelections=1] Minimum number of selections allowed.
+	 */
+	minSelections: 1,
+	
+	/**
 	 * @cfg {Number} [maxSelections=Number.MAX_VALUE] Maximum number of selections allowed.
 	 */
 	maxSelections: Number.MAX_VALUE,
@@ -55,6 +60,8 @@ Ext.define('Sonicle.picker.List', {
 	 * The selected value, according to {@link #valueField}.
 	 *   - `record` : Ext.data.Model
 	 * The whole record associated to the value.
+	 *   - `button` : String
+	 * The pressed button: ok or yes
 	 */
 	
 	/**
@@ -91,7 +98,8 @@ Ext.define('Sonicle.picker.List', {
 	emptyText: 'No items to display',
 	searchText: 'Search...',
 	selectedText: '{0} items selected',
-	okText: 'Ok',
+	okText: 'OK',
+	yesText: null,
 	cancelText: 'Cancel',
 	
 	/**
@@ -102,7 +110,13 @@ Ext.define('Sonicle.picker.List', {
 	
 	/**
 	 * @event okclick
-	 * Fires when the ok button is pressed.
+	 * Fires when the OK button is pressed.
+	 * @param {Sonicle.picker.List} this
+	 */
+	
+	/**
+	 * @event yesclick
+	 * Fires when the YES button is pressed.
 	 * @param {Sonicle.picker.List} this
 	 */
 	
@@ -154,7 +168,17 @@ Ext.define('Sonicle.picker.List', {
 				disabled: true,
 				handler: function() {
 					me.fireEvent('okclick', me);
-					me.firePick(me.getSelection());
+					me.firePick(me.getSelection(), 'ok');
+				}
+			}, {
+				xtype: 'button',
+				reference: 'btnyes',
+				text: me.yesText,
+				hidden: Ext.isEmpty(me.yesText),
+				disabled: true,
+				handler: function() {
+					me.fireEvent('yesclick', me);
+					me.firePick(me.getSelection(), 'yes');
 				}
 			}, {
 				xtype: 'button',
@@ -195,7 +219,7 @@ Ext.define('Sonicle.picker.List', {
 		this.applySearchFilter(text);
 	},
 	
-	firePick: function(recs) {
+	firePick: function(recs, button) {
 		var me = this,
 				vfld = me.valueField,
 				handler = me.handler,
@@ -204,8 +228,8 @@ Ext.define('Sonicle.picker.List', {
 		Ext.iterate(recs, function(rec) {
 			values.push(vfld ? rec.get(vfld) : rec.getId());
 		});
-		me.fireEvent('pick', me, values, recs);
-		if (handler) handler.call(me.scope || me, me, values, recs);
+		me.fireEvent('pick', me, values, recs, button);
+		if (handler) handler.call(me.scope || me, me, values, recs, button);
 	},
 	
 	privates: {
@@ -295,8 +319,13 @@ Ext.define('Sonicle.picker.List', {
 		},
 		
 		onSelectionChange: function(s, sel) {
-			var me = this;
-			me.lookupReference('btnok').setDisabled(sel.length === 0);
+			var me = this,
+					min = me.minSelections,
+					count = sel.length,
+					minCount = Ext.isNumber(min) && (min > 0) ? me.minSelections : 1,
+					disabled = count < minCount;
+			me.lookupReference('btnok').setDisabled(disabled);
+			me.lookupReference('btnyes').setDisabled(disabled);
 			if (me.allowMultiSelection && sel) {
 				me.lookupReference('txtselected').setHtml(Ext.String.htmlEncode(Ext.String.format(me.selectedText, sel.length)));
 			}
