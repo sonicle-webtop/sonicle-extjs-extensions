@@ -101,5 +101,50 @@ Ext.define('Sonicle.overrides.form.field.Text', {
 			rng.move('character', pos);
 			rng.select();
 		}
+	},
+	
+	/**
+	 * Computes some metrics about text selection.
+	 * @returns {Object} An object with `selStart`, `selEnd`, `beforeText`, `text` and `afterText` properties.
+	 */
+	getTextSelection: function() {
+		var me = this,
+				el = me.inputEl;
+		
+		if (el && el.dom) {
+			var dom = el.dom;
+			if (typeof dom.selectionStart === 'number' && typeof dom.selectionEnd === 'number') {
+				if (dom.selectionEnd > dom.selectionStart) {
+					return {
+						selStart: dom.selectionStart,
+						selEnd: dom.selectionEnd,
+						beforeText: dom.value.substr(0, dom.selectionStart),
+						text: dom.value.substr(dom.selectionStart, dom.selectionEnd-dom.selectionStart),
+						afterText: dom.value.substr(dom.selectionEnd)
+					};
+				}
+			} else {
+				var rng = document.selection.createRange(), trng, startRng, endRng;
+				if (rng && (rng.parentElement() === dom)) {
+						trng = dom.createTextRange();
+						trng.moveToBookmark(rng.getBookmark());
+
+						startRng = dom.createTextRange();
+						startRng.collapse(true);
+						startRng.setEndPoint("EndToStart", trng);
+						endRng = dom.createTextRange();
+						endRng.setEndPoint("StartToEnd", trng);
+
+						return {
+							selStart: startRng.text.length,
+							selEnd: startRng.text.length + trng.text.length,
+							beforeText: startRng.text,
+							text: trng.text,
+							afterText: endRng.text
+						};
+					}
+			}
+		}
+		return undefined;
 	}
 });
