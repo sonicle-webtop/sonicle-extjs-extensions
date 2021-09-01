@@ -7,6 +7,9 @@
 Ext.define('Sonicle.grid.ViewDropZone', {
 	extend: 'Ext.view.DropZone',
 	
+	indicatorHtml: '<div class="' + Ext.baseCSSPrefix + 'grid-drop-indicator-left" role="presentation"></div><div class="' + Ext.baseCSSPrefix + 'grid-drop-indicator-right" role="presentation"></div>',
+	indicatorCls: Ext.baseCSSPrefix + 'grid-drop-indicator',
+	
 	/**
 	 * @template
 	 * A `true` function by default, but provided so that you can disable dragging 
@@ -29,11 +32,16 @@ Ext.define('Sonicle.grid.ViewDropZone', {
 	 */
 	handleNodeDrop: Ext.emptyFn,
 	
+	/**
+	 * Override original onNodeOver to recalculate valid value using isDropAllowed
+	 */
 	onNodeOver: function(node, dragZone, e, data) {
 		var me = this,
-				view = me.view,
-				overRecord = view.getRecord(node);
+				overRecord = me.view.getRecord(node);
 		
+		if (!Ext.Array.contains(data.records, overRecord)) {
+			me.positionIndicator(node, data, e);
+		}
 		me.valid = me.isDropAllowed(me.view, overRecord, node, data, e, dragZone) === true;
 		return me.valid ? me.dropAllowed : me.dropNotAllowed;
 	}
