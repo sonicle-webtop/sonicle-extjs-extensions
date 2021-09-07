@@ -104,7 +104,7 @@ Ext.define('Sonicle.grid.column.Nest', {
 				html += '<i class="' + cls + ' fa ' + toolCls + '" data-qtip="'+ tip +'" style="' + style + '"></i>';
 			}
 		} else if (isChild) {
-			html += '<span class="' + me.hierarchySymbolExtraCls + '">' + Sonicle.grid.column.Nest.hierarchySvg() + '</span>';
+			html += '<span class="' + me.hierarchySymbolExtraCls + '" style="padding-left:20px;">' + Sonicle.grid.column.Nest.hierarchySvg() + '</span>';
 		}
 		html += '</div>';
 		return html + '<div class="' + wrapCls + '">' + ohtml + '</div>';

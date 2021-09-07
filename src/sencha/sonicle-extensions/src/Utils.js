@@ -104,26 +104,26 @@ Ext.define('Sonicle.Utils', {
 	},
 	
 	/**
-	 * Copies the specified property value from 'source' into the target `object`.
+	 * Copies the specified property value from Source `object` into the Target `object`.
 	 * Undefined values will be ignored, unless applyIfEmpty is active.
 	 * @param {Object} object The receiver of the property.
 	 * @param {Boolean} applyIfEmpty `true` to process empty/undefined values, `false` otherwise.
-	 * @param {Object} config The primary source of the properties.
+	 * @param {Object} sobject The primary source of the properties.
 	 * @param {String} name The property name to look-for in source object.
 	 * @param {String} [newName] The new property name to use in target object, as the above if not specified.
 	 * @param {Function} [parseFn] Optional function used to modify value before writing it.
 	 * @param {Object} [scope] The scope (`this` reference) in which the `parseFn` function will be called.
 	 * @return {Object} returns `object`.
 	 */
-	applyProp: function(object, applyIfEmpty, config, name, newName, parseFn, scope) {
+	applyProp: function(object, applyIfEmpty, sobject, name, newName, parseFn, scope) {
 		if (arguments.length === 4) {
 			newName = name;
 		} else if (arguments.length === 5 && Ext.isFunction(newName)) {
 			parseFn = newName;
 			newName = name;
 		}
-		if (Ext.isObject(object) && Ext.isObject(config) && Ext.isString(name) && (config[name] !== undefined) && (!applyIfEmpty && !Ext.isEmpty(config[name]))) {
-			object[newName] = Ext.isFunction(parseFn) ? Ext.callback(parseFn, scope || this, [config[name]]) : config[name];
+		if (Ext.isObject(object) && Ext.isObject(sobject) && Ext.isString(name) && (sobject[name] !== undefined) && (applyIfEmpty || !Ext.isEmpty(sobject[name]))) {
+			object[newName] = Ext.isFunction(parseFn) ? Ext.callback(parseFn, scope || this, [sobject[name]]) : sobject[name];
 		}
 		return object;
 	},
@@ -202,5 +202,15 @@ Ext.define('Sonicle.Utils', {
 	isGridColumnHidden: function(grid, itemId) {
 		var col = grid.getView().getColumnManager().getHeaderById(itemId);
 		return (col && col.hidden) ? true : false;
+	},
+	
+	/**
+	 * Transforms passed array into a suitable JSON String. If passed value is
+	 * it's not already an array, an array with one item will be retured.
+	 * @param {Object|Object[]} arr The value to use as an array.
+	 * @returns {String}
+	 */
+	toJSONArray: function(arr) {
+		return Ext.JSON.encode(Ext.Array.from(arr));
 	}
 });
