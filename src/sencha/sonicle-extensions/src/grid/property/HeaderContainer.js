@@ -69,7 +69,7 @@ Ext.define('Sonicle.grid.property.HeaderContainer', {
 			itemId: valueField,
 			header: gp.valueColText,
 			dataIndex: valueField,
-			renderer: me.getValueCellRenderer(true),
+			renderer: me.getValueCellRenderer(true, gp.valueEmptyText),
 			editor: {
 				xtype: 'textfield',
 				selectOnFocus: true
@@ -102,7 +102,7 @@ Ext.define('Sonicle.grid.property.HeaderContainer', {
 	},
 	
 	privates: {
-		getValueCellRenderer: function(applyDefValueCls) {
+		getValueCellRenderer: function(applyDefValueCls, emptyText) {
 			return function(val, meta, rec) {
 				var me = this,
 						grid = me.grid,
@@ -119,6 +119,10 @@ Ext.define('Sonicle.grid.property.HeaderContainer', {
 				}
 				if (applyDefValueCls && !Ext.isEmpty(defaultValueField) && val === rec.get(defaultValueField)) {
 					if (Ext.isEmpty(defaultValueCls)) meta.tdCls += grid.notEditableCls;
+				}
+				if (emptyText && Ext.isEmpty(result)) {
+					result = emptyText;
+					if (!Ext.isBlank(grid.valueEmptyCls)) meta.tdCls += grid.valueEmptyCls;
 				}
 				return Ext.util.Format.htmlEncode(result);
 			};

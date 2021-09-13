@@ -32,6 +32,20 @@ Ext.define('Sonicle.grid.property.Panel', {
 	valueField: null,
 	
 	/**
+	 * @cfg {String} [valueEmptyText=undefined]
+	 * The text to display in empty value cells (cells with a value of `undefined`, `null`, or `''`).
+	 * Defaults to `&#160;` aka `&nbsp;`.
+	 */
+	valueEmptyText: '\u00a0',
+	
+	/**
+	 * @cfg {String} [valueEmptyCls=undefined]
+	 * The CSS class to apply to an empty cell to style the emptyText. 
+	 * This class is automatically added and removed as needed depending on the 
+	 * current cell value.
+	 */
+	
+	/**
 	 * @cfg {Boolean} [typeField]
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as property type.
 	 * Leave this empty to handle all value simply as Strings.
