@@ -122,7 +122,7 @@ Ext.define('Sonicle.grid.property.HeaderContainer', {
 				}
 				if (emptyText && Ext.isEmpty(result)) {
 					result = emptyText;
-					if (!Ext.isBlank(grid.valueEmptyCls)) meta.tdCls += grid.valueEmptyCls;
+					if (!Ext.isEmpty(grid.valueEmptyCls)) meta.tdCls += grid.valueEmptyCls;
 				}
 				return Ext.util.Format.htmlEncode(result);
 			};
