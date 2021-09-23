@@ -4,6 +4,17 @@
 .so-nestcolumn-collapsetool-disabled {
 	cursor: default;
 }
-.so-nestcolumn-wrap {
-	display: inline-block;
+.x-grid-cell-inner > .so-nestcolumn-wrap:first-child {
+    display: inline-block;
+}
+.x-grid-cell-inner > .so-nestcolumn-wrap:last-child {
+   display: inline;
+}
+.so-nestcolumn-wrap > .so-iconcolumn-icon {
+    float: none;
+    display: inline-block;
+    vertical-align: top;
+}
+.so-nestcolumn-wrap > .so-iconcolumn-text {
+    vertical-align: top;
 }

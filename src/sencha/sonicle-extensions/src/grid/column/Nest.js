@@ -89,7 +89,9 @@ Ext.define('Sonicle.grid.column.Nest', {
 			if (Ext.isNumber(depth)) margin = 'margin-right:' + depth * me.indentationSize + 'px;';
 		}
 		html += '<div class="' + wrapCls + '" style="';
-		if (isParent || isChild) html += 'width:20px;';
+		//if (isParent || isChild) html += 'width:20px;';
+		if (isParent) html += 'width:15px;';
+		if (isChild) html += 'width:20px;';
 		html += margin + '">';
 		
 		//<svg width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M4.5 2A2.5 2.5 0 015 6.95V8.5a2.5 2.5 0 002.336 2.495L7.5 11h1.55a2.5 2.5 0 110 1H7.5a3.5 3.5 0 01-3.495-3.308L4 8.5V6.95A2.5 2.5 0 014.5 2zm7 8a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm-7-7a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"></path></svg>
