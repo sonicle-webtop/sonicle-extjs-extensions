@@ -81,11 +81,24 @@ Ext.define('Sonicle.String', {
 	
 	/**
 	 * Trims whitespace from either end of a string, leaving spaces within the string intact.
+	 * {@link Sonicle.String#trim Sonicle.String.trim} is alias for {@link Ext.String#trim Ext.String.trim}
 	 * @param {String} s The string to trim.
 	 * @returns {String} The trimmed string.
 	 */
 	trim: function(s) {
 		return Ext.String.trim(s);
+	},
+	
+	/**
+	 * Pads the left side of a string with a specified character.
+	 * {@link Sonicle.String#leftPad Sonicle.String.leftPad} is alias for {@link Ext.String#leftPad Ext.String.leftPad}
+	 * @param {String} s The string to pad.
+	 * @param {Number} size he total length of the output string.
+	 * @param {String} [character=' '] (optional) The character with which to pad the original string.
+	 * @returns {String} The padded string.
+	 */
+	leftPad: function(s, size, character) {
+		return Ext.String.leftPad(s, size, character);
 	},
 	
 	/**
@@ -302,6 +315,7 @@ Ext.define('Sonicle.String', {
 	 * @returns {String} The leftmost characters, null if null String input.
 	 */
 	left: function(s, len) {
+		if (!Ext.isNumber(len) || len < 0) len = 0;
 		return Ext.isEmpty(s) ? s : s.substring(0, len);
 	},
 	
@@ -312,7 +326,8 @@ Ext.define('Sonicle.String', {
 	 * @returns {String} The rightmost characters, null if null String input.
 	 */
 	right: function(s, len) {
-		
+		if (!Ext.isNumber(len) || len < 0) len = 0;
+		return Ext.isEmpty(s) ? s : s.slice(s.length - len, s.length);
 	},
 	
 	/**

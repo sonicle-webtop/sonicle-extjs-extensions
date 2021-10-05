@@ -451,7 +451,7 @@ Ext.define('Sonicle.Date', {
 				args = arguments[1],
 				ln = args.length;
 		for (; i < ln; i++) {
-			dt = Math[max ? 'max' : 'min'](dt, args[i].getTime());
+			if (args[i]) dt = Math[max ? 'max' : 'min'](dt, args[i].getTime());
 		}
 		return new Date(dt);
 	},
@@ -678,6 +678,27 @@ Ext.define('Sonicle.Date', {
 			dur += fnParse(tks[i]) * mul[i];
 		}
 		return dur;
+	},
+	
+	/**
+	 * Rounds time of passed date to nearest minutes.
+	 * https://stackoverflow.com/questions/4968250/how-to-round-time-to-the-nearest-quarter-hour-in-javascript	
+	 * @param {Date} date The date to be rounded
+	 * @param {Integer} minutes Minutes interval to round to.
+	 * @param {nearest|up|down} [method=nearest] Round method.
+	 * @returns {Date} The new rounded Date
+	 */
+	roundTime: function(date, minutes, method) {
+		if (!Ext.isDate(date) || !Ext.isNumber(minutes) || minutes <= 0) return date;
+		var ms = minutes * 60 * 1000,
+			roundFn = 'round';
+		
+		if ('up' === method) {
+			roundFn = 'ceil';
+		} else if ('down' === method) {
+			roundFn = 'floor';
+		}
+		return new Date(Math[roundFn](date.getTime() / ms) * ms);
 	}
 	
 	/*
