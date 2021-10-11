@@ -642,6 +642,7 @@ Ext.define('Sonicle.Date', {
 	
 	/**
 	 * Formats a duration value into a String like XX:XX:XX.
+	 * 2d 34h 34m 400s
 	 * @param {Integer} value Duration value in seconds.
 	 * @returns {String} Duration value string
 	 */
@@ -699,6 +700,53 @@ Ext.define('Sonicle.Date', {
 			roundFn = 'floor';
 		}
 		return new Date(Math[roundFn](date.getTime() / ms) * ms);
+	},
+	
+	/**
+	 * Converts passed value in seconds in a human readable format: like `1y 2d 10h 22m 3s`.
+	 * @param {Integer} seconds Duration value in seconds.
+	 * @param {Object/Boolean} [units] A config object to control time units to use in 
+	 * output: when not provided or set to `true`, all units are activated by default.
+	 * @param {Object} [symbols] A config object that can override defaults units 
+	 * symbols: `['y', 'd', 'h', 'm', 's']`: `y` for years, `d` for days, 
+	 * `h` for hours, `m` for minutes, `s` for seconds.
+	 * @returns {String} Duration value String in readable format
+	 */
+	humanReadableDuration: function(seconds, units, symbols) {
+		if (units === true) units = {};
+		units = Ext.apply({}, units || {}, {years: true, days: true, hours: true, minutes: true, seconds: true});
+		var flo = Math.floor,
+				syms = Ext.isArray(symbols) ? symbols : ['y', 'd', 'h', 'm', 's'],
+				vals = [0, 0, 0, 0, 0],
+				toks = [], v = seconds, i;
+		
+		if (Ext.isNumber(v)) {
+			if (units['years'] === true) {
+				vals[0] = flo(v / 31536000);
+				v = v % 31536000;
+			}
+			if (units['days'] === true) {
+				vals[1] = flo(v / 86400);
+				v = v % 86400;
+			}
+			if (units['hours'] === true) {
+				vals[2] = flo(v / 3600);
+				v = v % 3600;
+			}
+			if (units['minutes'] === true) {
+				vals[3] = flo(v / 60);
+			}
+			if (units['seconds'] === true) {
+				vals[4] = flo(v % 60);
+			}
+		}
+		
+		for (i=0; i<vals.length; i++) {
+			if (vals[i] > 0) {
+				toks.push(vals[i]+''+syms[i]);
+			}
+		}
+		return Sonicle.String.join(toks.length > 2 ? ', ' : ' ', toks);
 	}
 	
 	/*
