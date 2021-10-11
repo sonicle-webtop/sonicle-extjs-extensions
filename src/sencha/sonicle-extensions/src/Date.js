@@ -185,6 +185,19 @@ Ext.define('Sonicle.Date', {
 	},
 	
 	/**
+	 * Parses the passed string using the specified date format.
+	 * {@link Sonicle.Date#parse Sonicle.Date.parse} is alias for {@link Ext.Date#parse Ext.Date.parse}
+	 * @param {String} input The raw date string.
+	 * @param {String} format The expected date string format.
+	 * @param {Boolean} [strict=false] (optional) `true` to validate date strings while parsing (i.e. prevents JavaScript Date "rollover").
+	 * Invalid date strings will return `null` when parsed.
+	 * @return {Date/null} The parsed Date, or `null` if an invalid date string.
+	 */
+	parse: function(input, format, strict) {
+		return Ext.Date.parse(input, format, strict);
+	},
+	
+	/**
 	 * Get the day name (localized) for the given day number.
 	 * @param {Number} day A zero-based day number (0=sunday, 1=monday, etc...).
 	 * @param {Boolean} [lowercase] True to return a lowercase value.
@@ -244,7 +257,7 @@ Ext.define('Sonicle.Date', {
 	
 	/**
 	 * Returns the time duration between two dates in the specified units. For finding the number of
-	 * calendar days (ignoring time) between two dates use {@link Extensible.Date.diffDays diffDays} instead.
+	 * calendar days (ignoring time) between two dates use {@link Sonicle.Date.diffDays diffDays} instead.
 	 * @param {Date} start The start date
 	 * @param {Date} end The end date
 	 * @param {String} [unit=millis] The time unit to return. Valid values are 'millis' (the default),
