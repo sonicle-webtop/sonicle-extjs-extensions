@@ -642,7 +642,6 @@ Ext.define('Sonicle.Date', {
 	
 	/**
 	 * Formats a duration value into a String like XX:XX:XX.
-	 * 2d 34h 34m 400s
 	 * @param {Integer} value Duration value in seconds.
 	 * @returns {String} Duration value string
 	 */
