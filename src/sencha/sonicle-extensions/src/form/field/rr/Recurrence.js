@@ -108,6 +108,8 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 	 */
 	rrule: null,
 	
+	suspendOnRRuleCfgChange: 0,
+	
 	constructor: function(cfg) {
 		var me = this;
 		me.callParent([cfg]);
@@ -121,37 +123,39 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		me.items = [{
 			xtype: 'fieldcontainer',
 			layout: 'anchor',
-			items: [{
-				xtype: 'combo',
-				itemId: 'freqcbo',
-				editable: false,
-				typeAhead: false,
-				forceSelection: true,
-				triggerAction: 'all',
-				store: {
-					type: 'array',
-					autoLoad: true,
-					fields: [
-						{name: 'id', type: 'string'},
-						{name: 'desc', type: 'string'}
-					],
-					data: me.buildFreqComboData(me.freqOptions)
-				},
-				valueField: 'id',
-				displayField: 'desc',
-				listeners: {
-					beforeselect: function(s, rec) {
-						if ((rec.get('id') === 'raw') && (me.getAllowRawFreqSelection() === false)) {
-							return false;
-						} else {
-							return true;
-						}
+			items: [
+				{
+					xtype: 'combo',
+					itemId: 'freqcbo',
+					editable: false,
+					typeAhead: false,
+					forceSelection: true,
+					triggerAction: 'all',
+					store: {
+						type: 'array',
+						autoLoad: true,
+						fields: [
+							{name: 'id', type: 'string'},
+							{name: 'desc', type: 'string'}
+						],
+						data: me.buildFreqComboData(me.freqOptions)
 					},
-					select: function(s, rec) {
-						me.onFrequencyChange(rec.get('id'));
+					valueField: 'id',
+					displayField: 'desc',
+					listeners: {
+						beforeselect: function(s, rec) {
+							if ((rec.get('id') === 'raw') && (me.getAllowRawFreqSelection() === false)) {
+								return false;
+							} else {
+								return true;
+							}
+						},
+						select: function(s, rec) {
+							me.onFrequencyChange(rec.get('id'));
+						}
 					}
 				}
-			}]
+			]
 		}, {
 			xtype: 'container',
 			itemId: 'optsct',
@@ -167,41 +171,43 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 				}
 			},
 			layout: 'card',
-			items: [{
-				xtype: 'sorrdaily',
-				itemId: me.optsCtItemId(RRule.DAILY),
-				onEveryText: me.onEveryText,
-				onEveryWeekdayText: me.onEveryWeekdayText,
-				dayText: me.dayText
-			}, {
-				xtype: 'sorrweekly',
-				itemId: me.optsCtItemId(RRule.WEEKLY),
-				onEveryText: me.onEveryText,
-				weekText: me.weekText
-			}, {
-				xtype: 'sorrmonthly',
-				itemId: me.optsCtItemId(RRule.MONTHLY),
-				onTheText: me.onTheText,
-				thDayText: me.thDayText,
-				ofEveryText: me.ofEveryText,
-				ordinalsTexts: me.ordinalsTexts,
-				byDayText: me.byDayText,
-				byWeekdayText: me.byWeekdayText,
-				byWeText: me.byWeText,
-				monthText: me.monthText
-			}, {
-				xtype: 'sorryearly',
-				itemId: me.optsCtItemId(RRule.YEARLY),
-				onDayText: me.onDayText,
-				onTheText: me.onTheText,
-				ofText: me.ofText,
-				ofEveryText: me.ofEveryText,
-				ordinalsTexts: me.ordinalsTexts,
-				byDayText: me.byDayText,
-				byWeekdayText: me.byWeekdayText,
-				byWeText: me.byWeText,
-				yearText: me.yearText
-			}]
+			items: [
+				{
+					xtype: 'sorrdaily',
+					itemId: me.optsCtItemId(RRule.DAILY),
+					onEveryText: me.onEveryText,
+					onEveryWeekdayText: me.onEveryWeekdayText,
+					dayText: me.dayText
+				}, {
+					xtype: 'sorrweekly',
+					itemId: me.optsCtItemId(RRule.WEEKLY),
+					onEveryText: me.onEveryText,
+					weekText: me.weekText
+				}, {
+					xtype: 'sorrmonthly',
+					itemId: me.optsCtItemId(RRule.MONTHLY),
+					onTheText: me.onTheText,
+					thDayText: me.thDayText,
+					ofEveryText: me.ofEveryText,
+					ordinalsTexts: me.ordinalsTexts,
+					byDayText: me.byDayText,
+					byWeekdayText: me.byWeekdayText,
+					byWeText: me.byWeText,
+					monthText: me.monthText
+				}, {
+					xtype: 'sorryearly',
+					itemId: me.optsCtItemId(RRule.YEARLY),
+					onDayText: me.onDayText,
+					onTheText: me.onTheText,
+					ofText: me.ofText,
+					ofEveryText: me.ofEveryText,
+					ordinalsTexts: me.ordinalsTexts,
+					byDayText: me.byDayText,
+					byWeekdayText: me.byWeekdayText,
+					byWeText: me.byWeText,
+					yearText: me.yearText
+				}
+			]
 		}, {
 			xtype: 'container',
 			itemId: 'durct',
@@ -216,21 +222,23 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 					scope: me
 				}
 			},
-			items: [{
-				xtype: 'fieldset',
-				collapsed: true,
-				anchor: '100%',
-				width: '100%',
-				title: me.endsText
-			}, {
-				xtype: 'sorrduration',
-				itemId: 'dur',
-				endsText: me.endsText,
-				endsNeverText: me.endsNeverText,
-				endsAfterText: me.endsAfterText,
-				endsByText: me.endsByText,
-				occurrenceText: me.occurrenceText
-			}]	
+			items: [
+				{
+					xtype: 'fieldset',
+					collapsed: true,
+					anchor: '100%',
+					width: '100%',
+					title: me.endsText
+				}, {
+					xtype: 'sorrduration',
+					itemId: 'dur',
+					endsText: me.endsText,
+					endsNeverText: me.endsNeverText,
+					endsAfterText: me.endsAfterText,
+					endsByText: me.endsByText,
+					occurrenceText: me.occurrenceText
+				}
+			]	
 		}, {
 			xtype: 'textfield',
 			itemId: 'rawfld',
@@ -279,7 +287,9 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 			rr = me.fromRRuleString(value);
 			me.rrule = rr ? rr : null;
 		}
-		me.configureUi(me.rrule ? me.rrule.origOptions.freq : 'none', me.rrule);
+		if (me.suspendOnRRuleCfgChange === 0) {
+			me.configureUi(me.rrule ? me.rrule.origOptions.freq : 'none', me.rrule);
+		}
 		me.checkChange();
 		return me;
 	},
@@ -296,108 +306,6 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		}
 	},
 	
-	configureUi: function(freq, rrule) {
-		var me = this,
-				freqCbo = me.getComponent(0).getComponent('freqcbo'),
-				optsCt = me.getComponent('optsct'),
-				durCt = me.getComponent('durct'),
-				rawFld = me.getComponent('rawfld');
-		
-		rawFld.setValue(rrule ? rrule.toString() : null);
-		
-		if (freq === 'none') {
-			optsCt.hide();
-			durCt.hide();
-			rawFld.hide();
-			
-		} else if (freq === 'raw') {
-			optsCt.hide();
-			durCt.hide();
-			rawFld.show();
-			
-		} else {
-			var ok = true;
-			if (rrule !== undefined) {
-				ok = optsCt.getComponent(me.optsCtItemId(freq)).setRRule(rrule);
-				if (ok) durCt.getComponent('dur').setRRule(rrule);
-			}
-			if (ok) {
-				optsCt.setActiveItem(me.optsCtItemId(freq));
-				optsCt.show();
-				durCt.show();
-				rawFld.hide();
-				
-			} else {
-				freq = 'raw';
-				optsCt.hide();
-				durCt.hide();
-				rawFld.show();
-			}
-		}
-		freqCbo.setValue(freq);
-	},
-	
-	onFrequencyChange: function(freq) {
-		var me = this, cfg;
-		if (freq === 'none') {
-			me.setValue(null);
-		} else if (freq === 'raw') {
-			me.configureUi('raw', me.rrule);
-		} else {
-			cfg = me.buildRRuleCfg(null, null);
-			me.setValue(new RRule(cfg).toString());
-		}
-		me.fireEvent('select', me, freq);
-	},
-	
-	onRRuleCfgChange: function(s, rrCfg) {
-		var me = this, cfg;
-		if (s.isXType('sorrduration')) {
-			cfg = me.buildRRuleCfg(null, rrCfg);
-		} else {
-			cfg = me.buildRRuleCfg(rrCfg, null);
-		}
-		me.setValue(new RRule(cfg).toString());
-	},
-	
-	buildRRuleCfg: function(freqCfg, durCfg) {
-		var me = this,
-				freqCbo, optsCt, durCt, freqCmp;
-		
-		if (!freqCfg) {
-			freqCbo = me.getComponent(0).getComponent('freqcbo');
-			optsCt = me.getComponent('optsct');
-			freqCmp = optsCt.getComponent(me.optsCtItemId(freqCbo.getValue()));
-			if (freqCmp) freqCfg = freqCmp.getRRuleConfig();
-		}
-		if (!durCfg) {
-			durCt = me.getComponent('durct');
-			durCfg = durCt.getComponent('dur').getRRuleConfig();
-		}
-		return Ext.apply(freqCfg, durCfg);
-	},
-	
-	buildFreqComboData: function(freqOptions) {
-		var me = this,
-				freqTexts = me.frequencyTexts,
-				data = [], freq;
-		data.push(['none', freqTexts['none']]);
-		for (var i=0; i < freqOptions.length; i++) {
-			freq = freqOptions[i];
-			data.push([freq+'', freqTexts[freq]]);
-		}
-		data.push(['raw', freqTexts['raw']]);
-		return data;
-	},
-	
-	fromRRuleString: function(s) {
-		try {
-			return RRule.fromString(s);
-		} catch(err) {
-			return false;
-		}
-	},
-	
 	privates: {
 		checkAvail: function() {
 			if (!this.isAvailRRule) Ext.raise('Library RRule is required (see https://github.com/jakubroztocil/rrule)');
@@ -405,6 +313,110 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		
 		optsCtItemId: function(freq) {
 			return 'freq-'+freq;
+		},
+		
+		configureUi: function(freq, rrule) {
+			var me = this,
+					freqCbo = me.getComponent(0).getComponent('freqcbo'),
+					optsCt = me.getComponent('optsct'),
+					durCt = me.getComponent('durct'),
+					rawFld = me.getComponent('rawfld');
+
+			rawFld.setValue(rrule ? rrule.toString() : null);
+
+			if (freq === 'none') {
+				optsCt.hide();
+				durCt.hide();
+				rawFld.hide();
+
+			} else if (freq === 'raw') {
+				optsCt.hide();
+				durCt.hide();
+				rawFld.show();
+
+			} else {
+				var ok = true;
+				if (rrule !== undefined) {
+					ok = optsCt.getComponent(me.optsCtItemId(freq)).setRRule(rrule);
+					if (ok) durCt.getComponent('dur').setRRule(rrule);
+				}
+				if (ok) {
+					optsCt.setActiveItem(me.optsCtItemId(freq));
+					optsCt.show();
+					durCt.show();
+					rawFld.hide();
+
+				} else {
+					freq = 'raw';
+					optsCt.hide();
+					durCt.hide();
+					rawFld.show();
+				}
+			}
+			freqCbo.setValue(freq);
+		},
+
+		onFrequencyChange: function(freq) {
+			var me = this, cfg;
+			if (freq === 'none') {
+				me.setValue(null);
+			} else if (freq === 'raw') {
+				me.configureUi('raw', me.rrule);
+			} else {
+				cfg = me.buildRRuleCfg(null, null);
+				me.setValue(new RRule(cfg).toString());
+			}
+			me.fireEvent('select', me, freq);
+		},
+
+		onRRuleCfgChange: function(s, rrCfg) {
+			var me = this, cfg;
+			if (s.isXType('sorrduration')) {
+				cfg = me.buildRRuleCfg(null, rrCfg);
+			} else {
+				cfg = me.buildRRuleCfg(rrCfg, null);
+			}
+			me.suspendOnRRuleCfgChange++;
+			me.setValue(new RRule(cfg).toString());
+			me.suspendOnRRuleCfgChange--;
+		},
+		
+		buildRRuleCfg: function(freqCfg, durCfg) {
+			var me = this,
+					freqCbo, optsCt, durCt, freqCmp;
+
+			if (!freqCfg) {
+				freqCbo = me.getComponent(0).getComponent('freqcbo');
+				optsCt = me.getComponent('optsct');
+				freqCmp = optsCt.getComponent(me.optsCtItemId(freqCbo.getValue()));
+				if (freqCmp) freqCfg = freqCmp.getRRuleConfig();
+			}
+			if (!durCfg) {
+				durCt = me.getComponent('durct');
+				durCfg = durCt.getComponent('dur').getRRuleConfig();
+			}
+			return Ext.apply(freqCfg, durCfg);
+		},
+
+		buildFreqComboData: function(freqOptions) {
+			var me = this,
+					freqTexts = me.frequencyTexts,
+					data = [], freq;
+			data.push(['none', freqTexts['none']]);
+			for (var i=0; i < freqOptions.length; i++) {
+				freq = freqOptions[i];
+				data.push([freq+'', freqTexts[freq]]);
+			}
+			data.push(['raw', freqTexts['raw']]);
+			return data;
+		},
+
+		fromRRuleString: function(s) {
+			try {
+				return RRule.fromString(s);
+			} catch(err) {
+				return false;
+			}
 		}
 	}
 });

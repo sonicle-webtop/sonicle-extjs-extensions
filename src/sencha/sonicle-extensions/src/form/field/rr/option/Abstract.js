@@ -46,71 +46,27 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 	 * This method must be overridden into child classes 
 	 * to implement required custom logic.
 	 * 
-	 * @param {RRule} rr The RRule instance.
-	 * @return {Boolean}
-	 */
-	validateRRule: function(rr) {
-		Ext.raise('Override me');
-	},
-	
-	/**
-	 * This method should be overridden into child classes 
-	 * to implement required custom logic.
-	 * 
-	 * @param {RRule} rr The RRule instance.
-	 */
-	applyRRule: function(rr) {
-		
-	},
-	
-	/**
-	 * This method should be overridden into child classes 
-	 * to implement required custom logic.
-	 * 
-	 * @param {Ext.form.field.Base} field
-	 * @return {Boolean}
-	 */
-	shouldSkipChange: function(field) {
-		return false;
-	},
-	
-	/**
-	 * This method must be overridden into child classes 
-	 * to implement required custom logic.
-	 * 
 	 * @return {Object} RRule configuration
 	 */
 	getRRuleConfig: function() {
 		Ext.raise('Override me');
 	},
 	
-	/**
-	 * This method can be overridden into child classes 
-	 * to implement required custom logic.
-	 * 
-	 * @return {Object} Dynamic default configuration.
-	 */
-	calculateVMDataDefaults: function() {
-		return {};
-	},
-	
-	/**
-	 * This method must be overridden into child classes
-	 * to implement required custom logic.
-	 * 
-	 * @return {Object} Base default configuration.
-	 */
-	returnVMDataDefaults: function() {
-		Ext.raise('Override me');
-	},
-	
 	setStartDate: function(value) {
-		var me = this;
+		var me = this,
+				isDate = Ext.isDate,
+				changed = isDate(me.startDate) && isDate(value) ? Sonicle.Date.compare(me.startDate, value, false, true) !== 0 : me.startDate !== value,
+				vm;
 		me.startDate = value;
-		if (Ext.isDate(value)) {
-			if (me.rrule && !me.validateRRule(me.rrule)) {
-				me.getViewModel().set(me.getVMData());
-			}
+		if (changed && Ext.isDate(value)) {
+			vm = me.getViewModel();
+			me.suspendOnChange++;
+			me.getVMData(); // Make sure that data is initialized!
+			Ext.iterate(me.calculateVMDataDefaults(), function(key, value) {
+				vm.set('data.'+key, value);
+			});
+			me.startRRuleCfgChangeTask();
+			Ext.defer(function() { me.suspendOnChange--; }, 200);
 		}
 	},
 	
@@ -123,9 +79,7 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 			if (me.validateRRule(value) !== false) {
 				me.suspendOnChange++;
 				me.applyRRule(value);
-				Ext.defer(function() {
-					me.suspendOnChange--;
-				}, 200);
+				Ext.defer(function() { me.suspendOnChange--; }, 200);
 				return true;
 			} else {
 				return false;
@@ -133,114 +87,168 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 		}
 	},
 	
-	getVMData: function() {
-		var me = this,
-				vm = me.getViewModel(),
-				data = vm.getData();
+	privates: {
+		/**
+		 * This method must be overridden into child classes 
+		 * to implement required custom logic.
+		 * 
+		 * @param {RRule} rr The RRule instance.
+		 * @return {Boolean}
+		 */
+		validateRRule: function(rr) {
+			Ext.raise('Override me');
+		},
 		
-		if (data.opt1 !== null) {
-			return data;
-		} else {
-			data = Ext.apply({}, me.calculateVMDataDefaults(), me.returnVMDataDefaults());
-			vm.setData(data);
-			return data;
-		}
-	},
-	
-	optionSelectorOnChange: function(s, nv, ov) {
-		var me = this;
-		// Skip value changes originating from code/binding, we are interested
-		// only in changes coming from user interaction.
-		if (s.isXType('radiofield')) {
-			// For radio fields we cannot rely on oldValue (is oldValue null?); 
-			// we must use a private duringSetValue flag.
-			if (!s.duringSetValue && (nv === true)) me.onRRuleCfgChange();
-		}
-	},
-	
-	fieldOnChange: function(s, nv, ov) {
-		var me = this;
-		if (me.shouldSkipChange(s) === false) {
-			if (s.isXType('combo')) {
-				// Within combos this is called by the select event in which
-				// new and old values are not available. It' always a valid change.
-				me.onRRuleCfgChange();
-			} else if (s.isXType('checkboxfield') || s.isXType('radiofield')) {
-				// For checkbox and radio fields we cannot rely on oldValue 
-				// (is oldValue null?); we must use a private duringSetValue flag.
-				if (!s.duringSetValue) me.onRRuleCfgChange();
+		/**
+		 * This method should be overridden into child classes 
+		 * to implement required custom logic.
+		 * 
+		 * @param {RRule} rr The RRule instance.
+		 */
+		applyRRule: function(rr) {
+
+		},
+		
+		/**
+		 * This method should be overridden into child classes 
+		 * to implement required custom logic.
+		 * 
+		 * @param {Ext.form.field.Base} field
+		 * @return {Boolean}
+		 */
+		shouldSkipChange: function(field) {
+			return false;
+		},
+		
+		/**
+		 * This method can be overridden into child classes 
+		 * to implement required custom logic.
+		 * 
+		 * @return {Object} Dynamic default configuration.
+		 */
+		calculateVMDataDefaults: function() {
+			return {};
+		},
+
+		/**
+		 * This method must be overridden into child classes
+		 * to implement required custom logic.
+		 * 
+		 * @return {Object} Base default configuration.
+		 */
+		returnVMDataDefaults: function() {
+			Ext.raise('Override me');
+		},
+		
+		fieldOnChange: function(s, nv, ov) {
+			var me = this;
+			if (me.shouldSkipChange(s) === false) {
+				if (s.isXType('combo')) {
+					// Within combos this is called by the select event in which
+					// new and old values are not available. It' always a valid change.
+					me.onRRuleCfgChange();
+				} else if (s.isXType('checkboxfield') || s.isXType('radiofield')) {
+					// For checkbox and radio fields we cannot rely on oldValue 
+					// (is oldValue null?); we must use a private duringSetValue flag.
+					if (!s.duringSetValue) me.onRRuleCfgChange();
+				} else {
+					//if (ov !== null) me.onRRuleCfgChange();
+					me.onRRuleCfgChange();
+				}
+			}
+		},
+		
+		optionSelectorOnChange: function(s, nv, ov) {
+			var me = this;
+			// Skip value changes originating from code/binding, we are interested
+			// only in changes coming from user interaction.
+			if (s.isXType('radiofield')) {
+				// For radio fields we cannot rely on oldValue (is oldValue null?); 
+				// we must use a private duringSetValue flag.
+				if (!s.duringSetValue && (nv === true)) me.onRRuleCfgChange();
+			}
+		},
+		
+		onRRuleCfgChange: function() {
+			if (this.suspendOnChange === 0) this.startRRuleCfgChangeTask();
+		},
+		
+		getVMData: function() {
+			var me = this,
+					vm = me.getViewModel(),
+					data = vm.get('data');
+
+			if (data.opt1 !== null) {
+				return data;
 			} else {
-				//if (ov !== null) me.onRRuleCfgChange();
-				me.onRRuleCfgChange();
+				data = Ext.apply({}, me.calculateVMDataDefaults(), me.returnVMDataDefaults());
+				vm.set('data', data);
+				return data;
 			}
-		}
-	},
-	
-	onRRuleCfgChange: function() {
-		if (this.suspendOnChange === 0) this.startRRuleCfgChangeTask();
-	},
-	
-	startRRuleCfgChangeTask: function() {
-		var me = this,
-				task = me.rruleCfgChangeTask;
-		if (!task) {
-			me.rruleCfgChangeTask = task = new Ext.util.DelayedTask(me.doRRuleCfgChangeTask, me);
-		}
-		task.delay(me.rruleCfgChangeBuffer);
-	},
-	
-	doRRuleCfgChangeTask: function() {
-		this.fireEvent('rrulecfgchange', this, this.getRRuleConfig());
-	},
-	
-	asArray: function(item) {
-		if (Ext.isArray(item)) {
-			return item;
-		} else {
-			return Ext.isDefined(item) ? [item] : [];
-		}
-	},
-	
-	byWeekdayToJsWeekday: function(byWeekday) {
-		if (Ext.isArray(byWeekday)) {
-			var arr = [];
-			for (var i=0; i<byWeekday.length; i++) {
-				arr.push(byWeekday[i].getJsWeekday());
+		},
+		
+		startRRuleCfgChangeTask: function() {
+			var me = this,
+					task = me.rruleCfgChangeTask;
+			if (!task) {
+				me.rruleCfgChangeTask = task = new Ext.util.DelayedTask(me.doRRuleCfgChangeTask, me);
 			}
-			return arr;
-		} else {
-			return byWeekday.getJsWeekday();
-		}
-	},
-	
-	jsWeekdayToByWeekday: function(jsWeekday) {
-		if (Ext.isArray(jsWeekday)) {
-			var arr = [];
-			for (var i=0; i<jsWeekday.length; i++) {
-				arr.push(this.jsWeekdayToRRuleWeekday(jsWeekday[i]));
+			task.delay(me.rruleCfgChangeBuffer);
+		},
+
+		doRRuleCfgChangeTask: function() {
+			this.fireEvent('rrulecfgchange', this, this.getRRuleConfig());
+		},
+
+		asArray: function(item) {
+			if (Ext.isArray(item)) {
+				return item;
+			} else {
+				return Ext.isDefined(item) ? [item] : [];
 			}
-			return arr;
-		} else {
-			return this.jsWeekdayToRRuleWeekday(jsWeekday);
-		}
-	},
-	
-	jsWeekdayToRRuleWeekday: function(jsWeekday) {
-		switch(jsWeekday) {
-			case 0:
-				return RRule.SU;
-			case 1:
-				return RRule.MO;
-			case 2:
-				return RRule.TU;
-			case 3:
-				return RRule.WE;
-			case 4:
-				return RRule.TH;
-			case 5:
-				return RRule.FR;
-			case 6:
-				return RRule.SA;
+		},
+
+		byWeekdayToJsWeekday: function(byWeekday) {
+			if (Ext.isArray(byWeekday)) {
+				var arr = [];
+				for (var i=0; i<byWeekday.length; i++) {
+					arr.push(byWeekday[i].getJsWeekday());
+				}
+				return arr;
+			} else {
+				return byWeekday.getJsWeekday();
+			}
+		},
+
+		jsWeekdayToByWeekday: function(jsWeekday) {
+			if (Ext.isArray(jsWeekday)) {
+				var arr = [];
+				for (var i=0; i<jsWeekday.length; i++) {
+					arr.push(this.jsWeekdayToRRuleWeekday(jsWeekday[i]));
+				}
+				return arr;
+			} else {
+				return this.jsWeekdayToRRuleWeekday(jsWeekday);
+			}
+		},
+
+		jsWeekdayToRRuleWeekday: function(jsWeekday) {
+			switch(jsWeekday) {
+				case 0:
+					return RRule.SU;
+				case 1:
+					return RRule.MO;
+				case 2:
+					return RRule.TU;
+				case 3:
+					return RRule.WE;
+				case 4:
+					return RRule.TH;
+				case 5:
+					return RRule.FR;
+				case 6:
+					return RRule.SA;
+			}
 		}
 	}
 });

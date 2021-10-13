@@ -12,11 +12,13 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 	
 	viewModel: {
 		data: {
-			opt1: null,
-			opt2: null,
-			count: null,
-			opt3: null,
-			until: null
+			data: {
+				opt1: null,
+				opt2: null,
+				count: null,
+				opt3: null,
+				until: null
+			}
 		}
 	},
 	
@@ -32,7 +34,7 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 			xtype: 'radiofield',
 				itemId: 'opt1',
 				name: me.id + '-endmode',
-				bind: '{opt1}',
+				bind: '{data.opt1}',
 				boxLabel: me.endsNeverText,
 				listeners: {
 					change: me.optionSelectorOnChange,
@@ -43,7 +45,7 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 				xtype: 'radiofield',
 				itemId: 'opt2',
 				name: me.id + '-endmode',
-				bind: '{opt2}',
+				bind: '{data.opt2}',
 				boxLabel: me.endsAfterText,
 				listeners: {
 					change: me.optionSelectorOnChange,
@@ -52,7 +54,7 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 			}, {
 				xtype: 'numberfield',
 				itemId: 'opt2-count',
-				bind: '{count}',
+				bind: '{data.count}',
 				minValue: 1,
 				maxValue: 99,
 				allowDecimals: false,
@@ -71,7 +73,7 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 				xtype: 'radiofield',
 				itemId: 'opt3',
 				name: me.id + '-endmode',
-				bind: '{opt3}',
+				bind: '{data.opt3}',
 				listeners: {
 					change: me.optionSelectorOnChange,
 					scope: me
@@ -80,7 +82,7 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 			}, {
 				xtype: 'datefield',
 				itemId: 'opt3-until',
-				bind: '{until}',
+				bind: '{data.until}',
 				startDay: me.startDay,
 				format: me.dateFormat,
 				allowBlank: false,
@@ -90,52 +92,6 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 				},
 				width: 120
 		}]);
-	},
-	
-	fieldOnChange: function(s, nv, ov) {
-		var me = this, vm = me.getViewModel();
-		if (me.suspendOnChange === 0) {
-			vm.set('opt1', false);
-			vm.set('opt2', false);
-			vm.set('opt3', false);
-			vm.set(s.getItemId().split('-')[0], true);
-		}
-		me.callParent(arguments);
-	},
-	
-	shouldSkipChange: function(field) {
-		var data = this.getViewModel().getData();
-		if ((data.opt1 === true) && (field.getItemId().indexOf('opt1-') === -1)) return true;
-		if ((data.opt2 === true) && (field.getItemId().indexOf('opt2-') === -1)) return true;
-		if ((data.opt3 === true) && (field.getItemId().indexOf('opt3-') === -1)) return true;
-		return false;
-	},
-	
-	validateRRule: function(rr) {
-		return true;
-	},
-	
-	applyRRule: function(rr) {
-		var me = this,
-				rrCfg = rr.origOptions,
-				data = Ext.apply(me.getVMData(), {
-					opt1: false,
-					opt2: false,
-					opt3: false
-				});
-		
-		if (me.isOpt2(rrCfg)) {
-			data.opt2 = true;
-			data.count = rrCfg.count;
-		} else if (me.isOpt3(rrCfg)) {
-			data.opt3 = true;
-			data.until = rrCfg.until;
-			//data.until = Ext.Date.utcToLocal(rrCfg.until);
-		} else {
-			data.opt1 = true;
-		}
-		
-		me.getViewModel().set(data);
 	},
 	
 	getRRuleConfig: function() {
@@ -157,32 +113,80 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 		}
 	},
 	
-	isOpt2: function(rrCfg) {
-		return Ext.isDefined(rrCfg.count);
-	},
-	
-	isOpt3: function(rrCfg) {
-		return Ext.isDefined(rrCfg.until);
-	},
-	
-	calculateVMDataDefaults: function() {
-		var stDt = this.startDate;
-		if (Ext.isDate(stDt)) {
+	privates: {
+		validateRRule: function(rr) {
+			return true;
+		},
+		
+		applyRRule: function(rr) {
+			var me = this,
+					rrCfg = rr.origOptions,
+					data = Ext.apply(me.getVMData(), {
+						opt1: false,
+						opt2: false,
+						opt3: false
+					});
+
+			if (me.isOpt2(rrCfg)) {
+				data.opt2 = true;
+				data.count = rrCfg.count;
+			} else if (me.isOpt3(rrCfg)) {
+				data.opt3 = true;
+				data.until = rrCfg.until;
+				//data.until = Ext.Date.utcToLocal(rrCfg.until);
+			} else {
+				data.opt1 = true;
+			}
+
+			me.getViewModel().set('data', data);
+		},
+		
+		shouldSkipChange: function(field) {
+			var data = this.getVMData();
+			if ((data.opt1 === true) && (field.getItemId().indexOf('opt1-') === -1)) return true;
+			if ((data.opt2 === true) && (field.getItemId().indexOf('opt2-') === -1)) return true;
+			if ((data.opt3 === true) && (field.getItemId().indexOf('opt3-') === -1)) return true;
+			return false;
+		},
+		
+		calculateVMDataDefaults: function() {
+			var stDt = this.startDate;
+			if (Ext.isDate(stDt)) {
+				return {
+					until: stDt
+				};
+			} else {
+				return {};
+			}
+		},
+
+		returnVMDataDefaults: function() {
 			return {
-				until: stDt
+				opt1: true,
+				opt2: false,
+				count: 1,
+				opt3: false,
+				until: new Date()
 			};
-		} else {
-			return {};
+		},
+		
+		fieldOnChange: function(s, nv, ov) {
+			var me = this, vm = me.getViewModel();
+			if (me.suspendOnChange === 0) {
+				vm.set('data.opt1', false);
+				vm.set('data.opt2', false);
+				vm.set('data.opt3', false);
+				vm.set('data.'+s.getItemId().split('-')[0], true);
+			}
+			me.callParent(arguments);
+		},
+		
+		isOpt2: function(rrCfg) {
+			return Ext.isDefined(rrCfg.count);
+		},
+
+		isOpt3: function(rrCfg) {
+			return Ext.isDefined(rrCfg.until);
 		}
-	},
-	
-	returnVMDataDefaults: function() {
-		return {
-			opt1: true,
-			opt2: false,
-			count: 1,
-			opt3: false,
-			until: new Date()
-		};
 	}
 });
