@@ -511,6 +511,14 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	},
 	
 	/**
+	 * Returns browser's default ForeColor.
+	 * @returns {String}
+	 */
+	getBaseForeColor: function() {
+		return '#000000';
+	},
+	
+	/**
 	 * Inserts content at caret position.
 	 * @param {String} content Content to insert.
 	 */
@@ -543,7 +551,8 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 					if (cmp) cmp.setHtmlEditor(me);
 				};
 		
-		//editor.on('keydown', Ext.bind(me.onTMCETextAreaEdKeyDown, me, editor, true));
+		editor.on('keydown', Ext.bind(me.onTMCETextAreaEdKeyDown, me, editor, true));
+		//editor.on('NewBlock', me.onTMCETextAreaEdNewBlock);
 		//editor.on('NodeChange', Ext.bind(me.onTMCETextAreaEdNodeChange, me));
 		//editor.on('OpenWindow', me.onTMCETextAreaEdOpenWindow);
 		//editor.on('CloseWindow', me.onTMCETextAreaEdCloseWindow);
@@ -576,6 +585,28 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 		if (me.pendingFocusOnTMCETextArea) {
 			me.focus.apply(me, me.pendingFocusOnTMCETextArea);
 			delete me.pendingFocusOnTMCETextArea;
+		}
+	},
+	
+	onTMCETextAreaEdKeyDown: function(e, editor) {
+		// Workaround to solve formatting lost in TinyMCE when pressing 
+		// BACKSPACE key twice or clearing all content using DEL key.
+		// https://github.com/tinymce/tinymce/issues/3471
+		// https://github.com/tinymce/tinymce/issues/5139
+		
+		var me = this, node, style;
+		if (e.keyCode === Ext.event.Event.BACKSPACE || e.keyCode === Ext.event.Event.DELETE) {
+			node = me.editorGetSelection({editor: editor});
+			if ('DIV' === node.tagName) {
+				if (node.textContent.length <= 1 && node.innerHTML === '<br data-mce-bogus="1">') {
+					e.preventDefault();
+					e.stopPropagation();
+
+					style = me.getDefaultStyle();
+					node.innerHTML = Sonicle.form.field.tinymce.HTMLEditor.generateStyledContent(style.fontFamily, style.fontSize, style.color, me.getBaseForeColor());
+					return false;
+				}
+			}
 		}
 	},
 	
@@ -682,301 +713,60 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 		}
 	},
 	
-	getTextAreaCfg: function(cfg) {
-		var me = this;
-		if (me.isWysiwyg) {
-			return Ext.apply({
-				xtype: 'sotmcetextarea',
-				editor: Ext.merge({
-					language: me.language,
-					skin: me.skin,
-					plugins: me.buildTMCEPlugins(),
-					quickbars_selection_toolbar: me.buildTMCEQuickbarSelToolbar(),
-					quickbars_insert_toolbar: false,
-					contextmenu: me.buildTMCEContextMenu(),
-					toolbar: false,
-					image_advtab: true,
-					elementpath: me.showElementPath,
-					statusbar: me.showElementPath || me.showWordCount,
-					/*
-					// NB: uppercase letter is used because this value is used to 
-					// compare node name at many places in tinymce library (specially 
-					// in createNewTextBlock function of 'lists' plugin).
-					// Default value was small 'p'.
-					forced_root_block : 'P',
-					forced_root_block_attrs: {
-						'style': 'padding:0; margin:0;' // Flatten space between paragraph blocks (like using </br> line-break)
-					},
-					*/
-					forced_root_block : 'DIV',
-					forced_root_block_attrs: {
-						'style': me.generateDefaultStyles({color: false})
-					},
-					
-					valid_children: '+body[style],+div[style]',
-					entity_encoding : 'numeric', // Force numeric encoding usage, we cannot use 'named+numeric' due to this https://github.com/tinymce/tinymce/issues/3213
-					extended_valid_elements : 'a[name|href|target|title|onclick|dir|style],img[class|src|border=0|alt|title|hspace|vspace|width|height|align|onmouseover|onmouseout|name|style],table[style|dir|class|border=1|cellspacing|cellpadding|bgcolor|id],colgroup,col[style|dir|width],tbody,tr[style|dir|class],td[style|dir|class|colspan|rowspan|width|height],hr[class|width|size|noshade],font[face|size|color|style|dir],span[class|align|style|dir|br],p[class|style|dir|span|br]',
-					invalid_elements: 'object,iframe,script,embed', // Avoid unsafe elements
-					convert_fonts_to_spans: true, // Font elements are deprecated, avoid them!
-					end_container_on_empty_block: true, // Split blocks after pressing ENTER two times (eg. useful for spliting BLOCKQUOTEs)
-					convert_urls: false, // Disable any conversion by the editor
-					relative_urls : false, // When conversion enabled (not this case), try to determine the absolute form of any URL
-					remove_script_host: true, // When conversion enabled & relative_urls is active (not this case), try to remove host and proto from relative URLs
-					link_assume_external_targets: true, // link/autolink: assume URLs to be external
-					target_list: false, // link/autolink: disable named targets
-					default_link_target: '_blank', // link/autolink: set default target
-					link_default_protocol: 'http', // link/autolink: set default protocol
-					link_title: false, // link/autolink: hide title field in edit dialg
-					link_context_toolbar: true, // link/autolink: shows a context management toolbar over links
-					
-					browser_spellcheck: true,
-					// Default <table> styles
-					table_default_styles: {
-						width: '70%',
-						borderSpacing: '0'
-					},
-					paste_data_images: me.pasteAllowBlobImages, // paste: allow pasted images to be inserted as blob images (data:url)
-					powerpaste_allow_local_images: me.pasteAllowBlobImages, // powerpaste: allow pasted images to be inserted as blob images (data:url)
-					powerpaste_word_import: me.pasteWordMode || 'merge',
-					powerpaste_html_import: me.pasteHtmlMode || 'merge',
-					automatic_uploads: true, // Enable automatic upload of inline blob (data:url) using 'images_upload_handler' handler
-					//OLDautomatic_uploads: false, // Disable automatic uploads of images represented by data URLs or blob URIs.
-					images_upload_handler: function(blobInfo, success, failure, progress) {
-						if (!me.uploadBlobImages) {
-							failure(); // Simply signal upload failure, image is left as blob image
-						} else if (Ext.isFunction(me.imagesUploadHandler)) {
-							Ext.callback(me.imagesUploadHandler, me, [blobInfo, success, failure, progress]);
-						} else {
-							failure('imagesUploadHandler callback NOT provided');
-						}
-					},
-					content_style: me.buildContentStyle() + Sonicle.String.deflt(me.contentStyle, '')
-				}, me.tmceExtraConfig || {}),
-				value: me.value,
-				listeners: {
-					editorready: me.onTMCETextAreaEdReady,
-					editorchange: me.onTMCETextAreaEdChange,
-					scope: me
-				}
-			}, cfg || {});
-			
-		} else {
-			return Ext.apply({
-				xtype: 'sotmceplaintextarea',
-				value: me.value,
-				listeners: {
-					change: me.onTextAreaChange,
-					scope: me
-				}
-			}, cfg || {});
+	getDefaultStyle: function(opts) {
+		opts = opts || {};
+		var me = this,
+				style = {};
+		if (opts.fontFamily !== false) {
+			style['fontFamily'] = me.defFontFamily;
 		}
+		if (opts.fontSize !== false) {
+			style['fontSize'] = me.defFontSize;
+		}
+		if (opts.color !== false) {
+			style['color'] = me.defColor || me.getBaseForeColor();
+		}
+		return style;
 	},
 	
-	buildTMCEPlugins: function() {
-		var me = this;
-		return [
-			'template quickbars',
-			me.pluginPowerPaste ? 'powerpaste' : 'paste',
-			me.enableLists ? 'advlist lists' : '',
-			me.enableEmoticons ? 'emoticons' : '',
-			me.enableSymbols ? 'charmap' : '',
-			me.enableLink ? 'link autolink' : '',
-			me.enableImage ? 'image' : '',
-			me.enableTable ? 'table' : '',
-			me.enableDevTools ? 'codesample ' + (me.pluginAdvCodeEditor ? 'advcode' : 'code') : '',
-			me.showWordCount ? 'wordcount' : ''
-		].join(' ');
-	},
-	
-	buildTMCEQuickbarSelToolbar: function() {
-		var me = this;
-		return [
-			me.enableFormats ? 'bold italic blockquote' : ''
-			// Quicklink plugin seems that does not observe default protocol: 
-			// when the user types an URL without specifying leading protocol, 
-			// newly link become relative to browser base URL.
-			// For now, keep it disabled.
-			//'|',
-			//me.enableLink ? 'quicklink' : ''
-		].join(' ');
-	},
-	
-	buildTMCEContextMenu: function() {
-		var me = this;
-		return [
-			me.enableTable ? 'table' : ''
-		].join(' ');
+	getCurrentStyle: function(opts) {
+		opts = opts || {};
+		var me = this,
+				Tool = Sonicle.form.field.tinymce.tool,
+				ed = opts.editor || me.getEditor(),
+				style = {}, val;
+		if (ed) {
+			if (opts.fontFamily !== false) {
+				val = me.editorQueryCommand('FontName', {editor: ed});
+				style['fontFamily'] = (val || me.defFontFamily);
+			}
+			if (opts.fontSize !== false) {
+				val = me.editorQueryCommand('FontSize', {editor: ed});
+				style['fontSize'] = (val || me.defFontSize);
+			}
+			if (opts.color !== false) {
+				val = Tool.ColorFore.parseColor(me.editorQueryCommand('ForeColor', {editor: ed}));
+				style['color'] = (val || me.defColor);
+			}
+		}
+		return style;
 	},
 	
 	generateDefaultStyles: function(opts) {
-		opts = opts || {};
-		var me = this;
-		return [
-			me.defFontFamily ? 'font-family:' + me.defFontFamily + ';' : '',
-			me.defFontSize ? 'font-size:' + me.defFontSize + ';' : '',
-			me.defColor && opts.color !== false ? 'color:' + me.defColor + ';' : ''
-		].join('');
+		return Ext.dom.Helper.generateStyles(this.getDefaultStyle(opts));
 	},
 	
-	buildContentStyle: function() {
-		return [
-			//TODO: add support to custom style imports. Imports must be extracted an html snippet and then added to this style definition
-			//'@import url("https:/+/fonts.googleapis.com/css2?family=Archivo:wght@300&display=swap");',
-			'body{',
-				'margin:5px;', // Reduce default body margin to not loose too much space
-				'word-wrap:break-word;', // Make sure to break words (present in .mce-content-body class too)
-				this.generateDefaultStyles(),
-			'}'
-		].join('');
-	},
-	
-	getToolbarCfg: function(cfg) {
-		var me = this,
-				SoU = Sonicle.Utils,
-				qtipsEnabled = Ext.quickTipsActive && Ext.tip.QuickTipManager.isEnabled(),
-				tool = function(key, xtype, cfg) {
-					var extraCfg = Ext.apply(cfg || {}, me[key+'Config']),
-							icons = me.toolIcons[key],
-							mainCfg = {
-								xtype: xtype,
-								itemId: key,
-								tooltip: me.getToolTooltip(key, qtipsEnabled),
-								overflowText: me.getToolOvflText(key),
-								tabIndex: -1
-							};
-					if (Ext.isObject(icons)) Ext.apply(mainCfg, icons);
-					return Ext.merge(mainCfg, Ext.apply(me.getToolTexts(key) || {}, extraCfg));
-				},
-				items = [];
-		
-		if (me.enableFont) {
-			items.push(
-				tool('fontselect', 'so-tmcetoolfontselect', SoU.applyIfDefined({}, {
-					fontFormats: me.fonts
-				}))
-			);
-		}
-		if (me.enableFontSize) {
-			items.push(
-				tool('fontsizeselect', 'so-tmcetoolfontsizeselect', SoU.applyIfDefined({}, {
-					fontsizeFormats: me.fontSizes
-				}))
-			);
-		}
-		if (me.enableColors) {
-			if (items.length > 0) items.push('-');
-			items.push(
-				tool('forecolor', 'so-tmcetoolforecolor', SoU.applyIfDefined({}, {
-					colors: me.fontColors,
-					tilesPerRow: me.fontColorsTilesPerRow
-				})),
-				tool('backcolor', 'so-tmcetoolbackcolor', SoU.applyIfDefined({}, {
-					colors: me.fontColors,
-					tilesPerRow: me.fontColorsTilesPerRow
-				}))
-			);
-		}
-		if (me.enableFormats) {
-			if (items.length > 0) items.push('-');
-			items.push(
-				tool('bold', 'so-tmcetoolbold'),
-				tool('italic', 'so-tmcetoolitalic'),
-				tool('underline', 'so-tmcetoolunderline'),
-				tool('formattools', 'so-tmcetoolformattools')
-			);
-		}
-		if (me.enableAlignments || me.enableLists) {
-			if (items.length > 0) items.push('-');
-			if (me.enableAlignments) {
-				items.push(
-					tool('alignselect', 'so-tmcetoolalignselect')
-				);
-			}
-			if (me.enableLists) {
-				items.push(
-					tool('bulllistselect', 'so-tmcetoolbulllistselect'),
-					tool('numlistselect', 'so-tmcetoolnumlistselect')
-				);
-			}
-		}
-		if (me.enableLink || me.enableImage || me.enableEmoticons || me.enableSymbols || me.enableTable) {
-			if (items.length > 0) items.push('-');
-			if (me.enableEmoticons) {
-				items.push(
-					tool('emoticons', 'so-tmcetoolemoticons')
-				);
-			}
-			if (me.enableLink) {
-				items.push(
-					tool('link', 'so-tmcetoollink')
-				);
-			}
-			if (me.enableImage) {
-				items.push(
-					tool('image', 'so-tmcetoolimage')
-				);
-			}
-			if (me.enableTable) {
-				items.push(
-					tool('table', 'so-tmcetooltable')
-				);
-			}
-			if (me.enableSymbols) {
-				items.push(
-					tool('symbols', 'so-tmcetoolsymbols')
-				);
-			}
-		}
-		if (Ext.isObject(me.customTools)) {
-			Ext.iterate(me.customTools, function(key, value) {
-				var indx = Ext.isNumber(value.pos) ? value.pos-1 : -1,
-					ovflText = undefined,
-					item;
-				if (Ext.isString(value.tooltip)) {
-					ovflText = value.tooltip;
-				} else if (qtipsEnabled && Ext.isObject(value.tooltip)) {
-					ovflText = value.tooltip.title;
-				}
-				item = SoU.applyIfDefined(value, {
-						itemId: key
-					}, {
-						overflowText: ovflText,
-						tabIndex: -1
-				});
-				if (indx > -1) {
-					items.splice(indx, -1, item);
-				} else {
-					items.push(item);
-				}
-			});
-		}
-		if (me.enableDevTools) {
-			items.push('->');
-			items.push(
-				tool('devtools', 'so-tmcetooldevtools')
-			);
-		}
-		
-		return Ext.apply({
-			xtype: 'toolbar',
-			defaultButtonUI: me.defaultButtonUI,
-			enableOverflow: true,
-			items: items,
-			// stop form submits
-			listeners: {
-				click: function(e) {
-					e.preventDefault();
-				},
-				element: 'el'
-			}
-		}, cfg || {});
+	generateCurrentStyles: function(opts) {
+		return Ext.dom.Helper.generateStyles(this.getCurrentStyle(opts));
 	},
 	
 	/**
+	 * @deprecated
 	 * Sets default formatting to editor's body.
 	 * @param {Object} [opts] An object containing configuration.
 	 * @param {tinymce.Editor} [opts.editor] The editor instance to work with.
 	 */
+	/*
 	editorSetBodyFormatting: function(opts) {
 		opts = opts || {};
 		var me =  this,
@@ -991,6 +781,7 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 			Ext.fly(ebody).setStyle(style);
 		}
 	},
+	*/
 	
 	/**
 	 * Applies default formatting to current node.
@@ -1240,6 +1031,285 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	},
 	
 	privates: {
+		getTextAreaCfg: function(cfg) {
+			var me = this;
+			if (me.isWysiwyg) {
+				return Ext.apply({
+					xtype: 'sotmcetextarea',
+					editor: Ext.merge({
+						language: me.language,
+						skin: me.skin,
+						plugins: me.buildTMCEPlugins(),
+						quickbars_selection_toolbar: me.buildTMCEQuickbarSelToolbar(),
+						quickbars_insert_toolbar: false,
+						contextmenu: me.buildTMCEContextMenu(),
+						toolbar: false,
+						image_advtab: true,
+						elementpath: me.showElementPath,
+						statusbar: me.showElementPath || me.showWordCount,
+						/*
+						// NB: uppercase letter is used because this value is used to 
+						// compare node name at many places in tinymce library (specially 
+						// in createNewTextBlock function of 'lists' plugin).
+						// Default value was small 'p'.
+						forced_root_block : 'P',
+						forced_root_block_attrs: {
+							'style': 'padding:0; margin:0;' // Flatten space between paragraph blocks (like using </br> line-break)
+						},
+						*/
+						forced_root_block : 'DIV',
+						//forced_root_block_attrs: {
+						//	'style': me.generateDefaultStyles({color: false})
+						//},
+
+						valid_children: '+body[style],+div[style]',
+						entity_encoding : 'numeric', // Force numeric encoding usage, we cannot use 'named+numeric' due to this https://github.com/tinymce/tinymce/issues/3213
+						extended_valid_elements : 'a[name|href|target|title|onclick|dir|style],img[class|src|border=0|alt|title|hspace|vspace|width|height|align|onmouseover|onmouseout|name|style],table[style|dir|class|border=1|cellspacing|cellpadding|bgcolor|id],colgroup,col[style|dir|width],tbody,tr[style|dir|class],td[style|dir|class|colspan|rowspan|width|height],hr[class|width|size|noshade],font[face|size|color|style|dir],span[class|align|style|dir|br],p[class|style|dir|span|br]',
+						invalid_elements: 'object,iframe,script,embed', // Avoid unsafe elements
+						convert_fonts_to_spans: true, // Font elements are deprecated, avoid them!
+						end_container_on_empty_block: true, // Split blocks after pressing ENTER two times (eg. useful for spliting BLOCKQUOTEs)
+						convert_urls: false, // Disable any conversion by the editor
+						relative_urls : false, // When conversion enabled (not this case), try to determine the absolute form of any URL
+						remove_script_host: true, // When conversion enabled & relative_urls is active (not this case), try to remove host and proto from relative URLs
+						link_assume_external_targets: true, // link/autolink: assume URLs to be external
+						target_list: false, // link/autolink: disable named targets
+						default_link_target: '_blank', // link/autolink: set default target
+						link_default_protocol: 'http', // link/autolink: set default protocol
+						link_title: false, // link/autolink: hide title field in edit dialg
+						link_context_toolbar: true, // link/autolink: shows a context management toolbar over links
+
+						browser_spellcheck: true,
+						// Default <table> styles
+						table_default_styles: {
+							width: '70%',
+							borderSpacing: '0'
+						},
+						paste_data_images: me.pasteAllowBlobImages, // paste: allow pasted images to be inserted as blob images (data:url)
+						powerpaste_allow_local_images: me.pasteAllowBlobImages, // powerpaste: allow pasted images to be inserted as blob images (data:url)
+						powerpaste_word_import: me.pasteWordMode || 'merge',
+						powerpaste_html_import: me.pasteHtmlMode || 'merge',
+						automatic_uploads: true, // Enable automatic upload of inline blob (data:url) using 'images_upload_handler' handler
+						//OLDautomatic_uploads: false, // Disable automatic uploads of images represented by data URLs or blob URIs.
+						images_upload_handler: function(blobInfo, success, failure, progress) {
+							if (!me.uploadBlobImages) {
+								failure(); // Simply signal upload failure, image is left as blob image
+							} else if (Ext.isFunction(me.imagesUploadHandler)) {
+								Ext.callback(me.imagesUploadHandler, me, [blobInfo, success, failure, progress]);
+							} else {
+								failure('imagesUploadHandler callback NOT provided');
+							}
+						},
+						content_style: me.buildContentStyle() + Sonicle.String.deflt(me.contentStyle, '')
+					}, me.tmceExtraConfig || {}),
+					value: me.value,
+					listeners: {
+						editorready: me.onTMCETextAreaEdReady,
+						editorchange: me.onTMCETextAreaEdChange,
+						scope: me
+					}
+				}, cfg || {});
+
+			} else {
+				return Ext.apply({
+					xtype: 'sotmceplaintextarea',
+					value: me.value,
+					listeners: {
+						change: me.onTextAreaChange,
+						scope: me
+					}
+				}, cfg || {});
+			}
+		},
+
+		buildTMCEPlugins: function() {
+			var me = this;
+			return [
+				'template quickbars',
+				me.pluginPowerPaste ? 'powerpaste' : 'paste',
+				me.enableLists ? 'advlist lists' : '',
+				me.enableEmoticons ? 'emoticons' : '',
+				me.enableSymbols ? 'charmap' : '',
+				me.enableLink ? 'link autolink' : '',
+				me.enableImage ? 'image' : '',
+				me.enableTable ? 'table' : '',
+				me.enableDevTools ? 'codesample ' + (me.pluginAdvCodeEditor ? 'advcode' : 'code') : '',
+				me.showWordCount ? 'wordcount' : ''
+			].join(' ');
+		},
+
+		buildTMCEQuickbarSelToolbar: function() {
+			var me = this;
+			return [
+				me.enableFormats ? 'bold italic blockquote' : ''
+				// Quicklink plugin seems that does not observe default protocol: 
+				// when the user types an URL without specifying leading protocol, 
+				// newly link become relative to browser base URL.
+				// For now, keep it disabled.
+				//'|',
+				//me.enableLink ? 'quicklink' : ''
+			].join(' ');
+		},
+
+		buildTMCEContextMenu: function() {
+			var me = this;
+			return [
+				me.enableTable ? 'table' : ''
+			].join(' ');
+		},
+		
+		buildContentStyle: function() {
+			return [
+				//TODO: add support to custom style imports. Imports must be extracted an html snippet and then added to this style definition
+				//'@import url("https:/+/fonts.googleapis.com/css2?family=Archivo:wght@300&display=swap");',
+				'body{',
+					'margin:5px;', // Reduce default body margin to not loose too much space
+					'word-wrap:break-word;', // Make sure to break words (present in .mce-content-body class too)
+				'}'
+			].join('');
+		},
+	
+		getToolbarCfg: function(cfg) {
+			var me = this,
+					SoU = Sonicle.Utils,
+					qtipsEnabled = Ext.quickTipsActive && Ext.tip.QuickTipManager.isEnabled(),
+					tool = function(key, xtype, cfg) {
+						var extraCfg = Ext.apply(cfg || {}, me[key+'Config']),
+								icons = me.toolIcons[key],
+								mainCfg = {
+									xtype: xtype,
+									itemId: key,
+									tooltip: me.getToolTooltip(key, qtipsEnabled),
+									overflowText: me.getToolOvflText(key),
+									tabIndex: -1
+								};
+						if (Ext.isObject(icons)) Ext.apply(mainCfg, icons);
+						return Ext.merge(mainCfg, Ext.apply(me.getToolTexts(key) || {}, extraCfg));
+					},
+					items = [];
+
+			if (me.enableFont) {
+				items.push(
+					tool('fontselect', 'so-tmcetoolfontselect', SoU.applyIfDefined({}, {
+						fontFormats: me.fonts
+					}))
+				);
+			}
+			if (me.enableFontSize) {
+				items.push(
+					tool('fontsizeselect', 'so-tmcetoolfontsizeselect', SoU.applyIfDefined({}, {
+						fontsizeFormats: me.fontSizes
+					}))
+				);
+			}
+			if (me.enableColors) {
+				if (items.length > 0) items.push('-');
+				items.push(
+					tool('forecolor', 'so-tmcetoolforecolor', SoU.applyIfDefined({}, {
+						colors: me.fontColors,
+						tilesPerRow: me.fontColorsTilesPerRow
+					})),
+					tool('backcolor', 'so-tmcetoolbackcolor', SoU.applyIfDefined({}, {
+						colors: me.fontColors,
+						tilesPerRow: me.fontColorsTilesPerRow
+					}))
+				);
+			}
+			if (me.enableFormats) {
+				if (items.length > 0) items.push('-');
+				items.push(
+					tool('bold', 'so-tmcetoolbold'),
+					tool('italic', 'so-tmcetoolitalic'),
+					tool('underline', 'so-tmcetoolunderline'),
+					tool('formattools', 'so-tmcetoolformattools')
+				);
+			}
+			if (me.enableAlignments || me.enableLists) {
+				if (items.length > 0) items.push('-');
+				if (me.enableAlignments) {
+					items.push(
+						tool('alignselect', 'so-tmcetoolalignselect')
+					);
+				}
+				if (me.enableLists) {
+					items.push(
+						tool('bulllistselect', 'so-tmcetoolbulllistselect'),
+						tool('numlistselect', 'so-tmcetoolnumlistselect')
+					);
+				}
+			}
+			if (me.enableLink || me.enableImage || me.enableEmoticons || me.enableSymbols || me.enableTable) {
+				if (items.length > 0) items.push('-');
+				if (me.enableEmoticons) {
+					items.push(
+						tool('emoticons', 'so-tmcetoolemoticons')
+					);
+				}
+				if (me.enableLink) {
+					items.push(
+						tool('link', 'so-tmcetoollink')
+					);
+				}
+				if (me.enableImage) {
+					items.push(
+						tool('image', 'so-tmcetoolimage')
+					);
+				}
+				if (me.enableTable) {
+					items.push(
+						tool('table', 'so-tmcetooltable')
+					);
+				}
+				if (me.enableSymbols) {
+					items.push(
+						tool('symbols', 'so-tmcetoolsymbols')
+					);
+				}
+			}
+			if (Ext.isObject(me.customTools)) {
+				Ext.iterate(me.customTools, function(key, value) {
+					var indx = Ext.isNumber(value.pos) ? value.pos-1 : -1,
+						ovflText = undefined,
+						item;
+					if (Ext.isString(value.tooltip)) {
+						ovflText = value.tooltip;
+					} else if (qtipsEnabled && Ext.isObject(value.tooltip)) {
+						ovflText = value.tooltip.title;
+					}
+					item = SoU.applyIfDefined(value, {
+							itemId: key
+						}, {
+							overflowText: ovflText,
+							tabIndex: -1
+					});
+					if (indx > -1) {
+						items.splice(indx, -1, item);
+					} else {
+						items.push(item);
+					}
+				});
+			}
+			if (me.enableDevTools) {
+				items.push('->');
+				items.push(
+					tool('devtools', 'so-tmcetooldevtools')
+				);
+			}
+
+			return Ext.apply({
+				xtype: 'toolbar',
+				defaultButtonUI: me.defaultButtonUI,
+				enableOverflow: true,
+				items: items,
+				// stop form submits
+				listeners: {
+					click: function(e) {
+						e.preventDefault();
+					},
+					element: 'el'
+				}
+			}, cfg || {});
+		},
+		
 		getToolTooltip: function(key, qtips) {
 			var gval = Sonicle.Object.getValue,
 					tt = this.toolTexts,
@@ -1258,21 +1328,22 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	},
 	
 	statics: {
+		generateStyledContent: function(fontFamily, fontSize, color, defaultColor) {
+			var markup = '<span style="';
+			if (fontFamily) markup += 'font-family:'+fontFamily+';';
+			if (fontSize) markup += 'font-size:'+fontSize+';';
+			if (color && color !== defaultColor) markup +='color:'+color+';';
+			markup += '">&#8203;</span>'; // Make sure to use &#8203: zero-width space is important
+			return markup;
+		},
+		
 		generateInitialContent: function(fontFamily, fontSize, color, defaultColor) {
-			var div = '<div style="';
-			if (fontFamily) div += 'font-family:'+fontFamily+';';
-			if (fontSize) div += 'font-size:'+fontSize+';';
-			if (color && color !== defaultColor) div += 'color:'+color+';';
-			div += '"></div>';
+			var div = '<div>' + this.generateStyledContent(fontFamily, fontSize, color, defaultColor) + '</div>';
 			return div + div;
 		},
 		
 		generateInitialParagraph: function(innerContent, fontFamily, fontSize, color, defaultColor) {
-			var opendiv = '<div style="';
-			if (fontFamily) opendiv += 'font-family:'+fontFamily+';';
-			if (fontSize) opendiv += 'font-size:'+fontSize+';';
-			if (color && color !== defaultColor) opendiv += 'color:'+color+';';
-			opendiv += '">';
+			var opendiv = '<div>' + this.generateStyledContent(fontFamily, fontSize, color, defaultColor);
 			return opendiv + (innerContent || '') + '</div>' + opendiv + '</div>';
 		},
 		

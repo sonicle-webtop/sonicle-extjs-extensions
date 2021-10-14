@@ -151,7 +151,11 @@ Ext.define('Sonicle.form.field.tinymce.tool.NumListSelect', {
 			if (styleType === false) {
 				this.getHtmlEditor().editorExecuteCommand('RemoveList');
 			} else {
-				this.getHtmlEditor().editorExecuteCommand('InsertOrderedList', {'list-style-type': styleType});
+				var hed = this.getHtmlEditor();
+				hed.editorExecuteCommand('InsertOrderedList', {
+					'list-style-type': styleType,
+					'list-attributes': {style: hed.generateCurrentStyles({fontFamily: false, fontSize: false})}
+				});
 			}
 		},
 		
