@@ -3,6 +3,7 @@
  * Copyright (C) 2015 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
+ * Heavily inspired by: https://docs.sencha.com/extjs/6.2.0/classic/src/ColorUtils.js.html
  */
 Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
     var oldIE = Ext.isIE && Ext.ieVersion < 10;
@@ -69,11 +70,13 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
                 return hex;
             }
         },
-
-        hexRe: /#?([0-9a-f]{3,8})/i,
-        rgbaAltRe: /rgba\(\s*([\w#\d]+)\s*,\s*([\d\.]+)\s*\)/,
-        rgbaRe: /rgba\(\s*([\d\.]+)\s*,\s*([\d\.]+)\s*,\s*([\d\.]+)\s*,\s*([\d\.]+)\s*\)/,
-        rgbRe: /rgb\(\s*([\d\.]+)\s*,\s*([\d\.]+)\s*,\s*([\d\.]+)\s*\)/,
+		
+		/* eslint-disable no-useless-escape */
+        hexRe: /^#?(([0-9a-f]{8})|((?:[0-9a-f]{3}){1,2}))$/i,
+        rgbaAltRe: /^rgba\(\s*([\w#\d]+)\s*,\s*([\d\.]+)\s*\)$/i,
+        rgbaRe: /^rgba\(\s*([\d\.]+)\s*,\s*([\d\.]+)\s*,\s*([\d\.]+)\s*,\s*([\d\.]+)\s*\)$/i,
+        rgbRe: /^rgb\(\s*([\d\.]+)\s*,\s*([\d\.]+)\s*,\s*([\d\.]+)\s*\)$/i,
+		/* eslint-enable no-useless-escape */
 
         /**
          * Turn a string to a color object. Supports these formats:
