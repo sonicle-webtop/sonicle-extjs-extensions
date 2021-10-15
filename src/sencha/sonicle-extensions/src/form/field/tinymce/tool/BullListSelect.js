@@ -133,7 +133,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.BullListSelect', {
 				var hed = this.getHtmlEditor();
 				hed.editorExecuteCommand('InsertUnorderedList', {
 					'list-style-type': styleType,
-					'list-attributes': {style: hed.generateCurrentStyles({fontFamily: false, fontSize: false})}
+					'list-item-attributes': {style: hed.generateCurrentStyles()}
 				});
 			}
 		},

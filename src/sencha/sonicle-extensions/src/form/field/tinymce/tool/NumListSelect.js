@@ -154,7 +154,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.NumListSelect', {
 				var hed = this.getHtmlEditor();
 				hed.editorExecuteCommand('InsertOrderedList', {
 					'list-style-type': styleType,
-					'list-attributes': {style: hed.generateCurrentStyles({fontFamily: false, fontSize: false})}
+					'list-item-attributes': {style: hed.generateCurrentStyles()}
 				});
 			}
 		},

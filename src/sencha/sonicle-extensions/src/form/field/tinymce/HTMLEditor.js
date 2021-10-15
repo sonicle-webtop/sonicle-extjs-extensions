@@ -556,8 +556,24 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 					var cmp = me.getToolbarCmp(id);
 					if (cmp) cmp.setHtmlEditor(me);
 				};
-				
+		
 		//editor.on('keydown', Ext.bind(me.onTMCETextAreaEdKeyDown, me, editor, true));
+		/*
+		editor.on('ExecCommand', Ext.bind(function(e, editor1) {
+			console.log('ExecCommand - ' + e.command);
+		}, me, editor, true));
+		editor.on('NewBlock', Ext.bind(function(e, editor1) {
+			console.log('NewBlock - ' + e.newBlock.tagName);
+			if ('DIV' === e.newBlock.tagName) {
+				console.log(e.newBlock);
+			}
+		}, me, editor, true));
+		editor.on('BeforeSetContent', Ext.bind(function(e, editor1) {
+			console.log('BeforeSetContent - ');
+			console.log(e.content);
+		}, me, editor, true));
+		*/
+		//editor.on('FormatApply', function() { console.log('FormatApply'); });
 		//editor.on('NewBlock', me.onTMCETextAreaEdNewBlock);
 		//editor.on('NodeChange', Ext.bind(me.onTMCETextAreaEdNodeChange, me));
 		//editor.on('OpenWindow', me.onTMCETextAreaEdOpenWindow);
@@ -610,7 +626,8 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 					e.stopPropagation();
 
 					style = me.getDefaultStyle();
-					node.innerHTML = '<span style="'+Sonicle.form.field.tinymce.HTMLEditor.generateContentStyles(style.fontFamily, style.fontSize, style.color, me.getBaseForeHColor())+'">&#8203;</span>';
+					var styles = Sonicle.form.field.tinymce.HTMLEditor.generateContentStyles(style.fontFamily, style.fontSize, style.color, me.getBaseForeHColor());
+					node.innerHTML = '<span data-mce-style="'+styles+'" style="'+styles+'"><br data-mce-bogus="1"></span>';
 					//node.innerHTML = Sonicle.form.field.tinymce.HTMLEditor.generateStyledContent(style.fontFamily, style.fontSize, style.color, me.getBaseForeHColor());
 					return false;
 				}
@@ -1070,9 +1087,10 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 						},
 						*/
 						forced_root_block : 'DIV',
-						//forced_root_block_attrs: {
-						//	'style': me.generateDefaultStyles({color: false})
-						//},
+						forced_root_block_attrs: {
+							'style': me.generateDefaultStyles(),
+							'class': 'default-style'
+						},
 
 						valid_children: '+body[style],+div[style]',
 						entity_encoding : 'numeric', // Force numeric encoding usage, we cannot use 'named+numeric' due to this https://github.com/tinymce/tinymce/issues/3213
@@ -1176,6 +1194,9 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 				'body{',
 					'margin:5px;', // Reduce default body margin to not loose too much space
 					'word-wrap:break-word;', // Make sure to break words (present in .mce-content-body class too)
+				'}',
+				'body.mce-content-body{',
+					'font-family: Helvetica, Arial, sans-serif;', // Reset Tiny font located in default theme
 				'}'
 			].join('');
 		},
@@ -1349,28 +1370,20 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 		},
 		
 		generateInitialContent: function(fontFamily, fontSize, color, defaultColor) {
-			// We add style on both DIV and SPAN: workaround to solve formatting 
-			// lost in TinyMCE when pressing BACKSPACE key twice or clearing all 
-			// content using DEL key. The issue is still present if you clear all 
-			// content using CTRL+A and DEL but is a minor problem.
-			// https://github.com/tinymce/tinymce/issues/3471
-			// https://github.com/tinymce/tinymce/issues/5139
 			var style = this.generateContentStyles(fontFamily, fontSize, color, defaultColor);
-			var div = '<div style="'+style+'"><span style="'+style+'">&#8203;</span></div>';
+			//var div = '<div style="'+style+'"><span style="'+style+'">&#8203;</span></div>';
 			//var div = '<div><span style="'+style+'">&#8203;</span></div>';
+			//var div = '<div style="'+style+'"><span>&#8203;</span></div>';
+			var div = '<div style="'+style+'"></div>';
 			return div + div;
 		},
 		
 		generateInitialParagraph: function(innerContent, fontFamily, fontSize, color, defaultColor) {
-			// We add style on both DIV and SPAN: workaround to solve formatting 
-			// lost in TinyMCE when pressing BACKSPACE key twice or clearing all 
-			// content using DEL key. The issue is still present if you clear all 
-			// content using CTRL+A and DEL but is a minor problem.
-			// https://github.com/tinymce/tinymce/issues/3471
-			// https://github.com/tinymce/tinymce/issues/5139
 			var style = this.generateContentStyles(fontFamily, fontSize, color, defaultColor);
-			var opendiv = '<div style="'+style+'"><span style="'+style+'">&#8203;</span>';
+			//var opendiv = '<div style="'+style+'"><span style="'+style+'">&#8203;</span>';
 			//var opendiv = '<div><span style="'+style+'">&#8203;</span>';
+			//var opendiv = '<div style="'+style+'"><span>&#8203;</span>';
+			var opendiv = '<div style="'+style+'">';
 			return opendiv + (innerContent || '') + '</div>' + opendiv + '</div>';
 		},
 		
