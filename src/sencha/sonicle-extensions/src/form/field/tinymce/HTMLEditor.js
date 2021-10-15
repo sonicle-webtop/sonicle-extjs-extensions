@@ -427,9 +427,15 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	
 	/**
 	 * @cfg {String} [defaultForeColor]
-	 * The default fontSize to set.
+	 * The default color to set, 6-digit color hex code string (without the # symbol).
 	 */
 	defaultForeColor: undefined,
+	
+	/**
+	 * @private
+	 * The browser's base color, 6-digit color hex code string (without the # symbol).
+	 */
+	baseForeColor: '000000',
 	
 	constructor: function(cfg) {
 		var me = this,
@@ -514,8 +520,8 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	 * Returns browser's default ForeColor.
 	 * @returns {String}
 	 */
-	getBaseForeColor: function() {
-		return '#000000';
+	getBaseForeHColor: function() {
+		return Sonicle.String.prepend(this.baseForeColor, '#', true);
 	},
 	
 	/**
@@ -550,8 +556,8 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 					var cmp = me.getToolbarCmp(id);
 					if (cmp) cmp.setHtmlEditor(me);
 				};
-		
-		editor.on('keydown', Ext.bind(me.onTMCETextAreaEdKeyDown, me, editor, true));
+				
+		//editor.on('keydown', Ext.bind(me.onTMCETextAreaEdKeyDown, me, editor, true));
 		//editor.on('NewBlock', me.onTMCETextAreaEdNewBlock);
 		//editor.on('NodeChange', Ext.bind(me.onTMCETextAreaEdNodeChange, me));
 		//editor.on('OpenWindow', me.onTMCETextAreaEdOpenWindow);
@@ -588,6 +594,7 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 		}
 	},
 	
+	/*
 	onTMCETextAreaEdKeyDown: function(e, editor) {
 		// Workaround to solve formatting lost in TinyMCE when pressing 
 		// BACKSPACE key twice or clearing all content using DEL key.
@@ -603,12 +610,14 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 					e.stopPropagation();
 
 					style = me.getDefaultStyle();
-					node.innerHTML = Sonicle.form.field.tinymce.HTMLEditor.generateStyledContent(style.fontFamily, style.fontSize, style.color, me.getBaseForeColor());
+					node.innerHTML = '<span style="'+Sonicle.form.field.tinymce.HTMLEditor.generateContentStyles(style.fontFamily, style.fontSize, style.color, me.getBaseForeHColor())+'">&#8203;</span>';
+					//node.innerHTML = Sonicle.form.field.tinymce.HTMLEditor.generateStyledContent(style.fontFamily, style.fontSize, style.color, me.getBaseForeHColor());
 					return false;
 				}
 			}
 		}
 	},
+	*/
 	
 	/*
 	onTMCETextAreaEdKeyDown: function(e, editor) {
@@ -724,7 +733,7 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 			style['fontSize'] = me.defFontSize;
 		}
 		if (opts.color !== false) {
-			style['color'] = me.defColor || me.getBaseForeColor();
+			style['color'] = me.defColor || me.getBaseForeHColor();
 		}
 		return style;
 	},
@@ -1033,12 +1042,15 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	privates: {
 		getTextAreaCfg: function(cfg) {
 			var me = this;
+			//var useDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 			if (me.isWysiwyg) {
 				return Ext.apply({
 					xtype: 'sotmcetextarea',
 					editor: Ext.merge({
 						language: me.language,
 						skin: me.skin,
+						//skin: useDarkMode ? 'oxide-dark' : 'oxide',
+						//content_css: useDarkMode ? 'dark' : 'default',
 						plugins: me.buildTMCEPlugins(),
 						quickbars_selection_toolbar: me.buildTMCEQuickbarSelToolbar(),
 						quickbars_insert_toolbar: false,
@@ -1328,22 +1340,37 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	},
 	
 	statics: {
-		generateStyledContent: function(fontFamily, fontSize, color, defaultColor) {
-			var markup = '<span style="';
-			if (fontFamily) markup += 'font-family:'+fontFamily+';';
-			if (fontSize) markup += 'font-size:'+fontSize+';';
-			if (color && color !== defaultColor) markup +='color:'+color+';';
-			markup += '">&#8203;</span>'; // Make sure to use &#8203: zero-width space is important
-			return markup;
+		generateContentStyles: function(fontFamily, fontSize, color, defaultColor) {
+			var style = {};
+			if (fontFamily) style['fontFamily'] = fontFamily;
+			if (fontSize) style['fontSize'] = fontSize;
+			if (color && color !== defaultColor) style['color'] = color;
+			return Ext.dom.Helper.generateStyles(style);
 		},
 		
 		generateInitialContent: function(fontFamily, fontSize, color, defaultColor) {
-			var div = '<div>' + this.generateStyledContent(fontFamily, fontSize, color, defaultColor) + '</div>';
+			// We add style on both DIV and SPAN: workaround to solve formatting 
+			// lost in TinyMCE when pressing BACKSPACE key twice or clearing all 
+			// content using DEL key. The issue is still present if you clear all 
+			// content using CTRL+A and DEL but is a minor problem.
+			// https://github.com/tinymce/tinymce/issues/3471
+			// https://github.com/tinymce/tinymce/issues/5139
+			var style = this.generateContentStyles(fontFamily, fontSize, color, defaultColor);
+			var div = '<div style="'+style+'"><span style="'+style+'">&#8203;</span></div>';
+			//var div = '<div><span style="'+style+'">&#8203;</span></div>';
 			return div + div;
 		},
 		
 		generateInitialParagraph: function(innerContent, fontFamily, fontSize, color, defaultColor) {
-			var opendiv = '<div>' + this.generateStyledContent(fontFamily, fontSize, color, defaultColor);
+			// We add style on both DIV and SPAN: workaround to solve formatting 
+			// lost in TinyMCE when pressing BACKSPACE key twice or clearing all 
+			// content using DEL key. The issue is still present if you clear all 
+			// content using CTRL+A and DEL but is a minor problem.
+			// https://github.com/tinymce/tinymce/issues/3471
+			// https://github.com/tinymce/tinymce/issues/5139
+			var style = this.generateContentStyles(fontFamily, fontSize, color, defaultColor);
+			var opendiv = '<div style="'+style+'"><span style="'+style+'">&#8203;</span>';
+			//var opendiv = '<div><span style="'+style+'">&#8203;</span>';
 			return opendiv + (innerContent || '') + '</div>' + opendiv + '</div>';
 		},
 		
