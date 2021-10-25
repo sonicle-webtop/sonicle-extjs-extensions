@@ -306,6 +306,10 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		}
 	},
 	
+	isEqual: function(value1, value2) {
+		return Sonicle.form.field.rr.Recurrence.isRRuleEqual(value1, value2);
+	},
+	
 	privates: {
 		checkAvail: function() {
 			if (!this.isAvailRRule) Ext.raise('Library RRule is required (see https://github.com/jakubroztocil/rrule)');
@@ -417,6 +421,30 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 			} catch(err) {
 				return false;
 			}
+		}
+	},
+	
+	statics: {
+		
+		/**
+		 * Returns whether two RRules are logically equal. Comparison is NOT 
+		 * done by simply comparing strings: rules are firstly splitted into 
+		 * tokens, then resulting tokens sorted by value and finally re-joined 
+		 * into strings. This allow consistent results if same tokens are in 
+		 * different positions in the rrule string.
+		 * @param {String} rrule1 The first RRule to compare
+		 * @param {String} rrule2 The second RRule to compare
+		 * @return {Boolean} True if the values are equal, false if inequal.
+		 */
+		isRRuleEqual: function(rrule1, rrule2) {
+			var s1 = Ext.isString(rrule1) ? rrule1 : '',
+					s2 = Ext.isString(rrule2) ? rrule2 : '',
+					spl1 = s1.split(';'),
+					spl2 = s2.split(';');
+			if (spl1.length !== spl2.length) return false;
+			spl1.sort();
+			spl2.sort();
+			return spl1.join(';') === spl2.join(';');
 		}
 	}
 });
