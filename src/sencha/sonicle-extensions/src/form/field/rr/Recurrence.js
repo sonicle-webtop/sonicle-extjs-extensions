@@ -276,7 +276,7 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		me.configureUi(me.rrule ? me.rrule.origOptions.freq : 'none', me.rrule);
 	},
 	
-	setValue: function(value, /*private*/ internal) {
+	setValue: function(value, /*private*/ uiSilent) {
 		var me = this, rr;
 		
 		if (Ext.isEmpty(value)) {
@@ -287,7 +287,7 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 			rr = me.fromRRuleString(value);
 			me.rrule = rr ? rr : null;
 		}
-		if (!internal) {
+		if (!uiSilent) {
 			// If call to setValue comes from inside, we skip ui updates to 
 			// avoid unuseful updates and subsequent event fires!
 			me.configureUi(me.rrule ? me.rrule.origOptions.freq : 'none', me.rrule);
@@ -309,8 +309,12 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 			Ext.defer(function() { me.suspendOnRRuleCfgChange--; }, 250);
 			//me.suspendOnRRuleCfgChange--;
 			
-			optCt = optsCt.getLayout().getActiveItem();
-			me.setValue(new RRule(me.buildRRuleCfg(optCt.getRRuleConfig(), null)).toString(), true);
+			// If we have a valid rrule object, gets the updated  
+			// string according to startDate change
+			if (me.rrule) {
+				optCt = optsCt.getLayout().getActiveItem();
+				me.setValue(new RRule(me.buildRRuleCfg(optCt.getRRuleConfig(), null)).toString(), true);
+			}
 		}
 	},
 	
