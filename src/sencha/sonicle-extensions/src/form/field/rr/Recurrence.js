@@ -276,7 +276,7 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		me.configureUi(me.rrule ? me.rrule.origOptions.freq : 'none', me.rrule);
 	},
 	
-	setValue: function(value) {
+	setValue: function(value, /*private*/ internal) {
 		var me = this, rr;
 		
 		if (Ext.isEmpty(value)) {
@@ -287,7 +287,9 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 			rr = me.fromRRuleString(value);
 			me.rrule = rr ? rr : null;
 		}
-		if (me.suspendOnRRuleCfgChange === 0) {
+		if (!internal) {
+			// If call to setValue comes from inside, we skip ui updates to 
+			// avoid unuseful updates and subsequent event fires!
 			me.configureUi(me.rrule ? me.rrule.origOptions.freq : 'none', me.rrule);
 		}
 		me.checkChange();
@@ -295,14 +297,20 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 	},
 	
 	updateStartDate: function(newValue, oldValue) {
-		var me = this, optsCt, durCt;
+		var me = this, optsCt, optCt, durCt;
 		if (me.rendered) {
+			me.suspendOnRRuleCfgChange++;
 			optsCt = me.getComponent('optsct');
 			optsCt.items.each(function(item) {
-				item.setStartDate(newValue);
+				item.setStartDate(newValue, true);
 			});
 			durCt = me.getComponent('durct');
 			durCt.getComponent('dur').setStartDate(newValue);
+			Ext.defer(function() { me.suspendOnRRuleCfgChange--; }, 250);
+			//me.suspendOnRRuleCfgChange--;
+			
+			optCt = optsCt.getLayout().getActiveItem();
+			me.setValue(new RRule(me.buildRRuleCfg(optCt.getRRuleConfig(), null)).toString(), true);
 		}
 	},
 	
@@ -368,21 +376,21 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 				me.configureUi('raw', me.rrule);
 			} else {
 				cfg = me.buildRRuleCfg(null, null);
-				me.setValue(new RRule(cfg).toString());
+				me.setValue(new RRule(cfg).toString(), true);
 			}
 			me.fireEvent('select', me, freq);
 		},
 
 		onRRuleCfgChange: function(s, rrCfg) {
 			var me = this, cfg;
-			if (s.isXType('sorrduration')) {
-				cfg = me.buildRRuleCfg(null, rrCfg);
-			} else {
-				cfg = me.buildRRuleCfg(rrCfg, null);
+			if (me.suspendOnRRuleCfgChange === 0) {
+				if (s.isXType('sorrduration')) {
+					cfg = me.buildRRuleCfg(null, rrCfg);
+				} else {
+					cfg = me.buildRRuleCfg(rrCfg, null);
+				}
+				me.setValue(new RRule(cfg).toString(), true);
 			}
-			me.suspendOnRRuleCfgChange++;
-			me.setValue(new RRule(cfg).toString());
-			me.suspendOnRRuleCfgChange--;
 		},
 		
 		buildRRuleCfg: function(freqCfg, durCfg) {
