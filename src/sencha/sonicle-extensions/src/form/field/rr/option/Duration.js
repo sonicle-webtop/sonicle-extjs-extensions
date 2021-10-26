@@ -105,12 +105,19 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 				count: data.count
 			};
 		} else if (data.opt3 === true) {
+			var until = data.until;
 			return {
-				until: Ext.Date.utc(data.until.getFullYear(), data.until.getMonth(), data.until.getDate())
+				until: Ext.Date.utc(until.getUTCFullYear(), until.getUTCMonth(), until.getUTCDate(), until.getUTCHours(), until.getUTCMinutes(), until.getUTCSeconds())
 			};
 		} else {
 			return {};
 		}
+	},
+	
+	setStartDate: function(value) {
+		this.startDate = value;
+		// Here is NOT necessary, like parent method, to update values using 
+		// startDate just set. So, update its internal value and nothing else.
 	},
 	
 	privates: {
@@ -149,7 +156,7 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 			return false;
 		},
 		
-		calculateVMDataDefaults: function() {
+		returnVMDataStartDependantDefaults: function() {
 			var stDt = this.startDate;
 			if (Ext.isDate(stDt)) {
 				return {

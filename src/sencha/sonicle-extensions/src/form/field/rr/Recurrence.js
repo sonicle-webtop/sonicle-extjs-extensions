@@ -276,7 +276,7 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		me.configureUi(me.rrule ? me.rrule.origOptions.freq : 'none', me.rrule);
 	},
 	
-	setValue: function(value) {
+	setValue: function(value, /*private*/ uiSilent) {
 		var me = this, rr;
 		
 		if (Ext.isEmpty(value)) {
@@ -287,7 +287,9 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 			rr = me.fromRRuleString(value);
 			me.rrule = rr ? rr : null;
 		}
-		if (me.suspendOnRRuleCfgChange === 0) {
+		if (!uiSilent) {
+			// If call to setValue comes from inside, we skip ui updates to 
+			// avoid unuseful updates and subsequent event fires!
 			me.configureUi(me.rrule ? me.rrule.origOptions.freq : 'none', me.rrule);
 		}
 		me.checkChange();
@@ -295,15 +297,29 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 	},
 	
 	updateStartDate: function(newValue, oldValue) {
-		var me = this, optsCt, durCt;
+		var me = this, optsCt, optCt, durCt;
 		if (me.rendered) {
+			me.suspendOnRRuleCfgChange++;
 			optsCt = me.getComponent('optsct');
 			optsCt.items.each(function(item) {
-				item.setStartDate(newValue);
+				item.setStartDate(newValue, true);
 			});
 			durCt = me.getComponent('durct');
 			durCt.getComponent('dur').setStartDate(newValue);
+			Ext.defer(function() { me.suspendOnRRuleCfgChange--; }, 250);
+			//me.suspendOnRRuleCfgChange--;
+			
+			// If we have a valid rrule object, gets the updated  
+			// string according to startDate change
+			if (me.rrule) {
+				optCt = optsCt.getLayout().getActiveItem();
+				me.setValue(new RRule(me.buildRRuleCfg(optCt.getRRuleConfig(), null)).toString(), true);
+			}
 		}
+	},
+	
+	isEqual: function(value1, value2) {
+		return Sonicle.form.field.rr.Recurrence.isRRuleEqual(value1, value2);
 	},
 	
 	privates: {
@@ -364,21 +380,21 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 				me.configureUi('raw', me.rrule);
 			} else {
 				cfg = me.buildRRuleCfg(null, null);
-				me.setValue(new RRule(cfg).toString());
+				me.setValue(new RRule(cfg).toString(), true);
 			}
 			me.fireEvent('select', me, freq);
 		},
 
 		onRRuleCfgChange: function(s, rrCfg) {
 			var me = this, cfg;
-			if (s.isXType('sorrduration')) {
-				cfg = me.buildRRuleCfg(null, rrCfg);
-			} else {
-				cfg = me.buildRRuleCfg(rrCfg, null);
+			if (me.suspendOnRRuleCfgChange === 0) {
+				if (s.isXType('sorrduration')) {
+					cfg = me.buildRRuleCfg(null, rrCfg);
+				} else {
+					cfg = me.buildRRuleCfg(rrCfg, null);
+				}
+				me.setValue(new RRule(cfg).toString(), true);
 			}
-			me.suspendOnRRuleCfgChange++;
-			me.setValue(new RRule(cfg).toString());
-			me.suspendOnRRuleCfgChange--;
 		},
 		
 		buildRRuleCfg: function(freqCfg, durCfg) {
@@ -417,6 +433,30 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 			} catch(err) {
 				return false;
 			}
+		}
+	},
+	
+	statics: {
+		
+		/**
+		 * Returns whether two RRules are logically equal. Comparison is NOT 
+		 * done by simply comparing strings: rules are firstly splitted into 
+		 * tokens, then resulting tokens sorted by value and finally re-joined 
+		 * into strings. This allow consistent results if same tokens are in 
+		 * different positions in the rrule string.
+		 * @param {String} rrule1 The first RRule to compare
+		 * @param {String} rrule2 The second RRule to compare
+		 * @return {Boolean} True if the values are equal, false if inequal.
+		 */
+		isRRuleEqual: function(rrule1, rrule2) {
+			var s1 = Ext.isString(rrule1) ? rrule1 : '',
+					s2 = Ext.isString(rrule2) ? rrule2 : '',
+					spl1 = s1.split(';'),
+					spl2 = s2.split(';');
+			if (spl1.length !== spl2.length) return false;
+			spl1.sort();
+			spl2.sort();
+			return spl1.join(';') === spl2.join(';');
 		}
 	}
 });

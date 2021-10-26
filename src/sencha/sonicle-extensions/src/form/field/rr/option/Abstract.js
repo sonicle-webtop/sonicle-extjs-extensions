@@ -26,7 +26,7 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 	 */
 	startDate: undefined,
 	
-	suspendOnChange: 0,
+	suspendOnChange: 0, // Counter to ignore fields change events issuing change task!
 	rruleCfgChangeBuffer: 200,
 	
 	initComponent: function() {
@@ -52,7 +52,7 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 		Ext.raise('Override me');
 	},
 	
-	setStartDate: function(value) {
+	setStartDate: function(value, silent) {
 		var me = this,
 				isDate = Ext.isDate,
 				changed = isDate(me.startDate) && isDate(value) ? Sonicle.Date.compare(me.startDate, value, false, true) !== 0 : me.startDate !== value,
@@ -62,11 +62,13 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 			vm = me.getViewModel();
 			me.suspendOnChange++;
 			me.getVMData(); // Make sure that data is initialized!
-			Ext.iterate(me.calculateVMDataDefaults(), function(key, value) {
+			Ext.iterate(me.returnVMDataStartDependantDefaults(), function(key, value) {
 				vm.set('data.'+key, value);
 			});
-			me.startRRuleCfgChangeTask();
-			Ext.defer(function() { me.suspendOnChange--; }, 200);
+			if (!silent) {
+				me.startRRuleCfgChangeTask();
+			}
+			Ext.defer(function() { me.suspendOnChange--; }, 250);
 		}
 	},
 	
@@ -79,7 +81,7 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 			if (me.validateRRule(value) !== false) {
 				me.suspendOnChange++;
 				me.applyRRule(value);
-				Ext.defer(function() { me.suspendOnChange--; }, 200);
+				Ext.defer(function() { me.suspendOnChange--; }, 250);
 				return true;
 			} else {
 				return false;
@@ -126,7 +128,7 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 		 * 
 		 * @return {Object} Dynamic default configuration.
 		 */
-		calculateVMDataDefaults: function() {
+		returnVMDataStartDependantDefaults: function() {
 			return {};
 		},
 
@@ -181,7 +183,7 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 			if (data.opt1 !== null) {
 				return data;
 			} else {
-				data = Ext.apply({}, me.calculateVMDataDefaults(), me.returnVMDataDefaults());
+				data = Ext.apply({}, me.returnVMDataStartDependantDefaults(), me.returnVMDataDefaults());
 				vm.set('data', data);
 				return data;
 			}

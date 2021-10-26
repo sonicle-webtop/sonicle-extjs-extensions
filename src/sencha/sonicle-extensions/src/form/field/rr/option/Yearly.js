@@ -415,7 +415,7 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 			return false;
 		},
 		
-		calculateVMDataDefaults: function() {
+		returnVMDataStartDependantDefaults: function() {
 			var stDt = this.startDate, nth;
 			if (Ext.isDate(stDt)) {
 				var nth = Sonicle.Date.getNthWeekDayOfMonth(stDt);
