@@ -19,12 +19,18 @@ Ext.define('Sonicle.Object', {
 		return null;
 	},
 	
-	getValue: function(object, key, ifNoKey) {
+	/**
+	 * Extracts the value of the key/property from specified object.
+	 * @param {Object} object The object from which extract value.
+	 * @param {String} key The property name.
+	 * @param {Mixed} [ifMissing=undefined] The value to return if property is missing, otherwise undefined will be returned.
+	 * @returns {undefined|Mixed} Property value.
+	 */
+	getValue: function(object, key, ifMissing) {
 		if (Ext.isObject(object) && Ext.isString(key)) {
-			return object.hasOwnProperty(key) ? object[key] : ifNoKey;
-		} else {
-			return undefined;
+			return object.hasOwnProperty(key) ? object[key] : ifMissing;
 		}
+		return undefined;
 	},
 	
 	/**

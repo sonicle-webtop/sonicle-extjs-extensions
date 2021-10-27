@@ -19,7 +19,6 @@ Ext.define('Sonicle.Data', {
 	 * @returns {Object} An object containing all the values in this model.
 	 */
 	getModelData: function(rec, opts) {
-		opts = opts || {};
 		if (rec.isModel) {
 			if (opts === undefined) {
 				return rec.getData(true);
@@ -49,6 +48,45 @@ Ext.define('Sonicle.Data', {
 			});
 		}
 		return arr;
+	},
+	
+	/**
+	 * Clones the passed Model.
+	 * @param {Ext.data.Model} rec The record/model to be cloned.
+	 * @param {Object} opts An object containing options.
+	 * @param {Boolean} [opts.modifications=true] Set to `false` to model's modifications (see {@link #modelReset}).
+	 * @returns {Ext.data.Model}
+	 */
+	modelClone: function(rec, opts) {
+		opts = opts || {};
+		if (rec.isModel) {
+			if (opts.modifications === false) {
+				return this.modelReset(rec.clone(), {dirty: true, modified: true, previousValues: true});
+			} else {
+				return rec.clone();
+			}
+		}
+		return undefined;
+	},
+	
+	/**
+	 * Resets the passed Model.
+	 * @param {Ext.data.Model} rec The record/model to be reset.
+	 * @param {Object} opts An object containing options.
+	 * @param {Boolean} [opts.dirty=false] Set to `true` to reset dirty status.
+	 * @param {Boolean} [opts.modified=false] Set to `true` to clear {@link Ext.data.Model#modified} map.
+	 * @param {Boolean} [opts.previousValues=false] Set to `true` to clear {@link Ext.data.Model#previousValues} map.
+	 * @param {Boolean} [opts.all=false] Set to `true` to apply all resets above.
+	 * @returns {Ext.data.Model} Itself
+	 */
+	modelReset: function(rec, opts) {
+		opts = opts || {};
+		if (rec.isModel) {
+			if (opts.all === true || opts.dirty === true) rec.dirty = false;
+			if (opts.all === true || opts.modified === true) delete rec.modified;
+			if (opts.all === true || opts.previousValues === true) delete rec.previousValues;
+		}
+		return rec;
 	},
 	
 	/**
@@ -95,9 +133,24 @@ Ext.define('Sonicle.Data', {
 	},
 	
 	/**
+	 * Returns an array of Records of the specified IDs.
+	 * A null element will be added in case the Record is missing for an ID.
+	 * @param {Ext.data.Store} store The data store.
+	 * @param {Mixed[]} ids Array of IDs for which to collect records.
+	 * @returns {Ext.data.Model[]}
+	 */
+	getByIds: function(store, ids) {
+		var ret = [], rec;
+		Ext.iterate(ids, function(id) {
+			rec = store.getById(id);
+			ret.push(rec);
+		});
+		return ret;
+	},
+	
+	/**
 	 * Finds the matching Records in the store by a specific field value.
 	 * When store is filtered, finds records only within filter.
-	 * 
 	 * @param {Ext.data.Store} store The data store.
 	 * @param {String} fieldName The name of the Record field to test.
 	 * @param {String/RegExp} value Either a string that the field value should begin with, or a RegExp to test against the field.

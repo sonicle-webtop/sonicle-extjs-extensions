@@ -212,5 +212,49 @@ Ext.define('Sonicle.Utils', {
 	 */
 	toJSONArray: function(arr) {
 		return Ext.JSON.encode(Ext.Array.from(arr));
+	},
+	
+	/**
+	 * Displays specified contextmenu in a centralized way.
+	 * Any previous visible menu will be hide automatically.
+	 * @param {Ext.event.Event} evt The raw event object.
+	 * @param {Ext.menu.Menu} menu The menu component.
+	 * @param {Object} data Useful data to pass (data will be saved into menu.menuData property).
+	 * @returns {Ext.menu.Menu}
+	 */
+	showContextMenu: function(evt, menu, data) {
+		var me = this;
+		
+		evt.stopEvent();
+		me.hideContextMenu();
+		if (!menu || !menu.isXType('menu')) return;
+		
+		menu.menuData = data || {};
+		me.lastContextMenu = menu;
+		menu.on('hide', function(s) {
+			s.menuData = {};
+			if (me.lastContextMenu && me.lastContextMenu.getId() === s.getId()) {
+				me.lastContextMenu = null;
+			}
+		}, me, {single: true});
+		menu.showAt(evt.getXY());
+		return menu;
+	},
+	
+	/**
+	 * Hides currently visible context menu.
+	 */
+	hideContextMenu: function() {
+		var cxm = this.lastContextMenu;
+		if (cxm) cxm.hide();
+	},
+	
+	/**
+	 * Returns context menu data previously saved into menu.menuData property.
+	 * @returns {Object} The data object.
+	 */
+	getContextMenuData: function() {
+		var cxm = this.lastContextMenu;
+		return (cxm) ? cxm.menuData : null;
 	}
 });
