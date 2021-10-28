@@ -12,7 +12,7 @@ Ext.define('Sonicle.overrides.data.Model', {
 		Ext.iterate(me.associations, function(name) {
 			asso = me.associations[name];
 			sto = me[asso.getterName]();
-			if (sto) {
+			if (sto && sto.isStore) {
 				assoData = data[asso.role];
 				if (assoData) sto.add(assoData);
 			}
@@ -25,16 +25,21 @@ Ext.define('Sonicle.overrides.data.Model', {
 	 */
 	isDirty: function() {
 		var me = this, 
-				dirty = me.dirty, asso, sto;
-		
+				dirty = me.dirty, asso, get;
+
 		if (dirty) return true; // If already dirty, return true directly...
 		// Otherwise evaluate associations (if present)
 		Ext.iterate(me.associations, function(name) {
 			asso = me.associations[name];
-			sto = me[asso.getterName]();
-			if (sto && sto.needsSync) {
-				dirty = true;
-				return;
+			get = me[asso.getterName]();
+			if (get) {
+				if (get.isModel && get.isDirty() === true) {
+					dirty = true;
+					return;
+				} else if (get.isStore && get.needsSync === true) {
+					dirty = true;
+					return;
+				}
 			}
 		});
 		return dirty;
