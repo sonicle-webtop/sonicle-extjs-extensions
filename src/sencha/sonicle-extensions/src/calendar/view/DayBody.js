@@ -88,8 +88,7 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 	initComponent: function() {
 		var me = this;
 		me.callParent(arguments);
-
-		if (me.readOnly === true) me.enableEventResize = false;
+		
 		me.incrementsPerHour = me.hourIncrement / me.ddIncrement;
 		me.minEventHeight = me.minEventDisplayMinutes / (me.hourIncrement / me.hourHeight);
 	},
@@ -300,25 +299,25 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		if (!me.eventTpl) {
 			me.eventTpl = !(Ext.isIE || Ext.isOpera) ?
 				Ext.create('Ext.XTemplate',
-					'<div id="{_elId}" data-qtitle="{Title}" data-qtip="{Tooltip}" data-draggable="{_isDraggable}" class="{_selectorCls} {_colorCls} {_spanCls} ext-cal-evt ext-cal-evr" style="left: {_left}%; width: {_width}%; top: {_top}px; height: {_height}px; background:{_bgColor};">',
-						'<tpl if="_isDraggable">',
+					'<div id="{_elId}" data-qtitle="{Title}" data-qtip="{Tooltip}" data-draggable="{_isDraggable}" data-resizable="{_isResizable}" class="{_selectorCls} {_colorCls} {_spanCls} ext-cal-evt ext-cal-evr" style="left: {_left}%; width: {_width}%; top: {_top}px; height: {_height}px; background:{_bgColor};">',
+						'<tpl if="_isResizable">',
 						'<div class="ext-evt-rsz ext-evt-rsz-top"><div class="ext-evt-rsz-h">&#160;</div></div>',
 						'</tpl>',
 						'<div class="ext-evt-bd" style="color:{_foreColor};">', me.getEventBodyMarkup(), '</div>',
-						'<tpl if="_isDraggable">',
+						'<tpl if="_isResizable">',
 						'<div class="ext-evt-rsz ext-evt-rsz-bottom"><div class="ext-evt-rsz-h">&#160;</div></div>',
 						'</tpl>',
 					'</div>'
 				)
 				: Ext.create('Ext.XTemplate',
-					'<div id="{_elId}" data-qtitle="{Title}" data-qtip="{Tooltip}" data-draggable="{_isDraggable}" class="ext-cal-evt {_selectorCls} {_spanCls} {_colorCls}-x" style="left: {_left}%; width: {_width}%; top: {_top}px; background:{_bgColor};">',
+					'<div id="{_elId}" data-qtitle="{Title}" data-qtip="{Tooltip}" data-draggable="{_isDraggable}" data-resizable="{_isResizable}" class="ext-cal-evt {_selectorCls} {_spanCls} {_colorCls}-x" style="left: {_left}%; width: {_width}%; top: {_top}px; background:{_bgColor};">',
 						'<div class="ext-cal-evb">&#160;</div>',
 						'<dl style="height: {_height}px;" class="ext-cal-evdm">',
-							'<tpl if="_isDraggable">',
+							'<tpl if="_isResizable">',
 							'<div class="ext-evt-rsz ext-evt-rsz-top"><div class="ext-evt-rsz-h">&#160;</div></div>',
 							'</tpl>',
 							'<dd class="ext-evt-bd" style="color:{_foreColor};">', me.getEventBodyMarkup(), '</dd>',
-							'<tpl if="_isDraggable">',
+							'<tpl if="_isResizable">',
 							'<div class="ext-evt-rsz ext-evt-rsz-bottom"><div class="ext-evt-rsz-h">&#160;</div></div>',
 							'</tpl>',
 						'</dl>',
@@ -405,7 +404,8 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		data._foreColor = me.getEventForeColor(data._bgColor),
 		data._colorCls = 'ext-color-' + (evt[EM.Color.name] || 'nocolor') + (evt._renderAsAllDay ? '-ad' : '');
 		data._spanCls = (!isSpan ? '' : (!spanTop && !spanBottom ? 'ext-cal-ev-spanboth' : (spanBottom ? 'ext-cal-ev-spanbottom' : 'ext-cal-ev-spantop')));
-		data._isDraggable = (me.enableEventResize && !isSpan) ? EU.isMovable(evt) : false;
+		data._isDraggable = (!me.readOnly && !isSpan) ? EU.isMovable(evt) : false;
+		data._isResizable = (!me.readOnly && !isSpan && me.enableEventResize) ? EU.isMovable(evt) : false;
 		data._hasTimezone = (evt[EM.HasTimezone.name] === true);
 		data._isPrivate = (evt[EM.IsPrivate.name] === true);
 		data._hasReminder = (evt[EM.Reminder.name] !== -1);

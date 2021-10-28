@@ -1459,8 +1459,12 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 		opts = opts || {};
 		var me = this,
 				proxy = me.store.getProxy();
-		proxy.setExtraParams(Ext.apply(proxy.getExtraParams(), me.getStoreParams()));
-		me.store.load(opts);
+		if (proxy.type !== 'memory') {
+			proxy.setExtraParams(Ext.apply(proxy.getExtraParams(), me.getStoreParams()));
+			me.store.load(opts);
+		} else {
+			me.refresh(false);
+		}	
 	},
 	
 	/**

@@ -211,7 +211,7 @@ Ext.define('Sonicle.calendar.dd.DropZone', {
 		Ext.each(me.shims, function (shim) {
 			if (shim) Ext.destroy(shim);
 		});
-		Ext.removeNode(me.shimCt);
+		if (me.shimCt) Ext.removeNode(me.shimCt);
 		delete me.shimCt;
 		me.shims.length = 0;
 	}
