@@ -1,6 +1,7 @@
 /**
  * Override default Ext.data.Model
- * - Add support to associations: set associated data and check dirty status
+ * - Add support to associations: provide setAssociated method, check in isValid and isDirty
+ * - Add refresh option to isValid in order to make sure to have validation data recalculated
  */
 Ext.define('Sonicle.overrides.data.Model', {
 	override: 'Ext.data.Model',
@@ -20,25 +21,54 @@ Ext.define('Sonicle.overrides.data.Model', {
 	},
 	
 	/**
-	 * Evaluates model's dirty status taking into account associations.
-	 * @returns {Boolean}
+	 * Checks if the model is valid. See {@link #getValidation}.
+	 * Also associated data will be taken into account.
+	 * @param {Boolean} [refresh] Pass `true` to force a `refresh` of the validation instance before returning results. 
+	 * @returns {Boolean} True if the model is valid.
+	 */
+	isValid: function(refresh) {
+		var me = this,
+				valid = me.getValidation(refresh === true ? true : undefined).isValid(),
+				getter;
+		
+		if (!valid) return false; // If already invalid, return soon...
+		// Otherwise evaluate model associations (if present)
+		Ext.iterate(me.associations, function(name, assoc) {
+			getter = me[assoc.getterName]();
+			if (getter) {
+				// NB: we need to check also fromSingle into association object, 
+				// otherwise we run into a loop, exhausting the call-stack, due 
+				// to presence of inverse association inside the inner model.
+				if (getter.isModel && assoc.fromSingle && !getter.isValid(refresh)) {
+					valid = false;
+					return false;
+				}
+			}
+		});
+		return valid;
+	},
+	
+	/**
+	 * Checks if the model is dirty.
+	 * Also associated data will be taken into account.
+	 * @returns {Boolean} True if the model is dirty.
 	 */
 	isDirty: function() {
 		var me = this, 
-				dirty = me.dirty, asso, get;
+				dirty = me.dirty,
+				getter;
 
-		if (dirty) return true; // If already dirty, return true directly...
+		if (dirty) return true; // If already dirty, return soon...
 		// Otherwise evaluate associations (if present)
-		Ext.iterate(me.associations, function(name) {
-			asso = me.associations[name];
-			get = me[asso.getterName]();
-			if (get) {
-				if (get.isModel && get.isDirty() === true) {
+		Ext.iterate(me.associations, function(name, assoc) {
+			getter = me[assoc.getterName]();
+			if (getter) {
+				if (getter.isModel && assoc.fromSingle && getter.isDirty() === true) {
 					dirty = true;
-					return;
-				} else if (get.isStore && get.needsSync === true) {
+					return false;
+				} else if (getter.isStore && getter.needsSync === true) {
 					dirty = true;
-					return;
+					return false;
 				}
 			}
 		});
