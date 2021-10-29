@@ -6,16 +6,21 @@
 Ext.define('Sonicle.overrides.data.Model', {
 	override: 'Ext.data.Model',
 	
+	/**
+	 * Sets the associated data, adding item's data into the Store implied by 
+	 * the association. Data must be organized in sub-objects following the right 
+	 * data structure.
+	 * @param {Object} data An object containing data to be added to internal associations Stores.
+	 */
 	setAssociated: function(data) {
 		var me = this, 
-				asso, sto, assoData;
+				getter, roleData;
 		
-		Ext.iterate(me.associations, function(name) {
-			asso = me.associations[name];
-			sto = me[asso.getterName]();
-			if (sto && sto.isStore) {
-				assoData = data[asso.role];
-				if (assoData) sto.add(assoData);
+		Ext.iterate(me.associations, function(name, assoc) {
+			getter = me[assoc.getterName]();
+			if (getter && getter.isStore) {
+				roleData = data[assoc.role];
+				if (roleData) getter.add(roleData);
 			}
 		});
 	},
