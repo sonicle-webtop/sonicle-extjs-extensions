@@ -52,5 +52,27 @@ Ext.define('Sonicle.Object', {
 			}
 		});
 		return obj;
+	},
+	
+	/**
+	 * Applies key/value pairs into the specified object.
+	 * The cardinality of keys and value array must be the same.
+	 * @param {Object} object The object in which apply values.
+	 * @param {String[]|String} keys The list of keys to be set.
+	 * @param {Mixed[]|Mixed} values The list of values to set.
+	 * @returns {Object} The object itself.
+	 */
+	applyPairs: function(object, keys, values) {
+		keys = Ext.Array.from(keys, false);
+		values = Ext.Array.from(values, false);
+		if (keys.length === values.length) {
+			for (var i=0; i < keys.length; i++) {
+				var key = keys[i];
+				if (!Ext.isEmpty(key)) {
+					object[new String(key)] = values[i];
+				}
+			}
+		}
+		return object;
 	}
 });
