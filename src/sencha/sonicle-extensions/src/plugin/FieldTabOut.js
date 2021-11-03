@@ -57,13 +57,18 @@ Ext.define('Sonicle.plugin.FieldTabOut', {
 	privates: {
 		onCmpKeyDown: function(s, e, eopts) {
 			var me = this,
+					cmp = me.getCmp(),
 					rhc = me.rootHierarchyContainer,
-					cmp;
+					rcmp;
 			if (e.getKey() === e.TAB) {
 				e.stopEvent();
 				if (rhc && rhc.isContainer && Ext.isString(me.nextReference)) {
-					cmp = Sonicle.Utils.lookupReference(rhc, me.nextReference);
-					if (cmp && cmp.isComponent) cmp.focus(me.focusSelectText, me.focusDelay);
+					rcmp = Sonicle.Utils.lookupReference(rhc, me.nextReference);
+					if (rcmp && rcmp.isComponent) {
+						if (cmp.fireEvent('beforetaboutfocus', me, rcmp) !== false) {
+							rcmp.focus(me.focusSelectText, me.focusDelay);
+						}
+					}
 				}
 			}
 		}
