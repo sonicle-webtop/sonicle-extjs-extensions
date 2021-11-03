@@ -21,19 +21,21 @@ Ext.define('Sonicle.form.Label', {
 		var me = this,
 				appe = me.buildAppearance(me.getAppearance());
 		
-		if(appe[0]) me.cls = appe[0];
-		if(appe[1]) me.style = appe[1];
+		if (appe[0]) me.cls = appe[0];
+		if (appe[1]) me.style = appe[1];
 		me.callParent(arguments);
 	},
 	
-	buildAppearance: function(appe) {
-		var me = this;
-		if(appe === 'title') {
-			return [me.titleCls, me.titleCls];
-		} else if(appe === 'hint') {
-			return [me.hintCls, me.hintCls];
-		} else {
-			return [null, null];
+	privates: {
+		buildAppearance: function(appe) {
+			var me = this;
+			if (appe === 'title') {
+				return [me.titleCls, me.titleCls];
+			} else if (appe === 'hint') {
+				return [me.hintCls, me.hintCls];
+			} else {
+				return [null, null];
+			}
 		}
 	}
 });

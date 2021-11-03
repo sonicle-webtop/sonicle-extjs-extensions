@@ -3,6 +3,7 @@
  * Copyright (C) 2015 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
+ * @deprecated Not used anymore
  */
 Ext.define('Sonicle.form.Panel', {
 	extend: 'Ext.form.Panel',

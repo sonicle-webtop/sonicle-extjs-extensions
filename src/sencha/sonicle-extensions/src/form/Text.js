@@ -31,11 +31,11 @@ Ext.define('Sonicle.form.Text', {
 	componentCls: 'x-unselectable x-form-item-body-default',
 	
 	/**
+	 * @override Check me during ExtJs upgrade!
 	 * Overrides default implementation of {@link Ext.form.Label#getElConfig}.
 	 * This allows prepending htmlEncodeLineBreaks call.
 	 */
 	getElConfig: function() {
-		//NOTE: check this override during ExtJs upgrade!
 		var me = this;
 		me.html = me.text ? Ext.util.Format.htmlEncode(Sonicle.String.htmlEncodeLineBreaks(me.text)) : (me.html || '');
 		me.html = me.genIconMarkup(me.iconType, me.iconExtraCls) + me.html; // Add support to icons
@@ -45,11 +45,11 @@ Ext.define('Sonicle.form.Text', {
 	},
 	
 	/**
+	 * @override Check me during ExtJs upgrade!
 	 * Overrides default implementation of {@link Ext.form.Label#setText}.
 	 * This allows prepending htmlEncodeLineBreaks call.
 	 */
 	setText: function(text, encode) {
-		//NOTE: check this override during ExtJs upgrade!
 		var me = this;
 
 		encode = encode !== false;

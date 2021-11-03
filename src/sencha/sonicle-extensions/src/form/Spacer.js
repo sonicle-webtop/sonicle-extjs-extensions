@@ -26,9 +26,9 @@ Ext.define('Sonicle.form.Spacer', {
 	
 	constructor: function(cfg) {
 		var me = this, vert = cfg.vertical;
-		if(Ext.isDefined(vert) && Ext.isBoolean(vert)) me.vertical = vert;
-		if(Ext.isNumber(cfg.mult)) me.mult = cfg.mult;
-		if(me.vertical) {
+		if (Ext.isDefined(vert) && Ext.isBoolean(vert)) me.vertical = vert;
+		if (Ext.isNumber(cfg.mult)) me.mult = cfg.mult;
+		if (me.vertical) {
 			me.height = me.mult * 10;
 		} else {
 			me.width = me.mult * 10;

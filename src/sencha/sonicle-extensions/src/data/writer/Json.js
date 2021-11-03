@@ -9,17 +9,17 @@ Ext.define('Sonicle.data.writer.Json', {
 	alias: 'writer.sojson',
 	
 	config: {
+		
 		/**
 		 * @cfg {Boolean} writeAssociated
-		 * 'True' to write associated entities data into json response.
+		 * Set to `true` to write associated entities data into json response.
 		 */
 		writeAssociated: true,
 		
 		/**
 		 * @cfg {Boolean} writeChanges
-		 * 'True' to write session {@link Ext.data.Session#getChanges} 
-		 * instead of actual associated data.
-		 * Only valid if {@link #writeAssociated} is active.
+		 * Set to `true` to write session {@link Ext.data.Session#getChanges} 
+		 * instead of actual associated data. Only valid if {@link #writeAssociated} is active.
 		 */
 		writeChanges: false
 	},
@@ -51,7 +51,7 @@ Ext.define('Sonicle.data.writer.Json', {
 				} else if (assoObj.isModel) {
 					modelCN = Ext.getClassName(assoObj);
 					if (changes && changes[modelCN]) {
-						data[association.role] = changes[modelCN]
+						data[association.role] = changes[modelCN];
 					} else {
 						data[association.role] = associatedData[association.role];
 					}
@@ -62,29 +62,31 @@ Ext.define('Sonicle.data.writer.Json', {
 		return data;
 	},
 	
-	extractAssociatedData: function(store, fieldsMap, arrData) {
-		var me = this,
-				dateFormat = me.getDateFormat(),
-				ret = arrData,
-				record, field, key, value, i;
-		
-		for (i=0; i<arrData.length; i++) {
-			record = store.getAt(i);
-			for (key in arrData[i]) {
-				value = arrData[i][key];
-				if ((field = fieldsMap[key])) {
-					// Allow this Writer to take over formatting date values if it has a
-					// dateFormat specified. Only check isDate on fields declared as dates
-					// for efficiency.
-					if (field.isDateField && dateFormat && Ext.isDate(value)) {
-						value = Ext.Date.format(value, dateFormat);
-					} else if (field.serialize) {
-						value = field.serialize(value, record);
+	privates: {
+		extractAssociatedData: function(store, fieldsMap, arrData) {
+			var me = this,
+					dateFormat = me.getDateFormat(),
+					ret = arrData,
+					record, field, key, value, i;
+
+			for (i=0; i<arrData.length; i++) {
+				record = store.getAt(i);
+				for (key in arrData[i]) {
+					value = arrData[i][key];
+					if ((field = fieldsMap[key])) {
+						// Allow this Writer to take over formatting date values if it has a
+						// dateFormat specified. Only check isDate on fields declared as dates
+						// for efficiency.
+						if (field.isDateField && dateFormat && Ext.isDate(value)) {
+							value = Ext.Date.format(value, dateFormat);
+						} else if (field.serialize) {
+							value = field.serialize(value, record);
+						}
 					}
+					ret[i][key] = value;
 				}
-				ret[i][key] = value;
 			}
+			return ret;
 		}
-		return ret;
 	}
 });
