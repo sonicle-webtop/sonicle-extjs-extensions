@@ -205,6 +205,26 @@ Ext.define('Sonicle.Utils', {
 	},
 	
 	/**
+	 * Looks for a component with the specified {@link #reference} value into 
+	 * the passed container component. This method, unlike the {@link Ext.mixin.Container#lookupReference original one}, 
+	 * supports nesting of references using a dotted-style notation: a separate 
+	 * `lookupReference` call will be issued for each token found, so you with 
+	 * this you can dig down into the component hierarchy easily.
+	 * @param {Ext.container.Container} container The root hierarchy container in which start lookup.
+	 * @param {String} path A single reference or a reference path in dotted-notation.
+	 * @returns {Ext.Component} The referenced component or `null` if it is not found.
+	 */
+	lookupReference: function(container, path) {
+		var keys = path.split('.'),
+				cnt = container, i;
+		for (i=0; i < keys.length; i++) {
+			cnt = cnt.lookupReference(keys[i]);
+			if(!cnt) break;
+		}
+		return cnt;
+	},
+	
+	/**
 	 * Transforms passed array into a suitable JSON String. If passed value is
 	 * it's not already an array, an array with one item will be retured.
 	 * @param {Object|Object[]} arr The value to use as an array.
