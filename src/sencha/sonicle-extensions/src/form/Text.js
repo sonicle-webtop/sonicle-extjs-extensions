@@ -30,6 +30,10 @@ Ext.define('Sonicle.form.Text', {
 	// Make component unselectable and force a minimal height
 	componentCls: 'x-unselectable x-form-item-body-default',
 	
+	infoIconCls: 'fa fa-info-circle',
+	warnIconCls: 'fa fa-exclamation-triangle',
+	errorIconCls: 'fa fa-times-circle',
+	
 	/**
 	 * @override Check me during ExtJs upgrade!
 	 * Overrides default implementation of {@link Ext.form.Label#getElConfig}.
@@ -71,13 +75,13 @@ Ext.define('Sonicle.form.Text', {
 	
 	privates: {
 		genIconMarkup: function(type, extraCls) {
-			var cls;
+			var me = this, cls;
 			if ('info' === type) {
-				cls = 'fa fa-info-circle';
+				cls = me.infoIconCls;
 			} else if ('warn' === type) {
-				cls = 'fa fa-exclamation-triangle';
+				cls = me.warnIconCls;
 			} else if ('error' === type) {
-				cls = 'fa fa-times-circle';
+				cls = me.errorIconCls;
 			}
 			return cls ? '<i class="' + cls + ' ' + Sonicle.String.deflt(extraCls, '') + '" aria-hidden="true"></i>&nbsp;' : '';
 		}
