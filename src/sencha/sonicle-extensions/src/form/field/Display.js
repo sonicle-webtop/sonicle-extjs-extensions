@@ -27,7 +27,7 @@ Ext.define('Sonicle.form.field.Display', {
 		if (renderer) {
 			display = Ext.callback(renderer, me.scope, [value, me], 0, me);
 		} else {
-			display = Ext.isEmpty(me.iconCls) ? '' : '<i class="' + me.iconCls + '" aria-hidden="true"></i>&nbsp;';
+			display = Ext.isEmpty(me.iconCls) ? '' : '<i class="' + me.iconCls + '" aria-hidden="true" style="margin-right:5px;"></i>';
 			display += (me.htmlEncode ? Ext.util.Format.htmlEncode(value) : value);
 		}
 		return display;
