@@ -7,6 +7,10 @@
 Ext.define('Sonicle.grid.column.Lookup', {
 	extend: 'Ext.grid.column.Column',
 	alias: 'widget.solookupcolumn',
+	uses: [
+		'Sonicle.String',
+		'Sonicle.Utils'
+	],
 	
 	mixins: [
 		'Ext.util.StoreHolder'
@@ -103,10 +107,11 @@ Ext.define('Sonicle.grid.column.Lookup', {
 	buildHtml: function(value) {
 		var me = this,
 				lrec = me.findLookupRecord(value),
+				lval = me.findLookupValue(value, me.displayField, lrec),
 				ttip = me.evalValue(value, lrec, me.tooltipField, me.getTooltip, null),
 				s = '';
-		if (ttip) s += '<span data-qtip="' + ttip + '">';
-		s += me.findLookupValue(value, me.displayField, lrec);
+		if (ttip) s += '<span ' + Sonicle.Utils.generateTooltipAttrs(ttip) + '>';
+		s += Sonicle.String.htmlEncode(Ext.isEmpty(lval) ? me.emptyCellText : lval);
 		if (ttip) s += '</span>';
 		return s;
 	},
