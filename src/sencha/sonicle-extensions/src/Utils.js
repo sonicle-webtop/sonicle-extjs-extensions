@@ -11,6 +11,28 @@ Ext.define('Sonicle.Utils', {
 	],
 	
 	/**
+	 * Collects stack-trace into an array.
+	 * @param {Integer} traceback The initial index from which start collecting.
+	 * @returns {Array} 
+	 */
+	stackTrace: function(traceback) {
+		var stack = new Error().stack || '';
+		stack = stack.split('\n').map(function(line) { return line.trim(); });
+		stack = stack.splice(stack[0] === 'Error' ? 2 : 1);
+		return (Ext.isNumber(traceback) && (traceback > 0 && traceback <= stack.length)) ? stack.splice(traceback) : stack;
+	},
+	
+	/**
+	 * Collects stack-trace as String.
+	 * @param {Integer} traceback The initial index from which start collecting.
+	 * @returns {String}
+	 */
+	stackTraceToString: function(traceback) {
+		var stack = this.stackTrace(traceback);
+		return Ext.isArray(stack) ? Sonicle.String.join('\n', stack) : '';
+	},
+	
+	/**
 	 * 
 	 * @param {Ext.Base} classInst The class instance.
 	 * @param {Object} constructorConfig The config object passed to constructor.
