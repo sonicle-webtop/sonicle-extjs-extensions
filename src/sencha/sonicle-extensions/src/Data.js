@@ -170,5 +170,26 @@ Ext.define('Sonicle.Data', {
 			start = iof+1;
 		}
 		return recs;
+	},
+	
+	/**
+	 * Finds the first matching Record in this Store by a function.
+	 * @param {Ext.data.Store} store The data store.
+	 * @param {Function} fn The function to be called. It will be passed the following parameters:
+	 * @param {Ext.data.Model} fn.record The record to test for filtering. Access field values using {@link Ext.data.Model#get}.
+	 * @param {Object} fn.id The ID of the Record passed.
+	 * @param {Object} [scope] The scope (this reference) in which the function is executed. Defaults to this Store.
+	 * @param {Number} [start=0] The index at which to start searching.
+	 * @returns {Ext.data.Model} The matched record, null if no record is found for matched index, otherwise undefined.
+	 */
+	findRecordBy: function(store, fn, scope, start) {
+		var ridx, rec;
+		if (store && store.isStore) {
+			ridx = store.findBy(fn, scope, start);
+			if (ridx !== -1) {
+				rec = store.getAt(ridx);
+			}
+		}
+		return rec;
 	}
 });
