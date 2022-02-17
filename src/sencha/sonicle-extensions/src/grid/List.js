@@ -78,7 +78,7 @@ Ext.define('Sonicle.grid.List', {
 			}, {
 				xtype: 'soactioncolumn',
 				items: [{
-					iconCls: 'fa fa-trash-o',
+					iconCls: 'far fa-trash-alt',
 					tooltip: me.removeText,
 					handler: function(g, ridx) {
 						var rec = g.getStore().getAt(ridx);

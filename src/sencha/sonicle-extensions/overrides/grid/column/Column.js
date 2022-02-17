@@ -14,8 +14,8 @@ Ext.define('Sonicle.overrides.grid.column.Column', {
 		var me = this;
 		me.callParent(arguments);
 		if (!Ext.isEmpty(me.headerAlign)) {
-			me.removeCls(Ext.baseCSSPrefix + 'column-header-align-' + me.align);
-			me.addCls(Ext.baseCSSPrefix + 'column-header-align-' + me.headerAlign);
+			me.removeCls(Ext.baseCSSPrefix + 'column-header-align-' + me.getMappedAlignment(me.align));
+			me.addCls(Ext.baseCSSPrefix + 'column-header-align-' + me.getMappedAlignment(me.headerAlign));
 		}
 	}
 });

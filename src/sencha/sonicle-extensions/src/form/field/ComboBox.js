@@ -112,7 +112,7 @@ Ext.define('Sonicle.form.field.ComboBox', {
 		me.callParent(arguments);
 		me.listConfig.colorize = me.colorize;
 		me.listConfig.swatchGeometry = me.swatchGeometry;
-		if (me.store && me.store.grouper) me.listConfig.groupField = me.groupField;
+		if (me.store && !Ext.isEmpty(me.store.getGroupField())) me.listConfig.groupField = me.groupField;
 		me.listConfig.iconField = me.iconField;
 		me.listConfig.colorField = me.colorField;
 		me.listConfig.sourceCls = me.sourceCls;

@@ -19,7 +19,7 @@ Ext.define('Sonicle.grid.column.Clipboard', {
 		var me = this;
 		cfg = Ext.apply(cfg || {}, {
 			items: [{
-				iconCls: 'fa fa-files-o',
+				iconCls: 'far fa-copy',
 				tooltip: me.tooltipText
 			}]
 		});

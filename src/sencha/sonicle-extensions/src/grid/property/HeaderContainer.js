@@ -34,7 +34,7 @@ Ext.define('Sonicle.grid.property.HeaderContainer', {
 			renderer: function(val, meta, rec) {
 				var s = '';
 				if (!Ext.isEmpty(editableField) && rec.get(editableField) === false) {
-					s += '<i class="fa fa-lock" aria-hidden="true" '+Sonicle.Utils.generateTooltipAttrs(notEditableText)+' style="margin-right:5px;font-size:initial"></i>';
+					s += '<i class="fas fa-lock" aria-hidden="true" '+Sonicle.Utils.generateTooltipAttrs(notEditableText)+' style="margin-right:5px;font-size:initial"></i>';
 				}
 				return s + val;
 			},

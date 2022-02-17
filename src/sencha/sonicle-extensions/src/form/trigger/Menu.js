@@ -48,7 +48,7 @@ Ext.define('Sonicle.form.trigger.Menu', {
 	 */
 	
 	cls: 'so-' + 'form-menu-trigger',
-	extraCls: 'fa fa-bars',
+	extraCls: 'fas fa-bars',
 	
 	destroy: function() {
 		this.setMenu(null);

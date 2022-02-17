@@ -13,7 +13,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.FormatItalic', {
 	
 	tooltip: 'Italic',
 	
-	toolIconCls: 'fa fa-italic',
+	toolIconCls: 'fas fa-italic',
 	
 	initComponent: function() {
 		var me = this;

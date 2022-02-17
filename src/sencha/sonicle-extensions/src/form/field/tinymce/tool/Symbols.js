@@ -16,7 +16,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.Symbols', {
 	tooltip: 'Symbols',
 	arrowVisible: false,
 	
-	toolIconCls: 'fa fa-slack',
+	toolIconCls: 'fas fa-hashtag',
 	
 	initComponent: function() {
 		var me = this;

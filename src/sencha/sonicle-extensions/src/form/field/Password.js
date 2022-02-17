@@ -10,8 +10,8 @@ Ext.define('Sonicle.form.field.Password', {
 	
 	config: {
 		eyeTriggerCls: 'so-passwordfield-trigger-eye',
-		eyeTriggerClsOn: 'fa fa-eye-slash',
-		eyeTriggerClsOff: 'fa fa-eye'
+		eyeTriggerClsOn: 'far fa-eye-slash',
+		eyeTriggerClsOff: 'far fa-eye'
 	},
 	
 	inputType: 'password',

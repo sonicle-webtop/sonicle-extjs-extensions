@@ -25,7 +25,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.BullListSelect', {
 	enableToggle: true,
 	tooltip: 'Bullet list',
 	
-	toolIconCls: 'fa fa-list-ul',
+	toolIconCls: 'fas fa-list-ul',
 	defaultIconCls: 'so-tmcetoolbulllistselect-default',
 	defaultText: 'Default',
 	circleIconCls: 'so-tmcetoolbulllistselect-circle',

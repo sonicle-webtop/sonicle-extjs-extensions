@@ -35,7 +35,7 @@ Ext.define("Ext.saki.form.field.Icon", {
 	extend: "Ext.AbstractPlugin",
 	alternateClassName: "Ext.ux.form.field.Icon",
 	alias: ["plugin.saki-ficn", "plugin.ux-ficn"],
-	iconBaseCls: "fa",
+	iconBaseCls: "fas",
 	iconCls: "fa-info-circle",
 	iconMode: "font",
 	iconColor: "#5278FF",

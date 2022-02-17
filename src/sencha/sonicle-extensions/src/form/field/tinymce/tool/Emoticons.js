@@ -19,7 +19,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.Emoticons', {
 	tooltip: 'Emoticons',
 	arrowVisible: false,
 	
-	toolIconCls: 'fa fa-smile-o',
+	toolIconCls: 'far fa-smile',
 	
 	initComponent: function() {
 		var me = this;

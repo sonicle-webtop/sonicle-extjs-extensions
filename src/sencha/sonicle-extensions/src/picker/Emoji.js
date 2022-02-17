@@ -29,42 +29,44 @@ Ext.define('Sonicle.picker.Emoji', {
 	initComponent: function() {
 		var me = this, cmps;
 		me.callParent(arguments);
-		cmps = me.add({
-			xtype: 'soemojipalette',
-			tooltip: me.peopleText,
-			glyph: 'xf118@FontAwesome',
-			emojis: Sonicle.Emojis.lib.people
-		}, {
-			xtype: 'soemojipalette',
-			tooltip: me.natureText,
-			glyph: 'xf06c@FontAwesome',
-			emojis: Sonicle.Emojis.lib.nature
-		}, {
-			xtype: 'soemojipalette',
-			tooltip: me.foodsText,
-			glyph: 'xf0f5@FontAwesome',
-			emojis: Sonicle.Emojis.lib.foods
-		}, {
-			xtype: 'soemojipalette',
-			tooltip: me.activityText,
-			glyph: 'xf1e3@FontAwesome',
-			emojis: Sonicle.Emojis.lib.activity
-		}, {
-			xtype: 'soemojipalette',
-			tooltip: me.placesText,
-			glyph: 'xf1b9@FontAwesome',
-			emojis: Sonicle.Emojis.lib.places
-		}, {
-			xtype: 'soemojipalette',
-			tooltip: me.peopleText,
-			glyph: 'xf0eb@FontAwesome',
-			emojis: Sonicle.Emojis.lib.objects
-		}, {
-			xtype: 'soemojipalette',
-			tooltip: me.symbolsText,
-			glyph: 'xf292@FontAwesome',
-			emojis: Sonicle.Emojis.lib.symbols
-		});
+		cmps = me.add([
+			{
+				xtype: 'soemojipalette',
+				tooltip: me.peopleText,
+				iconCls: 'far fa-smile',
+				emojis: Sonicle.Emojis.lib.people
+			}, {
+				xtype: 'soemojipalette',
+				tooltip: me.natureText,
+				iconCls: 'fas fa-leaf',
+				emojis: Sonicle.Emojis.lib.nature
+			}, {
+				xtype: 'soemojipalette',
+				tooltip: me.foodsText,
+				iconCls: 'fas fa-utensils',
+				emojis: Sonicle.Emojis.lib.foods
+			}, {
+				xtype: 'soemojipalette',
+				tooltip: me.activityText,
+				iconCls: 'far fa-futbol',
+				emojis: Sonicle.Emojis.lib.activity
+			}, {
+				xtype: 'soemojipalette',
+				tooltip: me.placesText,
+				iconCls: 'fas fa-car',
+				emojis: Sonicle.Emojis.lib.places
+			}, {
+				xtype: 'soemojipalette',
+				tooltip: me.peopleText,
+				iconCls: 'far fa-lightbulb',
+				emojis: Sonicle.Emojis.lib.objects
+			}, {
+				xtype: 'soemojipalette',
+				tooltip: me.symbolsText,
+				iconCls: 'fas fa-hashtag',
+				emojis: Sonicle.Emojis.lib.symbols
+			}
+		]);
 		
 		Ext.iterate(cmps, function(cmp) {
 			me.relayEvents(cmp, ['select']);

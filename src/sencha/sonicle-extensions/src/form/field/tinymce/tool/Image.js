@@ -22,14 +22,14 @@ Ext.define('Sonicle.form.field.tinymce.tool.Image', {
 	
 	tooltip: 'Insert image',
 	
-	toolIconCls: 'fa fa-picture-o',
+	toolIconCls: 'far fa-image',
 	insertImageUrl: true,
-	insertImageUrlIconCls: 'fa fa-link',
+	insertImageUrlIconCls: 'fas fa-link',
 	insertImageUrlText: 'Link image from URL',
 	insertImageUrlPromptTitleText: undefined,
 	insertImageUrlPromptMsgText: 'Image URL',
 	insertImageFile: true,
-	insertImageFileIconCls: 'fa fa-upload',
+	insertImageFileIconCls: 'fas fa-upload',
 	insertImageFileText: 'Upload from file',
 	
 	/*

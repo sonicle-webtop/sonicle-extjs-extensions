@@ -53,30 +53,33 @@ Ext.define('Sonicle.overrides.data.Model', {
 		return valid;
 	},
 	
-	/**
-	 * Checks if the model is dirty.
-	 * Also associated data will be taken into account.
-	 * @returns {Boolean} True if the model is dirty.
-	 */
-	isDirty: function() {
-		var me = this, 
-				dirty = me.dirty,
-				getter;
+	privates: {
+		
+		/**
+		 * Checks if the model is dirty.
+		 * Also associated data will be taken into account.
+		 * @returns {Boolean} True if the model is dirty.
+		 */
+		isDirty: function() {
+			var me = this, 
+					dirty = me.dirty,
+					getter;
 
-		if (dirty) return true; // If already dirty, return soon...
-		// Otherwise evaluate associations (if present)
-		Ext.iterate(me.associations, function(name, assoc) {
-			getter = me[assoc.getterName]();
-			if (getter) {
-				if (getter.isModel && assoc.fromSingle && getter.isDirty() === true) {
-					dirty = true;
-					return false;
-				} else if (getter.isStore && getter.needsSync === true) {
-					dirty = true;
-					return false;
+			if (dirty) return true; // If already dirty, return soon...
+			// Otherwise evaluate associations (if present)
+			Ext.iterate(me.associations, function(name, assoc) {
+				getter = me[assoc.getterName]();
+				if (getter) {
+					if (getter.isModel && assoc.fromSingle && getter.isDirty() === true) {
+						dirty = true;
+						return false;
+					} else if (getter.isStore && getter.needsSync === true) {
+						dirty = true;
+						return false;
+					}
 				}
-			}
-		});
-		return dirty;
+			});
+			return dirty;
+		}
 	}
 });

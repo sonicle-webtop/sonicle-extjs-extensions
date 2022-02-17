@@ -11,7 +11,7 @@ Ext.define('Sonicle.toolbar.PathBreadcrumb', {
 		'Ext.button.Split'
 	],
 	mixins: [
-		'Ext.util.FocusableContainer'
+		'Ext.mixin.FocusableContainer'
 	],
 	
 	isBreadcrumb: true,

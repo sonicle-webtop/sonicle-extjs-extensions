@@ -18,7 +18,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.Table', {
 	
 	tooltip: 'Insert table',
 	
-	toolIconCls: 'fa fa-table',
+	toolIconCls: 'fas fa-table',
 	
 	initComponent: function() {
 		var me = this;

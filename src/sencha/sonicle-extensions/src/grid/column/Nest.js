@@ -65,8 +65,8 @@ Ext.define('Sonicle.grid.column.Nest', {
 	
 	collapseToolCls: 'so-'+'nestcolumn-collapsetool',
 	hierarchySymbolExtraCls: '',
-	collapsedIconCls: 'fa-plus-square-o',
-	expandedIconCls: 'fa-minus-square-o',
+	collapsedIconCls: 'far fa-plus-square',
+	expandedIconCls: 'far fa-minus-square',
 	wrapCls: 'so-'+'nestcolumn-wrap',
 	
 	collapseTooltip: 'Click to expand/collapse groups',
@@ -103,7 +103,7 @@ Ext.define('Sonicle.grid.column.Nest', {
 					cls = me.collapseToolCls + ' ' + (me.collapseDisabled ? me.collapseToolCls+'-disabled' : ''),
 					//style = me.collapseDisabled ? '' : 'cursor:pointer;';
 					style = '';
-				html += '<i class="' + cls + ' fa ' + toolCls + '" data-qtip="'+ tip +'" style="' + style + '"></i>';
+				html += '<i class="' + cls + ' ' + toolCls + '" data-qtip="'+ tip +'" style="' + style + '"></i>';
 			}
 		} else if (isChild) {
 			html += '<span class="' + me.hierarchySymbolExtraCls + '" style="padding-left:20px;">' + Sonicle.grid.column.Nest.hierarchySvg() + '</span>';

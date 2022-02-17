@@ -1,34 +1,24 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2020 Sonicle S.r.l.
+ * Copyright (C) 2022 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
  */
 Ext.define('Sonicle.grid.feature.RowLookup', {
 	extend: 'Ext.grid.feature.Feature',
 	alias: 'feature.sorowlookup',
-	
-	config: {
-		/**
-		 * @cfg {Ext.data.Store} lookupStore
-		 * The Store that columns should use as extra data source
-		 */
-		lookupStore: null
-	},
+	mixins: [
+		'Ext.util.StoreHolder'
+	],
 	
 	init: function(grid) {
 		var me = this,
-				view = me.view = grid.getView();
+				view = me.view,
+				store;
 		
-		me.setLookupStore(me.lookupStore);
 		view.rowLookupFeature = me;
 		view.renderRow = Ext.Function.interceptBefore(view, 'renderRow', function(record, rowIdx, out) {
-			if (record) {
-				if (record.lookupRecord === undefined) {
-					var lrec = me.getLookupRecord(record.getId());
-					record.lookupRecord = lrec ? lrec.clone() : null;
-				}
-			}
+			if (record) record.lookupRecord = me.makeRecordGetter(record);
 		});
 		/*
 		view.renderCell = Ext.Function.interceptBefore(view, 'renderCell', function(column, record, recordIndex, rowIndex, columnIndex, out, parent) {
@@ -37,36 +27,88 @@ Ext.define('Sonicle.grid.feature.RowLookup', {
 		});
 		*/
 		me.callParent(arguments);
+		
+		store = me.store = Ext.data.StoreManager.lookup(me.store || 'ext-empty-store');
+		me.bindStore(store, true);
 	},
 	
 	destroy: function() {
-		this.setLookupStore(null);
-		this.callParent();
+		var me = this;
+		me.bindStore(null);
+		me.callParent();
 	},
 	
-	applyLookupStore: function(store) {
+	setStore: function(newStore) {
 		var me = this;
-		if (store) {
-			store = Ext.data.StoreManager.lookup(store);
-			if (store.loadCount === 0) {
-				me.view.blockRefresh = true;
-				store.on('load', me.onLookupStoreLoad, me, {single: true});
-			}
-		} else {
-			if (me.lookupStore) {
-				me.lookupStore.un('load', me.onLookupStoreLoad, me);
+		if (me.store !== newStore) {
+			if (me.isConfiguring) {
+				me.store = newStore;
+			} else {
+				me.bindStore(newStore, /* initial */ false);
 			}
 		}
-		return store;
 	},
 	
-	onLookupStoreLoad: function() {
-		this.view.blockRefresh = false;
-		this.view.refresh();
+	getStoreListeners: function() {
+		var me = this;
+		return {
+			beforeload: me.onDataBeforeLoad,
+			refresh: me.onDataRefresh,
+			clear: me.onDataRefresh
+		};
 	},
 	
-	getLookupRecord: function(id) {
-		var lsto = this.lookupStore;
-		return lsto ? lsto.getById(id) : null;
+	bindStore: function(store, initial) {
+		var me = this,
+				view = me.view;
+		me.mixins.storeholder.bindStore.apply(me, arguments);
+		
+		if (store && view.componentLayoutCounter) {
+			if (view.blockRefresh) {
+				view.refreshNeeded = true;
+			} else {
+				if (store && !store.isLoading()) {
+					view.refresh();
+				}
+			}
+		}
+	},
+	
+	privates: {
+		onDataBeforeLoad: function(store) {
+			var me = this,
+					view = me.view;
+			//console.log(view.blockRefresh);
+			me.prevBlock = view.blockRefresh;
+			view.blockRefresh = true;
+		},
+		
+		onDataRefresh: function(store) {
+			var me = this,
+					view = me.view;
+			if (me.prevBlock !== undefined) {
+				//console.log('blockRefresh was '+me.prevBlock);
+				view.blockRefresh = me.prevBlock;
+				delete me.prevBlock;
+			}
+			view.updateLayout();
+		},
+		
+		findLookupRecord: function(recordId) {
+			var lsto = this.store, lrec;
+			if (lsto) {
+				lrec = lsto.getById(recordId);
+				if (lrec) lrec = lrec.clone();
+			}
+			return lrec;
+		},
+		
+		makeRecordGetter: function(record) {
+			return Ext.bind(function(rowLookup) {
+				var me = this;
+				if (!me.rowLookupRecord) me.rowLookupRecord = rowLookup.findLookupRecord(me.getId());
+				return me.rowLookupRecord;
+			}, record, [this]);
+		}
 	}
 });

@@ -53,18 +53,8 @@ Ext.define('Sonicle.upload.Field', {
 	
 	inputCls: Ext.baseCSSPrefix + 'form-text-file',
 	
-	/**
-	 * @cfg {Boolean} [readOnly=true]
-	 * Unlike with other form fields, the readOnly config defaults to true in File field.
-	 */
 	readOnly: true,
-	
-	/**
-	 * @cfg {Boolean} editable
-	 * @inheritdoc
-	 */
 	editable: false,
-	
 	submitValue: false,
 	
 	/**
@@ -78,6 +68,15 @@ Ext.define('Sonicle.upload.Field', {
 	 * Extract the file element, button outer element, and button active element.
 	 */
 	childEls: ['browseButtonWrap'],
+	
+	onDestroy: function() {
+		this.button = null;
+		this.callParent();
+	},
+	
+	getButtonMarginProp: function() {
+		return 'margin-left:';
+	},
 	
 	/**
 	 * @private
@@ -150,38 +149,20 @@ Ext.define('Sonicle.upload.Field', {
 		return '<td id="' + this.id + '-browseButtonWrap" data-ref="browseButtonWrap" role="presentation"></td>';
 	},
 	
-	onFileUploaded: function(s, file) {
-		this.doSetValue(file);
-	},
-	
 	/**
-	 * Overridden to skip rawValue processing in {@link Ext.form.field.Base#getValue}
+	 * @override Ext.form.field.Base#getValue
+	 * We want to skip rawValue processing
 	 */
 	getValue: function() {
 		return this.value;
 	},
 	
 	/**
-	 * Overridden to do nothing
+	 * @override Ext.form.field.Text#setValue
+	 * This method must do nothing
 	 */
-	setValue: Ext.emptyFn,
-	
-	/**
-	 * @private
-	 */
-	doSetValue: function(file) {
-		var me = this,
-				srpas = me.responseValueProperty,
-				val;
-		me.setRawValue(file.name);
-		if (file._serverResponse && !Ext.isEmpty(srpas)) {
-			val = file._serverResponse[srpas];
-		} else {
-			val = file.name;
-		}
-		me.mixins.field.setValue.call(me, val);
-		me.refreshEmptyText();
-		return me;
+	setValue: function(value) {
+		return this.getValue();
 	},
 	
 	reset: function() {
@@ -215,29 +196,39 @@ Ext.define('Sonicle.upload.Field', {
 		this.button.enable();
 	},
 	
-	onDestroy: function() {
-		this.button = null;
-		this.callParent();
-	},
-	
-	getButtonMarginProp: function() {
-		return 'margin-left:';
-	},
-	
-	onInputFocus: function(e) {
-		this.focus();
-	},
-	
-	onInputMouseDown: function(e) {
-		// Some browsers will show the cursor even if the input is read only,
-		// which will be visible in the short instant between inputEl focusing
-		// and subsequent focus jump to the FileButton. Preventing inputEl from
-		// focusing eliminates that flicker.
-		e.preventDefault();
-		this.focus();
-	},
-	
 	privates: {
+		onInputFocus: function(e) {
+			this.focus();
+		},
+
+		onInputMouseDown: function(e) {
+			// Some browsers will show the cursor even if the input is read only,
+			// which will be visible in the short instant between inputEl focusing
+			// and subsequent focus jump to the FileButton. Preventing inputEl from
+			// focusing eliminates that flicker.
+			e.preventDefault();
+			this.focus();
+		},
+				
+		onFileUploaded: function(s, file) {
+			this.doSetValue(file);
+		},
+		
+		doSetValue: function(file) {
+			var me = this,
+					srpas = me.responseValueProperty,
+					val;
+			me.setRawValue(file.name);
+			if (file._serverResponse && !Ext.isEmpty(srpas)) {
+				val = file._serverResponse[srpas];
+			} else {
+				val = file.name;
+			}
+			me.mixins.field.setValue.call(me, val);
+			me.refreshEmptyText();
+			return val;
+		},
+		
 		getFocusEl: function() {
 			return this.button;
 		},

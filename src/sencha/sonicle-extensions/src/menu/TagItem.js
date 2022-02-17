@@ -19,7 +19,7 @@ Ext.define('Sonicle.menu.TagItem', {
 	defaultColor: '#FFFFFF',
 	
 	showCheckbox: false,
-	glyph: 'xf02b@FontAwesome',
+	glyph: 'xf02b@\'Font Awesome 5 Free\'',
 	checkedCls: 'x-grid-item-selected',
 	uncheckedCls: '',
 	

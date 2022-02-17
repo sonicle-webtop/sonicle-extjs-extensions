@@ -19,7 +19,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.Link', {
 	
 	tooltip: 'Insert link',
 	
-	toolIconCls: 'fa fa-link',
+	toolIconCls: 'fas fa-link',
 	promptTitleText: undefined,
 	promptMsgText: 'URL',
 	suggestMailToText: 'The URL you entered seems to be an email address. Do you want to add the "mailto:" prefix?',

@@ -18,13 +18,13 @@ Ext.define('Sonicle.form.field.tinymce.tool.AlignSelect', {
 	
 	tooltip: 'Align',
 	
-	alignLeftIconCls: 'fa fa-align-left',
+	alignLeftIconCls: 'fas fa-align-left',
 	alignLeftText: 'Left',
-	alignCenterIconCls: 'fa fa-align-center',
+	alignCenterIconCls: 'fas fa-align-center',
 	alignCenterText: 'Center',
-	alignRightIconCls: 'fa fa-align-right',
+	alignRightIconCls: 'fas fa-align-right',
 	alignRightText: 'Right',
-	alignJustifyIconCls: 'fa fa-align-justify',
+	alignJustifyIconCls: 'fas fa-align-justify',
 	alignJustifyText: 'Justify',
 	
 	initComponent: function() {

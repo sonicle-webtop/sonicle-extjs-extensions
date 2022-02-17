@@ -43,10 +43,15 @@ Ext.define('Sonicle.overrides.form.field.Text', {
 }
 	*/
    
-   onFocus: function(e) {
+   /*
+	* On 6.2 this code was to keep caret position on focus
+	* instead of always going to the end
+	*/
+   /*onFocus: function(e) {
         var me = this,
             len;
  
+		//avoid parent code
         me.callSuper([e]);
         
         // This handler may be called when the focus has already shifted to another element;
@@ -57,6 +62,7 @@ Ext.define('Sonicle.overrides.form.field.Text', {
             // while tabbing between editors.
             if (!me.destroyed && document.activeElement === me.inputEl.dom) {
                 len = me.inputEl.dom.value.length;
+				//ext 6.2 : this is the modified code
                 if (me.selectOnFocus) me.selectText(0, len);
             }
         });
@@ -69,7 +75,7 @@ Ext.define('Sonicle.overrides.form.field.Text', {
         me.triggerWrap.addCls(me.triggerWrapFocusCls);
         me.inputWrap.addCls(me.inputWrapFocusCls);
         me.invokeTriggers('onFieldFocus', [e]);
-    },
+    },*/
 	
 	/**
 	 * Gets the current inputEl cursor position.

@@ -28,7 +28,7 @@ Ext.define('Sonicle.form.trigger.Open', {
      */
 	
 	cls: 'so-' + 'form-open-trigger',
-	extraCls: 'fa fa-external-link',
+	extraCls: 'fas fa-external-link-alt',
 
 	handler: function(cmp) {
 		var val = cmp.getValue();

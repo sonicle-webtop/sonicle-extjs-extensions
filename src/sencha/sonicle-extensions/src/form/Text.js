@@ -30,13 +30,12 @@ Ext.define('Sonicle.form.Text', {
 	// Make component unselectable and force a minimal height
 	componentCls: 'x-unselectable x-form-item-body-default',
 	
-	infoIconCls: 'fa fa-info-circle',
-	warnIconCls: 'fa fa-exclamation-triangle',
-	errorIconCls: 'fa fa-times-circle',
+	infoIconCls: 'fas fa-info-circle',
+	warnIconCls: 'fas fa-exclamation-triangle',
+	errorIconCls: 'fas fa-times-circle',
 	
 	/**
-	 * @override Check me during ExtJs upgrade!
-	 * Overrides default implementation of {@link Ext.form.Label#getElConfig}.
+	 * @override Ext.form.Label#getElConfig
 	 * This allows prepending htmlEncodeLineBreaks call.
 	 */
 	getElConfig: function() {
@@ -49,8 +48,7 @@ Ext.define('Sonicle.form.Text', {
 	},
 	
 	/**
-	 * @override Check me during ExtJs upgrade!
-	 * Overrides default implementation of {@link Ext.form.Label#setText}.
+	 * @override Ext.form.Label#setText
 	 * This allows prepending htmlEncodeLineBreaks call.
 	 */
 	setText: function(text, encode) {

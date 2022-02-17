@@ -16,12 +16,12 @@ Ext.define('Sonicle.form.field.tinymce.tool.DevTools', {
 	
 	tooltip: 'Developer tools',
 	
-	toolIconCls: 'fa fa-code',
+	toolIconCls: 'fas fa-code',
 	codeSample: true,
-	codeSampleIconCls: 'fa fa-file-code-o',
+	codeSampleIconCls: 'far fa-file-code',
 	codeSampleText: 'Insert/Edit code sample',
 	sourceCode: true,
-	sourceCodeIconCls: 'fa fa-code',
+	sourceCodeIconCls: 'fas fa-code',
 	sourceCodeText: 'Source code',
 	
 	initComponent: function() {

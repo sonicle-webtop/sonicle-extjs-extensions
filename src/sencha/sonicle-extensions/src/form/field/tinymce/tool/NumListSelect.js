@@ -22,7 +22,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.NumListSelect', {
 	enableToggle: true,
 	tooltip: 'Numbered list',
 	
-	toolIconCls: 'fa fa-list-ol',
+	toolIconCls: 'fas fa-list-ol',
 	defaultIconCls: 'so-tmcetoolnumlistselect-default',
 	defaultText: 'Default',
 	lowerAlphaIconCls: 'so-tmcetoolnumlistselect-lowerAlpha',

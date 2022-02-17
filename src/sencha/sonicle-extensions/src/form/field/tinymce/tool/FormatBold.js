@@ -13,7 +13,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.FormatBold', {
 	
 	tooltip: 'Bold',
 	
-	toolIconCls: 'fa fa-bold',
+	toolIconCls: 'fas fa-bold',
 	
 	initComponent: function() {
 		var me = this;

@@ -149,8 +149,8 @@ Ext.define('Sonicle.calendar.util.EventUtils', {
 				edate = XDate.format(evEndDt, dateFmt),
 				etime = XDate.format(edata[EM.EndDate.name], timeFmt),
 				tit = Ext.isEmpty(evLoc) ? evTit : Ext.String.format('{0} @{1}', evTit, evLoc),
-				iconDate = 'fa fa-clock-o',
-				iconCalendar = 'fa fa-calendar-o',
+				iconDate = 'far fa-clock',
+				iconCalendar = 'far fa-calendar',
 				tip, thtml;
 
 		if (SoDate.diffDays(evStaDt, evEndDt) === 0) {

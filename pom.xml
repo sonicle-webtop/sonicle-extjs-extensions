@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sonicle.extjs</groupId>
     <artifactId>sonicle-extjs-extensions</artifactId>
-    <version>6.2.0.48</version>
+	<version>3.0.0</version><!-- !!! See README.md for info on how to increment version numbers !!! -->
     <packaging>jar</packaging>
 	<name>sonicle-extjs-extensions</name>
 	
@@ -15,8 +15,8 @@
 	
     <properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		
-		<!-- SENCHA CONFIGURATION -->
+		<!-- SENCHA -->
+		<sencha.properties.target>sencha75</sencha.properties.target>
 		<sencha.package.name>sonicle-extensions</sencha.package.name>
     </properties>
 </project>

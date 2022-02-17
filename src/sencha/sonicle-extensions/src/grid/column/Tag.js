@@ -83,7 +83,7 @@ Ext.define('Sonicle.grid.column.Tag', {
 		'</tpl>',
 		'<tpl for="tags">',
 		'<span style="color:{color};margin:0 0 0 2px" data-qtip="{name}">',
-			'<i class="fa fa-tag"></i>',
+			'<i class="fas fa-tag"></i>',
 		'</span>',
 		'</tpl>'
 	],

@@ -35,9 +35,13 @@ Ext.define('Sonicle.form.field.Image', {
 	extend: 'Sonicle.form.field.DisplayImage',
 	alias: ['widget.soimagefield'],
 	requires: [
+		'Sonicle.Utils',
 		'Sonicle.form.trigger.Clear',
 		'Sonicle.upload.Uploader'
 	],
+	
+	fieldCls: 'so-' + 'form-image-field',
+	fieldBodyCls: 'so-' + 'form-image-field-body',
 	
 	postSubTpl: [
 			'</div>', // end inputWrap
@@ -47,45 +51,109 @@ Ext.define('Sonicle.form.field.Image', {
 	],
 	childEls: ['triggerWrap','inputWrap','pluWrap'],
 	
-	config: {
-		uploadDisabled: false,
-		clearTriggerCls: '',
-		uploadTriggerCls: ''
-	},
+	/**
+	 * @cfg {Boolean} [uploadDisabled=false]
+	 * Set to `true` to completely disable Uploader component.
+	 */
+	uploadDisabled: false,
 	
+	/**
+	 * @cfg {String} clearTriggerTooltip
+	 * The tooltip text to apply to Clear trigger.
+	 */
+	clearTriggerTooltip: undefined,
+	
+	/**
+	 * @cfg {String} clearTriggerCls
+	 * The CSS icon class to apply to Clear trigger.
+	 */
+	clearTriggerCls: undefined,
+	
+	/**
+	 * @cfg {String} uploadTriggerTooltip
+	 * The tooltip text to apply to Upload trigger.
+	 */
+	uploadTriggerTooltip: undefined,
+	
+	/**
+	 * @cfg {String} [uploadTriggerCls]
+	 * The CSS icon class to apply to Upload trigger.
+	 */
+	uploadTriggerCls: undefined,
+	
+	/**
+	 * @cfg {String} clearTriggerTooltip
+	 * The CSS icon class to apply to trigger in addition to the default `x-form-trigger-over`.
+	 */
+	triggersOverCls: undefined,
+	
+	/**
+	 * @readonly
+	 * @property {Sonicle.upload.Uploader} uploader
+	 * The uploader object.
+	 */
 	uploader: null,
 	
+	/**
+	 * @event clear
+	 */
+	
+	/**
+	 * @event uploaderready
+	 * @event beforeuploaderstart
+	 * @event uploadstarted
+	 * @event uploadcomplete
+	 * @event uploaderror
+	 * @event filesadded
+	 * @event beforeupload
+	 * @event fileuploaded
+	 * @event overallprogress
+	 * @event uploadprogress
+	 * @event storeempty
+	 */
+	
 	constructor: function(cfg) {
-		var me = this, 
-				iniCfg = Ext.apply({}, cfg, me.getInitialConfig()), 
-				triggers = {};
+		var me = this,
+				SoS = Sonicle.String,
+				SoU = Sonicle.Utils,
+				icfg = SoU.getConstructorConfigs(me, cfg, [
+					{triggers: true}, {uploadDisabled: true}, {triggersOverCls: true}, {clearTriggerCls: true}, {uploadTriggerCls: true}, {clearTriggerTooltip: true}, {uploadTriggerTooltip: true}, {uploaderConfig: true}
+				]),
+				overCls = SoS.join(' ', Ext.baseCSSPrefix + 'form-trigger-over', icfg.triggersOverCls),
+				triggers = {
+					clear: {
+						type: 'soclear',
+						weight: -1,
+						tooltip: icfg.clearTriggerTooltip,
+						cls: icfg.clearTriggerCls,
+						overCls: overCls,
+						handler: me.onClearClick
+					}
+				};
 		
-		triggers = Ext.apply(triggers, {
-			clear: {
-				type: 'soclear',
-				weight: -1,
-				cls: iniCfg.clearTriggerCls,
-				handler: me.onClearClick
+		if (!icfg.uploadDisabled) {
+			var tip = icfg.uploadTriggerTooltip;
+			if (Ext.isString(tip) && Ext.isString(icfg.maxSizeTooltip) && icfg.uploaderConfig && Ext.isNumber(icfg.uploaderConfig.maxFileSize)) {
+				tip = Ext.String.format(icfg.maxSizeTooltip, Sonicle.Bytes.format(icfg.uploaderConfig.maxFileSize));
 			}
-		});
-		if(!iniCfg.uploadDisabled) {
-			triggers = Ext.apply(triggers, {
-				upload: {
-					type: 'sohideable',
-					weight: -1,
-					hideOn: 'value',
-					cls: iniCfg.uploadTriggerCls,
-					handler: me.onUploadClick
-				}
-			});
+			triggers['upload'] = {
+				type: 'sohideable',
+				weight: -1,
+				hideOn: 'value',
+				tooltip: tip,
+				cls: icfg.uploadTriggerCls,
+				overCls: overCls,
+				handler: me.onUploadClick
+			};
 		}
-		Ext.apply(cfg, {triggers: triggers});
+				
+		cfg.triggers = SoU.mergeTriggers(icfg.triggers, triggers);
 		me.callParent([cfg]);
 	},
 	
 	destroy: function() {
 		var me = this;
-		if(me.uploader) {
+		if (me.uploader) {
 			me.uploader.destroy();
 			me.uploader = null;
 		}
@@ -95,13 +163,9 @@ Ext.define('Sonicle.form.field.Image', {
 	initComponent: function() {
 		var me = this;
 		me.callParent(arguments);
-		if(!me.getUploadDisabled()) {
+		if (!me.uploadDisabled) {
 			me.uploader = Ext.create('Sonicle.upload.Uploader', me, me.initialConfig.uploaderConfig);
 			me.on('afterrender', function() {
-				//me.uploader.setBrowseButton(me.triggers['upload'].domId);
-				////me.uploader.setBrowseButton(me.inputWrap.getId());
-				//me.uploader.setContainer(me.bodyEl.getId());
-				//me.uploader.setDropElement(me.getId());
 				me.uploader.setBrowseButton(me.triggers['upload'].domId);
 				me.uploader.setContainer(me.pluWrap.getId());
 				me.uploader.setDropElement(me.inputWrap.getId());
@@ -121,23 +185,8 @@ Ext.define('Sonicle.form.field.Image', {
 				'uploadprogress',
 				'storeempty'
 			]);
-			
 		}
 	},
-	
-	initEvents: function() {
-        var me = this,
-				el = me.inputEl;
-		me.callParent();
-	},
-	
-	/*
-	getSubTplData: function(fieldData) {
-		var ret = this.callParent(arguments);
-		ret.fieldStyle = this.getFieldStyles() + ret.fieldStyle;
-		return ret;
-	},
-	*/
 	
 	/**
 	 * Sets the read-only state of this field.
@@ -148,18 +197,20 @@ Ext.define('Sonicle.form.field.Image', {
 		var me = this;
 		me.callParent([readOnly]);
 		
-		if(me.rendered && me.uploader) {
-			if(readOnly) me.uploader.disable();
+		if (me.rendered && me.uploader) {
+			if (readOnly) me.uploader.disable();
 			else me.uploader.enable();
 		}
 	},
 	
-	onClearClick: function(me) {
-		me.setValue(null);
-		me.fireEvent('clear', me);
-	},
-	
-	onUploadClick: function(me) {
-		
-	}
+	privates: {
+		onClearClick: function(me) {
+			me.setValue(null);
+			me.fireEvent('clear', me);
+		},
+
+		onUploadClick: function(me) {
+			//TODO: add upload event
+		}
+	}	
 });

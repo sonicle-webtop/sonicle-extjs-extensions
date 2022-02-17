@@ -115,7 +115,7 @@ Ext.define('Sonicle.menu.StoreMenu', {
 	loadingItemIdentifier: 'loadingItem',
 	
 	loadingText: 'Loading...',
-	loadingIconCls: 'fa fa-spinner fa-spin',
+	loadingIconCls: 'fas fa-spinner fa-spin',
 	
 	/**
 	 * @private

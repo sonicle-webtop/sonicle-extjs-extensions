@@ -24,7 +24,7 @@ Ext.define('Sonicle.form.trigger.Copy', {
      */
 	
 	cls: 'so-' + 'form-copy-trigger',
-	extraCls: 'fa fa-clone',
+	extraCls: 'far fa-clone',
 
 	handler: function(cmp) {
 		var val = cmp.getValue();

@@ -13,7 +13,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.FormatUnderline', {
 	
 	tooltip: 'Underline',
 	
-	toolIconCls: 'fa fa-underline',
+	toolIconCls: 'fas fa-underline',
 	
 	initComponent: function() {
 		var me = this;

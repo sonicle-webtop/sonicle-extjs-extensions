@@ -26,37 +26,36 @@ Ext.define('Sonicle.toolbar.Breadcrumb', {
 	
 	updateStore: function(store, oldStore) {
 		var me = this;
-		me._needsSync = true;
-		if(oldStore) oldStore.un('load', me._onStoreLoad, me);
-		if(store) store.on('load', me._onStoreLoad, me);
-		if(store && !me.isConfiguring) {
-			me.setSelection(store.getRoot());
-		}
+		if (oldStore) oldStore.un('load', me.onStoreLoad, me);
+		if (store) store.on('load', me.onStoreLoad, me);
+		me.callParent(arguments);
 	},
 	
 	getSelectionParent: function() {
 		var node = this.getSelection(),
-				pNode = node ? node.parentNode : null;
-		if(pNode && pNode.get('depth') >= this.getMinDepth()) {
-			return pNode;
+				pnode = node ? node.parentNode : null;
+		if (pnode && pnode.get('depth') >= this.getMinDepth()) {
+			return pnode;
 		}
 		return null;
 	},
 	
 	/**
-	 * Ported ExtJs 6.0.2 implementation plus minDepth utilization.
+	 * Overrides default implementation of {@link Ext.toolbar.Breadcrumb#updateSelection} to add support to:
+	 *  - hiding items below a minimum depth value (minDepth)
+	 *  - text items ellipsis
 	 */
 	updateSelection: function(node, prevNode) {
 		var me = this,
+				mdepth = me.getMinDepth(),
+				shorten = me.getShorten(),
+				shrt = (shorten === false) ? false : true,
+				shrtLen = (shrt && Ext.isNumber(shorten)) ? shorten : 30,
 				buttons = me._buttons,
 				items = [],
-				itemCount = me.items.getCount(),
+				itemCount = Ext.ComponentQuery.query('[isCrumb]', me.getRefItems()).length,
 				needsSync = me._needsSync,
 				displayField = me.getDisplayField(),
-				md = me.getMinDepth(),
-				sho = me.getShorten(),
-				needSho = (sho === false) ? false : true,
-				shoLen = (needSho && Ext.isNumber(sho)) ? sho : 30,
 				showIcons, glyph, iconCls, icon, newItemCount, currentNode, text, button, id, depth, i;
 
 		Ext.suspendLayouts();
@@ -81,18 +80,19 @@ Ext.define('Sonicle.toolbar.Breadcrumb', {
 
 				if (button) {
 					// If we already have a button for this depth in the button cache reuse it
-					button.setText(needSho ? Ext.String.ellipsis(text, shoLen) : text);
+					button.setText(shrt ? Ext.String.ellipsis(text, shrtLen) : text);
 				} else {
 					// no button in the cache - make one and add it to the cache 
 					button = buttons[i] = Ext.create({
+						hidden: i < mdepth,
 						xtype: me.getUseSplitButtons() ? 'splitbutton' : 'button',
 						ui: me.getButtonUI(),
-						hidden: i < md,
-						cls: me._btnCls + ' ' + me._btnCls + '-' + me.ui,
-						text: needSho ? Ext.String.ellipsis(text, shoLen) : text,
-						showEmptyMenu: me.hideMenu?false:true,
-						// begin with an empty menu - items are populated on beforeshow 
-						menu: me.hideMenu?null:{
+						componentCls: me._btnCls + ' ' + me._btnCls + '-' + me.ui,
+						separateArrowStyling: false,
+						text: shrt ? Ext.String.ellipsis(text, shrtLen) : text,
+						showEmptyMenu: true,
+						// begin with an empty menu - items are populated on beforeshow
+						menu: {
 							listeners: {
 								click: '_onMenuClick',
 								beforeshow: '_onMenuBeforeShow',
@@ -128,8 +128,9 @@ Ext.define('Sonicle.toolbar.Breadcrumb', {
 						button.setGlyph(null);
 						button.setIcon(null);
 						button.setIconCls(
-								(currentNode.isLeaf() ? me._leafIconCls : me._folderIconCls) + '-' + me.ui
-								);
+							(currentNode.isLeaf() ? me._leafIconCls : me._folderIconCls) +
+							'-' + me.ui
+						);
 					} else {
 						// if showIcons is null do not show default icons 
 						button.setGlyph(null);
@@ -159,7 +160,9 @@ Ext.define('Sonicle.toolbar.Breadcrumb', {
 
 		} else {
 			// null selection 
-			me.removeAll(false);
+			for (i = 0; i < buttons.length; i++) {	
+				me.remove(buttons[i], false);
+			}
 		}
 
 		Ext.resumeLayouts(true);
@@ -190,13 +193,13 @@ Ext.define('Sonicle.toolbar.Breadcrumb', {
 	},
 	
 	privates: {
-		_onStoreLoad: function(s,recs,succ,op,node) {
+		onStoreLoad: function(s, recs, success, op, node) {
 			var me = this,
 					buttons = me._buttons,
 					depth = node.get('depth'),
 					button = buttons[depth];
 			
-			if(button && button._breadcrumbNodeId === node.getId()) {
+			if (button && button._breadcrumbNodeId === node.getId()) {
 				button.setArrowVisible(node.hasChildNodes());
 			}
 		}

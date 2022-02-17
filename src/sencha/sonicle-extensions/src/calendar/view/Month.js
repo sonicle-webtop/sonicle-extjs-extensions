@@ -239,7 +239,7 @@ Ext.define('Sonicle.calendar.view.Month', {
 				'{Title}',
 				'<tpl for="_tags">',
 				'<span style="color:{color};margin:0 0 0 2px">',
-					'<i class="fa fa-tag"></i>',
+					'<i class="fas fa-tag"></i>',
 				'</span>',
 				'</tpl>'
 			].join('');

@@ -1,0 +1,23 @@
+.so-form-image-field {
+	position: relative;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: cover;
+	background-clip: padding-box;
+	background-origin: padding-box;
+}
+/* 
+	Triggers are wrapped into a dedicated element (triggerWrap) next to another
+	element, displayed as table-cell, that wraps text field too. Ff field height 
+	is out of standard, in order to make sure that the trigger height is stretched 
+	properly, making the trigger element aligning to the field sibling, we need to 
+	tweak the original class a little bit: this is done by using table-cell display.
+*/
+.so-form-image-field-body .x-form-trigger {
+    display: table-cell;
+    vertical-align: middle;
+}
+.so-form-image-field-body .x-form-trigger-default {
+    background-image: none;
+	border-bottom: 0px; /* Remove bottom border in classic theme */
+}

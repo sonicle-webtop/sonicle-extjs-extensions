@@ -137,7 +137,7 @@ Ext.define('Sonicle.form.field.Tag', {
 				// method of multiSelectItemTpl where a fallback color is checked
 				// (and eventually provided) for each row.
 				if (!Ext.isEmpty(picker.colorField)) {
-					icon = '<span style="color:{color};margin-right:5px;"><i class="fa fa-tag"></i></span>';
+					icon = '<span style="color:{color};margin-right:5px;"><i class="fas fa-tag"></i></span>';
 				}
 				return '<span style="float:left;white-space:pre;">'
 					+ icon
@@ -245,11 +245,11 @@ Ext.define('Sonicle.form.field.Tag', {
 						return me.createAsDummy && values[me.displayField] === values[me.valueField];
 					},
 					genDummyMarkup: function() { // <-- Added
-						var iconCls = 'fa-exclamation-triangle';
+						var iconCls = 'fas fa-exclamation-triangle';
 						if ('loading' === me.dummyIcon) {
-							iconCls = 'fa-spinner fa-spin';
+							iconCls = 'fas fa-spinner fa-spin';
 						}
-						return '<i class="fa ' + iconCls + '" aria-hidden="true"></i>';
+						return '<i class="' + iconCls + '" aria-hidden="true"></i>';
 					},
 					strict: true
 				}
