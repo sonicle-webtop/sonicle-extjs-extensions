@@ -12,6 +12,30 @@ Ext.define('Sonicle.String', {
 	],
 	
 	/**
+	 * @deprecated use Sonicle.Object.booleanValue() instead
+	 */
+	parseBoolean: function(s, defValue) {
+		return Sonicle.Object.booleanValue(s, defValue);
+	},
+	
+	/**
+	 * @deprecated use Sonicle.Bytes.format() instead
+	 */
+	humanReadableSize: function(bytes, opts) {
+		return Sonicle.Bytes.format(bytes, opts);
+	},
+	
+	regexpExecAll: function(s, regexp, index) {
+		if (index === undefined) index = 0;
+		var matches = [], lastMatch;
+		while ((lastMatch = regexp.exec(s))) {
+			matches.push((Ext.isArray(lastMatch) && lastMatch.length > index) ? lastMatch[index] : lastMatch);
+			if (!regexp.global) break;
+		}
+		return matches;
+	},
+	
+	/**
 	 * Pattern that matches RegExp special characters that needs to be escaped 
 	 * in order to use the string as a RegExp pattern.
 	 */
@@ -102,7 +126,7 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
-	 * Convert certain characters to their HTML character equivalents for literal display in web pages.
+	 * Encode data to be used into HTML content: certain characters will be escaped for literal display in web pages.
 	 * @param {String} s The string to encode
 	 * @returns {String} The resulting string
 	 */
@@ -119,11 +143,16 @@ Ext.define('Sonicle.String', {
 		return Ext.String.htmlDecode(s);
 	},
 	
+	/**
+	 * Encode data to be used into HTML attributes: certain characters will be escaped for literal display in web pages attributes.
+	 * @param {String} s The string to encode
+	 * @returns {String} The resulting string
+	 */
 	htmlAttributeEncode: function(s) {
 		return !Ext.isString(s) ? s : s.replace(/&/g, '&amp;')
-				.replace(/</g, '&lt;')
-				.replace(/"/g, '&#34;')
-				.replace(/'/g, '&#39;')
+			.replace(/</g, '&lt;')
+			.replace(/"/g, '&#34;')
+			.replace(/'/g, '&#39;')
 		;
 	},
 	
@@ -614,25 +643,6 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
-	 * Parses a string as a boolean value:
-	 *  - `true`, `t`, `yes`, `y`, `1` are treated as `true` boolean value
-	 *  - `false`, `f`, `no`, `n`, `0` are treated as `false` boolean value
-	 * @param {String} s The source string to parse.
-	 * @param {Boolean} [defValue=false] Default boolean value to return in case of no match, or null. Defaults to `false`.
-	 * @returns {Boolean} The parsed value.
-	 */
-	parseBoolean: function(s, defValue) {
-		if (arguments.length === 1) defValue = false;
-		if (s === null) return defValue;
-		if (Ext.isBoolean(s)) return s;
-		switch(s.toLowerCase().trim()) {
-			case 'true': case 't': case 'yes': case 'y': case '1': return true;
-			case 'false': case 'f': case 'no': case 'n': case '0': return false;
-			default: defValue;
-		}
-	},
-	
-	/**
 	 * Parses a string as array of values divided by a separator and returns 
 	 * them as an array of elements. If source is not a string the specified 
 	 * default value will be returned.
@@ -676,22 +686,5 @@ Ext.define('Sonicle.String', {
 		return Ext.Array.map(s.split(itemsSep), function(value, idx) {
 			return fn.apply(this, [value.split(valueSep, 2), idx]);
 		});
-	},
-	
-	/**
-	 * @deprecated
-	 * Converts passed value in bytes in a human readable format.(eg. like '10 kB' or '100 MB')
-	 * @param {int} bytes The value in bytes
-	 * @param {Object} opts Computation options.
-	 * @param {err|iec|si} [opts.units=err] Whether to use the erroneous (but common) 
-	 *		representation (1024 magnitude + uppercase labels), 
-	 *		the IEC units (1024 magnitude + IEC labels) 
-	 *		or SI units (1000 magnitude)
-	 * @param {String} [opts.separator] Separator to use between value and symbol.
-	 * @param {int} [opts.decimals=2] Number of decimals to keep.
-	 * @returns {String} The formatted string
-	 */
-	humanReadableSize: function(bytes, opts) {
-		return Sonicle.Bytes.format(bytes, opts);
 	}
 });

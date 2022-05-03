@@ -30,6 +30,15 @@ Ext.define('Sonicle.VMUtils', {
 	},
 	
 	/**
+	 * Extracts "field" names defined in 'data' property of specified viewModel
+	 * @param {Ext.data.ViewModel} vm The ViewModel instance.
+	 * @returns {String[]} The names defined into 'data' Object.
+	 */
+	getDataNames: function(vm) {
+		return (vm && vm.isViewModel) ? Ext.Object.getKeys(vm.get('data')) : null;
+	},
+	
+	/**
 	 * Initializes 'data' property of specified viewModel
 	 * @param {Ext.data.ViewModel} vm The ViewModel instance.
 	 * @param {Object} initialData Object containing initial values to set.
@@ -53,13 +62,20 @@ Ext.define('Sonicle.VMUtils', {
 	/**
 	 * Sets passed data object into 'data' property of specified viewModel.
 	 * @param {Ext.data.ViewModel} vm The ViewModel instance.
-	 * @param {Object} data The data object containing field data.
+	 * @param {Object|Object[]} data The data object containing field data or an array of values.
+	 * @param {String[]} [names] Array of field names whose value are specified before as array of values.
 	 */
-	setData: function(vm, data) {
-		if (vm && vm.isViewModel && Ext.isObject(data)) {
-			Ext.iterate(data, function(name, value) {
-				vm.set('data.' + name, value);
-			});
+	setData: function(vm, data, names) {
+		if (vm && vm.isViewModel) {
+			if (Ext.isArray(data) && Ext.isArray(names) && data.length === names.length) {
+				Ext.iterate(data, function(value, i) {
+					vm.set('data.' + names[i], value);
+				});
+			} else if (Ext.isObject(data)) {
+				Ext.iterate(data, function(name, value) {
+					vm.set('data.' + name, value);
+				});
+			}
 		}
 	},
 	

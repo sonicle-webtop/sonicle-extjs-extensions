@@ -11,6 +11,20 @@ Ext.define('Sonicle.Utils', {
 	],
 	
 	/**
+	 * @deprecated use Sonicle.Object.setProp() instead
+	 */
+	setProp: function(object, name, value) {
+		return Sonicle.Object.setProp(object, name, value);
+	},
+	
+	/**
+	 * @deprecated use Sonicle.Object.copyProp() instead
+	 */
+	applyProp: function(object, applyIfEmpty, sobject, name, newName, parseFn, scope) {
+		return Sonicle.Object.copyProp(object, applyIfEmpty, sobject, name, newName, parseFn, scope);
+	},
+	
+	/**
 	 * Collects stack-trace into an array.
 	 * @param {Integer} traceback The initial index from which start collecting.
 	 * @returns {Array} 
@@ -109,45 +123,6 @@ Ext.define('Sonicle.Utils', {
 			}
 		}
 		return Ext.apply(object, dconfig, defaults);
-	},
-	
-	/**
-	 * 
-	 * @param {Object} object The receiver of the property.
-	 * @param {String} name The property name to set in target object.
-	 * @param {Mixed} value The value to set.
-	 * @returns {Object} returns `object`.
-	 */
-	setProp: function(object, name, value) {
-		if (Ext.isObject(object) && Ext.isString(name)) {
-			object[name] = value;
-		}
-		return object;
-	},
-	
-	/**
-	 * Copies the specified property value from Source `object` into the Target `object`.
-	 * Undefined values will be ignored, unless applyIfEmpty is active.
-	 * @param {Object} object The receiver of the property.
-	 * @param {Boolean} applyIfEmpty `true` to process empty/undefined values, `false` otherwise.
-	 * @param {Object} sobject The primary source of the properties.
-	 * @param {String} name The property name to look-for in source object.
-	 * @param {String} [newName] The new property name to use in target object, as the above if not specified.
-	 * @param {Function} [parseFn] Optional function used to modify value before writing it.
-	 * @param {Object} [scope] The scope (`this` reference) in which the `parseFn` function will be called.
-	 * @return {Object} returns `object`.
-	 */
-	applyProp: function(object, applyIfEmpty, sobject, name, newName, parseFn, scope) {
-		if (arguments.length === 4) {
-			newName = name;
-		} else if (arguments.length === 5 && Ext.isFunction(newName)) {
-			parseFn = newName;
-			newName = name;
-		}
-		if (Ext.isObject(object) && Ext.isObject(sobject) && Ext.isString(name) && (sobject[name] !== undefined) && (applyIfEmpty || !Ext.isEmpty(sobject[name]))) {
-			object[newName] = Ext.isFunction(parseFn) ? Ext.callback(parseFn, scope || this, [sobject[name]]) : sobject[name];
-		}
-		return object;
 	},
 	
 	/**
@@ -298,5 +273,35 @@ Ext.define('Sonicle.Utils', {
 	getContextMenuData: function() {
 		var cxm = this.lastContextMenu;
 		return (cxm) ? cxm.menuData : null;
+	},
+	
+	configurePropertyGrid: function(propertyGrid, sourceConfig, store) {
+		var recs, keys;
+		if (propertyGrid && propertyGrid.isXType('propertygrid')) {
+			if (sourceConfig) {
+				propertyGrid.sourceConfig = sourceConfig;
+				propertyGrid.configure(sourceConfig);
+			}
+			if (propertyGrid.sourceConfig && store) {
+				keys = Ext.Object.getAllKeys(propertyGrid.sourceConfig);
+				recs = [];
+				store.each(function(rec) {
+					if (!Ext.isDefined(sourceConfig[rec.getId()])) {
+						recs.push(rec);
+					} else {
+						rec.set('index', keys.indexOf(rec.get('name')));
+					}
+				});
+				if (recs.length > 0) store.remove(recs);
+
+				recs = [];
+				Ext.iterate(propertyGrid.sourceConfig, function(name, obj) {
+					if (!store.getById(name)) {
+						recs.push(store.createModel({name: name, value: obj.defaultValue, index: keys.indexOf(name)}));
+					}
+				});
+				if (recs.length > 0) store.add(recs);
+			}
+		}
 	}
 });
