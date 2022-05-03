@@ -275,7 +275,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 		});
 		
 		return {
-			fields: farr,
+			items: farr,
 			storeDependsOnMap: storeDependsOnMap
 		};
 	},
