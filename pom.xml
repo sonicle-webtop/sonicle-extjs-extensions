@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sonicle.extjs</groupId>
     <artifactId>sonicle-extjs-extensions</artifactId>
-	<version>3.0.0</version><!-- !!! See README.md for infos on how to increment version numbers !!! -->
+	<version>3.0.2</version><!-- !!! See README.md for infos on how to increment version numbers !!! -->
     <packaging>jar</packaging>
 	<name>sonicle-extjs-extensions</name>
 	

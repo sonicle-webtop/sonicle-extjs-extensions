@@ -84,6 +84,7 @@ Ext.define('Sonicle.toolbar.Breadcrumb', {
 				} else {
 					// no button in the cache - make one and add it to the cache 
 					button = buttons[i] = Ext.create({
+						isCrumb: true,
 						hidden: i < mdepth,
 						xtype: me.getUseSplitButtons() ? 'splitbutton' : 'button',
 						ui: me.getButtonUI(),
