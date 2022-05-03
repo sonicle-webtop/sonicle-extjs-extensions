@@ -17,7 +17,7 @@ Ext.define('Sonicle.plugin.FieldTooltip', {
 	 */
 	
 	/**
-	 * @cfg {field|field-bottom|label} tooltipTarget
+	 * @cfg {field|field-bottom|label|field+label} tooltipTarget
 	 * The target element on which display the tooltip.
 	 */
 	tooltipTarget: 'field',
@@ -89,8 +89,7 @@ Ext.define('Sonicle.plugin.FieldTooltip', {
 					}, 'after');
 					
 				} else {
-					el = me.getTooltipTgtEl();
-					if (el) {
+					Ext.iterate(me.getTooltipTgtEls(), function(el) {
 						if (Ext.quickTipsActive && Ext.isObject(tooltip)) {
 							Ext.tip.QuickTipManager.register(Ext.apply({
 								target: el.id
@@ -100,7 +99,7 @@ Ext.define('Sonicle.plugin.FieldTooltip', {
 						} else {
 							el.dom.setAttribute(me.getTooltipAttr(), tooltip);
 						}
-					}
+					});
 				}
 			}
 			
@@ -122,15 +121,14 @@ Ext.define('Sonicle.plugin.FieldTooltip', {
 				}
 				
 			} else {
-				el = me.getTooltipTgtEl();
-				if (el) {
+				Ext.iterate(me.getTooltipTgtEls(), function(el) {
 					if (Ext.quickTipsActive && Ext.isObject(cmp.tooltip)) {
 						Ext.tip.QuickTipManager.unregister(el);
 
 					} else {
 						el.dom.removeAttribute(me.getTooltipAttr());
 					}
-				}
+				});
 			}
 		},
 		
@@ -139,6 +137,14 @@ Ext.define('Sonicle.plugin.FieldTooltip', {
 			if ('field' === tt) return cmp.inputEl;
 			if ('label' === tt) return cmp.boxLabelEl || cmp.labelEl;
 			return null;
+		},
+		
+		getTooltipTgtEls: function() {
+			var cmp = this.getCmp(), tt = this.tooltipTarget;
+			if ('field' === tt) return [cmp.inputEl];
+			if ('label' === tt) return [cmp.boxLabelEl || cmp.labelEl];
+			if ('field+label' === tt) return [cmp.inputEl, cmp.boxLabelEl || cmp.labelEl];
+			return [];
 		},
 		
 		getTooltipAttr: function() {
