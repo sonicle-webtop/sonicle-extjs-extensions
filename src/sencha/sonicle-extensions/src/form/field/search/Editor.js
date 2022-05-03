@@ -65,8 +65,8 @@ Ext.define('Sonicle.form.field.search.Editor', {
 	
 	constructor: function(cfg) {
 		var me = this,
-				childViewModel = Ext.Factory.viewModel('sosearcheditormodel', {fields: cfg.fields, trueValue: cfg.trueValue, falseValue: cfg.falseValue}),
-				layout, items;
+			childViewModel = Ext.Factory.viewModel('sosearcheditormodel', {fields: cfg.fields, trueValue: cfg.trueValue, falseValue: cfg.falseValue}),
+			layout, items;
 		
 		if (cfg.trueValue) me.trueValue = cfg.trueValue;
 		if (cfg.falseValue) me.falseValue = cfg.falseValue;
@@ -82,7 +82,9 @@ Ext.define('Sonicle.form.field.search.Editor', {
 			Ext.iterate(cfg.tabs, function(tabCfg) {
 				var cfgFields = Ext.Array.filter(cfg.fields, function(item) {
 						return tabCfg.fields.indexOf(item.name) !== -1 && usedFields.indexOf(item.name) === -1;
-					}, me);
+					}, me),
+					result = me.createFieldsCfg(childViewModel, tabCfg.labelWidth || me.labelWidth, cfgFields);
+				
 				tbitems.push({
 					xtype: 'panel',
 					layout:'anchor',
@@ -91,7 +93,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 					border: false,
 					bodyPadding: '0 10 0 10',
 					title: Sonicle.String.deflt(tabCfg.title, ''),
-					items: me.createFieldsCfg(childViewModel, tabCfg.labelWidth || me.labelWidth, cfgFields)
+					items: result.items
 				});
 			});
 			layout = 'fit';
@@ -133,10 +135,11 @@ Ext.define('Sonicle.form.field.search.Editor', {
 			});
 			
 		} else {
+			var result = me.createFieldsCfg(childViewModel, me.labelWidth, cfg.fields);
 			Ext.apply(me, {
 				layout:'anchor',
 				bodyPadding: '0 10 0 10',
-				items: me.createFieldsCfg(childViewModel, me.labelWidth, cfg.fields),
+				items: result.items,
 				bbar: [
 					{
 						xtype: 'tbfill'
@@ -172,8 +175,10 @@ Ext.define('Sonicle.form.field.search.Editor', {
 	},
 	
 	destroy: function() {
-		this.clearListeners();
-		this.callParent();
+		var me = this;
+		delete me.reloadersMap;
+		me.clearListeners();
+		me.callParent();
 	},
 	
 	onOk: function() {
@@ -220,7 +225,9 @@ Ext.define('Sonicle.form.field.search.Editor', {
 	},
 	
 	createFieldsCfg: function(vm, labelWidth, fields) {
-		var me = this, arr = [];
+		var me = this,
+			storeDependsOnMap = {},
+			farr = [];
 		Ext.iterate(fields, function(field) {
 			var cfg = null;
 			if (field.type === 'string') {
@@ -246,7 +253,19 @@ Ext.define('Sonicle.form.field.search.Editor', {
 			}
 			if (cfg) {
 				if (!cfg.anchor && !cfg.width) cfg.anchor = '100%';
-				arr.push(Ext.apply(cfg, {
+				// Handle storeDependsOn config, setting-up Store's onBeforeLoad in order to call passed handler
+				if (Ext.isObject(field.storeDependsOn) && Ext.isString(field.storeDependsOn.parentField)) {
+					if (cfg.store) {
+						cfg.store.listeners = {
+							beforeload: function(s) {
+								Ext.callback(field.storeDependsOn.onBeforeLoadHandlerFn, s, [s, vm.get('values.'+field.storeDependsOn.parentField)]);
+							}
+						};
+						// Map the dependency in order to do post-process, see below... (note that many fields can depend to same parent)
+						storeDependsOnMap[field.storeDependsOn.parentField] = Ext.Array.push(storeDependsOnMap[field.storeDependsOn.parentField], field.name);
+					}
+				}
+				farr.push(Ext.apply(cfg, {
 					viewModel: vm,
 					labelWidth: labelWidth,
 					tooltip: Ext.isEmpty(cfg.tooltip) ? me.generateUsage(field) : me.generateUsage(field) + '\n' + cfg.tooltip,
@@ -254,7 +273,11 @@ Ext.define('Sonicle.form.field.search.Editor', {
 				}));
 			}
 		});
-		return arr;
+		
+		return {
+			fields: farr,
+			storeDependsOnMap: storeDependsOnMap
+		};
 	},
 	
 	createTextField: function(field) {
@@ -339,27 +362,6 @@ Ext.define('Sonicle.form.field.search.Editor', {
 		});
 	},
 	
-	createComboField: function(field) {
-		return Ext.apply(field.customConfig || {}, {
-			xtype: 'combo',
-			reference: field.name,
-			bind: {
-				value: '{values.'+field.name+'}',
-				hidden: '{hiddens.'+field.name+'}'
-			},
-			labelAlign: field.labelAlign || 'top',
-			fieldLabel: field.label || field.name,
-			triggers: {
-				clear: {
-					type: 'soclear',
-					weight: -1,
-					hideWhenEmpty: true,
-					hideWhenMouseOut: true
-				}
-			}
-		});
-	},
-	
 	createBooleanComboField: function(field) {
 		return Ext.apply(field.customConfig || {}, {
 			xtype: 'combo',
@@ -373,6 +375,27 @@ Ext.define('Sonicle.form.field.search.Editor', {
 				[this.falseValue, this.falseText]
 			],
 			//labelAlign: 'left',
+			labelAlign: field.labelAlign || 'top',
+			fieldLabel: field.label || field.name,
+			triggers: {
+				clear: {
+					type: 'soclear',
+					weight: -1,
+					hideWhenEmpty: true,
+					hideWhenMouseOut: true
+				}
+			}
+		});
+	},
+	
+	createComboField: function(field) {
+		return Ext.apply(field.customConfig || {}, {
+			xtype: 'combo',
+			reference: field.name,
+			bind: {
+				value: '{values.'+field.name+'}',
+				hidden: '{hiddens.'+field.name+'}'
+			},
 			labelAlign: field.labelAlign || 'top',
 			fieldLabel: field.label || field.name,
 			triggers: {

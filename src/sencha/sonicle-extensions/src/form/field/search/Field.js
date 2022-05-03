@@ -279,7 +279,7 @@ Ext.define('Sonicle.form.field.search.Field', {
 				if (field.type === 'boolean') {
 					if (!field.boolKeyword) cond.value = me.trueValue === cond.value ? true : false;
 					
-				} else if (field.type === 'tag') {
+				} else if (field.type === 'tag' && field.valueRemap !== false) {
 					var sto = me.storeCache[field.name], recs, newConds = [];
 					if (sto && fcc) {
 						recs = Sonicle.Data.findRecords(sto, fcc.displayField || fcc.valueField, cond.value, false, true, true);
