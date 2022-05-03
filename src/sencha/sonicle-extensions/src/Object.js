@@ -220,5 +220,38 @@ Ext.define('Sonicle.Object', {
 			object[newName] = Ext.isFunction(parseFn) ? Ext.callback(parseFn, scope || this, [source[name]]) : source[name];
 		}
 		return object;
+	},
+	
+	/**
+	 * Puts specified value at key in the passed multi-value map.
+	 * @param {Object} map The Map.
+	 * @param {String} key The key.
+	 * @param {Mixed} value The value to push in values list.
+	 * @returns {Object} returns `map`.
+	 */
+	multiValueMapPut: function(map, key, value) {
+		if (Ext.isObject(map)) {
+			var arr = Ext.Array.from(map[key]);
+			arr.push(value);
+			map[key] = arr;
+		}
+		return map;
+	},
+	
+	/**
+	 * Merges two multi-value Maps, one into the other. Both Maps must be of same type.
+	 * @param {Object} destMap The destination Map.
+	 * @param {Object} map The The map that will be merged.
+	 * @returns {Object} returns `destMap`.
+	 */
+	multiValueMapMerge: function(destMap, map) {
+		if (Ext.isObject(map)) {
+			Ext.iterate(map, function(key, values) {
+				Ext.iterate(values, function(value) {
+					Sonicle.Object.multiValueMapPut(destMap, key, value);
+				});
+			});
+		}
+		return destMap;
 	}
 });

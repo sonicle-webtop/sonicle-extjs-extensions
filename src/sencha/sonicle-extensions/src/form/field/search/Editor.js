@@ -66,6 +66,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 	constructor: function(cfg) {
 		var me = this,
 			childViewModel = Ext.Factory.viewModel('sosearcheditormodel', {fields: cfg.fields, trueValue: cfg.trueValue, falseValue: cfg.falseValue}),
+			storeDependsOnMap = {},
 			layout, items;
 		
 		if (cfg.trueValue) me.trueValue = cfg.trueValue;
@@ -85,6 +86,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 					}, me),
 					result = me.createFieldsCfg(childViewModel, tabCfg.labelWidth || me.labelWidth, cfgFields);
 				
+				Sonicle.Object.multiValueMapMerge(storeDependsOnMap, result.storeDependsOnMap);
 				tbitems.push({
 					xtype: 'panel',
 					layout:'anchor',
@@ -136,6 +138,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 			
 		} else {
 			var result = me.createFieldsCfg(childViewModel, me.labelWidth, cfg.fields);
+			Sonicle.Object.multiValueMapMerge(storeDependsOnMap, result.storeDependsOnMap);
 			Ext.apply(me, {
 				layout:'anchor',
 				bodyPadding: '0 10 0 10',
@@ -154,6 +157,23 @@ Ext.define('Sonicle.form.field.search.Editor', {
 			});
 		}
 		me.callParent([cfg]);
+		
+		me.reloadersMap = {};
+		Ext.iterate(storeDependsOnMap, function(parentName, childNames) {
+			me.reloadersMap[parentName] = {
+				childNames: childNames,
+				fn: Ext.Function.createBuffered(me.reloadDependingFields, 100, me)
+			};
+			childViewModel.bind('{values.' + parentName + '}', function(nv, ov, b) {
+				if (ov !== undefined) {
+					// Handle reloaders (storeDependsOn)
+					var reloader = me.reloadersMap[b.stub.name];
+					if (reloader) {
+						reloader.fn(b.stub.name, nv, reloader.childNames);
+					}
+				}
+			});
+		});
 		
 		// Find the defined height of first tab and then set it as 
 		// the maximum height for the remaining tabs.
@@ -224,226 +244,242 @@ Ext.define('Sonicle.form.field.search.Editor', {
 		this.setValue(value);
 	},
 	
-	createFieldsCfg: function(vm, labelWidth, fields) {
-		var me = this,
-			storeDependsOnMap = {},
-			farr = [];
-		Ext.iterate(fields, function(field) {
-			var cfg = null;
-			if (field.type === 'string') {
-				cfg = me.createTextField(field);
-			} else if (field.type === 'integer') {
-				cfg = me.createNumberField(field, true);
-			} else if (field.type === 'number') {
-				cfg = me.createNumberField(field, false);
-			} else if (field.type === 'date') {
-				cfg = me.createDateField(field);
-			} else if (field.type === 'time') {
-				cfg = me.createTimeField(field);
-			} else if (field.type === 'boolean') {
-				if (field.boolKeyword) {
-					cfg = me.createCheckboxField(field);
-				} else {
-					cfg = me.createBooleanComboField(field);
+	privates: {
+		createFieldsCfg: function(vm, labelWidth, fields) {
+			var me = this,
+				storeDependsOnMap = {},
+				farr = [];
+			Ext.iterate(fields, function(field) {
+				var cfg = null;
+				if (field.type === 'string') {
+					cfg = me.createTextField(field);
+				} else if (field.type === 'integer') {
+					cfg = me.createNumberField(field, true);
+				} else if (field.type === 'number') {
+					cfg = me.createNumberField(field, false);
+				} else if (field.type === 'date') {
+					cfg = me.createDateField(field);
+				} else if (field.type === 'time') {
+					cfg = me.createTimeField(field);
+				} else if (field.type === 'boolean') {
+					if (field.boolKeyword) {
+						cfg = me.createCheckboxField(field);
+					} else {
+						cfg = me.createBooleanComboField(field);
+					}
+				} else if (field.type === 'combo') {
+					cfg = me.createComboField(field);
+				} else if (field.type === 'tag') {
+					cfg = me.createTagField(field);
 				}
-			} else if (field.type === 'combo') {
-				cfg = me.createComboField(field);
-			} else if (field.type === 'tag') {
-				cfg = me.createTagField(field);
-			}
-			if (cfg) {
-				if (!cfg.anchor && !cfg.width) cfg.anchor = '100%';
-				// Handle storeDependsOn config, setting-up Store's onBeforeLoad in order to call passed handler
-				if (Ext.isObject(field.storeDependsOn) && Ext.isString(field.storeDependsOn.parentField)) {
-					if (cfg.store) {
-						cfg.store.listeners = {
-							beforeload: function(s) {
-								Ext.callback(field.storeDependsOn.onBeforeLoadHandlerFn, s, [s, vm.get('values.'+field.storeDependsOn.parentField)]);
-							}
-						};
-						// Map the dependency in order to do post-process, see below... (note that many fields can depend to same parent)
-						storeDependsOnMap[field.storeDependsOn.parentField] = Ext.Array.push(storeDependsOnMap[field.storeDependsOn.parentField], field.name);
+				if (cfg) {
+					if (!cfg.anchor && !cfg.width) cfg.anchor = '100%';
+					// Handle storeDependsOn config, setting-up Store's onBeforeLoad in order to call passed handler
+					if (Ext.isObject(field.storeDependsOn) && Ext.isString(field.storeDependsOn.parentField)) {
+						if (cfg.store) {
+							cfg.store.listeners = {
+								beforeload: function(s) {
+									Ext.callback(field.storeDependsOn.onBeforeLoadHandlerFn, s, [s, vm.get('values.'+field.storeDependsOn.parentField)]);
+								}
+							};
+							// Map the dependency in order to do post-process, see below... (note that many fields can depend to same parent)
+							Sonicle.Object.multiValueMapPut(storeDependsOnMap, field.storeDependsOn.parentField, field.name);
+						}
+					}
+					farr.push(Ext.apply(cfg, {
+						viewModel: vm,
+						labelWidth: labelWidth,
+						tooltip: Ext.isEmpty(cfg.tooltip) ? me.generateUsage(field) : me.generateUsage(field) + '\n' + cfg.tooltip,
+						plugins: [{ptype: 'sofieldtooltip', tooltipTarget: 'label'}]
+					}));
+				}
+			});
+
+			return {
+				items: farr,
+				storeDependsOnMap: storeDependsOnMap
+			};
+		},
+
+		createTextField: function(field) {
+			return Ext.apply(field.customConfig || {}, {
+				xtype: 'textfield',
+				reference: field.name,
+				bind: {
+					value: '{values.'+field.name+'}',
+					hidden: '{hiddens.'+field.name+'}'
+				},
+				labelAlign: field.labelAlign || 'top',
+				fieldLabel: field.label || field.name
+			});
+		},
+
+		createNumberField: function(field, integer) {
+			return Ext.apply(field.customConfig || {}, {
+				xtype: 'numberfield',
+				reference: field.name,
+				bind: {
+					value: '{values.'+field.name+'}',
+					hidden: '{hiddens.'+field.name+'}'
+				},
+				labelAlign: field.labelAlign || 'top',
+				fieldLabel: field.label || field.name,
+				allowDecimals: !integer
+			});
+		},
+
+		createDateField: function(field) {
+			return Ext.apply(field.customConfig || {}, {
+				xtype: 'datefield',
+				reference: field.name,
+				bind: {
+					value: '{values.'+field.name+'}',
+					hidden: '{hiddens.'+field.name+'}'
+				},
+				labelAlign: field.labelAlign || 'top',
+				fieldLabel: field.label || field.name,
+				triggers: {
+					clear: {
+						type: 'soclear',
+						weight: -1,
+						hideWhenEmpty: true,
+						hideWhenMouseOut: true
 					}
 				}
-				farr.push(Ext.apply(cfg, {
-					viewModel: vm,
-					labelWidth: labelWidth,
-					tooltip: Ext.isEmpty(cfg.tooltip) ? me.generateUsage(field) : me.generateUsage(field) + '\n' + cfg.tooltip,
-					plugins: [{ptype: 'sofieldtooltip', tooltipTarget: 'label'}]
-				}));
-			}
-		});
+			});
+		},
+
+		createTimeField: function(field) {
+			return Ext.apply(field.customConfig || {}, {
+				xtype: 'timefield',
+				reference: field.name,
+				bind: {
+					value: '{values.'+field.name+'}',
+					hidden: '{hiddens.'+field.name+'}'
+				},
+				labelAlign: field.labelAlign || 'top',
+				fieldLabel: field.label || field.name,
+				triggers: {
+					clear: {
+						type: 'soclear',
+						weight: -1,
+						hideWhenEmpty: true,
+						hideWhenMouseOut: true
+					}
+				}
+			});
+		},
+
+		createCheckboxField: function(field) {
+			return Ext.apply(field.customConfig || {}, {
+				xtype: 'checkboxfield',
+				reference: field.name,
+				bind: {
+					value: '{values.'+field.name+'}',
+					hidden: '{hiddens.'+field.name+'}'
+				},
+				hideEmptyLabel: true,
+				boxLabel: field.label || field.name
+			});
+		},
+
+		createBooleanComboField: function(field) {
+			return Ext.apply(field.customConfig || {}, {
+				xtype: 'combo',
+				reference: field.name,
+				bind: {
+					value: '{values.'+field.name+'}',
+					hidden: '{hiddens.'+field.name+'}'
+				},
+				store: [
+					[this.trueValue, this.trueText],
+					[this.falseValue, this.falseText]
+				],
+				//labelAlign: 'left',
+				labelAlign: field.labelAlign || 'top',
+				fieldLabel: field.label || field.name,
+				triggers: {
+					clear: {
+						type: 'soclear',
+						weight: -1,
+						hideWhenEmpty: true,
+						hideWhenMouseOut: true
+					}
+				}
+			});
+		},
+
+		createComboField: function(field) {
+			return Ext.apply(field.customConfig || {}, {
+				xtype: 'combo',
+				reference: field.name,
+				bind: {
+					value: '{values.'+field.name+'}',
+					hidden: '{hiddens.'+field.name+'}'
+				},
+				labelAlign: field.labelAlign || 'top',
+				fieldLabel: field.label || field.name,
+				triggers: {
+					clear: {
+						type: 'soclear',
+						weight: -1,
+						hideWhenEmpty: true,
+						hideWhenMouseOut: true
+					}
+				}
+			});
+		},
+
+		createTagField: function(field) {
+			return Ext.apply(field.customConfig || {}, {
+				xtype: 'sotagfield',
+				reference: field.name,
+				bind: {
+					value: '{values.'+field.name+'_raw}', //FIXME: is this still useful after introducing remapQueryObject?
+					labelValue: '{values.'+field.name+'}',
+					hidden: '{hiddens.'+field.name+'}'
+				},
+				createNewOnEnter: false,
+				createNewOnBlur: false,
+				filterPickList: true,
+				forceSelection: true,
+				queryMode: 'local',
+				labelAlign: field.labelAlign || 'top',
+				fieldLabel: field.label || field.name
+			});
+		},
 		
-		return {
-			items: farr,
-			storeDependsOnMap: storeDependsOnMap
-		};
-	},
-	
-	createTextField: function(field) {
-		return Ext.apply(field.customConfig || {}, {
-			xtype: 'textfield',
-			reference: field.name,
-			bind: {
-				value: '{values.'+field.name+'}',
-				hidden: '{hiddens.'+field.name+'}'
-			},
-			labelAlign: field.labelAlign || 'top',
-			fieldLabel: field.label || field.name
-		});
-	},
-	
-	createNumberField: function(field, integer) {
-		return Ext.apply(field.customConfig || {}, {
-			xtype: 'numberfield',
-			reference: field.name,
-			bind: {
-				value: '{values.'+field.name+'}',
-				hidden: '{hiddens.'+field.name+'}'
-			},
-			labelAlign: field.labelAlign || 'top',
-			fieldLabel: field.label || field.name,
-			allowDecimals: !integer
-		});
-	},
-	
-	createDateField: function(field) {
-		return Ext.apply(field.customConfig || {}, {
-			xtype: 'datefield',
-			reference: field.name,
-			bind: {
-				value: '{values.'+field.name+'}',
-				hidden: '{hiddens.'+field.name+'}'
-			},
-			labelAlign: field.labelAlign || 'top',
-			fieldLabel: field.label || field.name,
-			triggers: {
-				clear: {
-					type: 'soclear',
-					weight: -1,
-					hideWhenEmpty: true,
-					hideWhenMouseOut: true
+		reloadDependingFields: function(parentName, parentValue, childNames) {
+			var me = this;
+			Ext.iterate(childNames, function(name) {
+				var cmp = me.lookupReference(name);
+				if (cmp && cmp.getStore) {
+					if (Ext.isEmpty(parentValue)) {
+						cmp.getStore().clearData();
+					} else {
+						cmp.getStore().load();
+					}
 				}
+			});
+		},
+
+		generateUsage: function(field) {
+			var kw = field.name, value = '&lt;text&gt;';
+			if (field.type === 'boolean' && field.boolKeyword) {
+				kw = field.boolKeyword;
+				value = field.name;
+			} else if (field.type === 'boolean') {
+				value = '&lt;y|n&gt;';
+			} else if (field.type === 'date') {
+				value = '&lt;YYYY-MM-DD&gt;';
+			} else if (field.type === 'time') {
+				value = '&lt;HH:MM&gt;';
+			} else if (field.type === 'combo') {
+				value = '&lt;ID&gt;';
+			}  else if (field.type === 'tag') {
+				value = '&lt;tag1&gt;,...,&lt;tagN&gt;';
 			}
-		});
-	},
-	
-	createTimeField: function(field) {
-		return Ext.apply(field.customConfig || {}, {
-			xtype: 'timefield',
-			reference: field.name,
-			bind: {
-				value: '{values.'+field.name+'}',
-				hidden: '{hiddens.'+field.name+'}'
-			},
-			labelAlign: field.labelAlign || 'top',
-			fieldLabel: field.label || field.name,
-			triggers: {
-				clear: {
-					type: 'soclear',
-					weight: -1,
-					hideWhenEmpty: true,
-					hideWhenMouseOut: true
-				}
-			}
-		});
-	},
-	
-	createCheckboxField: function(field) {
-		return Ext.apply(field.customConfig || {}, {
-			xtype: 'checkboxfield',
-			reference: field.name,
-			bind: {
-				value: '{values.'+field.name+'}',
-				hidden: '{hiddens.'+field.name+'}'
-			},
-			hideEmptyLabel: true,
-			boxLabel: field.label || field.name
-		});
-	},
-	
-	createBooleanComboField: function(field) {
-		return Ext.apply(field.customConfig || {}, {
-			xtype: 'combo',
-			reference: field.name,
-			bind: {
-				value: '{values.'+field.name+'}',
-				hidden: '{hiddens.'+field.name+'}'
-			},
-			store: [
-				[this.trueValue, this.trueText],
-				[this.falseValue, this.falseText]
-			],
-			//labelAlign: 'left',
-			labelAlign: field.labelAlign || 'top',
-			fieldLabel: field.label || field.name,
-			triggers: {
-				clear: {
-					type: 'soclear',
-					weight: -1,
-					hideWhenEmpty: true,
-					hideWhenMouseOut: true
-				}
-			}
-		});
-	},
-	
-	createComboField: function(field) {
-		return Ext.apply(field.customConfig || {}, {
-			xtype: 'combo',
-			reference: field.name,
-			bind: {
-				value: '{values.'+field.name+'}',
-				hidden: '{hiddens.'+field.name+'}'
-			},
-			labelAlign: field.labelAlign || 'top',
-			fieldLabel: field.label || field.name,
-			triggers: {
-				clear: {
-					type: 'soclear',
-					weight: -1,
-					hideWhenEmpty: true,
-					hideWhenMouseOut: true
-				}
-			}
-		});
-	},
-	
-	createTagField: function(field) {
-		return Ext.apply(field.customConfig || {}, {
-			xtype: 'sotagfield',
-			reference: field.name,
-			bind: {
-				value: '{values.'+field.name+'_raw}', //FIXME: is this still useful after introducing remapQueryObject?
-				labelValue: '{values.'+field.name+'}',
-				hidden: '{hiddens.'+field.name+'}'
-			},
-			createNewOnEnter: false,
-			createNewOnBlur: false,
-			filterPickList: true,
-			forceSelection: true,
-			queryMode: 'local',
-			labelAlign: field.labelAlign || 'top',
-			fieldLabel: field.label || field.name
-		});
-	},
-	
-	generateUsage: function(field) {
-		var kw = field.name, value = '&lt;text&gt;';
-		if (field.type === 'boolean' && field.boolKeyword) {
-			kw = field.boolKeyword;
-			value = field.name;
-		} else if (field.type === 'boolean') {
-			value = '&lt;y|n&gt;';
-		} else if (field.type === 'date') {
-			value = '&lt;YYYY-MM-DD&gt;';
-		} else if (field.type === 'time') {
-			value = '&lt;HH:MM&gt;';
-		} else if (field.type === 'combo') {
-			value = '&lt;ID&gt;';
-		}  else if (field.type === 'tag') {
-			value = '&lt;tag1&gt;,...,&lt;tagN&gt;';
+			return Ext.String.format(this.usageText, kw, value);
 		}
-		return Ext.String.format(this.usageText, kw, value);
 	}
 });
