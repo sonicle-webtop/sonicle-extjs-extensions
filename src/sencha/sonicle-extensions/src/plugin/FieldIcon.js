@@ -9,16 +9,16 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 	alias: 'plugin.sofieldicon',
 	
 	/**
+	 * @cfg {String} iconCls
+	 * One or more space separated CSS classes to be applied to the icon element.
+	 */
+	iconCls: null,
+	
+	/**
 	 * @cfg {afterInput|beforeInput|afterLabel|beforeLabel} iconAlign [iconAlign=afterInput]
 	 * Sets the position for where the icon will be displayed related to the field.
 	 */
 	iconAlign: 'afterInput',
-	
-	iconCls: null,
-	
-	iconType: 'font',
-	
-	iconColor: '#B3B3B3',
 	
 	/*
 	 * @cfg {Number} iconWidth
@@ -31,8 +31,6 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 	 * The height in pixel of the icon.
 	 */
 	iconHeight: 16,
-	
-	iconCursor: null,
 	
 	iconMargin: '0 3px 0 3px',
 	
@@ -55,109 +53,40 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 		var me = this;
 		me.setCmp(field);
 		Ext.apply(field, {
-			setIconCls: function(iconCls) {
-				me.setIconCls(iconCls);
-			},
-			setIconTooltip: function(tooltip) {
-				me.setTooltip(tooltip);
-			}
+			setIconCls: Ext.bind(me.setIconCls, me),
+			setIconTooltip: Ext.bind(me.setTooltip, me)
 		});
 		
 		if (field.rendered) {
 			me.setup();
 		} else {
-			field.on('render', me.onCmpRender, me, {single: true});
+			field.on('render', me.onFieldRender, me, {single: true});
 		}
 	},
 	
 	destroy: function() {
 		var me = this,
-				cmp = me.getCmp();
-		if (cmp.rendered) {
-			me.clearTip();
+			field = me.getCmp();
+		if (field.rendered) {
+			me.clearTooltip();
 		}
+		delete field.iconEl;
+		delete field.iconWrapEl;
 		me.callParent();
-	},
-	
-	setup: function() {
-		var me = this,
-				cmp = me.getCmp(),
-				isChk = cmp.isXType('checkbox'),
-				isTA = cmp.isXType('textarea'),
-				icoElCfg = me.createIconElConfig(),
-				wrapElCfg = {
-					tag: 'div',
-					style: {
-						display: 'table-cell',
-						lineHeight: 0,
-						verticalAlign: 'middle',
-						width: (me.iconWidth + me.cellWidthAdjust) + 'px'
-					},
-					cn: [icoElCfg]
-				},
-				el;
-		
-		if (isTA) {
-			Ext.apply(wrapElCfg.style, {
-				verticalAlign: 'bottom',
-				paddingTop: '3px'
-			});
-		}
-		
-		switch(me.iconAlign) {
-			case 'afterInput':
-				if (isChk) {
-					el = cmp.inputEl.insertSibling(icoElCfg, 'after');
-				} else {
-					el = cmp.bodyEl.insertSibling(wrapElCfg, 'after');
-					el = el.down('i');
-				}
-				break;
-			case 'beforeInput':
-				el = cmp.labelEl.next().insertSibling(wrapElCfg, 'before');
-				el = el.down('i');
-				break;
-			case 'afterLabel':
-				if (isChk && cmp.boxLabelEl) {
-					Ext.apply(icoElCfg.style, {
-						verticalAlign: 'middle'
-					});
-					el = cmp.boxLabelEl.insertSibling(icoElCfg, 'after');
-				} else {
-					el = cmp.labelEl.insertSibling(wrapElCfg, 'after');
-				}
-				break;
-			case 'beforeLabel':
-				if (isChk && cmp.boxLabelEl) {
-					Ext.apply(icoElCfg.style, {
-						marginLeft: (me.iconWidth + me.cellWidthAdjust / 2) + "px"
-					});
-					cmp.boxLabelEl.setStyle({
-						paddingLeft: 0
-					});
-					el = cmp.boxLabelEl.insertSibling(icoElCfg, 'before');
-				} else {
-					el = cmp.labelEl.insertSibling(wrapElCfg, 'before');
-					el = el.down('i');
-				}
-				break;
-		}
-		
-		cmp.iconEl = el;
-		if (me.iconCls) me.setIconCls(me.iconCls);
-		if (me.tooltip) me.setTooltip(me.tooltip, true);
-	},
-	
-	onCmpRender: function(s) {
-		this.setup();
 	},
 	
 	setIconCls: function(iconCls) {
 		var me = this,
-				cmp = me.getCmp(),
-				el = cmp.iconEl;
-		if (cmp.rendered && el) {
-			el.replaceCls(me.iconCls, iconCls);
+			field = me.getCmp(),
+			iconEl = field.iconEl;
+		if (field.rendered && iconEl) {
+			iconEl.replaceCls(me.iconCls, iconCls);
+			// Updates 'display' style of the wrapper, or the icon, according to iconClass value
+			if (field.iconWrapEl) {
+				field.iconWrapEl.setStyle('display', Ext.isEmpty(iconCls) ? 'none' : 'table-cell');
+			} else {
+				iconEl.setStyle('display', Ext.isEmpty(iconCls) ? 'none' : 'inline-block');
+			}
 		}
 		me.iconCls = iconCls;
 	},
@@ -171,10 +100,10 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 	 */
 	setTooltip: function(tooltip, initial) {
 		var me = this,
-				cmp = me.getCmp(),
-				el = cmp.iconEl;
-		if (cmp.rendered && el) {
-			if (!initial || !tooltip) me.clearTip();
+			field = me.getCmp(),
+			el = field.iconEl;
+		if (field.rendered && el) {
+			if (!initial || !tooltip) me.clearTooltip();
 			if (tooltip) {
 				if (Ext.quickTipsActive && Ext.isObject(tooltip)) {
 					Ext.tip.QuickTipManager.register(Ext.apply({
@@ -192,31 +121,101 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 		}
 	},
 	
-	/**
-	 * @private
-	 */
-	clearTip: function() {
-		var me = this,
-				cmp = me.getCmp(),
-				el = cmp.iconEl;
-		if (cmp.rendered && el) {
-			if (Ext.quickTipsActive && Ext.isObject(me.tooltip)) {
-				Ext.tip.QuickTipManager.unregister(el);
-			} else {
-				el.dom.removeAttribute(me.getTipAttr());
+	privates: {
+		onFieldRender: function(s) {
+			this.setup();
+		},
+		
+		setup: function() {
+			var me = this,
+				field = me.getCmp(),
+				isCheckbox = field.isXType('checkbox'),
+				icoElCfg = me.createIconElConfig(),
+				wrapElCfg = {
+					tag: 'div',
+					style: {
+						display: 'table-cell',
+						lineHeight: 0,
+						verticalAlign: 'middle',
+						width: (me.iconWidth + me.cellWidthAdjust) + 'px'
+					},
+					cn: [icoElCfg]
+				},
+				wrapEl, icoEl;
+
+			if (field.isXType('textarea')) {
+				Ext.apply(wrapElCfg.style, {
+					verticalAlign: 'bottom',
+					paddingTop: '3px'
+				});
 			}
-		}
-	},
-	
-	getTipAttr: function() {
-		return this.tooltipType === 'qtip' ? 'data-qtip' : 'title';
-	},
-	
-	/**
-	 * @private
-	 */
-	createIconElConfig: function() {
-		var me = this,
+
+			switch(me.iconAlign) {
+				case 'afterInput':
+					if (isCheckbox) {
+						icoEl = field.inputEl.insertSibling(icoElCfg, 'after');
+					} else {
+						wrapEl = field.bodyEl.insertSibling(wrapElCfg, 'after');
+						icoEl = wrapEl.down('i');
+					}
+					break;
+				case 'beforeInput':
+					wrapEl = field.labelEl.next().insertSibling(wrapElCfg, 'before');
+					icoEl = wrapEl.down('i');
+					break;
+				case 'afterLabel':
+					if (isCheckbox && field.boxLabelEl) {
+						Ext.apply(icoElCfg.style, {
+							verticalAlign: 'middle'
+						});
+						icoEl = field.boxLabelEl.insertSibling(icoElCfg, 'after');
+					} else {
+						wrapEl = field.labelEl.insertSibling(wrapElCfg, 'after');
+						icoEl = wrapEl.down('i');
+					}
+					break;
+				case 'beforeLabel':
+					if (isCheckbox && field.boxLabelEl) {
+						Ext.apply(icoElCfg.style, {
+							marginLeft: (me.iconWidth + me.cellWidthAdjust / 2) + "px"
+						});
+						field.boxLabelEl.setStyle({
+							paddingLeft: 0
+						});
+						icoEl = field.boxLabelEl.insertSibling(icoElCfg, 'before');
+					} else {
+						wrapEl = field.labelEl.insertSibling(wrapElCfg, 'before');
+						icoEl = wrapEl.down('i');
+					}
+					break;
+			}
+
+			field.iconWrapEl = wrapEl;
+			field.iconEl = icoEl;
+
+			me.setIconCls(me.iconCls);
+			me.setTooltip(me.tooltip, true);
+		},
+		
+		clearTooltip: function() {
+			var me = this,
+				field = me.getCmp(),
+				el = field.iconEl;
+			if (field.rendered && el) {
+				if (Ext.quickTipsActive && Ext.isObject(me.tooltip)) {
+					Ext.tip.QuickTipManager.unregister(el);
+				} else {
+					el.dom.removeAttribute(me.getTipAttr());
+				}
+			}
+		},
+		
+		getTipAttr: function() {
+			return this.tooltipType === 'qtip' ? 'data-qtip' : 'title';
+		},
+		
+		createIconElConfig: function() {
+			var me = this,
 				cfg = {
 					tag: 'i',
 					cls: me.iconCls,
@@ -226,11 +225,11 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 						height: me.iconHeight + 'px',
 						//backgroundSize: me.iconWidth + 'px ' + me.iconHeight + 'px', // Enable 32px aligned svg on 16x16
 						fontSize: me.iconHeight + 'px',
-						color: me.iconColor,
 						margin: me.iconMargin
 					}
 				};
-		if (!Ext.isEmpty(me.iconCursor)) cfg.style['cursor'] = me.iconCursor;
-		return cfg;
+			//if (!Ext.isEmpty(me.iconCursor)) cfg.style['cursor'] = me.iconCursor;
+			return cfg;
+		}
 	}
 });
