@@ -3,6 +3,7 @@
  * Copyright (C) 2015 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
+ * @deprecated No longer used?
  */
 Ext.define('Sonicle.view.plugin.AutoSizeColumns', {
     extend: 'Ext.AbstractPlugin',

@@ -196,7 +196,8 @@ Ext.define('Sonicle.picker.List', {
 		me.on('selectionchange', me.onSelectionChange, me);
 		me.on('rowdblclick', me.onRowDblClick, me);
 		me.on('afterrender', function() {
-			me.lookupReference('searchField').focus();
+			var fld = me.lookupReference('searchField');
+			if (fld) fld.focus();
 		}, me, {single: true});
 	},
 	
@@ -221,15 +222,19 @@ Ext.define('Sonicle.picker.List', {
 	
 	firePick: function(recs, button) {
 		var me = this,
-				vfld = me.valueField,
-				handler = me.handler,
-				values = [];
+			vfld = me.valueField,
+			handler = me.handler,
+			values = [];
 		
 		Ext.iterate(recs, function(rec) {
 			values.push(vfld ? rec.get(vfld) : rec.getId());
 		});
 		me.fireEvent('pick', me, values, recs, button);
 		if (handler) handler.call(me.scope || me, me, values, recs, button);
+	},
+	
+	getNodeByRecord: function(record) {
+		return this.getView().getNodeByRecord(record);
 	},
 	
 	privates: {
