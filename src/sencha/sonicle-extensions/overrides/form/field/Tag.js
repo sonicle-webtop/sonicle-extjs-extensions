@@ -6,14 +6,14 @@ Ext.define('Sonicle.overrides.form.field.Tag', {
 	override: 'Ext.form.field.Tag',
 	
 	/**
-	 * @cfg {array|string} returnValueMode
+	 * @cfg {array|string} getValueMode
 	 */
-	returnValueMode: 'array',
+	getValueMode: 'array',
 	
 	getValue: function() {
 		var me = this,
 			value = me.callParent();
-		if ('string' === me.returnValueMode) {
+		if ('string' === me.getValueMode) {
 			return value ? Sonicle.String.join(',', value) : value;
 		} else {
 			return value;
