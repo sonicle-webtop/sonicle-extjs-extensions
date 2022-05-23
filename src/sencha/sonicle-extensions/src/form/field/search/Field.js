@@ -206,7 +206,8 @@ Ext.define('Sonicle.form.field.search.Field', {
 	setSearchString: function(searchString) {
 		if (Ext.isObject(searchString)) {
 			var value = Sonicle.SearchString.toHumanQuery(searchString.toString());
-			return this.setValue(value);
+			this.setValue(value);
+			return value;
 		}
 	},
 	
