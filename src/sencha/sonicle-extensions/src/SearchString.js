@@ -1,6 +1,6 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2015 Sonicle S.r.l.
+ * Copyright (C) 2019 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
  */
@@ -14,17 +14,34 @@ Ext.define('Sonicle.SearchString', {
 		me.checkAvail();
 	},
 	
+	/**
+	 * Parses a String query (with no human-readable optimizations) into search-string object.
+	 * @param {String} s A query to parse.
+	 * @returns {SearchString}
+	 */
 	parseRaw: function(s) {
 		this.checkAvail();
 		return SearchString.parse(s);
 	},
 	
+	/**
+	 * Parses a human-readable String query into search-string object.
+	 * @param {String} s A human-readable query to parse.
+	 * @returns {SearchString}
+	 */
 	parseHumanQuery: function(s) {
 		this.checkAvail();
 		return SearchString.parse(this.toRawQuery(s));
 	},
 	
-	toQueryObject: function(ss) {
+	/**
+	 * Converts passed SearchString into a QueryObject, an immutable and 
+	 * expanded representation of the source instance.
+	 * @param {SearchString} searchString The source SearchString object.
+	 * @returns {Object} Object with value, conditionArray, parsedQuery, textSegments and anyText properties
+	 */
+	toQueryObject: function(searchString) {
+		var ss = searchString.clone();
 		return {
 			value: ss.toString(),
 			conditionArray: ss.getConditionArray(),
@@ -34,8 +51,14 @@ Ext.define('Sonicle.SearchString', {
 		};
 	},
 	
-	getAllText: function(ss, allowNegated) {
-		return allowNegated ? ss.getAllText() : this.extractTextSegments(ss.getTextSegments());
+	/**
+	 * Extracts the all-text part from the passed SearchString.
+	 * @param {SearchString} searchString The source SearchString object.
+	 * @param {Boolean} allowNegated ???
+	 * @returns {String} The all-text part of the SearchString
+	 */
+	getAllText: function(searchString, allowNegated) {
+		return allowNegated ? searchString.getAllText() : this.extractTextSegments(searchString.getTextSegments());
 	},
 
 	/**

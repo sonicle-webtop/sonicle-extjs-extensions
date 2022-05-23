@@ -190,6 +190,27 @@ Ext.define('Sonicle.form.field.search.Field', {
 	},
 	
 	/**
+	 * Gets the SearchString object for the current search String.
+	 * @return {SearchString}
+	 */
+	getSearchString: function() {
+		var value = this.getValue();
+		return Ext.isString(value) ? Sonicle.SearchString.parseHumanQuery(value) : undefined;
+	},
+	
+	/**
+	 * Sets the passed SearchString object as search String.
+	 * @param {SearchString} searchString
+	 * @return {String} The human-readable query, just set.
+	 */
+	setSearchString: function(searchString) {
+		if (Ext.isObject(searchString)) {
+			var value = Sonicle.SearchString.toHumanQuery(searchString.toString());
+			return this.setValue(value);
+		}
+	},
+	
+	/**
 	 * Sets the hidden state of one/many query editor's field/s.
 	 * @param {String|Object} fieldName The field to set, or an object containing key/value pairs.
 	 * @param {Boolean} hidden
@@ -234,7 +255,7 @@ Ext.define('Sonicle.form.field.search.Field', {
 	
 	onPickerOk: function(s, rawValue, queryObject) {
 		var me = this,
-				value = Sonicle.SearchString.toHumanQuery(rawValue);
+			value = Sonicle.SearchString.toHumanQuery(rawValue);
 		me.setValue(value);
 		me.doQuery(value, queryObject);
 	},
