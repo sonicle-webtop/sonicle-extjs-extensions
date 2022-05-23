@@ -201,13 +201,13 @@ Ext.define('Sonicle.form.field.search.Field', {
 	/**
 	 * Sets the passed SearchString object as search String.
 	 * @param {SearchString} searchString
-	 * @return {String} The human-readable query, just set.
+	 * @param {Boolean} issueQuery Set to `true` to issue query.
 	 */
-	setSearchString: function(searchString) {
+	setSearchString: function(searchString, issueQuery) {
 		if (Ext.isObject(searchString)) {
 			var value = Sonicle.SearchString.toHumanQuery(searchString.toString());
 			this.setValue(value);
-			return value;
+			if (issueQuery === true) this.doQuery(value);
 		}
 	},
 	
