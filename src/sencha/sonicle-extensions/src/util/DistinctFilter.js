@@ -29,23 +29,26 @@ Ext.define('Sonicle.util.DistinctFilter', {
 		} else {
 			return false;
 		}
-	}
+	},
 	
-	/*
-	createRegexFilter: function() {
+	getFilterFn: function() {
 		var me = this,
-			anyMatch = !!me.getAnyMatch(),
-			exact = !!me.getExactMatch(),
-			value = me.getValue(),
-			matcher = Ext.String.createRegex(value,
-				!anyMatch,  // startsWith
-				!anyMatch && exact, // endsWith
-				!me.getCaseSensitive());
+			filterFn = me._filterFn;
 		
-		return function(item) {
-			var val = me.getPropertyValue(item);
-			return matcher ? matcher.test(val) : (val == null);
+		if (!filterFn) {
+			filterFn = me.createDistinctFilter();
+			me.generatedFilterFn = true;
 		}
-	}
-	*/
+		return filterFn;
+	},
+	
+	privates: {
+		createDistinctFilter: function() {
+			var me = this;
+			return function(item) {
+				var val = me.getPropertyValue(item);
+				return me.filterIfDistinct(val);
+			};
+		}
+	}	
 });
