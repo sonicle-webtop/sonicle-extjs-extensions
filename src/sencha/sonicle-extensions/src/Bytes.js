@@ -48,7 +48,7 @@ Ext.define('Sonicle.Bytes', {
 		if (value === null) return null;
 		var uni = opts.units || 'err',
 				mul = (uni === 'si') ? 1000: 1024,
-				sym = this.unitSymbols[(uni === 'iec') ? 'iec' : 'si'],
+				sym = Sonicle.Bytes.unitSymbols[(uni === 'iec') ? 'iec' : 'si'],
 				sep = opts.separator || ' ',
 				dec = Ext.isDefined(opts.decimals) ? opts.decimals : 2,
 				u = -1;
@@ -72,7 +72,7 @@ Ext.define('Sonicle.Bytes', {
 	parse: function(value, opts) {
 		opts = opts || {};
 		if (Ext.isEmpty(value)) return null;
-		var pb = this.parserBases,
+		var pb = Sonicle.Bytes.parserBases,
 				base = (opts.base === 'si') ? 10: 2,
 				parsed = value.match(/^([0-9\.,]*)(?:\s*)?(.*)$/),
 				amount = parsed[1].replace(',','.'),
