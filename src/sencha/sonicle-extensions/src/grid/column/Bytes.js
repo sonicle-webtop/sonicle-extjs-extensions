@@ -25,15 +25,24 @@ Ext.define('Sonicle.grid.column.Bytes', {
 	 */
 	separator: null,
 	
+	align: 'right',
+	
 	defaultRenderer: function(value) {
-		return this._readableBytes(value);
+		return this.readableBytes(value);
 	},
 	
 	updater: function(cell, value) {
-		cell.firstChild.innerHTML = this._readableBytes(value);
+		cell.firstChild.innerHTML = this.readableBytes(value);
 	},
 	
-	_readableBytes: function(value) {
-		return (value === -1) ? '' : Sonicle.Bytes.format(value, {units: this.units, separator: this.separator});
+	privates: {
+		readableBytes: function(value) {
+			var SoB = Sonicle.Bytes;
+			if (Ext.isString(value)) {
+				return SoB.format(SoB.parse(value), {units: this.units, separator: this.separator});
+			} else {
+				return (value === -1) ? '' : SoB.format(value, {units: this.units, separator: this.separator});
+			}
+		}
 	}
 });
