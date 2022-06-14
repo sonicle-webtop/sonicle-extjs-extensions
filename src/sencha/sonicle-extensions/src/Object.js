@@ -147,16 +147,55 @@ Ext.define('Sonicle.Object', {
 	},
 	
 	/**
-	 * Plucks the value of properties targeted by specified keys.
+	 * Plucks the value of a property from each item in the object.
+	 * @param {Object} object The object in which dig into.
+	 * @param {String} propertyName The property name to pluck from each element.
+	 * @param {String[]|String} [keys] List of keys to match or set to `undefined` to match all keys.
+	 * @returns {Object} The key->value from each item in the Object.
+	 */
+	pluck: function(object, propertyName, keys) {
+		keys = (keys === undefined) ? Ext.Object.getKeys(object) : Ext.Array.from(keys, false);
+		var me = this,
+			ret = {},
+			item;
+		Ext.iterate(keys, function(key) {
+			item = me.getValue(object, key);
+			if (item) ret[key] = item[propertyName];
+		});
+		return ret;
+	},
+	
+	/*
+	 * Returns the key of first item in the object which elicits a truthy return value from the passed selection function.
+	 * @param {Object} object The object in which dig into.
+	 * @param {Function} fn The selection function to execute for each item.
+	 * @param {Mixed} fn.item The object item.
+	 * @param {Mixed} fn.key The object item key.
+	 * @param {Object} scope (optional) The scope (<code>this</code> reference) in which the function is executed. Defaults to the array
+	 * @return {Object} The first item which returned true from the selection function, or null if none was found.
+	 */
+	findKeyBy: function(object, fn, scope) {
+		var ret = undefined;
+		Ext.iterate(Ext.Object.getKeys(object), function(key) {
+			if (fn.call(scope || object, object[key], key)) {
+				ret = key;
+				return false;
+			}
+		});
+		return ret;
+	},
+	
+	/**
+	 * Remaps object to a new one including/excluding specified keys and optionally renaming them.
 	 * By default, matching keys' value will be included in resulting object.
 	 * @param {Object} object The object in which dig into.
 	 * @param {String[]|String|Boolean} keys List of keys to match or set to `true` to match all keys.
 	 * @param {Boolean} [exclude=false] `true` to return only properties that not match passed keys.
 	 * @param {Object} [newKeys] Optional mapping table for keys in the form 'key -> newKey' for renaming purposes.
 	 * @param {Object} [scope] The scope (this reference) in which `newKeys` function is executed.
-	 * @returns {Object} New object with plucked properties.
+	 * @returns {Object} New remapped object.
 	 */
-	pluck: function(object, keys, exclude, newKeys, scope) {
+	remap: function(object, keys, exclude, newKeys, scope) {
 		if (keys !== true) keys = Ext.Array.from(keys, false);
 		exclude = Ext.isBoolean(exclude) ? exclude : false;
 		if (!Ext.isObject(object)) return object;
@@ -173,6 +212,23 @@ Ext.define('Sonicle.Object', {
 			}
 		});
 		return obj;
+	},
+	
+	/**
+	 * Swaps keys with values: any value must be primitive.
+	 * @param {Object} object The object in which dig into.
+	 * @returns {Object}
+	 */
+	swapKV: function(object) {
+		if (!Ext.isObject(object)) return object;
+		var me = this, ret = {}, newKey;
+		Ext.iterate(Ext.Object.getKeys(object), function(key) {
+			newKey = object[key];
+			if (Ext.isString(newKey) || Ext.isNumber(newKey) || Ext.isBoolean(newKey)) {
+				ret[me.stringValue(newKey)] = key;
+			}
+		});
+		return ret;
 	},
 	
 	/**

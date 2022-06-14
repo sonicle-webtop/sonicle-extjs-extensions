@@ -1356,7 +1356,7 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 		},
 		
 		getToolTexts: function(key) {
-			return Sonicle.Object.pluck(this.toolTexts[key], ['tooltipTitle', 'tooltipText'], true);
+			return Sonicle.Object.remap(this.toolTexts[key], ['tooltipTitle', 'tooltipText'], true);
 		}
 	},
 	

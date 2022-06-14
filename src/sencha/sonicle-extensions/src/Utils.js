@@ -69,7 +69,7 @@ Ext.define('Sonicle.Utils', {
 		Ext.iterate(namesMap, function(key, isProp) {
 			icfg[key] = isProp ? classInst[key] : classInst.getInitialConfig(key);
 		});
-		return Ext.apply(icfg, Sonicle.Object.pluck(constructorConfig, Ext.Object.getKeys(namesMap)));
+		return Ext.apply(icfg, Sonicle.Object.remap(constructorConfig, Ext.Object.getKeys(namesMap)));
 	},
 	
 	/**
