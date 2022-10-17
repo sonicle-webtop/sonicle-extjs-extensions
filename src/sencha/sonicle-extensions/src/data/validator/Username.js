@@ -17,5 +17,9 @@ Ext.define('Sonicle.data.validator.Username', {
 		 * A matcher to check for username.
 		 */
 		matcher: /^[a-z0-9\.\-\_]+$/i
+	},
+	
+	statics: {
+		maskRe: /[a-z0-9\.\-\_]/
 	}
 });
