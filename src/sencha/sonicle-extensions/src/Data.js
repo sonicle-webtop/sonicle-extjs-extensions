@@ -94,10 +94,11 @@ Ext.define('Sonicle.Data', {
 	 * @param {Ext.data.Store|Ext.data.Model[]} coll A {@link Ext.data.Store} or an array of {@link Ext.data.Model records} to use as source.
 	 * @param {String} [fieldName] A custom field name to get, otherwise {@link Ext.data.Model#getId} will be used.
 	 * @param {Function} [filterFn] A custom filter function which is passed each item in the collection. Should return `true` to accept each item or `false` to reject it.
+	 * @param {Function} [valueFn] A custom function which is passed each candidate value that allow to modify value before actually adding to the collection. It MUST return the value to be added, otherwise `undefined` means to skip the insertion.
 	 * @param {Object} [scope] The scope (`this` reference) in which the `filterFn` function will be called.
 	 * @returns {Mixed[]} An array of collected id values.
 	 */
-	collectValues: function(coll, fieldName, filterFn, scope) {
+	collectValues: function(coll, fieldName, filterFn, valueFn, scope) {
 		if (arguments.length >= 2 && arguments.length <= 3) {
 			if (Ext.isFunction(fieldName)) {
 				filterFn = fieldName;
@@ -106,9 +107,20 @@ Ext.define('Sonicle.Data', {
 		}
 		var me = this,
 			loopFn = function(rec) {
+				if (!Ext.isFunction(filterFn) || Ext.callback(filterFn, scope || me, [rec]) === true) {
+					var candidate = Ext.isEmpty(fieldName) ? rec.getId() : rec.get(fieldName), actual;
+					if (Ext.isFunction(valueFn)) {
+						actual = Ext.callback(valueFn, scope || me, [candidate]);
+						if (actual !== undefined) ids.push(actual);
+					} else {
+						ids.push(candidate);
+					}
+				}
+				/*
 				if (!filterFn || Ext.callback(filterFn, scope || me, [rec])) {
 					ids.push(Ext.isEmpty(fieldName) ? rec.getId() : rec.get(fieldName));
 				}
+				*/
 			},
 			ids = [];
 		

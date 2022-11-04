@@ -383,6 +383,27 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
 			if (!Ext.isNumber(threshold) || (threshold < 0) || (threshold > 1)) threshold = 0.5;
 			return Ext.isEmpty(bgColor) || (this.luminance(bgColor, 2) > threshold) ? '#000000' : '#FFFFFF';
 		},
+		
+		/**
+		 * Calculate resulting blend for a foreground color on top a base color.
+		 * https://stackoverflow.com/questions/12228548/finding-equivalent-color-with-opacity
+		 * @param {String} base Base color
+		 * @param {String} fore Foreground color with aplha
+		 * @returns {String} Hex
+		 */
+		blendColors: function(base, fore) {
+			var me = this,
+				cobjB = me.parseColor(base),
+				cobjF = me.parseColor(fore),
+				rgb;
+			
+			rgb = {
+				r: parseInt(cobjB.r + (cobjF.r - cobjB.r) * cobjF.a),
+				g: parseInt(cobjB.g + (cobjF.g - cobjB.g) * cobjF.a),
+				b: parseInt(cobjB.b + (cobjF.b - cobjB.b) * cobjF.a)
+			};
+			return me.rgb2hex(rgb, true);
+		},
 
         colorMap: {
             aliceblue:              [240, 248, 255],
