@@ -15,13 +15,15 @@ Ext.define('Sonicle.String', {
 	 * @deprecated use Sonicle.Object.booleanValue() instead
 	 */
 	parseBoolean: function(s, defValue) {
-		return Sonicle.Object.booleanValue(s, defValue);
+		Ext.log.warn('"Sonicle.String.parseBoolean" is deprecated. Use "Sonicle.Object.booleanValue" instead.');
+		return Sonicle.Object.booleanValue.apply(this, arguments);
 	},
 	
 	/**
 	 * @deprecated use Sonicle.Bytes.format() instead
 	 */
 	humanReadableSize: function(bytes, opts) {
+		Ext.log.warn('"Sonicle.String.humanReadableSize" is deprecated. Use "Sonicle.Bytes.format" instead.');
 		return Sonicle.Bytes.format(bytes, opts);
 	},
 	
