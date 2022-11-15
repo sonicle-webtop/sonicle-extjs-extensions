@@ -7,6 +7,165 @@ Ext.define('Sonicle.Data', {
     singleton: true,
 	
 	/**
+	 * Applies extra params to passed Proxy, or to the inner Proxy in case of Store.
+	 * @param {Ext.data.proxy.Proxy/Ext.data.Store} proxy The proxy.
+	 * @param {Object} extraParams Extra params to apply.
+	 * @param {Boolean} [clear=false] 'true' to clear previous params, 'false' to merge them.
+	 */
+	applyExtraParams: function(proxy, extraParams, clear) {
+		if (arguments.length === 2) clear = false;
+		if (!proxy.isProxy && !proxy.isStore) return;
+		proxy = (proxy.isStore) ? proxy.getProxy() : proxy;
+		if (proxy) {
+			var obj = Ext.apply((clear) ? {} : proxy.getExtraParams(), extraParams);
+			proxy.setExtraParams(obj);
+		}
+	},
+	
+	/**
+	 * Reloads passes Store applying specified extra-params.
+	 * @param {Ext.data.Store} store The store.
+	 * @param {Object} extraParams Extra params to apply.
+	 * @param {Boolean} [overwrite=false] Set as 'true' to clear previous extra-params, 'false' to merge them.
+	 * @param {Function} [callback] A callback function to call after load operation.
+	 * @param {Object} [scope] The scope (**this** reference) in which the callback is executed.
+	 */
+	loadWithExtraParams: function(store, extraParams, overwrite, callback, scope) {
+		if (!store.isStore) return;
+		var opts = {};
+		if (Ext.isFunction(callback)) {
+			Ext.apply(opts, {callback: callback});
+			if (scope !== undefined) Ext.apply(opts, {scope: scope});
+		}
+		this.applyExtraParams(store, extraParams, overwrite);
+		store.load(opts);
+	},
+	
+	/**
+	 * Gets the params of a hypotetical load operation executed against passed store.
+	 * @param {Ext.data.Store|Ext.data.Proxy} store The store.
+	 * @returns {Object}
+	 */
+	getParams: function(store) {
+		var params = {}, proxy, lopts, op;
+		if (store && store.isStore) {
+			proxy = store.getProxy();
+		} else if (store && store.isProxy) {
+			proxy = store;
+			store = null;
+		}
+		
+		if (store) {
+			lopts = {};
+			store.setLoadOptions(lopts);
+		}
+		if (proxy) {
+			if (lopts) {
+				op = Ext.createByAlias('data.operation.read', lopts);
+				params = proxy.getParams(op);
+			}
+			params = Ext.apply(params, proxy.getExtraParams() || {});
+		}
+		return params;
+	},
+	
+	/**
+	 * Checks if a store needs a sync operation.
+	 * @param {Ext.data.Store} store The store.
+	 * @returns {Boolean}
+	 */
+	storeNeedsSync: function(store) {
+		var needsSync = false;
+		if (store.isStore) {
+			if (store.getNewRecords().length > 0) needsSync = true;
+			if (store.getUpdatedRecords().length > 0) needsSync = true;
+			if (store.getRemovedRecords().length > 0) needsSync = true;
+		}
+		return needsSync;
+	},
+	
+	/**
+	 * Deep-clone a store.
+	 * @param {Ext.data.Store} store The store to be cloned.
+	 * @returns {Ext.data.Store} The new store
+	 */
+	storeDeepClone: function(store) {
+		var source = Ext.isString(store) ? Ext.data.StoreManager.lookup(store) : store,
+			target;
+		
+		if (source && source.isStore) {
+			target = Ext.create(source.$className, {
+				model: source.model
+			});
+			target.add(Ext.Array.map(source.getRange(), function(rec) {
+				return rec.copy();
+			}));
+		}
+		return target;
+	},
+	
+	/**
+	 * Returns an array of Records of the specified IDs.
+	 * A null element will be added in case the Record is missing for an ID.
+	 * @param {Ext.data.Store} store The data store.
+	 * @param {Mixed[]} ids Array of IDs for which to collect records.
+	 * @returns {Ext.data.Model[]}
+	 */
+	getByIds: function(store, ids) {
+		var ret = [], rec;
+		Ext.iterate(ids, function(id) {
+			rec = store.getById(id);
+			ret.push(rec);
+		});
+		return ret;
+	},
+	
+	/**
+	 * Finds the matching Records in the store by a specific field value.
+	 * When store is filtered, finds records only within filter.
+	 * @param {Ext.data.Store} store The data store.
+	 * @param {String} fieldName The name of the Record field to test.
+	 * @param {String/RegExp} value Either a string that the field value should begin with, or a RegExp to test against the field.
+	 * @param {Boolean} [anyMatch=false] True to match any part of the string, not just the beginning.
+	 * @param {Boolean} [caseSensitive=false] True for case sensitive comparison.
+	 * @param {Boolean} [exactMatch=false] True to force exact match (^ and $ characters added to the regex). Ignored if `anyMatch` is `true`.
+	 * @returns {Ext.data.Model[]} The matched records or an empty array.
+	 */
+	findRecords: function(store, fieldName, value, anyMatch, caseSentitive, exactMatch) {
+		var recs = [],
+				iof = -1, start = 0, rec;
+		while (true) {
+			rec = store.findRecord(fieldName, value, start, anyMatch, caseSentitive, exactMatch);
+			iof = store.indexOf(rec);
+			if (iof === -1) break;
+			recs.push(rec);
+			start = iof+1;
+		}
+		return recs;
+	},
+	
+	/**
+	 * Finds the first matching Record in this Store by a function.
+	 * @param {Ext.data.Store} store The data store.
+	 * @param {Function} fn The function to be called. It will be passed the following parameters:
+	 * @param {Ext.data.Model} fn.record The record to test for filtering. Access field values using {@link Ext.data.Model#get}.
+	 * @param {Object} fn.id The ID of the Record passed.
+	 * @param {Object} [scope] The scope (this reference) in which the function is executed. Defaults to this Store.
+	 * @param {Number} [start=0] The index at which to start searching.
+	 * @returns {Ext.data.Model} The matched record, null if no record is found for matched index, otherwise undefined.
+	 */
+	findRecordBy: function(store, fn, scope, start) {
+		var ridx, rec;
+		if (store && store.isStore) {
+			ridx = store.findBy(fn, scope, start);
+			if (ridx !== -1) {
+				rec = store.getAt(ridx);
+			}
+		}
+		return rec;
+	},
+	
+	/**
 	 * Wrapper method for {@link Ext.data.Model#getData}. Like the original one, 
 	 * it gets all values for each field in this model and returns an object 
 	 * containing the current data.
@@ -142,66 +301,5 @@ Ext.define('Sonicle.Data', {
 			if (vals.indexOf(copied) === -1) return copied;
 		}
 		return undefined;
-	},
-	
-	/**
-	 * Returns an array of Records of the specified IDs.
-	 * A null element will be added in case the Record is missing for an ID.
-	 * @param {Ext.data.Store} store The data store.
-	 * @param {Mixed[]} ids Array of IDs for which to collect records.
-	 * @returns {Ext.data.Model[]}
-	 */
-	getByIds: function(store, ids) {
-		var ret = [], rec;
-		Ext.iterate(ids, function(id) {
-			rec = store.getById(id);
-			ret.push(rec);
-		});
-		return ret;
-	},
-	
-	/**
-	 * Finds the matching Records in the store by a specific field value.
-	 * When store is filtered, finds records only within filter.
-	 * @param {Ext.data.Store} store The data store.
-	 * @param {String} fieldName The name of the Record field to test.
-	 * @param {String/RegExp} value Either a string that the field value should begin with, or a RegExp to test against the field.
-	 * @param {Boolean} [anyMatch=false] True to match any part of the string, not just the beginning.
-	 * @param {Boolean} [caseSensitive=false] True for case sensitive comparison.
-	 * @param {Boolean} [exactMatch=false] True to force exact match (^ and $ characters added to the regex). Ignored if `anyMatch` is `true`.
-	 * @returns {Ext.data.Model[]} The matched records or an empty array.
-	 */
-	findRecords: function(store, fieldName, value, anyMatch, caseSentitive, exactMatch) {
-		var recs = [],
-				iof = -1, start = 0, rec;
-		while (true) {
-			rec = store.findRecord(fieldName, value, start, anyMatch, caseSentitive, exactMatch);
-			iof = store.indexOf(rec);
-			if (iof === -1) break;
-			recs.push(rec);
-			start = iof+1;
-		}
-		return recs;
-	},
-	
-	/**
-	 * Finds the first matching Record in this Store by a function.
-	 * @param {Ext.data.Store} store The data store.
-	 * @param {Function} fn The function to be called. It will be passed the following parameters:
-	 * @param {Ext.data.Model} fn.record The record to test for filtering. Access field values using {@link Ext.data.Model#get}.
-	 * @param {Object} fn.id The ID of the Record passed.
-	 * @param {Object} [scope] The scope (this reference) in which the function is executed. Defaults to this Store.
-	 * @param {Number} [start=0] The index at which to start searching.
-	 * @returns {Ext.data.Model} The matched record, null if no record is found for matched index, otherwise undefined.
-	 */
-	findRecordBy: function(store, fn, scope, start) {
-		var ridx, rec;
-		if (store && store.isStore) {
-			ridx = store.findBy(fn, scope, start);
-			if (ridx !== -1) {
-				rec = store.getAt(ridx);
-			}
-		}
-		return rec;
 	}
 });

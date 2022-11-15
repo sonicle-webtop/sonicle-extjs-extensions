@@ -14,14 +14,16 @@ Ext.define('Sonicle.Utils', {
 	 * @deprecated use Sonicle.Object.setProp() instead
 	 */
 	setProp: function(object, name, value) {
-		return Sonicle.Object.setProp(object, name, value);
+		Ext.log.warn('"Sonicle.Utils.setProp" is deprecated. Use "Sonicle.Object.setProp" instead.');
+		return Sonicle.Object.setProp.apply(this, arguments);
 	},
 	
 	/**
 	 * @deprecated use Sonicle.Object.copyProp() instead
 	 */
 	applyProp: function(object, applyIfEmpty, sobject, name, newName, parseFn, scope) {
-		return Sonicle.Object.copyProp(object, applyIfEmpty, sobject, name, newName, parseFn, scope);
+		Ext.log.warn('"Sonicle.Utils.applyProp" is deprecated. Use "Sonicle.Object.copyProp" instead.');
+		return Sonicle.Object.copyProp.apply(this, arguments);
 	},
 	
 	/**
