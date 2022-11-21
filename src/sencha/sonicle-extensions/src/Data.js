@@ -7,7 +7,7 @@ Ext.define('Sonicle.Data', {
     singleton: true,
 	
 	/**
-	 * Applies extra params to passed Proxy, or to the inner Proxy in case of Store.
+	 * Applies extra-params to passed Proxy, or to the inner Proxy in case of Store.
 	 * @param {Ext.data.proxy.Proxy/Ext.data.Store} proxy The proxy.
 	 * @param {Object} extraParams Extra params to apply.
 	 * @param {Boolean} [clear=false] 'true' to clear previous params, 'false' to merge them.
@@ -18,6 +18,24 @@ Ext.define('Sonicle.Data', {
 		proxy = (proxy.isStore) ? proxy.getProxy() : proxy;
 		if (proxy) {
 			var obj = Ext.apply((clear) ? {} : proxy.getExtraParams(), extraParams);
+			proxy.setExtraParams(obj);
+		}
+	},
+	
+	/**
+	 * Removes extra-params from passed Proxy, or from the inner Proxy in case of Store.
+	 * @param {Ext.data.proxy.Proxy/Ext.data.Store} proxy The proxy.
+	 * @param {String|String[]} names Names of extraParams to remove.
+	 */
+	removeExtraParams: function(proxy, names) {
+		if (!proxy.isProxy && !proxy.isStore) return;
+		proxy = (proxy.isStore) ? proxy.getProxy() : proxy;
+		names = Ext.Array.from(names);
+		if (proxy) {
+			var obj = {};
+			Ext.iterate(proxy.getExtraParams(), function(k,v) {
+				if (names.indexOf(k) !== -1) obj[k] = v;
+			});
 			proxy.setExtraParams(obj);
 		}
 	},
