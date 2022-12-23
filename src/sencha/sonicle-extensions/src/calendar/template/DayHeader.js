@@ -29,7 +29,7 @@ Ext.define('Sonicle.calendar.template.DayHeader', {
 						'<tr>',
 							'<td class="ext-cal-gutter"></td>',
 							'<td class="ext-cal-hd-days-td"><div class="ext-cal-hd-ad-inner">{allDayTpl}</div></td>',
-							'<td class="ext-cal-gutter-rt"></td>',
+							'<td class="ext-cal-gutter-rt" style="{gutterStyle}"></td>',
 						'</tr>',
 					'</tbody>',
 				'</table>',
@@ -38,8 +38,16 @@ Ext.define('Sonicle.calendar.template.DayHeader', {
 	},
 	
 	applyTemplate: function(o) {
+		var sbSize = Ext.scrollbar.size(),
+			gutterStyle = '';
+		if (sbSize && sbSize.width > 0) {
+			gutterStyle = Ext.DomHelper.generateStyles({
+				width: sbSize.width + 'px'
+			});
+		}
 		return this.applyOut({
-			allDayTpl: this.allDayTpl.apply(o)
+			allDayTpl: this.allDayTpl.apply(o),
+			gutterStyle: gutterStyle
 		}, []).join('');
 	},
 	
