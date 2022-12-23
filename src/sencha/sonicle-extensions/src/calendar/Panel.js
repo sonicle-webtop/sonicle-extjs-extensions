@@ -416,6 +416,12 @@ Ext.define('Sonicle.calendar.Panel', {
 		me.activeItem =  (!Ext.isDefined(me.activeItem)) ? idx: (me.activeItem > idx ? idx: me.activeItem);
 		delete me.activeView;
 		
+		// Add support to overlay scrollbars
+		// https://developer.mozilla.org/en-US/docs/Web/CSS/scrollbar-gutter
+		// https://www.askvg.com/tip-restore-full-classic-scrollbars-in-mozilla-firefox-on-windows-11/
+		var sbSize = Ext.scrollbar.size();
+		if (sbSize && sbSize.width === 0) me.addCls('x-no-scrollbar');
+		
 		/*
 		if (me.showNavBar === false) {
 			delete me.tbar;
@@ -561,14 +567,15 @@ Ext.define('Sonicle.calendar.Panel', {
 	
 	// private
 	afterRender: function () {
-		this.callParent(arguments);
+		var me = this;
+		me.callParent(arguments);
 
-		this.body.addCls('x-cal-body');
+		me.body.addCls('x-cal-body');
 
 		Ext.defer(function () {
-			this.updateNavState();
-			this.fireViewChange();
-		}, 10, this);
+			me.updateNavState();
+			me.fireViewChange();
+		}, 10, me);
 	},
 	
 	// private
