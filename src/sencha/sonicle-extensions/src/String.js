@@ -16,7 +16,7 @@ Ext.define('Sonicle.String', {
 	 */
 	parseBoolean: function(s, defValue) {
 		Ext.log.warn('"Sonicle.String.parseBoolean" is deprecated. Use "Sonicle.Object.booleanValue" instead.');
-		return Sonicle.Object.booleanValue.apply(this, arguments);
+		return Sonicle.Object.booleanValue.apply(Sonicle.Object, arguments);
 	},
 	
 	/**
