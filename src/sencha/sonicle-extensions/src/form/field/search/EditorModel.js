@@ -8,6 +8,7 @@ Ext.define('Sonicle.form.field.search.EditorModel', {
 	extend: 'Ext.app.ViewModel',
 	alias: 'viewmodel.sosearcheditormodel',
 	uses: [
+		'Sonicle.Object',
 		'Sonicle.SearchString'
 	],
 	
@@ -51,7 +52,7 @@ Ext.define('Sonicle.form.field.search.EditorModel', {
 				if (field.boolKeyword) {
 					if (Ext.isArray(parsed[field.boolKeyword])) value = parsed[field.boolKeyword].indexOf(field.name) > -1;
 				} else {
-					if (Ext.isArray(parsed[kw])) value = Sonicle.String.parseBoolean(parsed[kw][0]) === true ? me.trueValue : me.falseValue;
+					if (Ext.isArray(parsed[kw])) value = Sonicle.Object.booleanValue(parsed[kw][0]) === true ? me.trueValue : me.falseValue;
 				}
 			} else if (field.type === 'date') {
 				if (Ext.isArray(parsed[kw])) value = Ext.Date.parse(parsed[kw][0], 'Y-m-d');
