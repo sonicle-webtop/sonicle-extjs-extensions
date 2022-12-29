@@ -15,7 +15,7 @@ Ext.define('Sonicle.Utils', {
 	 */
 	setProp: function(object, name, value) {
 		Ext.log.warn('"Sonicle.Utils.setProp" is deprecated. Use "Sonicle.Object.setProp" instead.');
-		return Sonicle.Object.setProp.apply(this, arguments);
+		return Sonicle.Object.setProp.apply(Sonicle.Object, arguments);
 	},
 	
 	/**
@@ -23,7 +23,7 @@ Ext.define('Sonicle.Utils', {
 	 */
 	applyProp: function(object, applyIfEmpty, sobject, name, newName, parseFn, scope) {
 		Ext.log.warn('"Sonicle.Utils.applyProp" is deprecated. Use "Sonicle.Object.copyProp" instead.');
-		return Sonicle.Object.copyProp.apply(this, arguments);
+		return Sonicle.Object.copyProp.apply(Sonicle.Object, arguments);
 	},
 	
 	/**
