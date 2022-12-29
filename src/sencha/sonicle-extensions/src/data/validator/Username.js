@@ -20,6 +20,6 @@ Ext.define('Sonicle.data.validator.Username', {
 	},
 	
 	statics: {
-		maskRe: /[a-z0-9\.\-\_]/
+		maskRe: /[a-z0-9\.\-\_]/i
 	}
 });
