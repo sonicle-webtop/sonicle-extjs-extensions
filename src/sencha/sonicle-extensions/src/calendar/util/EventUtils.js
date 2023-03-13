@@ -141,6 +141,7 @@ Ext.define('Sonicle.calendar.util.EventUtils', {
 				evDesc = edata[EM.Description.name],
 				evLoc = edata[EM.Location.name],
 				evOwn = edata[EM.Owner.name],
+				evOrg = edata[EM.Org.name],
 				evStaDt = edata[EM.StartDate.name],
 				evEndDt = edata[EM.EndDate.name],
 				evIsAD = edata[EM.IsAllDay.name] === true,
@@ -150,6 +151,7 @@ Ext.define('Sonicle.calendar.util.EventUtils', {
 				etime = XDate.format(edata[EM.EndDate.name], timeFmt),
 				tit = Ext.isEmpty(evLoc) ? evTit : Ext.String.format('{0} @{1}', evTit, evLoc),
 				iconDate = 'far fa-clock',
+				iconOrganizer = 'fas fa-user-clock',
 				iconCalendar = 'far fa-calendar',
 				tip, thtml;
 
@@ -161,6 +163,7 @@ Ext.define('Sonicle.calendar.util.EventUtils', {
 					'<br><span class="ext-evt-tooltip-descriptor"><i class="' + iconDate + '"></i></span>' + edate + (evIsAD ? '' : ' ' + etime);
 			//tip = startd + ' ' + startt + '<br>' + endd + ' ' + endt;
 		}
+		if (!Ext.isEmpty(evOrg)) tip += '<br><span class="ext-evt-tooltip-descriptor"><i class="' + iconOrganizer + '"></i></span>' + evOrg;
 		tip += '<br><span class="ext-evt-tooltip-descriptor"><i class="' + iconCalendar + '"></i></span>' + calName;
 		if (!Ext.isEmpty(evOwn)) tip += ' (' + evOwn + ')';
 		
