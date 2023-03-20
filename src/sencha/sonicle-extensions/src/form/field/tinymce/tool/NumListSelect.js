@@ -176,7 +176,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.NumListSelect', {
 		},
 		
 		isChildOfBody: function(editor, el) {
-			return editor.$.contains(editor.getBody(), el);
+			return editor.dom.isChildOf(el, editor.getBody());
 		},
 		
 		isTableCellNode: function(node) {

@@ -66,11 +66,11 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	language: 'en',
 	
 	/**
-	 * @cfg {String} [skin=oxide]
+	 * @cfg {String} [skin="tinymce-5"]
 	 * One of available TinyMCE skins.
 	 * Useful only when {@link #wysiwyg} is `true`.
 	 */
-	skin: 'oxide',
+	skin: 'tinymce-5',
 	
 	/**
 	 * @cfg {Boolean} [showElementPath=true]
@@ -113,6 +113,12 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	 * Useful only when {@link #wysiwyg} is `true`.
 	 */
 	enableFormats: true,
+	
+	/**
+	 * @cfg {Boolean} [enableCaseTools=true]
+	 * Set to `false` to hide case change controls.
+	 */
+	enableCaseTools: true,
 	
 	/**
 	 * @cfg {Boolean} [enableAlignments=true]
@@ -207,6 +213,18 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	pluginPowerPaste: false,
 	
 	/**
+	 * @cfg {Boolean} [pluginCaseChange=false]
+	 * Set to `true` to enable CaseChange plugin.
+	 */
+	pluginCaseChange: false,
+	
+	/**
+	 * @cfg {Boolean} [pluginAutoCorrect=false]
+	 * Set to `true` to enable AutoCorrect plugin.
+	 */
+	pluginAutoCorrect: false,
+	
+	/**
 	 * @cfg {Boolean} [pasteAllowBlobImages=true]
 	 * Set to `false` to avoid that pasted images are inserted as blob images (data:url)
 	 */
@@ -230,6 +248,11 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	 * @param {Function} success Success callback function that takes the URL value to be referenced.
 	 * @param {Function} failure Failure callback function that takes an optional message.
 	 * @param {Function} [progress] Progress callback function that takes a value between 1 and 100.
+	 */
+	
+	/**
+	 * @cfg {clean|merge|prompt} pasteGoogleDocsMode
+	 * Controls how content pasted from Google Docs is filtered.
 	 */
 	
 	/**
@@ -328,7 +351,11 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 			blockquoteText: 'Citation',
 			outdentText: 'Outdent',
 			indentText: 'Indent',
-			clearformatText: 'Clear formatting'
+			clearformatText: 'Clear formatting',
+			lowercaseText: 'lowercase',
+			uppercaseText: 'UPPERCASE',
+			titlecaseText: 'Title Case',
+			capitalizationText: 'Auto Capitalization'
 		},
 		alignselect: {
 			tooltipTitle: 'Align',
@@ -500,6 +527,7 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	
 	getTextArea: function() {
 		var me = this;
+		if (!me.rendered) return undefined;
 		return me.isWysiwyg ? me.getComponent(1) : me.getComponent(0);
 	},
 	
@@ -572,12 +600,13 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 			console.log('BeforeSetContent - ');
 			console.log(e.content);
 		}, me, editor, true));
-		*/
+		*/	
 		//editor.on('FormatApply', function() { console.log('FormatApply'); });
 		//editor.on('NewBlock', me.onTMCETextAreaEdNewBlock);
 		//editor.on('NodeChange', Ext.bind(me.onTMCETextAreaEdNodeChange, me));
 		//editor.on('OpenWindow', me.onTMCETextAreaEdOpenWindow);
 		//editor.on('CloseWindow', me.onTMCETextAreaEdCloseWindow);
+		editor.on('OpenNotification', Ext.bind(me.onTMCETextAreaEdOpenNotification, me));
 		
 		toolEditor('fontselect');
 		toolEditor('fontsizeselect');
@@ -608,94 +637,6 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 			me.focus.apply(me, me.pendingFocusOnTMCETextArea);
 			delete me.pendingFocusOnTMCETextArea;
 		}
-	},
-	
-	/*
-	onTMCETextAreaEdKeyDown: function(e, editor) {
-		// Workaround to solve formatting lost in TinyMCE when pressing 
-		// BACKSPACE key twice or clearing all content using DEL key.
-		// https://github.com/tinymce/tinymce/issues/3471
-		// https://github.com/tinymce/tinymce/issues/5139
-		
-		var me = this, node, style;
-		if (e.keyCode === Ext.event.Event.BACKSPACE || e.keyCode === Ext.event.Event.DELETE) {
-			node = me.editorGetSelection({editor: editor});
-			if ('DIV' === node.tagName) {
-				if (node.textContent.length <= 1 && node.innerHTML === '<br data-mce-bogus="1">') {
-					e.preventDefault();
-					e.stopPropagation();
-
-					style = me.getDefaultStyle();
-					var styles = Sonicle.form.field.tinymce.HTMLEditor.generateContentStyles(style.fontFamily, style.fontSize, style.color, me.getBaseForeHColor());
-					node.innerHTML = '<span data-mce-style="'+styles+'" style="'+styles+'"><br data-mce-bogus="1"></span>';
-					//node.innerHTML = Sonicle.form.field.tinymce.HTMLEditor.generateStyledContent(style.fontFamily, style.fontSize, style.color, me.getBaseForeHColor());
-					return false;
-				}
-			}
-		}
-	},
-	*/
-	
-	/*
-	onTMCETextAreaEdKeyDown: function(e, editor) {
-		var me = this;
-		if (e.keyCode === Ext.event.Event.BACKSPACE || e.keyCode === Ext.event.Event.DELETE) {
-			return;
-			Ext.defer(function() {
-				var content = editor.getContent({format: 'text'}), node;
-				if (Ext.isEmpty(content) || content === '\n' || content === ' &#13;') {
-					editor.setContent('');
-					me.editorSetBodyFormatting({editor: editor});
-					editor.selection.setCursorLocation(editor.getBody().firstChild, 0);
-					me.editorApplyDefaultFormatting({editor: editor});
-					
-				} else {
-					node = me.editorGetSelection({editor: editor});
-					if ('P' === node.nodeName || 'DIV' === node.nodeName) {
-						if (!node.hasChildNodes() || 'BR' === node.firstChild.nodeName) {
-							me.editorApplyDefaultFormatting({editor: editor});
-							me.editorGetDocument({editor: editor}).execCommand('Delete', false, null);
-						}
-					} else if ('SPAN' === node.nodeName && node.hasChildNodes() && node.firstChild.nodeName === 'BR') {
-						var textNode = me.editorGetDocument({editor: editor}).createTextNode('');
-						node.insertBefore(textNode, node.firstChild);
-					}
-				}
-			}, 1);
-			
-		} else if (e.keyCode === Ext.event.Event.ENTER) {
-			Ext.defer(function() {
-				var node = me.editorGetSelection({editor: editor});
-				if ('P' === node.nodeName || 'DIV' === node.nodeName) {
-					if (!node.hasChildNodes() || 'BR' === node.firstChild.nodeName) {
-						
-						//mmmmmmmmmmmmmmmmmmmm
-						me.editorGetDocument({editor: editor}).execCommand('Delete', false, null);
-						node = me.editorGetSelection({editor: editor});
-						if ('P' === node.nodeName || 'DIV' === node.nodeName) {
-							node.appendChild(me.editorGetDocument({editor: editor}).createElement('br'));
-						}
-						////////////////////////
-						//me.editorApplyDefaultFormatting({editor: editor});
-					}
-				}
-			}, 1);
-		}
-	},
-	*/
-	
-	onTMCETextAreaEdChange: function(s, value) {
-		var me = this;
-		me.mixins.field.setValue.call(me, value);
-		if (!Ext.isNumber(s.changeCounter)) s.changeCounter = 0;
-		s.changeCounter++;
-	},
-	
-	onTextAreaChange: function(s, newValue, oldValue) {
-		var me = this;
-		me.mixins.field.setValue.call(me, newValue);
-		if (!Ext.isNumber(s.changeCounter)) s.changeCounter = 0;
-		s.changeCounter++;
 	},
 	
 	setValue: function(value) {
@@ -848,6 +789,75 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 		opts = opts || {};
 		var ed = opts.editor || this.getEditor();
 		return ed ? ed.getBody() : undefined;
+	},
+	
+	/**
+	 * @param {String} type UI component type.
+	 * @param {String} name UI component name.
+	 * @param {Object} [opts] An object containing configuration.
+	 * @param {tinymce.Editor} [opts.editor] The editor instance to work with.
+	 */
+	editorCallUiComponentOnAction: function(type, name, opts) {
+		opts = opts || {};
+		var ed = opts.editor || this.getEditor(), all;
+		if (ed) {
+			all = ed.ui.registry.getAll();
+			if (all[type] && all[type][name]) {
+				all[type][name].onAction();
+			}
+			//ed.ui.registry.getAll().menuItems.capitalization.onAction()
+		}
+	},
+	
+	/**
+	 * Gets a configuration option.
+	 * @param {String} name Option name.
+	 * @param {Object} [opts] An object containing configuration.
+	 * @param {String} [opts.localStorageKey] The LocalStorage item key in which to get value from (has precedence over value, if any, in options).
+	 * @param {Mixed} [opts.defaultValue] The default value to return when no value can be provided.
+	 * @param {string|boolean|number} [opts.forceType] Force the returned value to the specified type.
+	 * @param {tinymce.Editor} [opts.editor] The editor instance to work with.
+	 * @returns {Mixed} The option's value, or `null` if no value can be provided.
+	 */
+	editorGetOption: function(name, opts) {
+		opts = opts || {};
+		var SoO = Sonicle.Object,
+			ed = opts.editor || this.getEditor(),
+			ovalue = undefined, lvalue = undefined, v;
+		if (ed) ovalue = ed.options.get(name);
+		if (window.localStorage && !Ext.isEmpty(opts.localStorageKey)) {
+			lvalue = localStorage.getItem(opts.localStorageKey);
+		}
+		v = Sonicle.Object.coalesce(lvalue, ovalue, opts.defaultValue);
+		if ('string' === opts.forceType) {
+			return SoO.stringValue(v);	
+		} else if ('boolean' === opts.forceType) {
+			return SoO.booleanValue(v);	
+		} else if ('number' === opts.forceType) {
+			return SoO.numberValue(v);	
+		} else {
+			return v;
+		}
+	},
+	
+	/**
+	 * Sets a configuration option.
+	 * @param {String} name Option name.
+	 * @param {Mixed} value Option value
+	 * @param {Object} [value] Optional value to pass.
+	 * @param {Object} [opts] An object containing configuration.
+	 * @param {String} [opts.localStorageKey] The LocalStorage item key in which to set value too.
+	 * @param {tinymce.Editor} [opts.editor] The editor instance to work with.
+	 */
+	editorSetOption: function(name, value, opts) {
+		opts = opts || {};
+		var ed = opts.editor || this.getEditor();
+		if (ed) {
+			ed.options.set(name, value);
+			if (window.localStorage && !Ext.isEmpty(opts.localStorageKey)) {
+				localStorage.setItem(opts.localStorageKey, value);
+			}
+		}
 	},
 	
 	/**
@@ -1065,6 +1075,7 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 					xtype: 'sotmcetextarea',
 					editor: Ext.merge({
 						language: me.language,
+						promotion: false, // Disable top promotion button (https://www.tiny.cloud/docs/tinymce/6/editor-premium-upgrade-promotion/#premium-upgrade-promotion-defaults)
 						skin: me.skin,
 						//skin: useDarkMode ? 'oxide-dark' : 'oxide',
 						//content_css: useDarkMode ? 'dark' : 'default',
@@ -1102,11 +1113,13 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 						relative_urls : false, // When conversion enabled (not this case), try to determine the absolute form of any URL
 						remove_script_host: true, // When conversion enabled & relative_urls is active (not this case), try to remove host and proto from relative URLs
 						link_assume_external_targets: true, // link/autolink: assume URLs to be external
-						target_list: false, // link/autolink: disable named targets
-						default_link_target: '_blank', // link/autolink: set default target
+						link_target_list: false, // link/autolink: disable named targets
+						link_default_target: '_blank', // link/autolink: set default target
 						link_default_protocol: 'http', // link/autolink: set default protocol
 						link_title: false, // link/autolink: hide title field in edit dialg
 						link_context_toolbar: true, // link/autolink: shows a context management toolbar over links
+						table_style_by_css: false,
+						table_use_colgroups: false,
 
 						browser_spellcheck: true,
 						// Default <table> styles
@@ -1115,19 +1128,36 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 							borderSpacing: '0'
 						},
 						paste_data_images: me.pasteAllowBlobImages, // paste: allow pasted images to be inserted as blob images (data:url)
-						powerpaste_allow_local_images: me.pasteAllowBlobImages, // powerpaste: allow pasted images to be inserted as blob images (data:url)
-						powerpaste_word_import: me.pasteWordMode || 'merge',
-						powerpaste_html_import: me.pasteHtmlMode || 'merge',
+						powerpaste_allow_local_images: me.pasteAllowBlobImages, // powerpaste plugin: allow pasted images to be inserted as blob images (data:url)
+						powerpaste_word_import: me.pasteWordMode || 'merge', // powerpaste plugin
+						powerpaste_googledocs_import: me.pasteGoogleDocsMode || 'merge', // powerpaste plugin
+						powerpaste_html_import: me.pasteHtmlMode || 'merge', // powerpaste plugin
+						paste_as_text: false, // powerpaste plugin (tmce default)
+						paste_merge_formats: true, // powerpaste plugin (tmce default)
+						paste_tab_spaces: 4, // powerpaste plugin (tmce default)
+						smart_paste: true, // powerpaste plugin (tmce default)
+						autocorrect_autocorrect: false, // autocorrect plugin
+						autocorrect_capitalize: me.editorGetOption('dummy', {localStorageKey: 'mce.capitalize', deflt: false, forceType: 'boolean'}), // autocorrect plugin
+						autocorrect_service_url: '',
 						automatic_uploads: true, // Enable automatic upload of inline blob (data:url) using 'images_upload_handler' handler
-						//OLDautomatic_uploads: false, // Disable automatic uploads of images represented by data URLs or blob URIs.
-						images_upload_handler: function(blobInfo, success, failure, progress) {
-							if (!me.uploadBlobImages) {
-								failure(); // Simply signal upload failure, image is left as blob image
-							} else if (Ext.isFunction(me.imagesUploadHandler)) {
-								Ext.callback(me.imagesUploadHandler, me, [blobInfo, success, failure, progress]);
-							} else {
-								failure('imagesUploadHandler callback NOT provided');
-							}
+						images_upload_handler: function(blobInfo, progress) {
+							return new Promise((resolve, reject) => {
+								if (!me.uploadBlobImages) {
+									// Simply signal upload failure, image is left as blob image
+									reject();
+								} else if (Ext.isFunction(me.imagesUploadHandler)) {
+									var successCb = function(imageUrl) {
+											resolve(imageUrl);
+										},
+										failureCb = function(error) {
+											// err can be a message string or an object with 'message' and 'remove' properties
+											reject(error);
+										};
+									Ext.callback(me.imagesUploadHandler, me, [blobInfo, successCb, failureCb, progress]);
+								} else {
+									reject({message: 'imagesUploadHandler callback NOT provided', remove: true});
+								}
+							});
 						},
 						content_style: me.buildContentStyle() + Sonicle.String.deflt(me.contentStyle, '')
 					}, me.tmceExtraConfig || {}),
@@ -1155,7 +1185,9 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 			var me = this;
 			return [
 				'template quickbars',
-				me.pluginPowerPaste ? 'powerpaste' : 'paste',
+				(me.pluginCaseChange && me.enableCaseTools) ? 'casechange' : '',
+				me.pluginAutoCorrect ? 'autocorrect' : '',
+				me.pluginPowerPaste ? 'powerpaste' : '',
 				me.enableLists ? 'advlist lists' : '',
 				me.enableEmoticons ? 'emoticons' : '',
 				me.enableSymbols ? 'charmap' : '',
@@ -1247,15 +1279,27 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 					}))
 				);
 			}
-			if (me.enableFormats) {
+				if (me.enableFormats) {
 				if (items.length > 0) items.push('-');
 				items.push(
 					tool('bold', 'so-tmcetoolbold'),
 					tool('italic', 'so-tmcetoolitalic'),
 					tool('underline', 'so-tmcetoolunderline'),
-					tool('formattools', 'so-tmcetoolformattools')
+					tool('formattools', 'so-tmcetoolformattools', SoU.applyIfDefined({}, {
+						enableFormatting: !!me.enableFormats,
+						enableCase: (!!me.pluginCaseChange && !!me.enableCaseTools)
+					}))
+				);
+			} else if (me.pluginCaseChange && me.enableCaseTools) { // Case utilities are under formattools menu
+				if (items.length > 0) items.push('-');
+				items.push(
+					tool('formattools', 'so-tmcetoolformattools', SoU.applyIfDefined({}, {
+						enableFormatting: false,
+						enableCase: true
+					}))
 				);
 			}
+			
 			if (me.enableAlignments || me.enableLists) {
 				if (items.length > 0) items.push('-');
 				if (me.enableAlignments) {
@@ -1357,7 +1401,103 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 		
 		getToolTexts: function(key) {
 			return Sonicle.Object.remap(this.toolTexts[key], ['tooltipTitle', 'tooltipText'], true);
+		},
+		
+		onTextAreaChange: function(s, newValue, oldValue) {
+			var me = this;
+			me.mixins.field.setValue.call(me, newValue);
+			if (!Ext.isNumber(s.changeCounter)) s.changeCounter = 0;
+			s.changeCounter++;
+		},
+
+		onTMCETextAreaEdChange: function(s, value) {
+			var me = this;
+			me.mixins.field.setValue.call(me, value);
+			if (!Ext.isNumber(s.changeCounter)) s.changeCounter = 0;
+			s.changeCounter++;
+		},
+
+		onTMCETextAreaEdOpenNotification: function(e) {
+			var not = e.notification;
+			// Suppress unwanted "Cannot convert blob..." error notifications (see WT-1000)
+			if (not.settings.type === 'error' && Sonicle.String.startsWith(not.settings.text, 'Cannot convert blob', true)) {
+				not.close();
+			}
 		}
+
+		/*
+		onTMCETextAreaEdKeyDown: function(e, editor) {
+			// Workaround to solve formatting lost in TinyMCE when pressing 
+			// BACKSPACE key twice or clearing all content using DEL key.
+			// https://github.com/tinymce/tinymce/issues/3471
+			// https://github.com/tinymce/tinymce/issues/5139
+
+			var me = this, node, style;
+			if (e.keyCode === Ext.event.Event.BACKSPACE || e.keyCode === Ext.event.Event.DELETE) {
+				node = me.editorGetSelection({editor: editor});
+				if ('DIV' === node.tagName) {
+					if (node.textContent.length <= 1 && node.innerHTML === '<br data-mce-bogus="1">') {
+						e.preventDefault();
+						e.stopPropagation();
+
+						style = me.getDefaultStyle();
+						var styles = Sonicle.form.field.tinymce.HTMLEditor.generateContentStyles(style.fontFamily, style.fontSize, style.color, me.getBaseForeHColor());
+						node.innerHTML = '<span data-mce-style="'+styles+'" style="'+styles+'"><br data-mce-bogus="1"></span>';
+						//node.innerHTML = Sonicle.form.field.tinymce.HTMLEditor.generateStyledContent(style.fontFamily, style.fontSize, style.color, me.getBaseForeHColor());
+						return false;
+					}
+				}
+			}
+		},
+		*/
+
+		/*
+		onTMCETextAreaEdKeyDown: function(e, editor) {
+			var me = this;
+			if (e.keyCode === Ext.event.Event.BACKSPACE || e.keyCode === Ext.event.Event.DELETE) {
+				return;
+				Ext.defer(function() {
+					var content = editor.getContent({format: 'text'}), node;
+					if (Ext.isEmpty(content) || content === '\n' || content === ' &#13;') {
+						editor.setContent('');
+						me.editorSetBodyFormatting({editor: editor});
+						editor.selection.setCursorLocation(editor.getBody().firstChild, 0);
+						me.editorApplyDefaultFormatting({editor: editor});
+
+					} else {
+						node = me.editorGetSelection({editor: editor});
+						if ('P' === node.nodeName || 'DIV' === node.nodeName) {
+							if (!node.hasChildNodes() || 'BR' === node.firstChild.nodeName) {
+								me.editorApplyDefaultFormatting({editor: editor});
+								me.editorGetDocument({editor: editor}).execCommand('Delete', false, null);
+							}
+						} else if ('SPAN' === node.nodeName && node.hasChildNodes() && node.firstChild.nodeName === 'BR') {
+							var textNode = me.editorGetDocument({editor: editor}).createTextNode('');
+							node.insertBefore(textNode, node.firstChild);
+						}
+					}
+				}, 1);
+
+			} else if (e.keyCode === Ext.event.Event.ENTER) {
+				Ext.defer(function() {
+					var node = me.editorGetSelection({editor: editor});
+					if ('P' === node.nodeName || 'DIV' === node.nodeName) {
+						if (!node.hasChildNodes() || 'BR' === node.firstChild.nodeName) {
+
+							//mmmmmmmmmmmmmmmmmmmm
+							me.editorGetDocument({editor: editor}).execCommand('Delete', false, null);
+							node = me.editorGetSelection({editor: editor});
+							if ('P' === node.nodeName || 'DIV' === node.nodeName) {
+								node.appendChild(me.editorGetDocument({editor: editor}).createElement('br'));
+							}
+							////////////////////////
+							//me.editorApplyDefaultFormatting({editor: editor});
+						}
+					}
+				}, 1);
+			}
+		}
+		*/
 	},
 	
 	statics: {
