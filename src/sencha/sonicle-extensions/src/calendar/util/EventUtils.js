@@ -5,6 +5,7 @@ Ext.define('Sonicle.calendar.util.EventUtils', {
 	singleton: true,
 	requires: [
 		'Sonicle.Date',
+		'Sonicle.String',
 		'Sonicle.grid.column.Tag'
 	],
 	
@@ -136,6 +137,7 @@ Ext.define('Sonicle.calendar.util.EventUtils', {
 		var EM = Sonicle.calendar.data.EventMappings,
 				XDate = Ext.Date,
 				SoDate = Sonicle.Date,
+				SoS = Sonicle.String,
 				calName = edata[EM.CalendarName.name],
 				evTit = edata[EM.Title.name],
 				evDesc = edata[EM.Description.name],
@@ -163,18 +165,19 @@ Ext.define('Sonicle.calendar.util.EventUtils', {
 					'<br><span class="ext-evt-tooltip-descriptor"><i class="' + iconDate + '"></i></span>' + edate + (evIsAD ? '' : ' ' + etime);
 			//tip = startd + ' ' + startt + '<br>' + endd + ' ' + endt;
 		}
-		if (!Ext.isEmpty(evOrg)) tip += '<br><span class="ext-evt-tooltip-descriptor"><i class="' + iconOrganizer + '"></i></span>' + evOrg;
-		tip += '<br><span class="ext-evt-tooltip-descriptor"><i class="' + iconCalendar + '"></i></span>' + calName;
+		if (!Ext.isEmpty(evOrg)) tip += '<br><span class="ext-evt-tooltip-descriptor"><i class="' + iconOrganizer + '"></i></span>' + SoS.htmlEncode(evOrg);
+		tip += '<br><span class="ext-evt-tooltip-descriptor"><i class="' + iconCalendar + '"></i></span>' + SoS.htmlEncode(calName);
 		if (!Ext.isEmpty(evOwn)) tip += ' (' + evOwn + ')';
 		
-		if (!Ext.isEmpty(evDesc)) tip += '<br><br>' + evDesc;
+		if (!Ext.isEmpty(evDesc)) tip += '<br><br>' + SoS.htmlEncode(evDesc);
 		
 		thtml = Sonicle.form.field.Tag.generateTagsMarkup(tdata);
 		if (!Ext.isEmpty(thtml)) tip += '<br><br>' + thtml;
 
 		return {
 			title: tit,
-			tooltip: Ext.String.htmlEncode(tip)
+			tooltip: tip
+			//tooltip: Ext.String.htmlEncode(tip)
 		};
 	}
 });

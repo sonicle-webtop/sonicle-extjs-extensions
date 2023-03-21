@@ -13,6 +13,7 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 	alias: 'widget.calendarview',
 	requires: [
 		'Sonicle.Date',
+		'Sonicle.String',
 		'Sonicle.ColorUtils',
 		'Sonicle.calendar.util.EventUtils',
 		'Sonicle.calendar.data.EventMappings'

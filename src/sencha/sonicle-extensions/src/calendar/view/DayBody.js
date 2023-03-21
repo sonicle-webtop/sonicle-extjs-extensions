@@ -370,6 +370,7 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 	getTemplateEventData: function(evt, date) {
 		var me = this,
 				soDate = Sonicle.Date,
+				SoS = Sonicle.String,
 				EU = Sonicle.calendar.util.EventUtils,
 				EM = Sonicle.calendar.data.EventMappings,
 				isSpan = me.isEventSpanning(evt),
@@ -425,8 +426,8 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		data.isSpan = isSpan;
 		data.spanTop = spanTop;
 		data.spanBottom = spanBottom;
-		data.Title = dinfo.title;
-		data.Tooltip = dinfo.tooltip;
+		data.Title = SoS.htmlAttributeEncode(dinfo.title);
+		data.Tooltip = SoS.htmlAttributeEncode(dinfo.tooltip);
 		return Ext.applyIf(data, evt);
 	},
 	

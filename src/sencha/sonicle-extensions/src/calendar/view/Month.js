@@ -285,6 +285,7 @@ Ext.define('Sonicle.calendar.view.Month', {
 	
 	getTemplateEventData: function(evt) {
 		var me = this,
+				SoS = Sonicle.String,
 				EM = Sonicle.calendar.data.EventMappings,
 				EU = Sonicle.calendar.util.EventUtils,
 				selector = me.getEventSelectorCls(evt[EM.Id.name]),
@@ -315,8 +316,8 @@ Ext.define('Sonicle.calendar.view.Month', {
 			_meetIconCls: me.meetingIconCls,
 			_commIconCls: me.commentsIconCls,
 			_tags: dtags,
-			Title: dinfo.title,
-			Tooltip: dinfo.tooltip
+			Title: SoS.htmlAttributeEncode(dinfo.title),
+			Tooltip: SoS.htmlAttributeEncode(dinfo.tooltip)
 		},
 		evt);
 	},
