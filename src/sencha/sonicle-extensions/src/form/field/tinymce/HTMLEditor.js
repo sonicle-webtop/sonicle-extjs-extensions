@@ -1141,7 +1141,7 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 						autocorrect_service_url: '',
 						automatic_uploads: true, // Enable automatic upload of inline blob (data:url) using 'images_upload_handler' handler
 						images_upload_handler: function(blobInfo, progress) {
-							return new Promise((resolve, reject) => {
+							return new Promise(function(resolve, reject) {
 								if (!me.uploadBlobImages) {
 									// Simply signal upload failure, image is left as blob image
 									reject();
