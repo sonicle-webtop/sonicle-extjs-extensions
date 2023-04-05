@@ -28,8 +28,8 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 	},
 	
 	statics: {
-		PSTATE_UNKNOWN: 'unknown',
-		PSTATE_PROMPED: 'prompted'
+		HISTORY_UNKNOWN: 'unknown',
+		HISTORY_PROMPED: 'prompted'
 	},
 	
 	/**
@@ -55,9 +55,9 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 		if (!me.api) return;
 		
 		try {
-			if (!force && me.checkState(proto) === me.self.PSTATE_PROMPED) return false;
+			if (!force && me.checkHistory(proto) === me.self.HISTORY_PROMPED) return false;
 			window.navigator.registerProtocolHandler(proto, url, opts.friendlyName);
-			me.setPromptState(proto, me.self.PSTATE_PROMPED);
+			me.setPromptHistory(proto, me.self.HISTORY_PROMPED);
 			return true;
 			
 		} catch (e) {
@@ -67,7 +67,7 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 	
 	/**
 	 * Removes a handler for a given URL scheme.
-	 * @param {String} proto The protocol registered.
+	 * @param {String} proto The protocol that was registered.
 	 * @param {String} url The URL template of the handler. Must match the one used in registering process.
 	 * @returns {Boolean}
 	 */
@@ -77,7 +77,7 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 		
 		try {
 			window.navigator.unregisterProtocolHandler(proto, url);
-			me.clearPromptState(proto);
+			me.clearPromptHistory(proto);
 			return true;
 			
 		} catch (e) {
@@ -85,22 +85,33 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 		}
 	},
 	
-	clearPromptState: function(proto) {
+	/**
+	 * Checks if a request for handling the specified protocol has been issued in past.
+	 * @param {String} proto The protocol to check.
+	 * @returns {String}
+	 */
+	checkPromptHistory: function(proto) {
 		var me = this,
-			key = me.buildPromptStateKey(proto);
-		Ext.state.Manager.clear(key);
-	},
-	
-	checkPromptState: function(proto) {
-		var me = this,
-			key = me.buildStateKey(proto),
+			ME = me.self,
+			key = me.buildPromptHistoryStateKey(proto),
 			state = Ext.state.Manager.get(key);
 		
-		if (state === me.self.PSTATE_PROMPED) {
+		if (state === ME.HISTORY_PROMPED) {
 			return state;
 		} else {
-			return me.self.PSTATE_UNKNOWN;
+			return ME.HISTORY_UNKNOWN;
 		}
+	},
+	
+	/**
+	 * Clears/Resets the prompt history for passed protocol.
+	 * @param {String} proto The protocol to check.
+	 * @returns {String}
+	 */
+	clearPromptHistory: function(proto) {
+		var me = this,
+			key = me.buildPromptHistoryStateKey(proto);
+		Ext.state.Manager.clear(key);
 	},
 	
 	privates: {
@@ -114,13 +125,13 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 			}
 		},
 		
-		buildPromptStateKey: function(proto) {
-			return this.stateKeyPrefix + 'protocolhandler@' + proto;
+		buildPromptHistoryStateKey: function(proto) {
+			return this.stateKeyPrefix + 'protocolhandlerhistory@' + proto;
 		},
 		
-		setPromptState: function(proto, state) {
+		setPromptHistory: function(proto, state) {
 			var me = this,
-				key = me.buildPromptStateKey(proto);
+				key = me.buildPromptHistoryStateKey(proto);
 			Ext.state.Manager.set(key, state);
 		}
 	}
