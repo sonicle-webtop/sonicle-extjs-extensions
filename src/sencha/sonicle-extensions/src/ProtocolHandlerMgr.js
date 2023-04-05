@@ -42,10 +42,11 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 	
 	/**
 	 * Registers an application as handler for specified protocol.
+	 * If procol registration has already been issued, nothing will be done unless `force` option is specified.
 	 * @param {String} proto The protocol to be registered.
 	 * @param {String} url The URL template of the handler. The `%s` will be replaced with the `href` of the link.
 	 * @param {String} [opts.friendlyName] The user friendly name for the protocol handler.
-	 * @param {Boolean} [opts.force] Set to `true` to force prompting again.
+	 * @param {Boolean} [opts.force] Set to `true` to force registering again ignoring the prompt state.
 	 * @returns {Boolean}
 	 */
 	register: function(proto, url, opts) {
