@@ -29,7 +29,7 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 	
 	statics: {
 		PSTATE_UNKNOWN: 'unknown',
-		PSTATE_PROMPED: 'prompted'
+		PSTATE_PROMPTED: 'prompted'
 	},
 	
 	/**
@@ -57,9 +57,9 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 		if (!me.api) return;
 		
 		try {
-			if (!force && me.checkPromptState(proto) === ME.PSTATE_PROMPED) return false;
+			if (!force && me.checkPromptState(proto) === ME.PSTATE_PROMPTED) return false;
 			window.navigator.registerProtocolHandler(proto, url, opts.friendlyName);
-			me.setPromptState(proto, ME.PSTATE_PROMPED);
+			me.setPromptState(proto, ME.PSTATE_PROMPTED);
 			return true;
 			
 		} catch (e) {
@@ -100,7 +100,7 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 			key = me.buildPromptStateKey(proto),
 			state = Ext.state.Manager.get(key);
 		
-		if (state === ME.PSTATE_PROMPED) {
+		if (state === ME.PSTATE_PROMPTED) {
 			return state;
 		} else {
 			return ME.PSTATE_UNKNOWN;
