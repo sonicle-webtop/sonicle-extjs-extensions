@@ -10,10 +10,6 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 		'Ext.state.Manager'
 	],
 	
-	config: {
-		stateKeyPrefix: ''
-	},
-	
 	/**
 	 * @readonly
 	 * @property {Boolean} api
@@ -27,10 +23,8 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 		me.api = me.checkApi();
 	},
 	
-	statics: {
-		PSTATE_UNKNOWN: 'unknown',
-		PSTATE_PROMPTED: 'prompted'
-	},
+	PSTATE_UNKNOWN: 'unknown',
+	PSTATE_PROMPTED: 'prompted',
 	
 	/**
 	 * Checks if Notification API is supported.
@@ -52,14 +46,13 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 	register: function(proto, url, opts) {
 		opts = opts || {};
 		var me = this,
-			ME = me.self,
 			force = Ext.isBoolean(opts.force) ? opts.force : false;
 		if (!me.api) return;
 		
 		try {
-			if (!force && me.checkPromptState(proto) === ME.PSTATE_PROMPTED) return false;
+			if (!force && me.checkPromptState(proto) === me.PSTATE_PROMPTED) return false;
 			window.navigator.registerProtocolHandler(proto, url, opts.friendlyName);
-			me.setPromptState(proto, ME.PSTATE_PROMPTED);
+			me.setPromptState(proto, me.PSTATE_PROMPTED);
 			return true;
 			
 		} catch (e) {
@@ -96,14 +89,13 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 	 */
 	checkPromptState: function(proto) {
 		var me = this,
-			ME = me.self,
 			key = me.buildPromptStateKey(proto),
 			state = Ext.state.Manager.get(key);
 		
-		if (state === ME.PSTATE_PROMPTED) {
+		if (state === me.PSTATE_PROMPTED) {
 			return state;
 		} else {
-			return ME.PSTATE_UNKNOWN;
+			return me.PSTATE_UNKNOWN;
 		}
 	},
 	
@@ -118,6 +110,12 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 		Ext.state.Manager.clear(key);
 	},
 	
+	setPromptState: function(proto, state) {
+		var me = this,
+			key = me.buildPromptStateKey(proto);
+		Ext.state.Manager.set(key, state);
+	},
+	
 	privates: {
 		checkApi: function() {
 			try {
@@ -130,13 +128,7 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 		},
 		
 		buildPromptStateKey: function(proto) {
-			return this.stateKeyPrefix + 'protocolhandlerpstate@' + proto;
-		},
-		
-		setPromptState: function(proto, state) {
-			var me = this,
-				key = me.buildPromptStateKey(proto);
-			Ext.state.Manager.set(key, state);
-		}
+			return 'protocolhandlerpstate@' + proto;
+		}		
 	}
 });
