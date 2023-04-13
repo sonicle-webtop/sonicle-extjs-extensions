@@ -1,7 +1,7 @@
 /*
- * Sonicle ExtJs UX
- * Copyright (C) 2019 Sonicle S.r.l.
- * sonicle@sonicle.com
+ * ExtJs UX
+ * Copyright (C) 2023 Sonicle S.r.l.
+ * malbinola[at]sonicle.com
  * http://www.sonicle.com
  */
 Ext.define('Sonicle.form.field.search.Editor', {
@@ -30,7 +30,14 @@ Ext.define('Sonicle.form.field.search.Editor', {
 	falseText: 'No',
 	okText: 'Search',
 	usageText: 'manual syntax: "{0}:{1}"',
+	saveTooltip: 'Save as favorite search',
+	saveIconCls: 'fas fa-save',
 	labelWidth: 110,
+	
+	/**
+	 * @cfg {Boolean} showSave
+	 */
+	showSave: false,
 	
 	/**
 	 * @cfg {Object[]} fields
@@ -75,6 +82,9 @@ Ext.define('Sonicle.form.field.search.Editor', {
 		if (cfg.falseText) me.falseText = cfg.falseText;
 		if (cfg.okText) me.okText = cfg.okText;
 		if (cfg.usageText) me.usageText = cfg.usageText;
+		if (cfg.saveTooltip) me.saveTooltip = cfg.saveTooltip;
+		if (cfg.saveIconCls) me.saveIconCls = cfg.saveIconCls;
+		if (Ext.isBoolean(cfg.showSave)) me.showSave = cfg.showSave;
 		
 		me.childViewModel = childViewModel;
 		
@@ -125,6 +135,14 @@ Ext.define('Sonicle.form.field.search.Editor', {
 									xtype: 'tbfill'
 								}, {
 									xtype: 'button',
+									iconCls: cfg.saveIconCls || me.saveIconCls,
+									tooltip: cfg.saveTooltip || me.saveTooltip,
+									handler: me.onSave,
+									scope: me
+								}, {
+									xtype: 'tbspacer'
+								}, {
+									xtype: 'button',
 									text: cfg.okText || me.okText,
 									tooltip: cfg.okTooltip,
 									handler: me.onOk,
@@ -140,12 +158,20 @@ Ext.define('Sonicle.form.field.search.Editor', {
 			var result = me.createFieldsCfg(childViewModel, me.labelWidth, cfg.fields);
 			Sonicle.Object.multiValueMapMerge(storeDependsOnMap, result.storeDependsOnMap);
 			Ext.apply(me, {
-				layout:'anchor',
+				layout: 'anchor',
 				bodyPadding: '0 10 0 10',
 				items: result.items,
 				bbar: [
 					{
 						xtype: 'tbfill'
+					}, {
+						xtype: 'button',
+						iconCls: cfg.saveIconCls || me.saveIconCls,
+						tooltip: cfg.saveTooltip || me.saveTooltip,
+						handler: me.onSave,
+						scope: me
+					}, {
+						xtype: 'tbspacer'
 					}, {
 						xtype: 'button',
 						text: cfg.okText || me.okText,
@@ -203,9 +229,16 @@ Ext.define('Sonicle.form.field.search.Editor', {
 	
 	onOk: function() {
 		var me = this,
-				qobj = me.childViewModel.updateQueryObject();
+			qobj = me.childViewModel.updateQueryObject();
 		me.setValue(qobj.value);
 		me.fireEvent('ok', me, qobj.value, qobj);
+	},
+	
+	onSave: function() {
+		var me = this,
+			qobj = me.childViewModel.updateQueryObject();
+		me.setValue(qobj.value);
+		me.fireEvent('save', me, qobj.value, qobj);
 	},
 	
 	onCancel: function() {
@@ -240,8 +273,9 @@ Ext.define('Sonicle.form.field.search.Editor', {
 	},
 	
 	setPreviousValue: function(value) {
-		this.childViewModel.setSearchStringValue(value);
+		var parsed = this.childViewModel.setSearchStringValue(value);
 		this.setValue(value);
+		return parsed;
 	},
 	
 	privates: {

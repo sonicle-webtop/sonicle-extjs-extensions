@@ -1,7 +1,7 @@
 /*
- * Sonicle ExtJs UX
- * Copyright (C) 2019 Sonicle S.r.l.
- * sonicle@sonicle.com
+ * ExtJs UX
+ * Copyright (C) 2023 Sonicle S.r.l.
+ * malbinola[at]sonicle.com
  * http://www.sonicle.com
  */
 Ext.define('Sonicle.form.field.search.EditorModel', {
@@ -35,6 +35,11 @@ Ext.define('Sonicle.form.field.search.EditorModel', {
 		}
 	},
 	
+	/**
+	 * Applies passed String to the editor.
+	 * @param {String} s The raw search string.
+	 * @returns {SearchString} The parsed search object
+	 */
 	setSearchStringValue: function(s) {
 		var me = this,
 				SoSS = Sonicle.SearchString,
@@ -65,6 +70,8 @@ Ext.define('Sonicle.form.field.search.EditorModel', {
 			}
 			me.set('values.'+field.name, value);
 		});
+		
+		return ss;
 	},
 	
 	updateQueryObject: function() {
