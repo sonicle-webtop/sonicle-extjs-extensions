@@ -19,6 +19,13 @@ Ext.define('Sonicle.view.BoundList', {
 	 */
 	
 	/**
+	 * @cfg {Function} [getGroup]
+	 * A function which returns the group info in the view (eg. useful for computing title dynamically).
+	 * @param {Object} values An Object with item fields.
+	 * @param {Mixed} value The value sustained by {@link #groupField}.
+	 */
+	
+	/**
 	 * @cfg {String} [iconField]
 	 * The field from the store to show icon in the view.
 	 */
@@ -36,6 +43,42 @@ Ext.define('Sonicle.view.BoundList', {
 	/**
 	 * @cfg {Function} [getSource]
 	 * A function which returns the source/origin info in the view.
+	 * @param {Object} values An Object with item fields.
+	 * @param {Mixed} value The value sustained by {@link #sourceField}.
+	 */
+	
+	/**
+	 * @cfg {Boolean} [enableButton]
+	 * Enables or disables displaying an icon-button on item-row.
+	 */
+	enableButton: false,
+	
+	/**
+	 * @cfg {String} [buttonIconCls]
+	 * The icon Class to use with button.
+	 */
+	buttonIconCls: 'fas fa-times',
+	
+	/**
+	 * @cfg {Function} [shouldShowButton]
+	 * A function which returns `true` or `false` weather the button is enabled or not for the item.
+	 * @param {Object} values An Object with item fields.
+	 */
+	
+	/**
+	 * @cfg {Function} [getButtonTooltip]
+	 * A function which returns the tooltip to show on the row.
+	 * @param {Object} values An Object with item fields.
+	 */
+	
+	/**
+	 * @cfg {Function/String} buttonHandler
+	 * A function called when the button is clicked.
+	 * @param {Sonicle.view.BoundList} list This list.
+	 * @param {Ext.event.Event} e The click event.
+	 * @param {Ext.data.Model} record The record that belongs to the item.
+	 * @param {HTMLElement} item The item's element.
+	 * @param {Number} index The item's index.
 	 */
 	
 	/**
@@ -73,6 +116,7 @@ Ext.define('Sonicle.view.BoundList', {
 	itemIconCls: 'so-'+'boundlist-icon',
 	itemDisplayCls: 'so-'+'boundlist-display',
 	itemSourceCls: 'so-'+'boundlist-source',
+	itemRightDockedCls: 'so-'+'boundlist-right',
 	itemSwatchCls: 'so-'+'boundlist-swatch',
 	
 	initComponent: function() {
@@ -93,25 +137,55 @@ Ext.define('Sonicle.view.BoundList', {
 		}
 	},
 	
+	onItemClick: function(record, itm, idx, e, eo) {
+		var me = this;
+		if (e.getTarget('.so-boundlist-button')) {
+			if (me.buttonHandler) {
+				Ext.callback(me.buttonHandler, me.scope, [me, e, record, itm, idx], 0, me);
+			}
+			return false;
+		} else {
+			return me.callParent(arguments);
+		}
+	},
+	
 	generateTpl: function() {
 		var me = this,
-				hasGroup = !Ext.isEmpty(me.groupField),
-				hasIcon = !Ext.isEmpty(me.iconField),
-				hasColor = !Ext.isEmpty(me.colorField),
-				sourceFn = function(getFn, field) {
-					if (Ext.isFunction(getFn)) {
-						return function(values) {
-							return Sonicle.String.deflt(getFn.apply(me, [values]), '&nbsp;');
-						};
-					} else if (!Ext.isEmpty(field)) {
-						return function(values) {
-							return Sonicle.String.deflt(values[field], '&nbsp;');
-						};
-					} else {
-						return Ext.emptyFn;
-					}
-				},
-				liCls;
+			hasGroup = !Ext.isEmpty(me.groupField),
+			hasIcon = !Ext.isEmpty(me.iconField),
+			hasColor = !Ext.isEmpty(me.colorField),
+			showButtonTplGetterFn = function(getFn) {
+				if (Ext.isFunction(getFn)) {
+					return function(values) {
+						return !!getFn.apply(me, [values]);
+					};
+				} else {
+					return function() { return true; };
+				}
+			},
+			tooltipAttrTplGetterFn = function(getFn) {
+				if (Ext.isFunction(getFn)) {
+					return function(values) {
+						return Sonicle.Utils.generateTooltipAttrs(getFn.apply(me, [values]));
+					};
+				} else {
+					return function() { return ''; };
+				}
+			},
+			valueTplGetterFn = function(getFn, field, defValue) {
+				if (Ext.isFunction(getFn)) {
+					return function(values) {
+						return Sonicle.String.deflt(getFn.apply(me, [values, values[field]]), defValue);
+					};
+				} else if (!Ext.isEmpty(field)) {
+					return function(values) {
+						return Sonicle.String.deflt(values[field], defValue);
+					};
+				} else {
+					return Ext.emptyFn;
+				}
+			},
+			liCls;
 		
 		if (hasGroup || hasIcon || hasColor) { // Setup modified template supporting new markup
 			liCls = me.itemCls + ' ' + me.listItemCls;
@@ -119,9 +193,9 @@ Ext.define('Sonicle.view.BoundList', {
 			me.tpl = new Ext.XTemplate(
 				'<tpl for=".">',
 					'<tpl if="this.grouping && this.groupingThreshold && this.showGroupItem(' + me.groupField + ')">',
-						'<li class="' + me.itemCls + ' ' + me.groupListItemCls + '"> ' + me.getGroupInnerTpl(me.groupField) + '</li>',
+						'<li class="' + me.itemCls + ' ' + me.groupListItemCls + '"> ' + me.generateGroupInnerTpl(me.groupField) + '</li>',
 					'</tpl>',
-					'<li role="option" unselectable="on" class="' + liCls + '">' + me.getInnerTpl(me.displayField) + '</li>',
+					'<li role="option" unselectable="on" class="' + liCls + '">' + me.generateInnerTpl(me.displayField) + '</li>',
 				'</tpl>',
 				// <tpl if="this.grouping && this.showGroupTitle(' + me.groupField + ')">style="padding-left:15px"</tpl>
 				{
@@ -143,7 +217,10 @@ Ext.define('Sonicle.view.BoundList', {
 					generateDisplayColorStyles: function(values, colorField) {
 						return !Ext.isEmpty(colorField) ? Sonicle.view.BoundList.generateColorStyles('text', values[colorField]) : '';
 					},
-					sourceValue: sourceFn(me.getSource, me.sourceField)
+					showButton: showButtonTplGetterFn(me.shouldShowButton),
+					buttonTipAttr: tooltipAttrTplGetterFn(me.getButtonTooltip),
+					sourceValue: valueTplGetterFn(me.getSource, me.sourceField, '&nbsp;'),
+					groupValue: valueTplGetterFn(me.getGroup, me.groupField, '&nbsp;')
 				}
 			);
 			
@@ -152,47 +229,60 @@ Ext.define('Sonicle.view.BoundList', {
 			// in order to make hovering and selection compatible with new item selector.
 			me.tpl = new Ext.XTemplate(
 				'<tpl for=".">',
-					'<li role="option" unselectable="on" class="' + me.itemCls + ' ' + me.listItemCls + '">' + me.getInnerTpl(me.displayField) + '</li>',
+					'<li role="option" unselectable="on" class="' + me.itemCls + ' ' + me.listItemCls + '">' + me.generateInnerTpl(me.displayField) + '</li>',
 				'</tpl>',
 				{
-					sourceValue: sourceFn(me.getSource, me.sourceField)
+					showButton: showButtonTplGetterFn(me.shouldShowButton),
+					buttonTipAttr: tooltipAttrTplGetterFn(me.getButtonTooltip),
+					sourceValue: valueTplGetterFn(me.getSource, me.sourceField, '&nbsp;'),
+					groupValue: valueTplGetterFn(me.getGroup, me.groupField, '&nbsp;')
 				}
 			);
 		}		
 	},
 	
-	getGroupInnerTpl: function(groupField) {
-		return '<span class="' + this.itemDisplayCls + ' ' + Sonicle.String.deflt(this.groupCls, '') + '">{' + groupField + '}</span>';
+	generateGroupInnerTpl: function(groupField) {
+		return this.wrapGroupInnerTpl('{[this.groupValue(values)]}');
 	},
 	
-	getInnerTpl: function(displayField) {
+	generateInnerTpl: function(displayField) {
 		var me = this,
-				hasIcon = !Ext.isEmpty(me.iconField),
-				hasColor = !Ext.isEmpty(me.colorField),
-				hasSource = !Ext.isEmpty(me.sourceField) || Ext.isFunction(me.getSource),
-				colorizeSwatch = (me.colorize === 'swatch'),
-				geomSwatchCls, swatchStyle, displayStyle, source;
+			origInnerTpl = me.getInnerTpl(displayField),
+			hasIcon = !Ext.isEmpty(me.iconField),
+			hasColor = !Ext.isEmpty(me.colorField),
+			hasSource = !Ext.isEmpty(me.sourceField) || Ext.isFunction(me.getSource),
+			useButton = me.enableButton,
+			floating = hasSource || useButton,
+			colorizeSwatch = (me.colorize === 'swatch'),
+			geomSwatchCls, swatchStyle, displayStyle, source;
 		
-		if (hasIcon || hasColor || hasSource) { // Return modified innerTpl to support new features
+		if (hasIcon || hasColor || hasSource || useButton) { // Return modified innerTpl to support new features
 			if (hasIcon && hasColor && colorizeSwatch) hasColor = false;
 			geomSwatchCls = me.itemSwatchCls + '-' + me.swatchGeometry;
 			swatchStyle = (hasColor && colorizeSwatch) ? '{[this.generateSwatchColorStyles(values, "' + me.colorField + '")]}' : '';
 			displayStyle = (hasColor && !colorizeSwatch) ? '{[this.generateDisplayColorStyles(values, "' + me.colorField + '")]}' : '';
 			source = '[this.sourceValue(values)]';
 			
-			return (hasSource ? '<div style="float:left; white-space: pre;">' : '')
-					+ (hasIcon ? '<div class="' + me.itemIconCls + ' {' + me.iconField + '}"></div>' : '')
-					+ (hasColor && colorizeSwatch ? '<div class="' + me.itemSwatchCls + ' ' + geomSwatchCls + '" style="' + swatchStyle + '")]}"></div>' : '')
-					+ '<span class="' + me.itemDisplayCls + '" style="' + displayStyle + '">{' + displayField + '}</span>'
-					+ (hasSource ? '</div>' : '')
-					+ (hasSource ? '<div class="' + me.itemSourceCls + ' ' + Sonicle.String.deflt(me.sourceCls, '') + '">{' + source + '}</div>' : '');
+			return (floating ? '<div class="so-boundlist-floating">' : '')
+				+ (hasIcon ? '<div class="' + me.itemIconCls + ' {' + me.iconField + '}"></div>' : '')
+				+ (hasColor && colorizeSwatch ? '<div class="' + me.itemSwatchCls + ' ' + geomSwatchCls + '" style="' + swatchStyle + '"></div>' : '')
+				+ '<span class="' + me.itemDisplayCls + '" style="' + displayStyle + '">' + origInnerTpl + '</span>'
+				+ (floating ? '</div>' : '')
+				+ (floating ? '<div class="' + me.itemRightDockedCls + '">' : '')
+				+ (floating && hasSource ? '<span class="' + Sonicle.String.deflt(me.sourceCls, '') + '">{' + source + '}</span>' : '')
+				+ (floating && useButton ? '<tpl if="this.showButton(values) === true"><i class="so-boundlist-button ' + me.buttonIconCls + '" {[this.buttonTipAttr(values)]}></i></tpl>' : '')
+				+ (floating ? '</div>' : '');
 			
 		} else { // Return original innerTpl
-			return me.callParent(arguments);
+			return origInnerTpl;
 		}
 	},
 	
 	privates: {
+		wrapGroupInnerTpl: function(innerTpl) {
+			return '<span class="' + this.itemDisplayCls + ' ' + Sonicle.String.deflt(this.groupCls, '') + '">' + innerTpl + '</span>';
+		},
+		
 		evalGroupThreshold: function() {
 			var me = this, groups;
 			if (me.store) {
@@ -208,14 +298,14 @@ Ext.define('Sonicle.view.BoundList', {
 			if (colorize === 'swatch') {
 				if (color === '#FFFFFF') {
 					return Ext.dom.Helper.generateStyles({
-							backgroundColor: '#FFFFFF',
-							border: '1px solid #A8A8A8'
-						});
+						backgroundColor: '#FFFFFF',
+						border: '1px solid #A8A8A8'
+					});
 				} else {
 					return Ext.dom.Helper.generateStyles({
-							backgroundColor: color,
-							border: 'none'
-						});
+						backgroundColor: color,
+						border: 'none'
+					});
 				}
 			} else if (colorize === 'text') {
 				return Ext.dom.Helper.generateStyles({

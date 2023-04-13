@@ -31,11 +31,11 @@
 .so-boundlist-display {
 	white-space: pre;
 }
-.so-boundlist-sourcewrap {
+.so-boundlist-floating {
 	float: left;
 	white-space: pre;
 }
-.so-boundlist-source {
+.so-boundlist-right {
 	text-align: right;
 	white-space: pre;
 	/*width: 100%;*/
@@ -48,4 +48,13 @@
 }
 .so-boundlist-item .so-boundlist-icon {
 	margin-left: 0px;
+}
+.so-boundlist-item .so-boundlist-button {
+	vertical-align: middle;
+	margin-left: 5px;
+	display: none;
+	opacity: 0.8;
+}
+.so-boundlist-item.x-boundlist-item-over .so-boundlist-button {
+	display: inline;
 }

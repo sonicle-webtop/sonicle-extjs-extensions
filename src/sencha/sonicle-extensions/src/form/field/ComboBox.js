@@ -22,18 +22,25 @@ Ext.define('Sonicle.form.field.ComboBox', {
 	swatchGeometry: 'rounded',
 	
 	/**
-	 * @cfg {String} groupField
+	 * @cfg {String} [groupField]
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as group header.
 	 * This is suitable for changing the groupField specified in {@link Ext.data.Store#store}.
 	 */
 	
 	/**
-	 * @cfg {String} iconField
+	 * @cfg {Function} [getGroup]
+	 * A function which returns the group info in the view (eg. useful for computing title dynamically).
+	 * @param {Object} values An Object with item fields.
+	 * @param {Mixed} value The value sustained by {@link #groupField}.
+	 */
+	
+	/**
+	 * @cfg {String} [iconField]
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as CSS icon class.
 	 */
 	
 	/**
-	 * @cfg {String} colorField
+	 * @cfg {String} [colorField]
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as 
 	 * color swatch instead of using an icon.
 	 */
@@ -51,6 +58,8 @@ Ext.define('Sonicle.form.field.ComboBox', {
 	/**
 	 * @cfg {Function} [getSource]
 	 * A function which returns the value of source.
+	 * @param {Object} values An Object with item fields.
+	 * @param {Mixed} value The value sustained by {@link #sourceField}.
 	 */
 	
 	componentCls: 'so-'+'combo',
@@ -112,7 +121,10 @@ Ext.define('Sonicle.form.field.ComboBox', {
 		me.callParent(arguments);
 		me.listConfig.colorize = me.colorize;
 		me.listConfig.swatchGeometry = me.swatchGeometry;
-		if (me.store && !Ext.isEmpty(me.store.getGroupField())) me.listConfig.groupField = me.groupField;
+		if (me.store && !Ext.isEmpty(me.store.getGroupField())) {
+			me.listConfig.groupField = me.groupField;
+			me.listConfig.getGroup = me.getGroup;
+		}
 		me.listConfig.iconField = me.iconField;
 		me.listConfig.colorField = me.colorField;
 		me.listConfig.sourceCls = me.sourceCls;
@@ -122,9 +134,9 @@ Ext.define('Sonicle.form.field.ComboBox', {
 	
 	getSubTplData: function(fieldData) {
 		var me = this,
-				hasIcon = !Ext.isEmpty(me.iconField),
-				hasColor = !Ext.isEmpty(me.colorField),
-				hasSwatch = !hasIcon && hasColor && (me.colorize === 'swatch');
+			hasIcon = !Ext.isEmpty(me.iconField),
+			hasColor = !Ext.isEmpty(me.colorField),
+			hasSwatch = !hasIcon && hasColor && (me.colorize === 'swatch');
 		
 		return Ext.apply(me.callParent(arguments), {
 			hasIcon: hasIcon,
