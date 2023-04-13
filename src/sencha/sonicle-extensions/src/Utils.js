@@ -132,22 +132,30 @@ Ext.define('Sonicle.Utils', {
 	 * @param {String/Object} tooltip It can be a string to be used as innerHTML (html tags are accepted) or QuickTips config object.
 	 * @returns {String} The HTML attributes, or an empty string in case of misconfigurations.
 	 */
-	generateTooltipAttrs: function(tooltip) {
+	generateTooltipAttrs: function(tooltip, opts) {
+		opts = opts || {};
 		var SoS = Sonicle.String,
-				qtips = Ext.quickTipsActive && Ext.tip.QuickTipManager.isEnabled(),
-				encode = SoS.htmlAttributeEncode;
+			qtips = Ext.quickTipsActive && Ext.tip.QuickTipManager.isEnabled(),
+			encode = SoS.htmlAttributeEncode,
+			s = '';
 		
-		if (Ext.isString(tooltip)) {
-			return (qtips ? ' data-qtip' : ' title') + '="' + encode(tooltip) + '"';
-		} else if (Ext.isObject(tooltip)) {
-			if (qtips) {
-				return ' data-qtitle="' + encode(tooltip.title) + '" data-qtip="' + encode(tooltip.text) + '"';
-			} else {
-				return ' title' + '="' + encode(SoS.deflt(tooltip.text, tooltip.title)) + '"';
+		if (qtips) {
+			if (Ext.isString(tooltip)) {
+				s += ' data-qtip="' + encode(tooltip) + '"';
+			} else if (Ext.isObject(tooltip)) {
+				s += ' data-qtitle="' + encode(tooltip.title) + '" data-qtip="' + encode(tooltip.text) + '"';
 			}
+			if (Ext.isNumber(opts.showDelay)) s += ' data-qshowdelay="' + encode(opts.showDelay+'') + '"';
+			if (Ext.isNumber(opts.dismissDelay)) s += ' data-qdismissdelay="' + encode(opts.dismissDelay+'') + '"';
+			
 		} else {
-			return '';
+			if (Ext.isString(tooltip)) {
+				s += ' title="' + encode(tooltip) + '"';
+			} else if (Ext.isObject(tooltip)) {
+				s += ' title="' + encode(SoS.deflt(tooltip.text, tooltip.title)) + '"';
+			}
 		}
+		return s;
 	},
 	
 	/**
