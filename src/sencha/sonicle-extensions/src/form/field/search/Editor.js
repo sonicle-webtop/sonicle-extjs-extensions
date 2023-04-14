@@ -74,7 +74,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 		var me = this,
 			childViewModel = Ext.Factory.viewModel('sosearcheditormodel', {fields: cfg.fields, trueValue: cfg.trueValue, falseValue: cfg.falseValue}),
 			storeDependsOnMap = {},
-			layout, items;
+			layout, items, bbar;
 		
 		if (cfg.trueValue) me.trueValue = cfg.trueValue;
 		if (cfg.falseValue) me.falseValue = cfg.falseValue;
@@ -87,6 +87,28 @@ Ext.define('Sonicle.form.field.search.Editor', {
 		if (Ext.isBoolean(cfg.showSave)) me.showSave = cfg.showSave;
 		
 		me.childViewModel = childViewModel;
+		
+		bbar = [{xtype: 'tbfill'}];
+		if (me.showSave) {
+			Ext.Array.push(bbar, [
+				{
+					xtype: 'button',
+					iconCls: cfg.saveIconCls || me.saveIconCls,
+					tooltip: cfg.saveTooltip || me.saveTooltip,
+					handler: me.onSave,
+					scope: me
+				}, {
+					xtype: 'tbspacer'
+				}
+			]);
+		}
+		bbar.push({
+			xtype: 'button',
+			text: cfg.okText || me.okText,
+			tooltip: cfg.okTooltip,
+			handler: me.onOk,
+			scope: me
+		});
 		
 		if (Ext.isArray(cfg.tabs) && !Ext.isEmpty(cfg.tabs)) {
 			var tbitems = [], usedFields = [];
@@ -130,25 +152,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 						items: tbitems,
 						layout: 'anchor',
 						tabBar:	{
-							items: [
-								{
-									xtype: 'tbfill'
-								}, {
-									xtype: 'button',
-									iconCls: cfg.saveIconCls || me.saveIconCls,
-									tooltip: cfg.saveTooltip || me.saveTooltip,
-									handler: me.onSave,
-									scope: me
-								}, {
-									xtype: 'tbspacer'
-								}, {
-									xtype: 'button',
-									text: cfg.okText || me.okText,
-									tooltip: cfg.okTooltip,
-									handler: me.onOk,
-									scope: me
-								}
-							]
+							items: bbar
 						}
 					}
 				]
@@ -161,25 +165,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 				layout: 'anchor',
 				bodyPadding: '0 10 0 10',
 				items: result.items,
-				bbar: [
-					{
-						xtype: 'tbfill'
-					}, {
-						xtype: 'button',
-						iconCls: cfg.saveIconCls || me.saveIconCls,
-						tooltip: cfg.saveTooltip || me.saveTooltip,
-						handler: me.onSave,
-						scope: me
-					}, {
-						xtype: 'tbspacer'
-					}, {
-						xtype: 'button',
-						text: cfg.okText || me.okText,
-						tooltip: cfg.okTooltip,
-						handler: me.onOk,
-						scope: me
-					}
-				]
+				bbar: bbar
 			});
 		}
 		me.callParent([cfg]);

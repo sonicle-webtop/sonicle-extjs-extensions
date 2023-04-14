@@ -163,6 +163,7 @@ Ext.define('Sonicle.form.field.search.Field', {
 		});
 		
 		me.on('clear', me.onClear, me);
+		//me.on('specialkey', me.onSpecialKey, me);
 	},
 	
 	destroy: function() {
@@ -174,6 +175,7 @@ Ext.define('Sonicle.form.field.search.Field', {
 		});
 		me.storeCache = null;
 		
+		//me.on('specialkey', me.onSpecialKey, me);
 		me.un('clear', me.onClear, me);
 		me.callParent();
 	},
@@ -193,6 +195,11 @@ Ext.define('Sonicle.form.field.search.Field', {
 	initEvents: function() {
 		var me = this;
 		me.callParent();
+		me.altArrowKeyNav.map.addBinding({
+			key: /^.$/,
+			handler: me.onInputKey,
+			scope: me
+		});
 		me.altArrowKeyNav.map.addBinding({
 			key: Ext.event.Event.ENTER,
 			handler: me.onInputKeyEnter,
@@ -439,21 +446,26 @@ Ext.define('Sonicle.form.field.search.Field', {
 		this.collapseDDPicker();
 	},
 	
+	/**
+	 * Adds/Removes selectedItemCls on focused item
+	 */
 	onFocusChange: function(selModel, prevRecord, newRecord) {
 		var me = this,
 			picker = me.picker,
 			el;
 		
-		if (prevRecord) {
-			el = picker.getNodeByRecord(prevRecord);
-			if (el) Ext.fly(el).removeCls(picker.selectedItemCls);
-		}
-		
-		me.callParent(arguments);
-		
-		if (newRecord) {
-			el = picker.getNodeByRecord(newRecord);
-			if (el) Ext.fly(el).addCls(picker.selectedItemCls);
+		if (picker && picker.disableFocusSaving) {
+			me.callParent(arguments);
+		} else {
+			if (picker && prevRecord) {
+				el = picker.getNodeByRecord(prevRecord);
+				if (el) Ext.fly(el).removeCls(picker.selectedItemCls);
+			}
+			me.callParent(arguments);
+			if (picker && newRecord) {
+				el = picker.getNodeByRecord(newRecord);
+				if (el) Ext.fly(el).addCls(picker.selectedItemCls);
+			}
 		}
 	},
 	
@@ -466,25 +478,40 @@ Ext.define('Sonicle.form.field.search.Field', {
 		},
 		
 		/*
-		 * fired by BoundListKeyNav
+		//fired by BoundListKeyNav
 		onSpecialKey: function(s, e, eo) {
-			var me = this;
+			var me = this,
+				value = s.getValue();
 			if (eo && eo.fromBoundList) return;
 			if (e.getKey() === e.ENTER) {
-				if (s.fireEvent('enterkeypress', s, e) !== false) {
-					me.fireQuery(s.getValue());
+				if (me.fireEvent('enterkeypress', me, e, value) !== false) {
+					me.fireQuery(value);
 				}
 			}
 		},
 		*/
 		
+		onInputKey: function(keyCode, e) {
+			// Disarm list-opening on any input!
+			this.disarmListDelayedOpening();
+			return true;
+		},
+		
 		onInputKeyEnter: function(keyCode, e) {
 			var me = this,
-					value = me.getValue();
+				picker = me.getPicker(),
+				value = me.getValue();
 			
-			if (!me.isExpanded) {
+			me.disarmListDelayedOpening();
+			
+			// Enter key should be handled here only when the combo's picker is 
+			// not activated (expanded): there is a side-effect of the original 
+			// impl. where after typing with no results, the picker is visually 
+			// hidden but expanded flag is still set to true. We can track this 
+			// situation checking picker's highlightedItem!
+			if (!me.isExpanded || (picker && !picker.highlightedItem)) {
 				e.stopEvent();
-				if (me.fireEvent('enterkeypress', me, e) !== false) {
+				if (me.fireEvent('enterkeypress', me, e, value) !== false) {
 					me.fireQuery(value);
 				}
 				return false;
@@ -514,7 +541,10 @@ Ext.define('Sonicle.form.field.search.Field', {
 		onPickerSelModelSelect: function(s, rec, indx) {
 			var me = this,
 				value = me.getValue();
-			if (value) me.fireQuery(value);
+			
+			if (value){
+				me.fireQuery(value);
+			}
 		},
 		
 		onSearchPickerOk: function(s, rawValue, queryObject) {
