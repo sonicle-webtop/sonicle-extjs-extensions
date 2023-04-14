@@ -14,6 +14,11 @@ Ext.define('Sonicle.view.BoundList', {
 	],
 	
 	/**
+	 * @cfg {Boolean} disableFocusSaving
+	 */
+	disableFocusSaving: false,
+	
+	/**
 	 * @cfg {String} [groupField]
 	 * The field from the store to group the view.
 	 */
@@ -126,6 +131,19 @@ Ext.define('Sonicle.view.BoundList', {
 		// This allows to use the original class within the new group-item 
 		// and so make it look similar (across themes) to the other list-items.
 		me.itemSelector = '.' + me.listItemCls;
+	},
+	
+	saveFocusState: function() {
+		var me = this,
+			navModel = me.getNavigationModel();
+		
+		// Skip saving/restoring focused record
+		if (me.disableFocusSaving) {
+			if (navModel) navModel.setPosition(null);
+			return Ext.emptyFn;
+		} else {
+			return me.callParent();
+		}
 	},
 	
 	refresh: function() {
