@@ -7,6 +7,10 @@
 Ext.define('Sonicle.AnnouncementBar', {
 	extend: 'Ext.Component',
 	alias: 'widget.soannouncementbar',
+	requires: [
+		'Sonicle.String',
+		'Sonicle.Utils'
+	],
 	
 	config: {
 		type: undefined,
@@ -25,14 +29,10 @@ Ext.define('Sonicle.AnnouncementBar', {
 	hidden: true,
 	
 	/**
-	 * @property
+	 * @property {String} buttonText
 	 * An object containing the default button text strings that can be overriden for localization support.
-	 * Supported properties are: yes and no.
+	 * Supported properties are: yes and no. Defaults to {@link Ext.MessageBox#buttonText} values.
 	 */
-	buttonText: {
-		yes: 'Yes',
-		no: 'No'
-	},
 	
 	baseCls: 'so-' + 'announcementbar',
 	
@@ -47,6 +47,20 @@ Ext.define('Sonicle.AnnouncementBar', {
 		'</div>'
 	],
 	childEls: ['barEl', 'msgEl', 'yesEl', 'noEl', 'linkEl'],
+	
+	constructor: function(cfg) {
+		var me = this,
+			icfg = Sonicle.Utils.getConstructorConfigs(me, cfg, [
+				{buttonText: true}
+			]);
+		if (!icfg.buttonText) {
+			cfg.buttonText = {
+				yes: Ext.MessageBox.buttonText.yes,
+				no: Ext.MessageBox.buttonText.no
+			};
+		}
+		me.callParent([cfg]);
+	},
 	
 	initRenderData: function() {
 		var me = this,
@@ -130,9 +144,7 @@ Ext.define('Sonicle.AnnouncementBar', {
 	 */
 	setAnnouncement: function(cfg) {
 		cfg = cfg || {};
-		var me = this,
-			SoO = Sonicle.Object,
-			oldButtonText = me.buttonText;
+		var me = this;
 		
 		// If called during global layout suspension, make the call after layout resumption
 		if (Ext.Component.layoutSuspendCount) {
