@@ -469,6 +469,17 @@ Ext.define('Sonicle.form.field.search.Field', {
 		}
 	},
 	
+	select: function(r, assert) {
+		// Ignore calls coming from assert, otherwise it will cause a re-query 
+		// (due to select event firing) under certain conditions:
+		// - type a value that matches a recent
+		// - then choose it issuing a query, finally click on body removing focus on field
+		// - now type again a simil word and when the list is open click outside
+		// => an auto query will fire!!!
+		if (assert) return;
+		this.callParent(arguments);
+	},
+	
 	privates: {
 		disarmListDelayedOpening: function() {
 			var me = this;
@@ -571,6 +582,7 @@ Ext.define('Sonicle.form.field.search.Field', {
 		fireQuery: function(value, queryObject) {
 			var me = this,
 				SoSS = Sonicle.SearchString;
+			me.doQueryTask.cancel(); // Stops any pending combo query
 			if (arguments.length === 1) {
 				queryObject = SoSS.toQueryObject(SoSS.parseHumanQuery(value));
 			}
