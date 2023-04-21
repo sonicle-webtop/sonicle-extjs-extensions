@@ -255,9 +255,9 @@ Ext.define('Sonicle.Object', {
 	
 	/**
 	 * Copies the specified property value from Source `object` into the Target `object`.
-	 * Undefined values will be ignored, unless copyIfEmpty is active.
+	 * Undefined values in source will be ignored and optionally you can enforce the not-empty constraint.
 	 * @param {Object} object The receiver of the property.
-	 * @param {Boolean} copyIfEmpty `true` to process empty/undefined values, `false` otherwise.
+	 * @param {Boolean} copyIfEmpty `true` to process empty values, `false` otherwise.
 	 * @param {Object} source The primary source of the properties.
 	 * @param {String} name The property name to look-for in source object.
 	 * @param {String} [newName] The new property name to use in target object, as the above if not specified.
@@ -266,12 +266,11 @@ Ext.define('Sonicle.Object', {
 	 * @return {Object} returns `object`.
 	 */
 	copyProp: function(object, copyIfEmpty, source, name, newName, parseFn, scope) {
-		if (arguments.length === 4) {
-			newName = name;
-		} else if (arguments.length === 5 && Ext.isFunction(newName)) {
+		if (arguments.length > 4 && Ext.isFunction(newName)) {
+			scope = parseFn;
 			parseFn = newName;
-			newName = name;
 		}
+		if (!Ext.isString(newName)) newName = name;
 		if (Ext.isObject(object) && Ext.isObject(source) && Ext.isString(name) && (source[name] !== undefined) && (copyIfEmpty || !Ext.isEmpty(source[name]))) {
 			object[newName] = Ext.isFunction(parseFn) ? Ext.callback(parseFn, scope || this, [source[name]]) : source[name];
 		}

@@ -211,6 +211,32 @@ Ext.define('Sonicle.Data', {
 	},
 	
 	/**
+	 * Sets model's field value using passed data, under certain conditions: 
+	 * current value is undefined/null or is equal to field's default value.
+	 * It will always be set if force options is active.
+	 * Unless specified, model's dirty status will not be altered.
+	 * @param {Ext.data.Model} model The model/record.
+	 * @param {String} name The field name to set.
+	 * @param {Mixed} defValue The value to set.
+	 * @param {Object} [opts] An object containing options.
+	 * @param {Boolean} [opts.force=false] Set to `true` to force setting value.
+	 * @param {Boolean} [opts.dirty=false] Set to `true` to set the dirty status.
+	 * @returns {undefined}
+	 */
+	setModelDefaultValueIf: function(model, name, defValue, opts) {
+		opts = opts || {};
+		if (model && model.isModel && Ext.isString(name)) {
+			var field = model.getField(name), value;
+			if (field) {
+				value = model.get(name);
+				if (!!opts.force || (value == null || field.getDefaultValue() === value)) {
+					model.set(name, defValue, {dirty: Ext.isBoolean(opts.dirty) ? opts.dirty : false});
+				}
+			}
+		}
+	},
+	
+	/**
 	 * Returns an array of values for a given set of fields.
 	 * @param {Ext.data.Model} rec The record/model to use as source.
 	 * @param {String[]|String} fieldNames Names whose values will be extracted.
