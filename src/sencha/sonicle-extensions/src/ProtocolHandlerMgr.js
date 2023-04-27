@@ -72,7 +72,7 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 		if (!me.api) return;
 		
 		try {
-			window.navigator.unregisterProtocolHandler(proto, url);
+			if (window.navigator.unregisterProtocolHandler) window.navigator.unregisterProtocolHandler(proto, url);
 			me.resetPromptState(proto);
 			return true;
 			
@@ -120,7 +120,7 @@ Ext.define('Sonicle.ProtocolHandlerMgr', {
 		checkApi: function() {
 			try {
 				var nav = window.navigator;
-				return !!(nav.registerProtocolHandler && nav.unregisterProtocolHandler);
+				return !!(nav.registerProtocolHandler);
 				
 			} catch (e) {
 				return false;
