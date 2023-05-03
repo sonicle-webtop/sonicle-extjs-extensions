@@ -36,10 +36,11 @@
 
 Ext.define('Sonicle.form.field.HTMLEditor', {
     extend: 'Ext.form.FieldContainer',
-    mixins: {
-        field: 'Ext.form.field.Field'
-    },
 	alias: ['widget.sohtmleditor'],
+    mixins: {
+        field: 'Ext.form.field.Field',
+		labelable: 'Ext.form.Labelable'
+    },
 	requires: [
 		'Sonicle.Utils',
 		'Sonicle.form.field.TinyMCETextArea'
