@@ -3,6 +3,8 @@
  * Copyright (C) 2020 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
+ * 
+ * @deprecated use Sonicle.form.field.color.PalettePicker instead
  */
 Ext.define('Sonicle.form.field.Palette', {
 	extend: 'Ext.form.field.Picker',
