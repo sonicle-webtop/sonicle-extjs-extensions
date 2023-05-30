@@ -130,32 +130,72 @@ Ext.define('Sonicle.Utils', {
 	/**
 	 * Generates HTML attriutes to display tooltip suitable to complete markup.
 	 * @param {String/Object} tooltip It can be a string to be used as innerHTML (html tags are accepted) or QuickTips config object.
-	 * @returns {String} The HTML attributes, or an empty string in case of misconfigurations.
+	 * @param {Object} opts An object containing options.
+	 * @param {String} [opts.noraw] Set to `true` to replace raw String output with an Object containing attributes as keys.
+	 * @param {Number} [opts.showDelay] Tooltip show delay. Only for QuickTips.
+	 * @param {Number} [opts.dismissDelay] Tooltip dismiss delay. Only for QuickTips.
+	 * @returns {String/Object} HTML attributes as String or Object map depending on configuration, or an empty string in case of misconfigurations.
 	 */
 	generateTooltipAttrs: function(tooltip, opts) {
 		opts = opts || {};
 		var SoS = Sonicle.String,
 			qtips = Ext.quickTipsActive && Ext.tip.QuickTipManager.isEnabled(),
 			encode = SoS.htmlAttributeEncode,
-			s = '';
+			rawOutput = opts.noraw !== true,
+			out = rawOutput ? '' : {};
 		
 		if (qtips) {
 			if (Ext.isString(tooltip)) {
-				s += ' data-qtip="' + encode(tooltip) + '"';
+				if (rawOutput) {
+					out += ' data-qtip="' + encode(tooltip) + '"';
+				} else {
+					out['data-qtip'] = encode(tooltip);
+				}
+				//s += ' data-qtip="' + encode(tooltip) + '"';
 			} else if (Ext.isObject(tooltip)) {
-				s += ' data-qtitle="' + encode(tooltip.title) + '" data-qtip="' + encode(tooltip.text) + '"';
+				if (rawOutput) {
+					out += ' data-qtitle="' + encode(tooltip.title) + '" data-qtip="' + encode(tooltip.text) + '"';
+				} else {
+					out['data-qtitle'] = encode(tooltip.title);
+					out['data-qtip'] = encode(tooltip.text);
+				}
+				//s += ' data-qtitle="' + encode(tooltip.title) + '" data-qtip="' + encode(tooltip.text) + '"';
 			}
-			if (Ext.isNumber(opts.showDelay)) s += ' data-qshowdelay="' + encode(opts.showDelay+'') + '"';
-			if (Ext.isNumber(opts.dismissDelay)) s += ' data-qdismissdelay="' + encode(opts.dismissDelay+'') + '"';
+			if (Ext.isNumber(opts.showDelay)) {
+				if (rawOutput) {
+					out += ' data-qshowdelay="' + encode(opts.showDelay+'') + '"';
+				} else {
+					out['data-qshowdelay'] = encode(opts.showDelay+'');
+				}
+				//s += ' data-qshowdelay="' + encode(opts.showDelay+'') + '"';
+			}
+			if (Ext.isNumber(opts.dismissDelay)) {
+				if (rawOutput) {
+					out += ' data-qdismissdelay="' + encode(opts.dismissDelay+'') + '"';
+				} else {
+					out['data-qdismissdelay'] = encode(opts.dismissDelay+'');
+				}
+				//s += ' data-qdismissdelay="' + encode(opts.dismissDelay+'') + '"';
+			}
 			
 		} else {
 			if (Ext.isString(tooltip)) {
-				s += ' title="' + encode(tooltip) + '"';
+				if (rawOutput) {
+					out += ' title="' + encode(tooltip) + '"';
+				} else {
+					out['title'] = encode(tooltip);
+				}
+				//s += ' title="' + encode(tooltip) + '"';
 			} else if (Ext.isObject(tooltip)) {
-				s += ' title="' + encode(SoS.deflt(tooltip.text, tooltip.title)) + '"';
+				if (rawOutput) {
+					out += ' title="' + encode(SoS.deflt(tooltip.text, tooltip.title)) + '"';
+				} else {
+					out['title'] = encode(SoS.deflt(tooltip.text, tooltip.title));
+				}
+				//s += ' title="' + encode(SoS.deflt(tooltip.text, tooltip.title)) + '"';
 			}
 		}
-		return s;
+		return out;
 	},
 	
 	/**

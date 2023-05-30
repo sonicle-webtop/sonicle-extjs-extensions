@@ -89,7 +89,10 @@ Ext.define('Sonicle.String', {
 		' *$'
 	),
 	
-	// http://stackoverflow.com/questions/23483855/javascript-regex-to-validate-ipv4-and-ipv6-address-no-hostnames 
+	/**
+	 * Matches an IPv4 address (in dotted notation) or an IPv6.
+	 * http://stackoverflow.com/questions/23483855/javascript-regex-to-validate-ipv4-and-ipv6-address-no-hostnames
+	 */
 	reIPAddress: new RegExp(
 		'^(' +
 		// ipv4 
@@ -100,12 +103,64 @@ Ext.define('Sonicle.String', {
 		')$'
 	),
 	
-	// https://github.com/flipjs/cidr-regex 
-	// http://www.regexpal.com/93987 
+	/**
+	 * Matches an IPv4 address (in dotted notation).
+	 * https://stackoverflow.com/questions/5284147/validating-ipv4-addresses-with-regexp/5284179#5284179
+	 */
+	reIPAddress4: /^\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b$/,
+	
+	/**
+	 * Matches an IPv4 netmask in dotted notation.
+	 * https://stackoverflow.com/questions/5360768/regular-expression-for-subnet-masking/5360788#5360788
+	 */
+	reNetmask4: /^(((255\.){3}(255|254|252|248|240|224|192|128|0+))|((255\.){2}(255|254|252|248|240|224|192|128|0+)\.0)|((255\.)(255|254|252|248|240|224|192|128|0+)(\.0+){2})|((255|254|252|248|240|224|192|128|0+)(\.0+){3}))$/,
+	
+	/**
+	 * Matches a CIDRv4.
+	 * https://github.com/flipjs/cidr-regex
+	 * http://www.regexpal.com/93987
+	 */
 	reCIDRv4: /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$/,
+	
+	/**
+	 * Matches a CIDRv6.
+	 * https://github.com/flipjs/cidr-regex
+	 * http://www.regexpal.com/93987
+	 */
 	reCIDRv6: /^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*(\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))?$/,
 	
-	// https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression
+	/**
+	 * Matches a hostname (RFC 1123): string segments separated by dot.
+	 * https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
+	 */
+	reHostname: /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/,
+	
+	/**
+	 * Matches a network port-number
+	 * https://stackoverflow.com/questions/12968093/regex-to-validate-port-number
+	 * https://github.com/cusspvz/proxywrap/issues/13
+	 */
+	rePort: /^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/,
+	
+	/**
+	 * Matches valid username chars.
+	 */
+	reUsernameChars: /^[a-z0-9\.\-\_]+$/i,
+	
+	/**
+	 * Matches simple email (also with name in ""). (from Sencha - see original Ext.data.validator.Email)
+	 */
+	reEmail: /^(")?(?:[^\."])(?:(?:[\.])?(?:[\w\-!#$%&'*+\/=?\^_`{|}~]))*\1@(\w[\-\w]*\.){1,5}([A-Za-z]){2,6}$/,
+	
+	/**
+	 * Matches only an email address part.
+	 */
+	reEmailAddress: /^[_A-Za-z0-9-\+]+(?:\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(?:\.[_A-Za-z0-9-]+)*(?:\.[A-Za-z]{2,})$/,
+	
+	/**
+	 * Matches an RFC5322 address
+	 * https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression
+	 */
 	reMatchAnyRFC5322Addresses: /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/i,
 	
 	/**
@@ -154,11 +209,43 @@ Ext.define('Sonicle.String', {
 	 * @returns {String} The resulting string
 	 */
 	htmlAttributeEncode: function(s) {
-		return !Ext.isString(s) ? s : s.replace(/&/g, '&amp;')
+		if (Ext.isEmpty(s) || !Ext.isString(s)) return s;
+		return s.replace(/&/g, '&amp;')
 			.replace(/</g, '&lt;')
 			.replace(/"/g, '&#34;')
 			.replace(/'/g, '&#39;')
 		;
+	},
+	
+	/**
+	 * Wraps the passed HTML into specified tags: optionally you can decorate wrapper with many attributes.
+	 * @param {String} content The content to wrap. Can be null.
+	 * @param {String} tag The HTML tag to use as wrapper.
+	 * @param {Object} opts An object containing options.
+	 * @param {String} [opts.cls] The CSS Class to set.
+	 * @param {String/Object} [opts.style] The styles to set.
+	 * @returns {String}
+	 */
+	htmlWrap: function(content, tag, opts) {
+		opts = opts || {};
+		var SoS = Sonicle.String,
+			attEnc = SoS.htmlAttributeEncode,
+			XDH = Ext.dom.Helper,
+			spec = {
+				tag: SoS.ifString(tag, 'span'),
+				html: content
+			};
+		
+		if (Ext.isString(opts.cls)) {
+			spec.cls = attEnc(opts.cls);
+		}
+		if (Ext.isString(opts.style)) {
+			spec.style = attEnc(opts.style);
+		} else if (Ext.isObject(opts.style)) {
+			spec.style = attEnc(XDH.generateStyles(opts.style));
+		}
+		Ext.apply(spec, Sonicle.Object.remap(opts, ['tag', 'html', 'cls', 'style'], true));
+		return XDH.markup(spec);
 	},
 	
 	/**
@@ -194,12 +281,22 @@ Ext.define('Sonicle.String', {
 	
 	/**
 	 * Returns passed string if it isn't empty (@link Ext#isEmpty), ifValue otherwise.
-	 * @param {String} s The value
-	 * @param {String} ifEmpty The fallback value
-	 * @returns {String} Returned value
+	 * @param {Mixed} s The value
+	 * @param {Mixed} ifEmpty The fallback value
+	 * @returns {Mixed}
 	 */
 	deflt: function(s, ifEmpty) {
 		return Ext.isEmpty(s) ? ifEmpty : s;
+	},
+	
+	/**
+	 * Returns passed string if check with (@link Ext#isString) is satisfied, ifNotString value otherwise.
+	 * @param {Mixed} s The value
+	 * @param {Mixed} ifNotString
+	 * @returns {Mixed}
+	 */
+	ifString: function(s, ifNotString) {
+		return Ext.isString(s) ? s : ifNotString;
 	},
 	
 	/**

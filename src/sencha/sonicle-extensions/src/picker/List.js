@@ -6,7 +6,7 @@
  */
 Ext.define('Sonicle.picker.List', {
 	extend: 'Ext.grid.Panel',
-	alias: 'widget.solistpicker',
+	alias: ['widget.sopickerlist', 'widget.solistpicker'],
 	requires: [
 		'Sonicle.form.trigger.Clear'
 	],
@@ -83,6 +83,13 @@ Ext.define('Sonicle.picker.List', {
 	displayField: null,
 	
 	/**
+	 * @cfg {Function/String} displayRenderer
+	 * A renderer is an 'interceptor' method which can be used to transform data (value,
+	 * appearance, etc.) before it is rendered.
+	 * See {@link Ext.grid.column.Column#renderer renderer} for more info.
+	 */
+	
+	/**
 	 * @cfg {String} searchField
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as field used in searches.
 	 */
@@ -149,6 +156,7 @@ Ext.define('Sonicle.picker.List', {
 			me.hideHeaders = true;
 			me.columns = [{
 				dataIndex: me.displayField,
+				renderer: me.displayRenderer,
 				flex: 1
 			}];
 		}

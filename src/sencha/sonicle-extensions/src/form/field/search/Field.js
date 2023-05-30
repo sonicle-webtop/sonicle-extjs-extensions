@@ -235,6 +235,10 @@ Ext.define('Sonicle.form.field.search.Field', {
 		}
 	},
 	
+	getOwnerCmp: function() {
+		return this;
+	},
+	
 	getOwnerBodyEl: function() {
 		return this.bodyEl;
 	},

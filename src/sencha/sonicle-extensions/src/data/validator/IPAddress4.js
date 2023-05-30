@@ -7,6 +7,9 @@
 Ext.define('Sonicle.data.validator.IPAddress4', {
 	extend: 'Ext.data.validator.Format',
 	alias: 'data.validator.soipaddress4',
+	requires: [
+		'Sonicle.String'
+	],
 	
 	type: 'soipaddress4',
 	
@@ -14,9 +17,8 @@ Ext.define('Sonicle.data.validator.IPAddress4', {
 		message: 'Is not a valid IPv4 address',
 		
 		/**
-		 * https://stackoverflow.com/questions/5284147/validating-ipv4-addresses-with-regexp/5284179#5284179
 		 * A matcher to check for IPv4 address in dotted notation.
 		 */
-		matcher: /^\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b$/
+		matcher: Sonicle.String.reIPAddress4
 	}
 });

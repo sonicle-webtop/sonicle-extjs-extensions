@@ -11,30 +11,53 @@ Ext.define('Sonicle.mixin.ConditionalValidator', {
 	},
 	
 	config: {
-		ifHasValue: false,
+		/**
+		 * @cfg {Boolean} [ifHasValue]
+		 * Set to `true` to enable validation only if current field's value is NOT empty.
+		 */
+		ifHasValue: undefined,
 		
 		/**
-		 * @cfg {String} ifField
-		 * The field name of the field whose {@link#ifValues values} come from.
+		 * @cfg {String} [ifField]
+		 * The name of the field referenced by {@link#ifFieldHasValue} and {@link#ifFieldValues} configs.
 		 */
-		ifField: null,
+		ifField: undefined,
 		
 		/**
-		 * @cfg {Mixed[]} ifFieldValues
-		 * Array of values for field targeted by {@link#ifField} for which to 
-		 * consider the presence of the attached field mandatory.
+		 * @cfg {Boolean} [ifHasValue]
+		 * Set to `true` to enable validation only if {@link#ifField specified field's} value is NOT empty.
 		 */
-		ifFieldValues: null
+		ifFieldHasValue: undefined,
+		
+		/**
+		 * @cfg {Mixed[]} [ifFieldValues]
+		 * An array of values to enable validation only if {@link#ifField specified field's} value is one of this list.
+		 */
+		ifFieldValues: undefined
 	},
 	
 	shouldValidate: function(value, record) {
 		var me = this,
-				iffld = me.getIfField();
-		if (me.getIfHasValue() === true && Ext.isEmpty(value)) return false;
-		if (!Ext.isEmpty(iffld)) {
-			return Ext.Array.from(me.getIfFieldValues()).indexOf(record.get(iffld)) !== -1;
-		} else {
-			return true;
+			ifhv = me.getIfHasValue(),
+			iff = me.getIfField();
+		
+		if (ifhv !== undefined) {
+			if (ifhv === true && Ext.isEmpty(value)) return false;
+			if (ifhv === false && !Ext.isEmpty(value)) return false;
+			
+		} else if (Ext.isString(iff)) {
+			var fvalue = record.get(iff),
+				iffhv = me.getIfFieldHasValue(),
+				iffvalues = me.getIfFieldValues();
+			
+			if (iffhv !== undefined) {
+				if (iffhv === true && Ext.isEmpty(fvalue)) return false;
+				if (iffhv === false && !Ext.isEmpty(fvalue)) return false;
+				
+			} else if (iffvalues !== undefined) {
+				if (Ext.Array.from(iffvalues).indexOf(fvalue) !== -1) return false;
+			}
 		}
+		return true;
 	}
 });

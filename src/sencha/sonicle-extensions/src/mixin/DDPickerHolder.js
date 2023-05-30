@@ -3,6 +3,8 @@
  * Copyright (C) 2023 Matteo Albinola
  * matteo.albinola[at]gmail.com
  * Inspired by: https://docs.sencha.com/extjs/6.2.0/classic/src/Picker.js.html
+ * This is originally conceived to be mixed into a Ext.field.Field, methods 
+ * onEsc, onFocusLeave, doDestroy and initComponent are specific to that component.
  */
 Ext.define('Sonicle.mixin.DDPickerHolder', {
 	extend: 'Ext.Mixin',
@@ -38,6 +40,12 @@ Ext.define('Sonicle.mixin.DDPickerHolder', {
 	 * An offset [x,y] to use in addition to the {@link #ddPickerAlign} when 
 	 * positioning the picker. Defaults to undefined.
 	 */
+	
+	/**
+	 * @method
+	 * Returns the owning component.
+	 */
+	getOwnerCmp: Ext.emptyFn,
 	
 	/**
 	 * @method
@@ -115,7 +123,7 @@ Ext.define('Sonicle.mixin.DDPickerHolder', {
 			me.creatingDDPicker = true;
 			me.ddPickers[id] = picker = me.createDDPicker(id);
 			// For upward component searches.
-			picker.ownerCmp = me;
+			picker.ownerCmp = me.getOwnerCmp();
 			delete me.creatingDDPicker;
 		}
 		return picker;
@@ -138,10 +146,11 @@ Ext.define('Sonicle.mixin.DDPickerHolder', {
 	 */
 	expandDDPicker: function(id) {
 		var me = this,
+			cmp = me.getOwnerCmp(),
 			obodyEl = me.getOwnerBodyEl(),
 			picker, doc;
 		
-		if (obodyEl && me.rendered && Ext.isEmpty(me.expandedDD) && !me.destroyed) {
+		if (cmp && obodyEl && cmp.rendered && Ext.isEmpty(me.expandedDD) && !cmp.destroyed) {
 			picker = me.getDDPicker(id);
 			if (picker) {
 				doc = Ext.getDoc();
@@ -155,7 +164,7 @@ Ext.define('Sonicle.mixin.DDPickerHolder', {
 				picker.show();
 				me.expandedDD = id;
 				me.alignDDPicker();
-				obodyEl.addCls(me.openCls);
+				obodyEl.addCls(cmp.openCls);
 
 				/*
 				if (!me.ariaStaticRoles[me.ariaRole]) {
@@ -188,7 +197,7 @@ Ext.define('Sonicle.mixin.DDPickerHolder', {
 
 				// Buffer is used to allow any layouts to complete before we align
 				Ext.on('resize', me.alignDDPicker, me, {buffer: 1});
-				me.fireEvent('expandDDPicker', me, id);
+				cmp.fireEvent('expandDDPicker', me, id);
 				me.onExpandDDPicker(id);
 			}
 		}
@@ -199,13 +208,15 @@ Ext.define('Sonicle.mixin.DDPickerHolder', {
 	 */
 	collapseDDPicker: function() {
 		var me = this,
+			cmp = me.getOwnerCmp(),
 			obodyEl = me.getOwnerBodyEl(),
-			openCls = me.openCls,
 			aboveSfx = '-above',
 			id = me.expandedDD,
-			picker = me.ddPickers[id];
+			picker = me.ddPickers[id],
+			openCls;
 		
-		if (obodyEl && !me.destroyed && !me.destroying && picker) {
+		if (cmp && obodyEl && !cmp.destroyed && !cmp.destroying && picker) {
+			openCls = cmp.openCls;
 			
 			// hide the picker and cleas expanded flag
 			picker.hide();
@@ -226,7 +237,7 @@ Ext.define('Sonicle.mixin.DDPickerHolder', {
 			me.ddpScrollListeners.destroy();
 			
 			Ext.un('resize', me.alignDDPicker, me);
-			me.fireEvent('collapseDDPicker', me, id);
+			cmp.fireEvent('collapseDDPicker', me, id);
 			
 			me.onCollapseDDPicker(id);
 		}
@@ -238,10 +249,11 @@ Ext.define('Sonicle.mixin.DDPickerHolder', {
 	 */
 	alignDDPicker: function() {
 		var me = this,
+			cmp = me.getOwnerCmp(),
 			id = me.expandedDD,
 			picker;
 		
-		if (me.rendered && !me.destroyed) {
+		if (cmp && cmp.rendered && !cmp.destroyed) {
 			picker = me.ddPickers[id];
 			if (picker.isVisible() && picker.isFloating()) {
 				me.doAlignDDPicker(id);
@@ -273,10 +285,11 @@ Ext.define('Sonicle.mixin.DDPickerHolder', {
 		
 		collapseDDPickerIf: function(e) {
 			var me = this,
+				cmp = me.getOwnerCmp(),
 				obodyEl = me.getOwnerBodyEl();
 			// If what was mousedowned on is outside of this Field, and is not focusable, then collapse.
 			// If it is focusable, this Field will blur and collapse anyway.
-			if (obodyEl && !me.destroyed && !e.within(obodyEl, false, true) && !me.owns(e.target) && !Ext.fly(e.target).isFocusable()) {
+			if (cmp && obodyEl && !cmp.destroyed && !e.within(obodyEl, false, true) && !cmp.owns(e.target) && !Ext.fly(e.target).isFocusable()) {
 				me.collapseDDPicker();
 			}
 		},
@@ -298,6 +311,7 @@ Ext.define('Sonicle.mixin.DDPickerHolder', {
 		 */
 		doAlignDDPicker: function(id) {
 			var me = this,
+				cmp = me.getOwnerCmp(),
 				obodyEl = me.getOwnerBodyEl(),
 				oalignEl = me.getOwnerAlignEl(),
 				picker = me.ddPickers[id],
@@ -305,7 +319,7 @@ Ext.define('Sonicle.mixin.DDPickerHolder', {
 				newPos,
 				isAbove;
 
-			if (obodyEl && oalignEl && picker) {
+			if (cmp && obodyEl && oalignEl && picker) {
 				// Align to the trigger wrap because the border isn't always on the input element, which
 				// can cause the offset to be off
 				picker.el.alignTo(oalignEl, me.ddPickerAlign, me.ddPickerOffset);
@@ -319,8 +333,8 @@ Ext.define('Sonicle.mixin.DDPickerHolder', {
 
 				// add the {openCls}-above class if the picker was aligned above
 				// the field due to hitting the bottom of the viewport
-				isAbove = picker.el.getY() < me.inputEl.getY();
-				obodyEl[isAbove ? 'addCls' : 'removeCls'](me.openCls + aboveSfx);
+				isAbove = picker.el.getY() < cmp.inputEl.getY();
+				obodyEl[isAbove ? 'addCls' : 'removeCls'](cmp.openCls + aboveSfx);
 				picker[isAbove ? 'addCls' : 'removeCls'](picker.baseCls + aboveSfx);
 			}
 		}
