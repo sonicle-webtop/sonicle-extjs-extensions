@@ -225,6 +225,11 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	pluginAutoCorrect: false,
 	
 	/**
+	 * @cfg {String} [autoCorrectServiceUrl]
+	 */
+	autoCorrectServiceUrl: '',
+	
+	/**
 	 * @cfg {Boolean} [pasteAllowBlobImages=true]
 	 * Set to `false` to avoid that pasted images are inserted as blob images (data:url)
 	 */
@@ -1138,7 +1143,7 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 						smart_paste: true, // powerpaste plugin (tmce default)
 						autocorrect_autocorrect: false, // autocorrect plugin
 						autocorrect_capitalize: me.editorGetOption('dummy', {localStorageKey: 'mce.capitalize', deflt: false, forceType: 'boolean'}), // autocorrect plugin
-						autocorrect_service_url: '',
+						autocorrect_service_url: me.autoCorrectServiceUrl, // even if autocorrect is disabled (see false above), ajax call to service URL is still being executed!
 						automatic_uploads: true, // Enable automatic upload of inline blob (data:url) using 'images_upload_handler' handler
 						images_upload_handler: function(blobInfo, progress) {
 							return new Promise(function(resolve, reject) {
