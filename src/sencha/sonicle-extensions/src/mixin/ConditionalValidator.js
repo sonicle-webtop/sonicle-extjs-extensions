@@ -55,7 +55,7 @@ Ext.define('Sonicle.mixin.ConditionalValidator', {
 				if (iffhv === false && !Ext.isEmpty(fvalue)) return false;
 				
 			} else if (iffvalues !== undefined) {
-				if (Ext.Array.from(iffvalues).indexOf(fvalue) !== -1) return false;
+				if (Ext.Array.from(iffvalues).indexOf(fvalue) === -1) return false;
 			}
 		}
 		return true;
