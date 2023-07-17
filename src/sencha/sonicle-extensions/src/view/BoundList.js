@@ -66,7 +66,7 @@ Ext.define('Sonicle.view.BoundList', {
 	
 	/**
 	 * @cfg {Function} [shouldShowButton]
-	 * A function which returns `true` or `false` weather the button is enabled or not for the item.
+	 * A function which returns `true` or `false` whether the button is enabled or not for the item.
 	 * @param {Object} values An Object with item fields.
 	 */
 	

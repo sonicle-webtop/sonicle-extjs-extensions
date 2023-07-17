@@ -366,9 +366,22 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
 		luminance: function(color, precision) {
 			if (!Number.isInteger(precision)) precision = 2;
 			var cobj = this.parseColor(color),
-					//lum = (cobj.r * 0.299) + (cobj.g * 0.587) + (cobj.b * 0.114); // W3 formula (http://www.w3.org/TR/AERT#color-contrast)
-					lum = (cobj.r * 0.2126) + (cobj.g * 0.7152) + (cobj.b * 0.0722); // ITU-R BT.709 (https://en.wikipedia.org/wiki/Relative_luminance)
+				//lum = (cobj.r * 0.299) + (cobj.g * 0.587) + (cobj.b * 0.114); // W3 formula (http://www.w3.org/TR/AERT#color-contrast)
+				lum = (cobj.r * 0.2126) + (cobj.g * 0.7152) + (cobj.b * 0.0722); // ITU-R BT.709 (https://en.wikipedia.org/wiki/Relative_luminance)
 			return Sonicle.Number.round(lum/255, precision);
+		},
+		
+		/**
+		 * Calculate a color shade according to a percentage.
+		 * @param {String} color A color value that can be parsed.
+		 * @param {Number} p Percentage value (from -1 to 1): positive values will 
+		 * shade to white (lighten the color), negative to black (darken the color).
+		 * @returns {String} 
+		 */
+		shade: function(color, p) {
+			var me = this,
+				cobj = me.parseColor(color);
+			return cobj ? me.rgb2hex(me.hsv2rgb(cobj.h, cobj.s, Math.min(Math.max(0, (cobj.v + (cobj.v * p))), 1)), true) : color;
 		},
 		
 		/**
