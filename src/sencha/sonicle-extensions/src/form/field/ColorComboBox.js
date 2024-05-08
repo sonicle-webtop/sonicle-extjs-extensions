@@ -95,18 +95,19 @@ Ext.define('Sonicle.form.field.ColorComboBox', {
 	 */
 	getListItemTpl: function(displayField) {
 		var picker = this.pickerField,
-				colorizeGeometry = (picker.colorize === 'geometry'),
-				style = picker.genStyleForListItem(colorizeGeometry, picker.colorField);
+			enc = ((picker.listConfig || {}).escapeDisplay === true) ? ':htmlEncode' : '',
+			colorizeGeometry = (picker.colorize === 'geometry'),
+			style = picker.genStyleForListItem(colorizeGeometry, picker.colorField);
 		
 		if (colorizeGeometry) {
 			var lwcls = picker.listSwatchCls,
 					lwccls = (picker.geometry === 'circle') ? (lwcls + '-circle') : '';
 			return '<div class="' + picker.componentCls + ' x-combo-list-item">'
 				+ '<div class="' + lwcls + ' ' + lwccls + '" style="'+style+'"></div>'
-				+ '<span>{'+displayField+'}</span>'
+				+ '<span>{' + displayField+enc + '}</span>'
 				+ '</div>';
 		} else {
-			return '<span style="'+style+'">{' + displayField + '}</span>';
+			return '<span style="'+style+'">{' + displayField+enc + '}</span>';
 		}
 	},
 	

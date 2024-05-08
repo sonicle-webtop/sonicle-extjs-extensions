@@ -20,8 +20,6 @@ Ext.define('Sonicle.form.field.Tag', {
 	
 	sourceField: null,
 	
-	htmlEncodeListDisplay: false,
-	
 	sourceCls: null,
 	
 	/**
@@ -129,9 +127,9 @@ Ext.define('Sonicle.form.field.Tag', {
 		me.listConfig = Ext.apply(this.listConfig || {}, {
 			getInnerTpl: function(displayField) {
 				var picker = this.pickerField,
-						enc = picker.htmlEncodeListDisplay ? ':htmlEncode' : '',
-						sourceCls = Sonicle.String.deflt(picker.sourceCls, ''),
-						icon = '';
+					enc = ((picker.listConfig || {}).escapeDisplay === true) ? ':htmlEncode' : '',
+					sourceCls = Sonicle.String.deflt(picker.sourceCls, ''),
+					icon = '';
 				
 				// TODO: here we have no way to check color value like in getColor 
 				// method of multiSelectItemTpl where a fallback color is checked

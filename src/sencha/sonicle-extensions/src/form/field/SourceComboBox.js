@@ -11,8 +11,6 @@ Ext.define('Sonicle.form.field.SourceComboBox', {
 	extend: 'Ext.form.field.ComboBox',
 	alias: ['widget.sosourcecombo', 'widget.sosourcecombobox'],
 	
-	escapeDisplayed: false,
-	
 	/**
 	 * @cfg {String} sourceField
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as source.
@@ -49,12 +47,12 @@ Ext.define('Sonicle.form.field.SourceComboBox', {
 	 */
 	getListItemTpl: function(displayField){
 		var picker = this.pickerField,
-				esc = picker.escapeDisplayed ? ':htmlEncode' : '';
+			enc = ((picker.listConfig || {}).escapeDisplay === true) ? ':htmlEncode' : '';
 		return '<div style="float:left; white-space: pre;">'
-			+ '{'+displayField+esc+'}'
+			+ '{' + displayField+enc + '}'
 			+ '</div>'
 			+ '<div style="text-align: right; width:100%">'
-			+ '{'+picker.sourceField+esc+'}'
+			+ '{' + picker.sourceField+enc + '}'
 			+ '</div>';
 			//this.tpl = '<tpl for="."><div class="x-combo-list-item"><div style="float:left; white-space: pre;">{' + this.displayField + '}</div><div style="text-align: right; width:100%">{' + this.sourceField + '}</div></div></tpl>';
 	}
