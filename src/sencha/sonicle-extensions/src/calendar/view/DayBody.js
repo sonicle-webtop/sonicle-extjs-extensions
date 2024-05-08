@@ -299,7 +299,7 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		if (!me.eventTpl) {
 			me.eventTpl = !(Ext.isIE || Ext.isOpera) ?
 				Ext.create('Ext.XTemplate',
-					'<div id="{_elId}" data-qtitle="{Title}" data-qtip="{Tooltip}" data-draggable="{_isDraggable}" data-resizable="{_isResizable}" class="{_selectorCls} {_colorCls} {_spanCls} ext-cal-evt ext-cal-evr" style="left: {_left}%; width: {_width}%; top: {_top}px; height: {_height}px; background:{_bgColor};">',
+					'<div id="{_elId}" data-qtitle="{TooltipTitle}" data-qtip="{Tooltip}" data-draggable="{_isDraggable}" data-resizable="{_isResizable}" class="{_selectorCls} {_colorCls} {_spanCls} ext-cal-evt ext-cal-evr" style="left: {_left}%; width: {_width}%; top: {_top}px; height: {_height}px; background:{_bgColor};">',
 						'<tpl if="_isResizable">',
 						'<div class="ext-evt-rsz ext-evt-rsz-top"><div class="ext-evt-rsz-h">&#160;</div></div>',
 						'</tpl>',
@@ -427,6 +427,10 @@ Ext.define('Sonicle.calendar.view.DayBody', {
 		data.spanTop = spanTop;
 		data.spanBottom = spanBottom;
 		data.Title = SoS.htmlAttributeEncode(dinfo.title);
+		//looks like tooltip title needs to be encoded twice or any html will be interpreted
+		//[ see https://forum.sencha.com/forum/showthread.php?333529 ]
+		data.TooltipTitle = SoS.htmlAttributeEncode(data.Title);
+		//we want html to be interpreted instead here
 		data.Tooltip = SoS.htmlAttributeEncode(dinfo.tooltip);
 		return Ext.applyIf(data, evt);
 	},

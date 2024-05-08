@@ -5,6 +5,8 @@
 Ext.define('Sonicle.overrides.grid.column.Column', {
 	override: 'Ext.grid.column.Column',
 	
+	defaultRenderer: Ext.util.Format.htmlEncode,
+	
 	/**
 	 * @cfg {'start'/'center'/'end'} [headerAlign]
 	 * Sets the alignment of the header, overwriting value set using {@link Ext.grid.column.Column#align}.
