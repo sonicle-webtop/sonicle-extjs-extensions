@@ -8,6 +8,9 @@ Ext.define('Sonicle.form.field.Display', {
 	extend: 'Ext.form.field.Display',
 	alias: ['widget.so-displayfield'],
 	
+	// Force HTML encoding by default!
+	htmlEncode: true,
+	
 	/**
 	 *  @cfg {String} iconCls
 	 *  An additional CSS class (or classes) to be added to the icon's element.
