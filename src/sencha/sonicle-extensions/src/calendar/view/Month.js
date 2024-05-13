@@ -257,18 +257,18 @@ Ext.define('Sonicle.calendar.view.Month', {
 
 			tpl = !(Ext.isIE || Ext.isOpera) ?
 					new Ext.XTemplate(
-							'<div id="{_elId}" data-qtitle="{Title}" data-qtip="{Tooltip}" data-draggable="{_isDraggable}" class="{_selectorCls} {_spanCls} {_colorCls} ext-cal-evt ext-cal-evr" style="background:{_bgColor};">',
+							'<div id="{_elId}" data-qtitle="{TooltipTitle}" data-qtip="{Tooltip}" data-draggable="{_isDraggable}" class="{_selectorCls} {_spanCls} {_colorCls} ext-cal-evt ext-cal-evr" style="background:{_bgColor};">',
 								'<div class="ext-evt-bd" style="color:{_foreColor};">', body, '</div>',
 							'</div>'
 							)
 					: new Ext.XTemplate(
 							'<tpl if="_renderAsAllDay">',
-							'<div id="{_elId}" data-qtitle="{Title}" data-qtip="{Tooltip}" data-draggable="{_isDraggable}" class="{_selectorCls} {_spanCls} {_colorCls} ext-cal-evo" style="background:{_bgColor};">',
+							'<div id="{_elId}" data-qtitle="{TooltipTitle}" data-qtip="{Tooltip}" data-draggable="{_isDraggable}" class="{_selectorCls} {_spanCls} {_colorCls} ext-cal-evo" style="background:{_bgColor};">',
 								'<div class="ext-cal-evm">',
 									'<div class="ext-cal-evi">',
 							'</tpl>',
 							'<tpl if="!_renderAsAllDay">',
-							'<div id="{_elId}" data-qtitle="{Title}" data-qtip="{Tooltip}" class="{_selectorCls} {_colorCls} ext-cal-evt ext-cal-evr" style="background:{_bgColor};">',
+							'<div id="{_elId}" data-qtitle="{TooltipTitle}" data-qtip="{Tooltip}" class="{_selectorCls} {_colorCls} ext-cal-evt ext-cal-evr" style="background:{_bgColor};">',
 							'</tpl>',
 							'<div class="ext-evt-bd" style="color:{_foreColor};">', body, '</div>',
 							'<tpl if="_renderAsAllDay">',
@@ -317,6 +317,10 @@ Ext.define('Sonicle.calendar.view.Month', {
 			_commIconCls: me.commentsIconCls,
 			_tags: dtags,
 			Title: SoS.htmlAttributeEncode(dinfo.title),
+			//looks like tooltip title needs to be encoded twice or any html will be interpreted
+			//[ see https://forum.sencha.com/forum/showthread.php?333529 ]
+			TooltipTitle: SoS.htmlAttributeEncode(SoS.htmlAttributeEncode(dinfo.title)),
+			//we want html to be interpreted instead here
 			Tooltip: SoS.htmlAttributeEncode(dinfo.tooltip)
 		},
 		evt);

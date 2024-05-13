@@ -126,8 +126,9 @@ Ext.define('Sonicle.form.field.Tag', {
 		var me = this;
 		me.listConfig = Ext.apply(this.listConfig || {}, {
 			getInnerTpl: function(displayField) {
-				var picker = this.pickerField,
-					enc = ((picker.listConfig || {}).escapeDisplay === true) ? ':htmlEncode' : '',
+				var list = this,
+					picker = list.pickerField,
+					enc = (list.escapeDisplay === true) ? ':htmlEncode' : '',
 					sourceCls = Sonicle.String.deflt(picker.sourceCls, ''),
 					icon = '';
 				

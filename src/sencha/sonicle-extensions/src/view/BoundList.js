@@ -197,7 +197,8 @@ Ext.define('Sonicle.view.BoundList', {
 					};
 				} else if (!Ext.isEmpty(field)) {
 					return function(values) {
-						return Sonicle.String.deflt(values[field], defValue);
+						var SoS = Sonicle.String;
+						return SoS.deflt(SoS.htmlEncode(values[field]), defValue);
 					};
 				} else {
 					return Ext.emptyFn;
