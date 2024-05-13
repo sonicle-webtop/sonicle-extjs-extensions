@@ -46,8 +46,9 @@ Ext.define('Sonicle.form.field.SourceComboBox', {
 	 * Returns modified inner template.
 	 */
 	getListItemTpl: function(displayField){
-		var picker = this.pickerField,
-			enc = ((picker.listConfig || {}).escapeDisplay === true) ? ':htmlEncode' : '';
+		var list = this,
+			picker = list.pickerField,
+			enc = (list.escapeDisplay === true) ? ':htmlEncode' : '';
 		return '<div style="float:left; white-space: pre;">'
 			+ '{' + displayField+enc + '}'
 			+ '</div>'

@@ -94,8 +94,9 @@ Ext.define('Sonicle.form.field.ColorComboBox', {
 	 * Returns modified inner template.
 	 */
 	getListItemTpl: function(displayField) {
-		var picker = this.pickerField,
-			enc = ((picker.listConfig || {}).escapeDisplay === true) ? ':htmlEncode' : '',
+		var list = this,
+			picker = list.pickerField,
+			enc = (list.escapeDisplay === true) ? ':htmlEncode' : '',
 			colorizeGeometry = (picker.colorize === 'geometry'),
 			style = picker.genStyleForListItem(colorizeGeometry, picker.colorField);
 		
