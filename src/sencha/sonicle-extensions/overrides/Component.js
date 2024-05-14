@@ -14,4 +14,6 @@ Ext.define('Sonicle.overrides.Component', {
 			me.reference = reference;
 		}
 	}
+}, function() {
+	Ext.util.Format.htmlAttributeEncode = Sonicle.String.htmlAttributeEncode;
 });
