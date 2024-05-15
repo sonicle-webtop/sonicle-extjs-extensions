@@ -112,7 +112,10 @@ Ext.define('Sonicle.selection.RowModel', {
 			//me.view.bufferedRenderer.scrollTo(ix, true);
 			me.select(ix);
 			for (i = 0; i < viewsLn; i++) {
-				views[i].navigationModel.setPosition(ix);
+				var nm = views[i].navigationModel;
+				// Change recordIndex so that the "No movement" test is bypassed in setPosition
+				nm.recordIndex = -1;
+				nm.setPosition(ix);
 			}
 		}
 	}
