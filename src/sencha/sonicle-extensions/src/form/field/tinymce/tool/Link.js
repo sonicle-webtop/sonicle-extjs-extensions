@@ -46,7 +46,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.Link', {
 								suggestProto =  me.suggestProto && !SoS.startsWith(url, 'http'), // !/^\w+:/i.test(url),
 								applyLink = function(url, text) {
 									var hed = me.getHtmlEditor();
-									hed.editorInsertContent(hed.editorCreateHTML('a', {href: url, target: '_blank'}, SoS.htmlEncode(text || SoS.substrAfter(url, '/'+'/', false))));
+									hed.editorInsertContent(hed.editorCreateHTML('a', {href: url, target: '_blank'}, text || SoS.htmlEncode(SoS.substrAfter(url, '/'+'/', false))));
 									//hed.editorExecuteCommand('mceInsertLink', {href: url, text: text});
 									//hed.editorExecuteCommand('createlink', url);
 								};
