@@ -39,10 +39,10 @@ Ext.define('Sonicle.FullscreenMgr', {
 	
 	destroy: function() {
 		var me = this;
-		me.callParent();
 		if (me.fullscreenApi && me.changeListener) {
 			screenfull.off('change', me.changeListener);
 		}
+		me.callParent();
 	},
 	
 	request: function(el) {

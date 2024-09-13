@@ -27,7 +27,7 @@ Ext.define('Sonicle.form.trigger.Hideable', {
 	 */
 	hideWhenMouseOut: false,
 	
-	destroy: function() {
+	onDestroy: function() {
 		this.clearListeners();
 		this.callParent();
 	},

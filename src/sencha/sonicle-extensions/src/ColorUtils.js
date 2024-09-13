@@ -11,6 +11,51 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
     return {
         singleton: true,
 		uses: ['Sonicle.Number'],
+		
+		
+		generateColorSwatch: function(colorize, color, opts) {
+			opts = opts || {};
+			var ME = Sonicle.ColorUtils,
+				//geometry = opts.swatchGeometry,
+				framedCls = opts.framedCls || 'so-colorswatch-framed',
+				lum = Ext.isNumber(opts.luminanceThreshold) ? opts.luminanceThreshold : 0.8,
+				swatchCls, swatchStyle, inputStyle;
+			
+			if ('text' === colorize) {
+				inputStyle = inputStyle || {};
+				inputStyle.color = color;
+				
+			} else if ('swatch' === colorize) {
+				swatchStyle = {};
+				swatchStyle.backgroundColor = color;
+				//FIXME: support dark theme: luminance test may be not enough
+				if (ME.luminance(color) > lum) {
+					swatchCls = framedCls;
+					// Border-color needs to be customized in CSS class
+					swatchStyle.borderColor = '';
+				} else {
+					swatchStyle.borderColor = color;
+				}
+				/*
+				if ('square' === geometry) {
+					swatchCls.push(opts.squareSwatchCls || 'so-colorswatch-square');
+				} else if ('circle' === geometry) {
+					swatchCls.push(opts.circleSwatchCls || 'so-colorswatch-circle');
+				} else if ('rounded' === geometry) {
+					swatchCls.push(opts.roundedSwatchCls || 'so-colorswatch-rounded');
+				}
+				*/
+			}
+			
+			return {
+				swatchCls: swatchCls,
+				swatchStyle: swatchStyle,
+				inputStyle: inputStyle
+			};
+		},
+		
+		
+		
 
         constructor: function () {
             ColorUtils = this;
@@ -213,32 +258,121 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
         getRGBString: function(rgb) {
             return "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")";
         },
+		
+		/**
+		 * Converts RGB color into its HEX notation.
+		 * @param {Integer/Object} r The red component (0-255), or the whole RGB object carrying three distinct components (r, g, b).
+		 * @param {Integer} [g] The green component (0-255). Optional if an object is provided as first argument.
+		 * @param {Integer} [b] The blue component (0-255). Optional if an object is provided as first argument.
+		 * @param {Boolean} hash `True` to prepend # symbol.
+		 * @returns {String} The HEX color string
+		 */
+		rgb2hex: function(r, g, b, hash) {
+			if (Ext.isObject(r)) {
+				hash = g;
+				b = r.b;
+				g = r.g;
+				r = r.r;
+			}
+			var pad = function(s) {
+				return Ext.String.leftPad(s, 2, '0');
+			};
+			return (hash ? '#' : '') + (pad(r.toString(16)) + pad(g.toString(16)) + pad(b.toString(16))).toUpperCase();
+			//return (hash ? '#' : '') + (g | (b << 8) | (r << 16)).toString(16);
+		},
 
         /**
-         * Following standard math to convert from hsl to rgb
-         * Check out wikipedia page for more information on how this works
-         * h => [0,1]
-         * s,l => [0,1]
-         * @param h
-         * @param s
-         * @param v
-         * @return {Object} An object with "r", "g" and "b" color properties.
+		 * Converts RGB color representation into HSV (or HSB/HSI).
+         * http://en.wikipedia.org/wiki/HSL_and_HSV
+         * @param {Integer/Object} r The Red component (0-255), or the whole RGB object carrying three distinct components (r, g, b).
+         * @param {Integer} [g] The Green component (0-255). Optional if an object is pprovided as first argument.
+         * @param {Integer} [b] The Blue component (0-255). Optional if an object is pprovided as first argument.
+         * @return {Object} HSV object carrying three distinct components (h, s, v).
          */
-        hsv2rgb: function(h, s, v) {
-            h = h * 360;
+        rgb2hsv: function(r, g, b) {
+			if (Ext.isObject(r)) {
+				b = r.b;
+				g = r.g;
+				r = r.r;
+			}
+            r = r / 255;
+            g = g / 255;
+            b = b / 255;
 
-            if (h === 360) {
-                h = 0;
+            var M = Math.max(r, g, b),
+				m = Math.min(r, g, b),
+				c = M - m,
+				hprime = 0,
+				h, s, v;
+			
+            if (c !== 0) {
+                if (M === r) {
+                    hprime = ((g - b) / c) % 6;
+                } else if (M === g) {
+                    hprime = ((b - r) / c) + 2;
+                } else if (M === b) {
+                    hprime = ((r - g) / c) + 4;
+                }
             }
 
-            var c = v * s;
-
-            var hprime = h / 60;
-
-            var x = c * (1 - Math.abs(hprime % 2 - 1));
-
-            var rgb = [0, 0, 0];
-
+            h = hprime * 60;
+            if (h === 360) h = 0;
+			v = M;
+            s = 0;
+            if (c !== 0) s = c/v;
+            h = h / 360;
+            if (h < 0) h = h + 1;
+			
+			return {
+				h: h,
+				s: s,
+				v: v
+			};
+        },
+		
+		/**
+		 * Converts RGB color representation into sRGB.
+         * https://en.wikipedia.org/wiki/SRGB
+         * @param {Integer/Object} r The Red component (0-255), or the whole RGB object carrying three distinct components (r, g, b).
+         * @param {Integer} [g] The Green component (0-255). Optional if an object is pprovided as first argument.
+         * @param {Integer} [b] The Blue component (0-255). Optional if an object is pprovided as first argument.
+         * @return {Object} sRGB object carrying three distinct components (r, g, b).
+         */
+		rgb2srgb: function(r, g, b) {
+			if (Ext.isObject(r)) {
+				b = r.b;
+				g = r.g;
+				r = r.r;
+			}
+			var normalize = function(c) {
+				c = c / 255;
+				return (c <= 0.03928) ? (c / 12.92) : Math.pow(((c + 0.055) / 1.055), 2.4);
+			};
+			return {r: normalize(r), g: normalize(g), b: normalize(b)};
+		},
+		
+		/**
+		 * Converts HSV color representation into RGB.
+         * @param {Number/Object} h The Hue component (0-1)), or the whole HSV object carrying three distinct components (h, s, v).
+		 * @param {Number} [s] The Saturation component (0-1). Optional if an object is provided as first argument.
+		 * @param {Number} [v] The Value/Brightness component (0-1). Optional if an object is provided as first argument.
+         * @return {Object} RGB object carrying three distinct components (r, g, b).
+         */
+        hsv2rgb: function(h, s, v) {
+			if (Ext.isObject(h)) {
+				v = h.v;
+				s = h.s;
+				h = h.h;
+			}
+            h = h * 360;
+            if (h === 360) h = 0;
+			
+			var c = v * s,
+				hprime = h / 60,
+				x = c * (1 - Math.abs(hprime % 2 - 1)),
+				rgb = [0, 0, 0],
+				m;
+			
             switch (Math.floor(hprime)) {
                 case 0:
                     rgb = [c, x, 0];
@@ -264,144 +398,183 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
                     // </debug>
                     break;
             }
-
-            var m = v - c;
-
-            rgb[0] += m;
-            rgb[1] += m;
-            rgb[2] += m;
-
-            rgb[0] = Math.round(rgb[0] * 255);
-            rgb[1] = Math.round(rgb[1] * 255);
-            rgb[2] = Math.round(rgb[2] * 255);
-
+			
+            m = v - c;
+			rgb[0] += m;
+			rgb[1] += m;
+			rgb[2] += m;
+			rgb[0] = Math.round(rgb[0] * 255);
+			rgb[1] = Math.round(rgb[1] * 255);
+			rgb[2] = Math.round(rgb[2] * 255);
+			
             return {
                 r: rgb[0],
                 g: rgb[1],
                 b: rgb[2]
             };
         },
-
-        /**
-         * http://en.wikipedia.org/wiki/HSL_and_HSV
-         * @param {Number} r The red component (0-255).
-         * @param {Number} g The green component (0-255).
-         * @param {Number} b The blue component (0-255).
-         * @return {Object} An object with "h", "s" and "v" color properties.
-         */
-        rgb2hsv: function(r,g,b) {
-            r = r / 255;
-            g = g / 255;
-            b = b / 255;
-
-            var M = Math.max(r,g,b);
-            var m = Math.min(r,g,b);
-            var c = M - m;
-
-            var hprime = 0;
-            if (c !== 0) {
-                if (M === r) {
-                    hprime = ((g - b) / c) % 6;
-                } else if (M === g) {
-                    hprime = ((b - r) / c) + 2;
-                } else if (M === b) {
-                    hprime = ((r - g) / c) + 4;
-                }
-            }
-
-            var h = hprime * 60;
-            if (h === 360) {
-                h = 0;
-            }
-
-            var v = M;
-
-            var s = 0;
-            if (c !== 0) {
-                s = c/v;
-            }
-
-            h = h / 360;
-
-            if (h < 0) {
-                h = h + 1;
-            }
-
-            return {
-                h: h,
-                s: s,
-                v: v
-            };
-        },
 		
 		/**
-		 * Converts RGB color values into HEX notation.
-		 * @param {Integer/Object} r The red component (0-255), or an RGB color object.
-		 * @param {Integer} g The green component (0-255).
-		 * @param {Integer} b The blue component (0-255).
-		 * @param {Boolean} hash `True` to prepend # symbol.
-		 * @returns {String} The HEX color string
+		 * Converts HSV (or HSB/HSI) color representation into HSL.
+		 * https://it.wikipedia.org/wiki/Hue_Saturation_Brightness
+		 * https://stackoverflow.com/questions/3423214/convert-hsb-hsv-color-to-hsl
+		 * @param {Number/Object} h The Hue component (0-1), or the whole HSV object carrying three distinct components (h, s, v).
+		 * @param {Number} [s] The Saturation component (0-1). Optional if an object is provided as first argument.
+		 * @param {Number} [v] The Value/Brightness component (0-1). Optional if an object is provided as first argument.
+		 * @returns {Object} HSL object carrying three distinct components (h, s, l).
 		 */
-		rgb2hex: function(r, g, b, hash) {
-			if (Ext.isObject(r)) {
-				hash = g;
-				b = r.b;
-				g = r.g;
-				r = r.r;
+		hsv2hsl: function(h, s, v) {
+			if (Ext.isObject(h)) {
+				v = h.v;
+				s = h.s;
+				h = h.h;
 			}
-			var pad = function(s) {
-				return Ext.String.leftPad(s, 2, '0');
+			var l = v - (v*s)/2,
+				m = Math.min(l, 1-l);
+			return {
+				h: h,
+				s: m ? ((v-l)/m) : 0,
+				l: l
 			};
-			return (hash ? '#' : '') + (pad(r.toString(16)) + pad(g.toString(16)) + pad(b.toString(16))).toUpperCase();
-			//return (hash ? '#' : '') + (g | (b << 8) | (r << 16)).toString(16);
+		},
+		
+		/**
+		 * Converts HSL color representation into RGB.
+         * @param {Number/Object} h The Hue component (0-1)), or the whole HSL object carrying three distinct components (h, s, v).
+		 * @param {Number} [s] The Saturation component (0-1). Optional if an object is provided as first argument.
+		 * @param {Number} [l] The Lightness component (0-1). Optional if an object is provided as first argument.
+         * @return {Object} RGB object carrying three distinct components (r, g, b).
+         */
+        hsl2rgb: function(h, s, l) {
+			return this.hsv2rgb(this.hsl2hsv(h, s, l));
+		},
+		
+		/**
+		 * Converts HSL color representation into HSV (or HSB/HSI).
+		 * https://it.wikipedia.org/wiki/Hue_Saturation_Brightness
+		 * https://stackoverflow.com/questions/3423214/convert-hsb-hsv-color-to-hsl
+		 * @param {Number/Object} h The Hue component (0-1), or the whole HSV object carrying three distinct components (h, s, l).
+		 * @param {Number} [s] The Saturation component (0-1). Optional if an object is provided as first argument.
+		 * @param {Number} [l] The Lightness component (0-1). Optional if an object is pprovided as first argument.
+		 * @returns {Object} HSV object carrying three distinct components (h, s, v).
+		 */
+		hsl2hsv: function(h, s, l) {
+			if (Ext.isObject(h)) {
+				l = h.l;
+				s = h.s;
+				h = h.h;
+			}
+			var v = s * Math.min(l, 1-l) + l;
+			return {
+				h: h,
+				s: v ? (2-2*l/v) : 0,
+				v: v
+			};
 		},
 		
 		/**
 		 * Computes the relative luminance (human eye favors green color), 
-		 * white color has 100% black color 0%, other colors are between.
-		 * @param {String} color A color value.
+		 * white color has 100% (1) black color 0% (0), other colors are between.
+		 * @param {String/Object} color A color value.
 		 * @param {Integer} [precision=2] Desired decimal places
-		 * @returns {Number} Value between 0..1 indicating the luminance.
+		 * @returns {Number|undefined} Value between 0..1 indicating the luminance.
 		 */
-		luminance: function(color, precision) {
+		luminance: function(color, precision, opts) {
+			opts = opts || {};
 			if (!Number.isInteger(precision)) precision = 2;
 			var cobj = this.parseColor(color),
-				//lum = (cobj.r * 0.299) + (cobj.g * 0.587) + (cobj.b * 0.114); // W3 formula (http://www.w3.org/TR/AERT#color-contrast)
-				lum = (cobj.r * 0.2126) + (cobj.g * 0.7152) + (cobj.b * 0.0722); // ITU-R BT.709 (https://en.wikipedia.org/wiki/Relative_luminance)
-			return Sonicle.Number.round(lum/255, precision);
+				lum;
+			if (cobj) {
+				cobj = this.rgb2srgb(cobj);
+				if ('w3' === opts.mode) {
+					// W3 formula (http://www.w3.org/TR/AERT#color-contrast)
+					lum = (cobj.r * 0.299) + (cobj.g * 0.587) + (cobj.b * 0.114);
+				} else {
+					// ITU-R BT.709 (https://en.wikipedia.org/wiki/Relative_luminance)
+					lum = (cobj.r * 0.2126) + (cobj.g * 0.7152) + (cobj.b * 0.0722);
+				}
+				lum = Sonicle.Number.round(lum, precision);
+			}
+			return lum;
 		},
 		
 		/**
 		 * Calculate a color shade according to a percentage.
-		 * @param {String} color A color value that can be parsed.
+		 * https://www.sitepoint.com/javascript-generate-lighter-darker-color/
+		 * @param {String/Object} color A color value that can be parsed.
 		 * @param {Number} p Percentage value (from -1 to 1): positive values will 
 		 * shade to white (lighten the color), negative to black (darken the color).
 		 * @returns {String} 
 		 */
 		shade: function(color, p) {
 			var me = this,
-				cobj = me.parseColor(color);
-			return cobj ? me.rgb2hex(me.hsv2rgb(cobj.h, cobj.s, Math.min(Math.max(0, (cobj.v + (cobj.v * p))), 1)), true) : color;
+				cobj = me.parseColor(color), hsl;
+			
+			if (cobj) {
+				hsl = me.hsv2hsl(cobj);
+				return me.rgb2hex(me.hsl2rgb(hsl.h, hsl.s, Math.min(Math.max(0, hsl.l * (1 + p)), 1)), true);
+				//return me.rgb2hex(me.hsv2rgb(me.hsl2hsv(hsl.h, hsl.s, Math.min(Math.max(0, hsl.l * (1 + p)), 1))), true);
+			}
+			return color;
+			//return cobj ? me.rgb2hex(me.hsv2rgb(cobj.h, cobj.s, Math.min(Math.max(0, (cobj.v + (cobj.v * p))), 1)), true) : color;
 		},
 		
 		/**
-		 * Calculate the best foreground color for the specified background.
-		 * A background color with a luminance below the bound value will be 
-		 * considered dark and so white forecolor is returned, otherwise black. 
-		 * @param {String} bgColor A color value.
-		 * @param {Number} [threshold=0.5] Luminance threshold value.
-		 * @returns {String} `#000000` or `#FFFFFF`
+		 * Computes the color-ratio.
+		 * https://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
+		 * https://webaim.org/resources/contrastchecker/
+		 * @param {String/Object} color1 First color value.
+		 * @param {String/Object} color2 Second color value.
+		 * @returns {Number} A value (0-1) that measures the contrast.
 		 */
-		bestForeColor: function(bgColor, threshold) {
-			if (!Ext.isNumber(threshold) || (threshold < 0) || (threshold > 1)) threshold = 0.5;
-			return Ext.isEmpty(bgColor) || (this.luminance(bgColor, 2) > threshold) ? '#000000' : '#FFFFFF';
+		contrastRatio: function(color1, color2) {
+			var l1 = this.luminance(color1, 2),
+				l2 = this.luminance(color2, 2);
+			return (Math.max(l1, l2) + 0.05)/(Math.min(l1, l2) + 0.05);
+		},
+		
+		/**
+		 * Calculate the best foreground color for the specified background 
+		 * using a certain operative mode:
+		 *  - shade: computes the relative-luminance of the color and then shade the color using a fixed percentage.
+		 *  - brightness: computes HSV object and find the new Value using a mapping table.
+		 *  - fixed: evaluates luminance against a threshold value and return a fixed dark (#000000) or ligth color (#FFFFFF).
+		 * @param {String} bgColor A color value.
+		 * @param {shade|brightness|fixed} mode The evaluation mode.
+		 * @param {Object} opts An object containing configuration options:
+		 * @param {Number} [opts.luminance] The luminance threshold value. Defaults to 0.64. (shade+fixed)
+		 * @param {Number} [opts.darkColor] The dark color value. Defaults to #000000. (fixed)
+		 * @param {Number} [opts.lightColor] The light color value. Defaults to #FFFFFF. (fixed)
+		 */
+		bestForeColor: function(bgColor, mode, opts) {
+			opts = opts || {};
+			var ME = Sonicle.ColorUtils;
+			if ('shade' === mode) {
+				// Computes the relative-luminance of the color and then shade the color using a fixed percentage
+				var lum = ME.luminance(bgColor),
+					thres = Sonicle.Number.between(opts.luminance, 0, 1) ? opts.luminance : 0.64;
+				return ME.shade(bgColor, (lum > thres) ? -0.5 : 0.7);
+				
+			} else if ('brightness' === mode) {
+				// Computes HSV object and find the new Value using a mapping table
+				// https://stackoverflow.com/questions/635022/calculating-contrasting-colours-in-javascript
+				var cobj = ME.parseColor(bgColor), v;
+				if (cobj) {
+					v = (cobj.v < 0.25) ? 0.75 : ((cobj.v >= 0.25 && cobj.v < 0.5) ? 1 : ((cobj.v >= 0.5 && cobj.v < 0.75) ? 0 : 0.25));
+					return ME.rgb2hex(ME.hsv2rgb(cobj.h, cobj.s, Math.min(Math.max(0, v), 1)), true);
+				}
+			} else { // fixed
+				var lum = ME.luminance(bgColor),
+					thres = Sonicle.Number.isBetween(opts.luminance, 0, 1) ? opts.luminance : 0.64;
+				return (lum > thres) ? (opts.darkColor || '#000000') : (opts.lightColor || '#FFFFFF');
+			}
 		},
 		
 		/**
 		 * Calculate resulting blend for a foreground color on top a base color.
 		 * https://stackoverflow.com/questions/12228548/finding-equivalent-color-with-opacity
-		 * @param {String} base Base color
-		 * @param {String} fore Foreground color with aplha
+		 * @param {String/Object} base Base color
+		 * @param {String/Object} fore Foreground color with aplha
 		 * @returns {String} Hex
 		 */
 		blendColors: function(base, fore) {
@@ -416,6 +589,34 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
 				b: parseInt(cobjB.b + (cobjF.b - cobjB.b) * cobjF.a)
 			};
 			return me.rgb2hex(rgb, true);
+		},
+		
+		/**
+		 * Finds the closest color looking into passed list of colors.
+		 * https://nesin.io/blog/find-closest-color-javascript
+		 * @param {String/Object} color Base color
+		 * @param {String[]/Object[]} list Lists of colors to check
+		 * @returns {String/Object} The closest color
+		 */
+		closestColor: function(color, list) {
+			list = Ext.Array.from(list);
+			var me = this,
+				cobj = me.parseColor(color),
+				closestDist, closestColor;
+			
+			if (cobj) {
+				Ext.iterate(list, function(lcolor) {
+					var lcobj = me.parseColor(lcolor), dist;
+					if (lcobj) {
+						dist = Math.sqrt(Math.pow(cobj.r - lcobj.r, 2) + Math.pow(cobj.g - lcobj.g, 2) + Math.pow(cobj.b - lcobj.b, 2));
+						if (dist < closestDist || closestDist === undefined) {
+							closestDist = dist;
+							closestColor = lcolor;
+						}
+					}
+				});
+			}	
+			return closestColor;
 		},
 
         colorMap: {

@@ -10,7 +10,7 @@ Ext.define('Sonicle.mixin.BadgeText', {
 	mixinConfig: {
 		id: 'badgetext',
 		after: {
-			onRender: 'afterOnRender'
+			onRender: 'badgeTextAfterOnRender'
 		}
 	},
 	
@@ -40,7 +40,7 @@ Ext.define('Sonicle.mixin.BadgeText', {
 	
 	hasBadgeCls: 'so-has-badge',
 	
-	afterOnRender: function() {
+	badgeTextAfterOnRender: function() {
 		var me = this;
 		if (!me.badgeEl) me.createBadgeEl();
 		if (me.badgeText) me.updateBadgeText(me.badgeText);
@@ -48,8 +48,8 @@ Ext.define('Sonicle.mixin.BadgeText', {
 	
 	createBadgeEl: function() {
 		var me = this,
-				scaleCls = 'so-badge-' + me.scale,
-				styles = {};
+			scaleCls = 'so-badge-' + me.scale,
+			styles = {};
 		
 		me.setStyle({overflow: 'visible'});
 		me.badgeEl = Ext.DomHelper.append(me.el, {

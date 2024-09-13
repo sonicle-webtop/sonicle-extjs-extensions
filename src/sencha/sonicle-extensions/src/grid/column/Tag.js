@@ -95,7 +95,7 @@ Ext.define('Sonicle.grid.column.Tag', {
 		me.callParent(arguments);
 	},
 	
-	doDestroy: function() {
+	onDestroy: function() {
 		this.setTagsStore(null);
 		this.callParent();
 	},

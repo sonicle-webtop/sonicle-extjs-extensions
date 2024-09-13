@@ -1,11 +1,15 @@
 /**
- * Override default Ext.grid.column.Column
+ * Override original {@link Ext.grid.column.Column}
  * - Add support to headerAlign: allow to set a different align from cell align
+ * - Add support to emptyCls application in case of empty values
  */
 Ext.define('Sonicle.overrides.grid.column.Column', {
 	override: 'Ext.grid.column.Column',
+	requires: [
+		'Sonicle.Utils'
+	],
 	
-	defaultRenderer: Ext.util.Format.htmlEncode,
+	defaultRenderer: Sonicle.Utils.generateBaseColumnRenderer({useEmptyCls: true, htmlEncode: true}),
 	
 	/**
 	 * @cfg {'start'/'center'/'end'} [headerAlign]

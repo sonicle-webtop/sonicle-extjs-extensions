@@ -5,69 +5,49 @@
     flex-direction: row;
     flex: 1
 }
-
 .so-announcementbar .so-announcementbar-link,.so-announcementbar .so-announcementbar-msg {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: black
 }
-
 .so-announcementbar .so-announcementbar-msgwrap {
     flex: 1;
     display: flex;
     flex-direction: row;
     justify-content: center
 }
-
 .so-announcementbar .so-announcementbar-msg {
     text-align: center;
 	margin-right: 5px;
 }
-
 .so-announcementbar .so-announcementbar-yes,.so-announcementbar .so-announcementbar-no {
     margin: 0 5px 0 5px;
     cursor: pointer;
-    color: black;
     font-weight: bold
 }
-
 .so-announcementbar .so-announcementbar-link {
     width: 120px;
     text-align: right;
     cursor: pointer
 }
-
 .so-announcementbar .so-announcementbar-link:after {
     font-family: 'Font Awesome 5 Free';
     content: "\f00d" !important;
     margin-left: 6px
 }
-
-/*
-.so-announcementbar .so-announcementbar-wrap-info .so-announcementbar-msg,.so-announcementbar .so-announcementbar-wrap-info .so-announcementbar-link,.so-announcementbar .so-announcementbar-wrap-info .so-announcementbar-yes,.so-announcementbar .so-announcementbar-wrap-info .so-announcementbar-no {
-    color: var(--info-color)
-}
-*/
-
-.so-announcementbar .so-announcementbar-wrap-alert {
-	color: var(--announcementbar-alert-color);
-    background-color: var(--announcementbar-alert-bg-color)
-}
-
-.so-announcementbar .so-announcementbar-wrap-warning {
-	color: var(--announcementbar-warning-color);
-    background-color: var(--announcementbar-warning-bg-color)
-}
-
 .so-announcementbar .so-announcementbar-wrap-info {
-	color: var(--announcementbar-info-color);
-    background-color: var(--announcementbar-info-bg-color)   
+	color: var(--so-announcementbar-color-info-bg-on);
+    background-color: var(--so-announcementbar-color-info-bg)
 }
-
+.so-announcementbar .so-announcementbar-wrap-alert {
+	color: var(--so-announcementbar-color-alert-bg-on);
+    background-color: var(--so-announcementbar-color-alert-bg)
+}
+.so-announcementbar .so-announcementbar-wrap-warning {
+	color: var(--so-announcementbar-color-warning-bg-on);
+    background-color: var(--so-announcementbar-color-warning-bg)
+}
 .so-announcementbar .so-announcementbar-wrap-success {
-	color: var(--announcementbar-success-color);
-    background-color: var(--announcementbar-success-bg-color)
+	color: var(--so-announcementbar-color-success-bg-on);
+    background-color: var(--so-announcementbar-color-success-bg)
 }
-
-

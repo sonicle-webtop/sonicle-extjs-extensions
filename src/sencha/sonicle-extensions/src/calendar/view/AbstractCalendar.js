@@ -1039,7 +1039,7 @@ Ext.define('Sonicle.calendar.view.AbstractCalendar', {
 		var me = this,
 				etc = me.eventTextColor;
 		if(etc === 'auto') {
-			return Sonicle.ColorUtils.bestForeColor(bgColor, me.colorLuminance);
+			return Sonicle.ColorUtils.bestForeColor(bgColor, 'fixed', { luminance: me.colorLuminance });
 		} else if(etc === 'white') {
 			return '#FFFFFF';
 		} else {

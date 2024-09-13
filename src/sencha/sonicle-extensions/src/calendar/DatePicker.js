@@ -6,7 +6,7 @@
  */
 Ext.define('Sonicle.calendar.DatePicker', {
 	extend: 'Ext.picker.Date',
-	alias: 'widget.socalendarpicker',
+	alias: 'widget.socalendarpickerlegacy',
 	requires: [
 		'Sonicle.Date'
 	],
@@ -142,17 +142,17 @@ Ext.define('Sonicle.calendar.DatePicker', {
 			
 			onNodeOver: function(target, dd, e, data) {
 				var self = this,
-						dz = dd.view.dropZone,
-						cellDate = self.extractDate(target),
-						newDate = Sonicle.Date.copyDate(cellDate, data.eventStart);
+					dz = dd.view.dropZone,
+					cellDate = self.extractDate(target),
+					newDate = Sonicle.Date.copyDate(cellDate, data.eventStart);
 				return dz.updateProxy(e, data, newDate, newDate);
 			},
 			
 			onNodeDrop: function(target, dd, e, data) {
 				var self = this,
-						dz = dd.view.dropZone,
-						cellDate = self.extractDate(target),
-						newDate = Sonicle.Date.copyDate(cellDate, data.eventStart);
+					dz = dd.view.dropZone,
+					cellDate = self.extractDate(target),
+					newDate = Sonicle.Date.copyDate(cellDate, data.eventStart);
 				dz.onNodeDrop({date: newDate}, dd, e, data);
 			},
 			
@@ -164,7 +164,7 @@ Ext.define('Sonicle.calendar.DatePicker', {
 		me.dddz.addToGroup('DayViewDD');
 		me.dddz.addToGroup('MonthViewDD');
 		
-		// Overrides default behaviour in order to make some tunings:
+		// Override original behaviour in order to make some tunings:
 		// we need to completely disable monthpicker making also its
 		// button un-useful
 		if(!me.showMonthpicker) {
@@ -180,7 +180,7 @@ Ext.define('Sonicle.calendar.DatePicker', {
 	
 	/*
 	doShowMonthPicker: function() {
-		// Overrides default behaviour in order to prevent monthpicker display
+		// Override original behaviour in order to prevent monthpicker display
 		if(this.showMonthpicker) this.callParent(arguments);
 	},
 	*/
@@ -188,7 +188,7 @@ Ext.define('Sonicle.calendar.DatePicker', {
 	onOkClick: function(picker, value) {
 		var me = this;
 		me.callParent(arguments);
-		// Overrides default behaviour in order to fire select event
+		// Override original behaviour in order to fire select event
 		// after choosing new month 
 		me.fireEvent('select', me, me.value);
 	},
@@ -255,14 +255,14 @@ Ext.define('Sonicle.calendar.DatePicker', {
 	selectedUpdate: function(date) {
 		var me = this;
 		me.callParent(arguments);
-		// Overrides default behaviour in order update picker styles
+		// Override original behaviour in order update picker styles
 		me.updateStyles();
 	},
 	
 	fullUpdate: function(date) {
 		var me = this;
 		me.callParent(arguments);
-		// Overrides default behaviour in order update picker styles
+		// Override original behaviour in order update picker styles
 		me.updateStyles();
 	},
 	

@@ -1,12 +1,19 @@
-.so-grid-colorcolumn-swatch {
-	float: left;
+.so-grid-cell-inner-colorcolumn.so-colorcolumn-nolabel {
+	text-overflow: clip;
+}
+.so-grid-cell-inner-colorcolumn .so-colorcolumn-swatch {
+	display: inline-block;
+	vertical-align: middle;
     width: 15px;
     height: 15px;
-    margin-right: 5px;
 }
-.so-grid-colorcolumn-swatch-rounded {
+.so-colorcolumn-swatch.so-colorcolumn-swatch-rounded {
 	border-radius: 2px;
 }
-.so-grid-colorcolumn-swatch-circle {
+.so-colorcolumn-swatch.so-colorcolumn-swatch-circle {
 	border-radius: 50%;
+}
+.so-grid-cell-inner-colorcolumn .so-colorcolumn-label {
+	vertical-align: middle;
+	margin-left: 5px;
 }

@@ -93,7 +93,7 @@ Ext.define('Sonicle.form.field.pickerpanel.Editor', {
 		me.callParent(arguments);
 	},
 	
-	destroy: function() {
+	onDestroy: function() {
 		this.clearListeners();
 		this.callParent();
 	},

@@ -59,7 +59,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.FontSizeSelect', {
 		me.on('select', me.onSelectFontSize, me);
 	},
 	
-	doDestroy: function() {
+	onDestroy: function() {
 		var me = this;
 		me.un('select', me.onSelectFontSize, me);
 		me.callParent();

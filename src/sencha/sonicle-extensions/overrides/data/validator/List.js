@@ -1,5 +1,5 @@
 /**
- * Override default Ext.data.validator.Bound
+ * Override original {@link Ext.data.validator.Bound}
  * - Add support to conditional validation
  */
 Ext.define('Sonicle.overrides.data.validator.List', {

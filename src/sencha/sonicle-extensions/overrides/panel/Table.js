@@ -1,5 +1,6 @@
 /**
  * Override original {@link Ext.panel.Table}
+ * - Marks component body with no-border class when borders are set to off
  * - Add noItemsBackground config to hide items background
  * - Add support to recoverLostSelection config in order to restore selection 
  *   in similar place if the selected row isn't there anymore
@@ -20,12 +21,24 @@ Ext.define('Sonicle.overrides.panel.Table', {
 	 */
 	recoverLostSelection: false,
 	
+	noBorderCls: Ext.baseCSSPrefix + 'grid-no-border',
 	noItemsBgCls: Ext.baseCSSPrefix + 'grid-no-items-bg',
 	
 	initComponent: function() {
 		var me = this;
 		me.callParent();
+		if (me.border === false) {
+			me.addCls(me.noBorderCls);
+			me.addBodyCls(me.noBorderCls);
+		}
 		if (me.hideRowBackground) me.addBodyCls(me.noItemsBgCls);
+	},
+	
+	setBorder: function(border, targetEl) {
+		var me = this;
+		me[border ? 'removeCls' : 'addCls'](me.noBorderCls);
+		me[border ? 'removeBodyCls' : 'addBodyCls'](me.noBorderCls);
+		me.callParent(arguments);
 	},
 	
 	/**

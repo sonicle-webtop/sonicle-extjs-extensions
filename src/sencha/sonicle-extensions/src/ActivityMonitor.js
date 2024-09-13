@@ -111,8 +111,10 @@ Ext.define('Sonicle.ActivityMonitor', {
 	},
 	
 	destroy: function() {
-		this.stop();
-		this.targetEl = null;
+		var me = this;
+		me.stop();
+		me.targetEl = null;
+		me.callParent();
 	},
 	
 	/**

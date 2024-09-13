@@ -217,6 +217,38 @@ Ext.define('Sonicle.upload.Uploader', {
 		me.plu.start();
 	},
 	
+	/*
+	registerBrowseButton: function(id) {
+		var plu = this.plu,
+			buttonEl = document.getElementById(id),
+			inputEl;
+		
+		if (plu && plu.runtime === 'html5' && buttonEl) {
+			inputEl = Ext.fly(this.plu.getOption('container')).down('input', true);
+			plu.addEvent(buttonEl, 'click', function(e) {
+				var input = document.getElementById(inputEl.id);
+				if (input && !input.disabled) input.click();
+				e.preventDefault();
+			});
+		}
+	},
+	*/
+	
+	/**
+	 * Shows browse dialoy triggering a click event on plu's input element.
+	 * NB: This may work only in html5 version!
+	 */
+	browse: function() {
+		console.log('browse');
+		var plu = this.plu,
+			inputEl;
+		
+		if (plu && plu.runtime === 'html5') {
+			inputEl = Ext.fly(this.plu.getOption('container')).down('input', true);
+			if (inputEl && !inputEl.disabled) inputEl.click();
+		}
+	},
+	
 	/**
 	 * @private
 	 */

@@ -28,11 +28,20 @@ Ext.define('Sonicle.form.Text', {
 	iconExtraCls: null,
 	
 	// Make component unselectable and force a minimal height
-	componentCls: 'x-unselectable x-form-item-body-default',
+	//componentCls: 'x-unselectable x-form-item-body-default',
+	componentCls: 'so-'+'text',
 	
 	infoIconCls: 'fas fa-info-circle',
 	warnIconCls: 'fas fa-exclamation-triangle',
 	errorIconCls: 'fas fa-times-circle',
+	
+	initComponent: function() {
+		var me = this;
+		me.callParent(arguments);
+		// Make component unselectable and force a minimal height
+		me.addCls('x-unselectable');
+		me.addCls('x-form-item-body-default');
+	},
 	
 	/**
 	 * @override Ext.form.Label#getElConfig
@@ -81,7 +90,7 @@ Ext.define('Sonicle.form.Text', {
 			} else if ('error' === type) {
 				cls = me.errorIconCls;
 			}
-			return cls ? '<i class="' + cls + ' ' + Sonicle.String.deflt(extraCls, '') + '" aria-hidden="true"></i>&nbsp;' : '';
+			return cls ? '<i class="' + cls + ' ' + Sonicle.String.deflt(extraCls, '') + '" aria-hidden="true"></i>' : '';
 		}
 	}
 });

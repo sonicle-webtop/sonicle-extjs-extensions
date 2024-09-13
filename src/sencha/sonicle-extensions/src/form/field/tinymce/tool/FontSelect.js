@@ -84,7 +84,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.FontSelect', {
 		me.on('select', me.onSelectFont, me);
 	},
 	
-	doDestroy: function() {
+	onDestroy: function() {
 		var me = this;
 		me.un('select', me.onSelectFont, me);
 		me.callParent();
@@ -92,7 +92,8 @@ Ext.define('Sonicle.form.field.tinymce.tool.FontSelect', {
 	
 	bindEditor: function(editor, htmlEditor) {
 		var me = this,
-				monCbks = me.getEditorMonitoredCallbacks();
+			monCbks = me.getEditorMonitoredCallbacks();
+		
 		if (htmlEditor) {
 			me.editor = editor;
 			monCbks['onNodeChange'] = Ext.bind(me.onEditorNodeChange, me);
@@ -104,13 +105,15 @@ Ext.define('Sonicle.form.field.tinymce.tool.FontSelect', {
 	
 	setFontNameValue: function(fontName) {
 		var me = this,
-				mrec = me.findMatchingRec(Sonicle.String.lower(fontName));
+			SoS = Sonicle.String,
+			mrec = me.findMatchingRec(SoS.lower(fontName));
+		
 		if (mrec) {
 			me.setValue(mrec.get(me.valueField));
 			me.setEmptyText(null);
 		} else {
 			me.setValue(null);
-			me.setEmptyText(Sonicle.String.deflt(fontName, me.defaultText));
+			me.setEmptyText(SoS.deflt(fontName, me.defaultText));
 		}
 	},
 	

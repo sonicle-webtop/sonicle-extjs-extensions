@@ -35,8 +35,21 @@ Ext.define('Sonicle.form.field.ComboBox', {
 	 */
 	
 	/**
+	 * @cfg {String} [staticIconCls]
+	 * One or more space separated CSS classes to be applied statically to the icon element.
+	 * This have precedence over {@link #iconField}.
+	 */
+	
+	/**
 	 * @cfg {String} [iconField]
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as CSS icon class.
+	 */
+	
+	/**
+	 * @cfg {Function} [getIcon]
+	 * A function which returns the value of icon.
+	 * @param {Object} values An Object with item fields.
+	 * @param {Mixed} value The value sustained by {@link #iconField}.
 	 */
 	
 	/**
@@ -51,15 +64,20 @@ Ext.define('Sonicle.form.field.ComboBox', {
 	 */
 	
 	/**
-	 * @cfg {String} [sourceCls]
-	 * An additional CSS class (or classes) to be added to source element.
-	 */
-	
-	/**
 	 * @cfg {Function} [getSource]
 	 * A function which returns the value of source.
 	 * @param {Object} values An Object with item fields.
 	 * @param {Mixed} value The value sustained by {@link #sourceField}.
+	 */
+	
+	/**
+	 * @cfg {String} [groupCls]
+	 * An additional CSS class (or classes) to be added to group element.
+	 */
+	
+	/**
+	 * @cfg {String} [sourceCls]
+	 * An additional CSS class (or classes) to be added to source element.
 	 */
 	
 	componentCls: 'so-'+'combo',
@@ -83,7 +101,9 @@ Ext.define('Sonicle.form.field.ComboBox', {
 	*/
 	
 	/**
-	 * Override original tpl (as Ext.form.field.Text, see above) to add swatchEl
+	 * @override Check me during ExtJs upgrade!
+	 * Override original {@link Ext.form.field.Text#preSubTpl}:
+	 *  - add swatchEl
 	 */
 	preSubTpl: [
 		'<tpl if="hasSwatch">', // <-- Modified adding swatch markup if necessary
@@ -106,6 +126,35 @@ Ext.define('Sonicle.form.field.ComboBox', {
 	],
 	childEls: ['iconEl', 'swatchWrap', 'swatchEl'],
 	
+	initComponent: function() {
+		var me = this;
+		me.callParent(arguments);
+		me.listConfig = me.initListConfig();
+	},
+	
+	initListConfig: function() {
+		var me = this,
+			defaults = {
+				colorize: me.colorize,
+				swatchGeometry: me.swatchGeometry,
+				iconField: me.iconField,
+				getIcon: me.getIcon,
+				colorField: me.colorField,
+				sourceField: me.sourceField,
+				getSource: me.getSource,
+				groupCls: me.groupCls,
+				sourceCls: me.sourceCls
+			};
+		
+		if (me.store && !Ext.isEmpty(me.store.getGroupField())) {
+			Ext.apply(defaults, {
+				groupField: me.groupField,
+				getGroup: me.getGroup
+			});
+		}
+		return Ext.apply({}, me.listConfig || {}, defaults);
+	},
+	
 	/*
 	collapse: function() {
 		// Block picker collapsing, only for development!
@@ -113,28 +162,9 @@ Ext.define('Sonicle.form.field.ComboBox', {
 	},
 	*/
 	
-	initComponent: function() {
-		var me = this;
-		me.listConfig = Ext.apply(me.listConfig || {}, {
-			xtype: 'soboundlist'
-		});
-		me.callParent(arguments);
-		me.listConfig.colorize = me.colorize;
-		me.listConfig.swatchGeometry = me.swatchGeometry;
-		if (me.store && !Ext.isEmpty(me.store.getGroupField())) {
-			me.listConfig.groupField = me.groupField;
-			me.listConfig.getGroup = me.getGroup;
-		}
-		me.listConfig.iconField = me.iconField;
-		me.listConfig.colorField = me.colorField;
-		me.listConfig.sourceCls = me.sourceCls;
-		me.listConfig.sourceField = me.sourceField;
-		me.listConfig.getSource = me.getSource;
-	},
-	
 	getSubTplData: function(fieldData) {
 		var me = this,
-			hasIcon = !Ext.isEmpty(me.iconField),
+			hasIcon = !Ext.isEmpty(me.iconField) || !Ext.isEmpty(me.staticIconCls),
 			hasColor = !Ext.isEmpty(me.colorField),
 			hasSwatch = !hasIcon && hasColor && (me.colorize === 'swatch');
 		
@@ -150,7 +180,7 @@ Ext.define('Sonicle.form.field.ComboBox', {
 	},
 	
 	/**
-	 * Overrides default implementation of {@link Ext.form.field.ComboBox#afterRender}.
+	 * Override original {@link Ext.form.field.ComboBox#afterRender}
 	 */
 	afterRender: function() {
 		var me = this;
@@ -158,6 +188,7 @@ Ext.define('Sonicle.form.field.ComboBox', {
 		if (me.inputWrap && me.swatchWrap) {
 			me.swatchWrap.setHeight(me.inputWrap.getHeight());
 		}
+		if (!Ext.isEmpty(me.staticIconCls)) me.updateIcon();
 		
 		/*
 		elWrap = me.el.down('.x-form-text-wrap');
@@ -176,7 +207,7 @@ Ext.define('Sonicle.form.field.ComboBox', {
 	},
 	
 	/**
-	 * Overrides default implementation of {@link Ext.form.field.Field#onChange}.
+	 * Override original {@link Ext.form.field.Field#onChange}
 	 */
 	onChange: function(newVal, oldVal) {
 		var me = this;
@@ -186,7 +217,7 @@ Ext.define('Sonicle.form.field.ComboBox', {
 	},
 	
 	/**
-	 * Overrides default implementation of {@link Ext.form.field.Field#updateEditable}.
+	 * Override original {@link Ext.form.field.Field#updateEditable}
 	 */
 	updateEditable: function(editable, oldEditable) {
 		var me = this;
@@ -207,16 +238,30 @@ Ext.define('Sonicle.form.field.ComboBox', {
 		}
 	},
 	
+	/**
+	 * Override original {@link Ext.form.field.ComboBox#createPicker}:
+	 *  - customize defaults for boundlist config
+	 */
+	createPicker: function() {
+		var me = this,
+			config;
+		
+		config = Ext.apply(me.defaultListConfig, {
+			xtype: 'soboundlist'
+		});
+		
+		me.defaultListConfig = config;
+		return me.callParent();
+	},
+	
 	privates: {
 		updateColor: function(nv, ov) {
 			var me = this,
-					BL = Sonicle.view.BoundList,
-					colorizeSwatch = (me.colorize === 'swatch');
-			
-			if (colorizeSwatch) {
-				if (me.swatchEl) me.swatchEl.applyStyles(BL.generateColorStyles('swatch', me.getColorByValue(nv)));
+				SoBL = Sonicle.view.BoundList;
+			if ('text' === me.colorize) {
+				if (me.inputEl) me.inputEl.applyStyles(SoBL.generateColorStyles('text', me.getColorByValue(nv)));
 			} else {
-				if (me.inputEl) me.inputEl.applyStyles(BL.generateColorStyles('text', me.getColorByValue(nv)));
+				if (me.swatchEl) me.swatchEl.applyStyles(SoBL.generateColorStyles('swatch', me.getColorByValue(nv)));
 			}
 		},
 		
@@ -224,7 +269,7 @@ Ext.define('Sonicle.form.field.ComboBox', {
 			var me = this, cls;
 			if (me.iconEl) {
 				if (me.lastIconCls) me.iconEl.removeCls(me.lastIconCls);
-				cls = me.getIconClsByValue(nv);
+				cls = me.staticIconCls || me.getIconClsByValue(nv);
 				if (!Ext.isEmpty(cls)) {
 					me.lastIconCls = cls;
 					me.iconEl.addCls(cls);

@@ -31,9 +31,9 @@
  * reasonably feasible for technical reasons, the Appropriate Legal Notices must
  * display the words "Copyright (C) 2014 Sonicle S.r.l.".
  */
-
-/* global undef */
-
+/**
+ * @deprecated use Sonicle.form.field.tinymce.HTMLEditor
+ */
 Ext.define('Sonicle.form.field.HTMLEditor', {
     extend: 'Ext.form.FieldContainer',
 	alias: ['widget.sohtmleditor'],

@@ -1,0 +1,51 @@
+
+.so-btn-avatar .x-btn-icon-el {
+	display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+.so-btn-avatar.so-btn-avatar-medium.so-btn-avatar-theme-triton .x-btn-icon-el,
+.so-btn-avatar.so-btn-avatar-medium.so-btn-avatar-theme-1-triton .x-btn-icon-el {
+	width: 24px;
+	height: 24px;
+}
+.so-btn-avatar.so-btn-avatar-large.so-btn-avatar-theme-triton .x-btn-icon-el,
+.so-btn-avatar.so-btn-avatar-large.so-btn-avatar-theme-1-triton .x-btn-icon-el {
+	width: 32px;
+	height: 32px;
+}
+.so-btn-avatar.so-btn-avatar-small .so-btn-avatar-swatch {
+	width: 16px;
+	height: 16px;
+}
+.so-btn-avatar.so-btn-avatar-medium .so-btn-avatar-swatch {
+	width: 24px;
+	height: 24px;
+}
+.so-btn-avatar.so-btn-avatar-large .so-btn-avatar-swatch {
+	width: 32px;
+	height: 32px;
+}
+.so-btn-avatar.so-btn-avatar-medium.so-btn-avatar-theme-triton,
+.so-btn-avatar.so-btn-avatar-medium.so-btn-avatar-theme-1-triton {
+	padding-top: 6px;
+	padding-bottom: 6px;
+}
+.so-btn-avatar.so-btn-avatar-large.so-btn-avatar-theme-large,
+.so-btn-avatar.so-btn-avatar-large.so-btn-avatar-theme-1-triton {
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+.so-btn-avatar-swatch.so-btn-avatar-picture {
+    background-repeat: round;
+    background-size: cover;
+}
+.so-btn-avatar-swatch.so-btn-avatar-initials {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+.so-btn-avatar-swatch.so-btn-avatar-initials span {
+    line-height: 1;
+    font-weight: 500;
+}

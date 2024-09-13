@@ -1,0 +1,14 @@
+
+/* Support x-grid-no-items-bg bodyClass to draw transparent items */
+.x-grid-body.x-grid-no-items-bg .x-grid-item:not(.x-grid-item-over) {
+    background-color: transparent;
+}
+
+.so-grid-cell-inner-link {
+	text-decoration: none;
+	cursor: default;
+}
+.so-grid-cell-inner-link:hover {
+	text-decoration: underline;
+	cursor: pointer;
+}

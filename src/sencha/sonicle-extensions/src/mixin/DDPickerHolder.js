@@ -4,7 +4,7 @@
  * matteo.albinola[at]gmail.com
  * Inspired by: https://docs.sencha.com/extjs/6.2.0/classic/src/Picker.js.html
  * This is originally conceived to be mixed into a Ext.field.Field, methods 
- * onEsc, onFocusLeave, doDestroy and initComponent are specific to that component.
+ * onEsc, onFocusLeave, onDestroy and initComponent are specific to that component.
  */
 Ext.define('Sonicle.mixin.DDPickerHolder', {
 	extend: 'Ext.Mixin',
@@ -12,12 +12,12 @@ Ext.define('Sonicle.mixin.DDPickerHolder', {
 	mixinConfig: {
 		id: 'ddpickerholder',
 		before: {
-			onEsc: 'beforeOnEsc',
-			onFocusLeave: 'beforeOnFocusLeave',
-			doDestroy: 'beforeDoDestroy'
+			onEsc: 'ddPickerHolderBeforeOnEsc',
+			onFocusLeave: 'ddPickerHolderBeforeOnFocusLeave'
 		},
 		on: {
-			initComponent: 'onInitComponent'
+			initComponent: 'ddPickerHolderOnInitComponent',
+			onDestroy: 'ddPickerHolderOnOnDestroy'
 		}
 	},
 	
@@ -262,25 +262,25 @@ Ext.define('Sonicle.mixin.DDPickerHolder', {
 	},
 	
 	privates: {
-		onInitComponent: function() {
+		ddPickerHolderOnInitComponent: function() {
 			var me = this;
 			me.ddPickers = {};
 		},
 		
-		beforeOnEsc: function(e) {
+		ddPickerHolderOnOnDestroy: function() {
+			delete this.expandedDD;
+			delete this.ddPickers;
+		},
+		
+		ddPickerHolderBeforeOnEsc: function(e) {
 			if (this.isDDPickerExpanded()) {
 				this.collapseDDPicker();
 				e.stopEvent();
 			}
 		},
 		
-		beforeOnFocusLeave: function() {
+		ddPickerHolderBeforeOnFocusLeave: function() {
 			this.collapseDDPicker();
-		},
-		
-		beforeDoDestroy: function() {
-			delete this.expandedDD;
-			delete this.ddPickers;
 		},
 		
 		collapseDDPickerIf: function(e) {
@@ -330,12 +330,14 @@ Ext.define('Sonicle.mixin.DDPickerHolder', {
 
 				picker.x = newPos[0];
 				picker.y = newPos[1];
-
-				// add the {openCls}-above class if the picker was aligned above
-				// the field due to hitting the bottom of the viewport
-				isAbove = picker.el.getY() < cmp.inputEl.getY();
-				obodyEl[isAbove ? 'addCls' : 'removeCls'](cmp.openCls + aboveSfx);
-				picker[isAbove ? 'addCls' : 'removeCls'](picker.baseCls + aboveSfx);
+				
+				if (cmp.isField) {
+					// add the {openCls}-above class if the picker was aligned above
+					// the field due to hitting the bottom of the viewport
+					isAbove = picker.el.getY() < cmp.inputEl.getY();
+					obodyEl[isAbove ? 'addCls' : 'removeCls'](cmp.openCls + aboveSfx);
+					picker[isAbove ? 'addCls' : 'removeCls'](picker.baseCls + aboveSfx);
+				}	
 			}
 		}
 	}	

@@ -1,6 +1,6 @@
 /**
- * Override default Ext.form.field.Tag
- * - Add support to returnValueMode in order to customize getValue return type
+ * Override original {@link Ext.form.field.Tag}
+ * - Add support to getValueMode in order to customize getValue return type
  */
 Ext.define('Sonicle.overrides.form.field.Tag', {
 	override: 'Ext.form.field.Tag',

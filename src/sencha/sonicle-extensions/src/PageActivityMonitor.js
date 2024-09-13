@@ -45,6 +45,7 @@ Ext.define('Sonicle.PageActivityMonitor', {
 	
 	destroy: function() {
 		this.monitor = null;
+		this.callParent();
 	},
 	
 	start: function(timeout) {

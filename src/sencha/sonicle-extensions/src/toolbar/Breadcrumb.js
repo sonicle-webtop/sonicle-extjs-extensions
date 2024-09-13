@@ -1,8 +1,8 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2015 Sonicle S.r.l.
- * sonicle@sonicle.com
- * http://www.sonicle.com
+ * Copyright (C) 2023 Sonicle S.r.l.
+ * malbinola[at]sonicle.com
+ * https://www.sonicle.com
  */
 Ext.define('Sonicle.toolbar.Breadcrumb', {
 	extend: 'Ext.toolbar.Breadcrumb',
@@ -13,15 +13,31 @@ Ext.define('Sonicle.toolbar.Breadcrumb', {
 	config: {
 		/**
 		 * @cfg {Number} [minDepth=0]
-		 * Minimum depth at which begin to display nodes.
+		 * Minimum node depth at which begin to display nodes.
 		 * Nodes with depth below this value will be hidden.
 		 */
 		minDepth: 0,
 		
 		/**
-		 * @cfg {Boolean|Number} [shorten=30]
+		 * @cfg {Boolean} [showOnlySelectedNode=false]
+		 * Set to `true` to show only sected node.
+		 * This will override any value set to {@link #minDepth}.
 		 */
-		shorten: 30
+		showOnlySelectedNode: false,
+		
+		/**
+		 * @cfg {Boolean} [disableButtonMenu=false]
+		 * Set to `true` to disable completely dropdown menu on bottons, also in
+		 * case of child items.
+		 */
+		disableButtonMenu: false,
+		
+		/**
+		 * @cfg {Boolean|Number} [shortenDisplay=30]
+		 * Display value will be shortened to specified number of chars.
+		 * Set to `false` to disable this behaviour.
+		 */
+		shortenDisplay: 30
 	},
 	
 	updateStore: function(store, oldStore) {
@@ -41,22 +57,23 @@ Ext.define('Sonicle.toolbar.Breadcrumb', {
 	},
 	
 	/**
-	 * Overrides default implementation of {@link Ext.toolbar.Breadcrumb#updateSelection} to add support to:
-	 *  - hiding items below a minimum depth value (minDepth)
-	 *  - text items ellipsis
+	 * Override original {@link Ext.toolbar.Breadcrumb#updateSelection}:
+	 *  - hide items below a minimum depth value (see minDepth)
+	 *  - hide all items except the selected one (see showOnlySelectedNode)
+	 *  - display field ellipsis
 	 */
 	updateSelection: function(node, prevNode) {
 		var me = this,
-				mdepth = me.getMinDepth(),
-				shorten = me.getShorten(),
-				shrt = (shorten === false) ? false : true,
-				shrtLen = (shrt && Ext.isNumber(shorten)) ? shorten : 30,
-				buttons = me._buttons,
-				items = [],
-				itemCount = Ext.ComponentQuery.query('[isCrumb]', me.getRefItems()).length,
-				needsSync = me._needsSync,
-				displayField = me.getDisplayField(),
-				showIcons, glyph, iconCls, icon, newItemCount, currentNode, text, button, id, depth, i;
+			buttons = me._buttons,
+			items = [],
+			itemCount = Ext.ComponentQuery.query('[isCrumb]', me.getRefItems()).length,
+			needsSync = me._needsSync,
+			displayField = me.getDisplayField(),
+			minDepth = me.getMinDepth(), // --> Added
+			showSelectedOnly = me.getShowOnlySelectedNode(), // --> Added
+			shortenDisplay = me.getShortenDisplay(), // --> Added
+			hidden, // --> Added
+			showIcons, glyph, iconCls, icon, newItemCount, currentNode, text, button, id, depth, i;
 
 		Ext.suspendLayouts();
 
@@ -65,32 +82,37 @@ Ext.define('Sonicle.toolbar.Breadcrumb', {
 			depth = node.get('depth');
 			newItemCount = depth + 1;
 			i = depth;
+			if (showSelectedOnly === true) minDepth = depth; // --> Added
 
 			while (currentNode) {
 				id = currentNode.getId();
+				hidden = i < minDepth; // --> Added to hide items according to configs
 
 				button = buttons[i];
-
+				if (button) {
+					button.setHidden(hidden); // --> Added to control item display
+				}
+				
 				if (!needsSync && button && button._breadcrumbNodeId === id) {
-					// reached a level in the hierarchy where we are already in sync. 
+					// reached a level in the hierarchy where we are already in sync.
 					break;
 				}
 
 				text = currentNode.get(displayField);
-
+				if (Ext.isNumber(shortenDisplay)) text = Ext.String.ellipsis(text, shortenDisplay);
+				
 				if (button) {
 					// If we already have a button for this depth in the button cache reuse it
-					button.setText(shrt ? Ext.String.ellipsis(text, shrtLen) : text);
+					button.setText(text);
 				} else {
-					// no button in the cache - make one and add it to the cache 
+					// no button in the cache - make one and add it to the cache
 					button = buttons[i] = Ext.create({
 						isCrumb: true,
-						hidden: i < mdepth,
 						xtype: me.getUseSplitButtons() ? 'splitbutton' : 'button',
 						ui: me.getButtonUI(),
 						componentCls: me._btnCls + ' ' + me._btnCls + '-' + me.ui,
 						separateArrowStyling: false,
-						text: shrt ? Ext.String.ellipsis(text, shrtLen) : text,
+						text: text,
 						showEmptyMenu: true,
 						// begin with an empty menu - items are populated on beforeshow
 						menu: {
@@ -101,7 +123,8 @@ Ext.define('Sonicle.toolbar.Breadcrumb', {
 							}
 						},
 						handler: '_onButtonClick',
-						scope: me
+						scope: me,
+						hidden: hidden // --> Added to control item display
 					});
 				}
 
@@ -115,7 +138,7 @@ Ext.define('Sonicle.toolbar.Breadcrumb', {
 					if (glyph) {
 						button.setGlyph(glyph);
 						button.setIcon(null);
-						button.setIconCls(iconCls); // may need css to get glyph 
+						button.setIconCls(iconCls); // may need css to get glyph
 					} else if (icon) {
 						button.setGlyph(null);
 						button.setIconCls(null);
@@ -125,22 +148,22 @@ Ext.define('Sonicle.toolbar.Breadcrumb', {
 						button.setIcon(null);
 						button.setIconCls(iconCls);
 					} else if (showIcons) {
-						// only show default icons if showIcons === true 
+						// only show default icons if showIcons === true
 						button.setGlyph(null);
 						button.setIcon(null);
 						button.setIconCls(
-							(currentNode.isLeaf() ? me._leafIconCls : me._folderIconCls) +
-							'-' + me.ui
-						);
+								(currentNode.isLeaf() ? me._leafIconCls : me._folderIconCls) +
+								'-' + me.ui
+								);
 					} else {
-						// if showIcons is null do not show default icons 
+						// if showIcons is null do not show default icons
 						button.setGlyph(null);
 						button.setIcon(null);
 						button.setIconCls(null);
 					}
 				}
-
-				button.setArrowVisible(currentNode.hasChildNodes());
+				
+				button.setArrowVisible(this.disableButtonMenu === true ? false : currentNode.hasChildNodes()); // --> Modified to control arrow display
 				button._breadcrumbNodeId = currentNode.getId();
 				
 				currentNode = currentNode.parentNode;
@@ -148,20 +171,20 @@ Ext.define('Sonicle.toolbar.Breadcrumb', {
 			}
 
 			if (newItemCount > itemCount) {
-				// new selection has more buttons than existing selection, add the new buttons 
+				// new selection has more buttons than existing selection, add the new buttons
 				items = buttons.slice(itemCount, depth + 1);
 				me.add(items);
 			} else {
-				// new selection has fewer buttons, remove the extra ones from the items, but 
-				// do not destroy them, as they are returned to the cache and recycled. 
+				// new selection has fewer buttons, remove the extra ones from the items, but
+				// do not destroy them, as they are returned to the cache and recycled.
 				for (i = itemCount - 1; i >= newItemCount; i--) {
-					me.remove(me.items.items[i], false);
+					me.remove(buttons[i], false);
 				}
 			}
 
 		} else {
-			// null selection 
-			for (i = 0; i < buttons.length; i++) {	
+			// null selection
+			for (i = 0; i < buttons.length; i++) {
 				me.remove(buttons[i], false);
 			}
 		}
@@ -170,24 +193,27 @@ Ext.define('Sonicle.toolbar.Breadcrumb', {
 
 		/**
 		 * @event selectionchange
-		 * Fires when the selected node changes
-		 * @param {Ext.toolbar.Breadcrumb} this
-		 * @param {Ext.data.TreeModel} node The selected node (or null if there is no selection)
+		 * Fires when the selected node changes. At render time, this event will fire
+		 * indicating that the configured {@link #selection} has been selected.
+		 * @param {Ext.toolbar.Breadcrumb} this 
+		 * @param {Ext.data.TreeModel} node The selected node.
 		 * @param {Ext.data.TreeModel} prevNode The previously selected node.
 		 */
 		me.fireEvent('selectionchange', me, node, prevNode);
-		
+
 		if (me._shouldFireChangeEvent) {
 			/**
 			 * @event change
-			 * Fires when the user changes the selected record. In contrast to the {@link #selectionchange} event, this does
-			 * *not* fire at render time, only in response to user activity.
-			 * @param {Ext.toolbar.Breadcrumb} this
+			 * Fires when the user changes the selected record. In contrast to the
+			 * {@link #selectionchange} event, this does *not* fire at render time,
+			 * only in response to user activity.
+			 * @param {Ext.toolbar.Breadcrumb} this 
 			 * @param {Ext.data.TreeModel} node The selected node.
 			 * @param {Ext.data.TreeModel} prevNode The previously selected node.
 			 */
 			me.fireEvent('change', me, node, prevNode);
 		}
+
 		me._shouldFireChangeEvent = true;
 
 		me._needsSync = false;
@@ -196,13 +222,17 @@ Ext.define('Sonicle.toolbar.Breadcrumb', {
 	privates: {
 		onStoreLoad: function(s, recs, success, op, node) {
 			var me = this,
-					buttons = me._buttons,
-					depth = node.get('depth'),
-					button = buttons[depth];
+				buttons = me._buttons,
+				depth = node.get('depth'),
+				button = buttons[depth];
 			
 			if (button && button._breadcrumbNodeId === node.getId()) {
 				button.setArrowVisible(node.hasChildNodes());
 			}
+		},
+		
+		_onMenuBeforeShow: function(menu) {
+			return this.disableButtonMenu === true ? false : this.callParent(arguments);
 		}
 	}
 });

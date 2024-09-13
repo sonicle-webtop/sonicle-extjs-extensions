@@ -8,7 +8,10 @@ Ext.define('Sonicle.mixin.ActHolder', {
 	extend: 'Ext.Mixin',
 	
 	mixinConfig: {
-		id: 'actholder'
+		id: 'actholder',
+		on: {
+			onDestroy: 'actHolderOnOnDestroy'
+		}
 	},
 	
 	__acts: null,
@@ -17,7 +20,7 @@ Ext.define('Sonicle.mixin.ActHolder', {
 		this.__acts = {};
 	},
 	
-	destroy: function() {
+	actHolderOnOnDestroy: function() {
 		this.__acts = null;
 	},
 	
@@ -52,10 +55,10 @@ Ext.define('Sonicle.mixin.ActHolder', {
 	 */
 	getAct: function(group, name) {
 		var me = this,
-				SoStr = Sonicle.String;
+			SoS = Sonicle.String;
 		if (arguments.length === 1) {
-			name = SoStr.substrBeforeLast(group, '@');
-			group = SoStr.deflt(SoStr.substrAfterLast(group, '@'), Sonicle.mixin.ActHolder.DEFAULT_GROUP);
+			name = SoS.substrBeforeLast(group, '@');
+			group = SoS.deflt(SoS.substrAfterLast(group, '@'), Sonicle.mixin.ActHolder.DEFAULT_GROUP);
 		}
 		return (me.__acts[group]) ? me.__acts[group][name] : undefined;
 	},
@@ -69,6 +72,28 @@ Ext.define('Sonicle.mixin.ActHolder', {
 		return this.__acts[group];
 	},
 	
+	/**
+	 * Gets an action and wraps it into the specified component.
+	 * Group can be specified setting name as: 'name@group'. If not provided, 'default' group is used.
+	 * @param {String} name The action name.
+	 * @param {button|menuitem} xtype The desired component's XType.
+	 * @param {Object} cfg An optional config to be applied to the component.
+	 * @return {Ext.Component} The component.
+	 */
+	getActAs: function(name, xtype, cfg) {
+		var act = this.getAct(name), obj;
+		if (act) {
+			obj = Ext.create('widget.'+xtype, act);
+			if (cfg) obj.setConfig(cfg);
+			return obj;
+		}
+		return obj;
+	},
+	
+	/**
+	 * @private
+	 * Creates an Action instance.
+	 */
 	createAct: function(group, name, cfg) {
 		return new Ext.Action(cfg);
 	},

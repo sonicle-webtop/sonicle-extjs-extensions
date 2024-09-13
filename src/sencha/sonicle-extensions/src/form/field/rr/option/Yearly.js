@@ -1,8 +1,8 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2018 Sonicle S.r.l.
- * sonicle@sonicle.com
- * http://www.sonicle.com
+ * Copyright (C) 2024 Sonicle S.r.l.
+ * sonicle[at]sonicle.com
+ * https://www.sonicle.com
  */
 Ext.define('Sonicle.form.field.rr.option.Yearly', {
 	extend: 'Sonicle.form.field.rr.option.Abstract',
@@ -16,7 +16,7 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 			foOpt1ByMonthDay: {
 				get: function(get) {
 					var max = get('foOpt1ByMonthDayMaxValue'),
-							val = get('data.opt1ByMonthDay');
+						val = get('data.opt1ByMonthDay');
 					return val > max ? max : val;
 				},
 				set: function(val) {
@@ -41,7 +41,7 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 	
 	initComponent: function() {
 		var me = this,
-				SoDate = Sonicle.Date;
+			SoD = Sonicle.Date;
 		me.callParent(arguments);
 		me.add([{
 			xtype: 'fieldcontainer',
@@ -80,18 +80,18 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 							{name: 'desc', type: 'string'}
 						],
 						data: [
-							[1, SoDate.getMonthName(0, true)],
-							[2, SoDate.getMonthName(1, true)],
-							[3, SoDate.getMonthName(2, true)],
-							[4, SoDate.getMonthName(3, true)],
-							[5, SoDate.getMonthName(4, true)],
-							[6, SoDate.getMonthName(5, true)],
-							[7, SoDate.getMonthName(6, true)],
-							[8, SoDate.getMonthName(7, true)],
-							[9, SoDate.getMonthName(8, true)],
-							[10, SoDate.getMonthName(9, true)],
-							[11, SoDate.getMonthName(10, true)],
-							[12, SoDate.getMonthName(11, true)]
+							[1, SoD.getMonthName(0, true)],
+							[2, SoD.getMonthName(1, true)],
+							[3, SoD.getMonthName(2, true)],
+							[4, SoD.getMonthName(3, true)],
+							[5, SoD.getMonthName(4, true)],
+							[6, SoD.getMonthName(5, true)],
+							[7, SoD.getMonthName(6, true)],
+							[8, SoD.getMonthName(7, true)],
+							[9, SoD.getMonthName(8, true)],
+							[10, SoD.getMonthName(9, true)],
+							[11, SoD.getMonthName(10, true)],
+							[12, SoD.getMonthName(11, true)]
 						]
 					},
 					allowBlank: false,
@@ -115,7 +115,7 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 						change: me.fieldOnChange,
 						scope: me
 					},
-					width: 60
+					width: 80
 				}, {
 					xtype: 'label',
 					cls: 'x-form-cb-label-default',
@@ -132,7 +132,7 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 						change: me.fieldOnChange,
 						scope: me
 					},
-					width: 60
+					width: 80
 				}, {
 					xtype: 'label',
 					cls: 'x-form-cb-label-default',
@@ -211,13 +211,13 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 							[-1, me.byDayText],
 							[-2, me.byWeekdayText],
 							[-3, me.byWeText],
-							[1, SoDate.getDayName(1, true)],
-							[2, SoDate.getDayName(2, true)],
-							[3, SoDate.getDayName(3, true)],
-							[4, SoDate.getDayName(4, true)],
-							[5, SoDate.getDayName(5, true)],
-							[6, SoDate.getDayName(6, true)],
-							[0, SoDate.getDayName(0, true)]
+							[1, SoD.getDayName(1, true)],
+							[2, SoD.getDayName(2, true)],
+							[3, SoD.getDayName(3, true)],
+							[4, SoD.getDayName(4, true)],
+							[5, SoD.getDayName(5, true)],
+							[6, SoD.getDayName(6, true)],
+							[0, SoD.getDayName(0, true)]
 						]
 					},
 					allowBlank: false,
@@ -248,18 +248,18 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 							{name: 'desc', type: 'string'}
 						],
 						data: [
-							[1, SoDate.getMonthName(0, true)],
-							[2, SoDate.getMonthName(1, true)],
-							[3, SoDate.getMonthName(2, true)],
-							[4, SoDate.getMonthName(3, true)],
-							[5, SoDate.getMonthName(4, true)],
-							[6, SoDate.getMonthName(5, true)],
-							[7, SoDate.getMonthName(6, true)],
-							[8, SoDate.getMonthName(7, true)],
-							[9, SoDate.getMonthName(8, true)],
-							[10, SoDate.getMonthName(9, true)],
-							[11, SoDate.getMonthName(10, true)],
-							[12, SoDate.getMonthName(11, true)]
+							[1, SoD.getMonthName(0, true)],
+							[2, SoD.getMonthName(1, true)],
+							[3, SoD.getMonthName(2, true)],
+							[4, SoD.getMonthName(3, true)],
+							[5, SoD.getMonthName(4, true)],
+							[6, SoD.getMonthName(5, true)],
+							[7, SoD.getMonthName(6, true)],
+							[8, SoD.getMonthName(7, true)],
+							[9, SoD.getMonthName(8, true)],
+							[10, SoD.getMonthName(9, true)],
+							[11, SoD.getMonthName(10, true)],
+							[12, SoD.getMonthName(11, true)]
 						]
 					},
 					allowBlank: false,
@@ -286,7 +286,7 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 						change: me.fieldOnChange,
 						scope: me
 					},
-					width: 60
+					width: 80
 				}, {
 					xtype: 'label',
 					cls: 'x-form-cb-label-default',
@@ -298,7 +298,7 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 	
 	getRRuleConfig: function() {
 		var me = this,
-				data = me.getVMData();
+			data = me.getVMData();
 		
 		if (data.opt1 === true) {
 			return {
@@ -356,7 +356,7 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 				return {
 					freq: RRule.YEARLY,
 					bysetpos: [data.opt2ByPos],
-					byweekday: me.jsWeekdayToByWeekday(me.asArray(data.opt2ByWeekDay)),
+					byweekday: Sonicle.form.field.rr.Recurrence.jsWeekdayToByWeekday(me.asArray(data.opt2ByWeekDay)),
 					bymonth: [data.opt2ByMonth],
 					interval: data.opt2Interval
 				};
@@ -369,7 +369,7 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 	privates: {
 		validateRRule: function(rr) {
 			var me = this,
-					rrCfg = rr.origOptions;
+				rrCfg = rr.origOptions;
 			if (rrCfg.freq !== RRule.YEARLY) return false;
 			if (!me.isOpt1(rrCfg) && !me.isOpt2(rrCfg)) return false;
 			return true;
@@ -377,11 +377,11 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 		
 		applyRRule: function(rr) {
 			var me = this,
-					rrCfg = rr.origOptions,
-					data = Ext.apply(me.getVMData(), {
-						opt1: false,
-						opt2: false
-					});
+				rrCfg = rr.origOptions,
+				data = Ext.apply(me.getVMData(), {
+					opt1: false,
+					opt2: false
+				});
 
 			if (me.isOpt1(rrCfg)) {
 				data.opt1 = true;
@@ -399,7 +399,7 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 				} else if (me.asArray(rrCfg.byweekday).length === 2) {
 					data.opt2ByWeekDay = -3;
 				} else {
-					data.opt2ByWeekDay = me.byWeekdayToJsWeekday(me.asArray(rrCfg.byweekday))[0];
+					data.opt2ByWeekDay = Sonicle.form.field.rr.Recurrence.byWeekdayToJsWeekday(me.asArray(rrCfg.byweekday))[0];
 				}
 				data.opt2ByMonth = me.asArray(rrCfg.bymonth)[0];
 				if (rrCfg.interval) data.opt2Interval = rrCfg.interval;
@@ -416,15 +416,15 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 		},
 		
 		returnVMDataStartDependantDefaults: function() {
-			var stDt = this.startDate, nth;
-			if (Ext.isDate(stDt)) {
-				var nth = Sonicle.Date.getNthWeekDayOfMonth(stDt);
+			var start = this.getStartDate(), nth;
+			if (Ext.isDate(start)) {
+				var nth = Sonicle.Date.getNthWeekDayOfMonth(start);
 				return {
-					opt1ByMonth: stDt.getMonth()+1,
-					opt1ByMonthDay: stDt.getDate(),
+					opt1ByMonth: start.getMonth()+1,
+					opt1ByMonthDay: start.getDate(),
 					opt2ByPos: (nth > 4) ? -1 : nth,
-					opt2ByWeekDay: stDt.getDay(),
-					opt2ByMonth: stDt.getMonth()+1
+					opt2ByWeekDay: start.getDay(),
+					opt2ByMonth: start.getMonth()+1
 				};
 			} else {
 				return {};

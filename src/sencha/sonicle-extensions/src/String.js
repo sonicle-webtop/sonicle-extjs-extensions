@@ -27,6 +27,21 @@ Ext.define('Sonicle.String', {
 		return Sonicle.Bytes.format(bytes, opts);
 	},
 	
+	regexpCreateJoined: function(pattern, separator, opts) {
+		opts = opts || {};
+		var tw = Ext.isBoolean(opts.separatorTrailingWhitespace) ? opts.separatorTrailingWhitespace : true,
+			lw = Ext.isBoolean(opts.separatorLeadingWhitespace) ? opts.separatorLeadingWhitespace : true,
+			re = '(' + pattern + ')';
+		
+		re += '(?:';
+		if (lw) re += '\s*';
+		re += Ext.String.escapeRegex(separator);
+		if (tw) re += '\s*';
+		re += '(' + pattern + ')';
+		re += ')*';
+		return new RegExp('^' + re + '$', opts.flags);
+	},
+	
 	regexpExecAll: function(s, regexp, index) {
 		if (index === undefined) index = 0;
 		var matches = [], lastMatch;
@@ -130,38 +145,62 @@ Ext.define('Sonicle.String', {
 	reCIDRv6: /^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*(\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))?$/,
 	
 	/**
-	 * Matches a hostname (RFC 1123): string segments separated by dot.
+	 * Strictly (start/end) matches a hostname (RFC 1123): string segments separated by dot.
 	 * https://stackoverflow.com/questions/106179/regular-expression-to-match-dns-hostname-or-ip-address
 	 */
 	reHostname: /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/,
 	
 	/**
-	 * Matches a network port-number
+	 * Strictly (start/end) matches a network port-number
 	 * https://stackoverflow.com/questions/12968093/regex-to-validate-port-number
 	 * https://github.com/cusspvz/proxywrap/issues/13
 	 */
 	rePort: /^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$/,
 	
 	/**
-	 * Matches valid username chars.
+	 * Strictly (start/end) matches valid username chars: both uppercase/lowercase 
+	 * letters, period (.), hyphen (-) and underscore (_) characters.
 	 */
 	reUsernameChars: /^[a-z0-9\.\-\_]+$/i,
 	
 	/**
-	 * Matches simple email (also with name in ""). (from Sencha - see original Ext.data.validator.Email)
+	 * Strictly (start/end) matches an email address (also with name in "").
+	 * (from Sencha - see original Ext.data.validator.Email)
+	 * 
+	 * Valid:
+	 *  - john.doe@example.com
+	 *  - John.Doe@example.com
+	 *  - "John.Doe"@example.com
+	 * NON valid:
+	 *  - ".John.Doe"@example.com
+	 *  - "John.Doe."@example.com
+	 *  - "John..Doe"@example.com
 	 */
 	reEmail: /^(")?(?:[^\."])(?:(?:[\.])?(?:[\w\-!#$%&'*+\/=?\^_`{|}~]))*\1@(\w[\-\w]*\.){1,5}([A-Za-z]){2,6}$/,
 	
 	/**
+	 * @deprecated use reEmail instead
 	 * Matches only an email address part.
 	 */
 	reEmailAddress: /^[_A-Za-z0-9-\+]+(?:\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(?:\.[_A-Za-z0-9-]+)*(?:\.[A-Za-z]{2,})$/,
 	
 	/**
-	 * Matches an RFC5322 address
+	 * Matches a series of RFC5322 addresses
 	 * https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression
+	 * https://betterprogramming.pub/on-the-practicality-of-regex-for-email-address-processing-78280ab006c3
 	 */
+	reRFC5322Addresses: /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/i,
 	reMatchAnyRFC5322Addresses: /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/i,
+	//MATCH_RFC5322_ADDRESS: '(?:[a-z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*|"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])',
+	
+	/**
+	 * Matches a series of email recipients in the form: display-name < email-address >.
+	 * Delimiters are: comma, semi-colon, tab, newline, space; ignores delimiters in quotes.
+	 * Display name can contain a-z plus \u00C0-\u024F, i.e. Latin supplement, 
+	 * Latin Extended-A, and Latin Extended-B.
+	 * The local part is either a quoted string or latin (see above) plus . ! # $ % & ' * + - / = ? ^ _ ` { | } ~
+	 */
+	reParseEmailRecipient: /("[^"]+"|'[^']+'|\w[\w\u00C0-\u024F.!#$%&'*+-/=?^_`{|}~]*)@[^,;>\x20\t\n]+|[\w\u00C0-\u024F][\w\u00C0-\u024F\-'\x20]+\s<[^>]+>|("[^"]+"|'[^']+')\s<[^>]+>/g,
 	
 	/**
 	 * Trims whitespace from either end of a string, leaving spaces within the string intact.
@@ -317,7 +356,11 @@ Ext.define('Sonicle.String', {
 	 * @param {String} value The value to look for.
 	 * @returns {Boolean} `true` if value is found in string, `false` otherwise.
 	 */
-	contains: function(s, value) {
+	contains: function(s, value, ignoreCase) {
+		if (ignoreCase === true) {
+			s = this.lower(s);
+			value = this.lower(value);
+		}
 		return Ext.isString(s) ? s.indexOf(value) !== -1 : false;
 	},
 	
@@ -584,6 +627,27 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
+	 * Searches a string for a specified value, or a regular expression, and 
+	 * returns a new string where the specified values are replaced.
+	 * @param {String} s The String to be modified, may be null.
+	 * @param {String/Object} searchvalue The value, or regular expression, that will be replaced by the new value; or a mapping object to replace many strings sequentially.
+	 * @param {String} newvalue The value to replace the search value with.
+	 * @returns {String} A new String, where the specified value(s) has been replaced by the new value.
+	 */
+	replaceAll: function(s, searchvalue, newvalue) {
+		if (Ext.isEmpty(s)) return s;
+		if (arguments.length === 2 && Ext.isObject(searchvalue)) {
+			var ns = s + '';
+			Ext.iterate(searchvalue, function(sv, rv) {
+				ns = ns.replaceAll(sv, rv);
+			});
+			return ns;
+		} else {
+			return s.replaceAll(searchvalue, newvalue);
+		}
+	},
+	
+	/**
 	 * Splits a `String` object into an array of strings by separating the string into substrings.
 	 * @param {String} s The String to be splitted, may be null.
 	 * @param {String} separator Specifies the character to use for separating the string.
@@ -636,6 +700,29 @@ Ext.define('Sonicle.String', {
 			}
 		}
 		return ellipsed ? s + '...' : s.slice(0, -sep.length);
+	},
+	
+	/**
+	 * Wraps passed string using specified separator (at begin and end).
+	 * @param {String} s The String to be wrapped, may be null.
+	 * @param {String|String[]} separator The separator String or a 2-items array with beginning and ending separator.
+	 */
+	unwrap: function(s, separator) {
+		if (Ext.isEmpty(separator)) return s;
+		var start = separator[0], end = separator[separator.length-1];
+		s = this.removeStart(s, start);
+		s = this.removeEnd(s, end);
+		return s;
+	},
+	
+	/**
+	 * Checks if passed string is wrapped into specified separator.
+	 * @param {String} s The String to be wrapped, may be null.
+	 * @param {String|String[]} separator The separator String or a 2-items array with beginning and ending separator.
+	 * @returns {Boolean}
+	 */
+	isWrapped: function(s, separator) {
+		return s !== this.unwrap(s, separator);
 	},
 	
 	/**
@@ -781,12 +868,88 @@ Ext.define('Sonicle.String', {
 	parseKVArray: function(s, defValue, transformFn, itemsSep, valueSep) {
 		if (!Ext.isString(itemsSep)) itemsSep = ',';
 		if (!Ext.isString(valueSep)) valueSep = '=';
-		if (Ext.isEmpty(s)) defValue;
+		if (Ext.isEmpty(s)) return defValue;
 		var fn = Ext.isFunction(transformFn) ? transformFn : function(values, index) {
 			return values.length > 1 ? [values[0], values[1]] : ['key'+index, values[0]];
 		};
 		return Ext.Array.map(s.split(itemsSep), function(value, idx) {
 			return fn.apply(this, [value.split(valueSep, 2), idx]);
 		});
+	},
+	
+	/**
+	 * Parses a series of email recipients delimited by a separator: comma, 
+	 * semi-colon, tab, newline, space. Delimiters will be ignored in quotes.
+	 * Each recipient must follow the form: display-name < email-address >.
+	 * @param {String} s
+	 * @returns {String[]}
+	 */
+	parseEmailRecipients: function(s, opts) {
+		opts = opts || {};
+		// cover simple case separately; simple string without comma, semi-colon or white-space
+		// Initially, check for a simple string without comma, semi-colon or white-space
+		if (/^[^,;\s]+$/.test(s)) return [s];
+		// Now find matches using a regex
+		var matches = String(s).match(Sonicle.String.reParseEmailRecipient) || [];
+		if (opts.wrapDisplayName === true) {
+			// Wraps into double-quote section the display name (any text before <)
+			return matches.map(function(match) {
+				return match.replace(/^([^"]+)\s</, '"$1" <');
+			});
+		} else {
+			return matches;
+		}
+	},
+	
+	/**
+	 * Removes unwanted quotes from display names.
+	 * "World, Hello" becomes World, Hello
+	 * but "Say \"Hello\"" becomes Say "Hello"
+	 * @param {String} s Display name string.
+	 * @returns {String} Sanitized string
+	 */
+	unescapeDisplayName: function(s) {
+		s = Ext.String.trim(s || '');
+		
+		// Remove outer quotes
+		while (s.length > 1 && /^["'\\\s]/.test(s[0]) && s[0] === s.substr(-1)) {
+			s = Ext.String.trim(s.substr(1, s.length - 2));
+		}
+		// unescape inner quotes
+		s = s.replace(/\\"/g, '"');
+		// unescape escaped backslashes
+		s = s.replace(/\\{2}/g, '\\');
+		
+		return s;
+	},
+	
+	/**
+	 * Removes (almost) all quotes from a string.
+	 * https://github.com/open-xchange/appsuite-frontend/blob/1f265d512b13f4db11f57a55eea65f57478aa0f3/ui/apps/io.ox/core/util.js
+	 * @param {String} s Source string.
+	 * @returns {String} Sanitized string
+	 */
+	removeQuotes: function(s) {
+		return Ext.String.trim(s).replace(/^["'\\]+|["'\\]+$/g, '').replace(/\\?"/g, '');
+	},
+	
+	/**
+	 * Prepares a Data URLs from passed data, allowing content creators to embed small files inline in documents.
+	 * https://yoksel.github.io/url-encoder/
+	 * https://github.com/yoksel/url-encoder/blob/master/src/js/script.js
+	 * @param {String} mediaType MIME type String of passed data-content.
+	 * @param {String} data The raw content-data.
+	 * @param {Object} opts An object containing options.
+	 * @param {String} [opts.base64] Set to `true` to encode content-data using base64.
+	 * @returns {String} The encoded Data URL
+	 */
+	toDataURL: function(mediaType, data, opts) {
+		opts = opts || {};
+		var udata = encodeURIComponent(data), enc = '';
+		if (opts.base64 === true) {
+			enc = ';base64';
+			udata = Ext.util.Base64.encode(udata);
+		}
+		return 'data:' + Sonicle.String.deflt(mediaType, 'text/plain') + enc + ',' + udata;
 	}
 });

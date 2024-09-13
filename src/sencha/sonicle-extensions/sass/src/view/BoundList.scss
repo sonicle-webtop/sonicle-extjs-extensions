@@ -12,6 +12,10 @@
 	width: 16px;
 	height: 16px;
 	margin-left: 5px;
+	background-repeat: no-repeat;
+}
+.so-boundlist-icon-bg {
+	background-size: contain;
 }
 .so-boundlist-swatch {
 	position: absolute;
@@ -44,7 +48,7 @@
 	font-weight: bold;
 }
 .so-boundlist-swatchitem .so-boundlist-display {
-	padding-left: 21px;
+	padding-left: 20px;
 }
 .so-boundlist-item .so-boundlist-icon {
 	margin-left: 0px;

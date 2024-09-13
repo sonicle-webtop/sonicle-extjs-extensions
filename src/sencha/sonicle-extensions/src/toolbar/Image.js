@@ -6,7 +6,7 @@
  */
 Ext.define('Sonicle.toolbar.Image', {
 	extend: 'Ext.toolbar.Item',
-	alias: ['widget.sotbimage', 'widget.tbimage'],
+	alias: ['widget.so-tbimage', 'widget.tbimage'],
 	
 	/**
 	 * @cfg {"small"/"medium"/"large"} scale
@@ -14,21 +14,43 @@ Ext.define('Sonicle.toolbar.Image', {
 	 */
 	scale: 'small',
 	
-	autoEl: 'i',
-	componentCls: 'so-tbimage',
+	/**
+	 * @cfg {String} imageCls
+	 * The CSS class to apply to the image element.
+	 */
+	
+	renderTpl: [
+		'<i id="{id}-imageEl" data-ref="imageEl" class="{baseCls}-image {imageCls}" role="presentation"></i>'
+	],
+	childEls: ['imageEl'],
+	
+	baseCls: 'so-tbimage',
+	
+	autoEl: {
+		tag: 'span',
+		hidefocus: 'on',
+		unselectable: 'on'
+	},
+	
+	initRenderData: function() {
+		var me = this;
+		return Ext.apply(me.callParent(), {
+			imageCls: me.imageCls || ''
+		});
+	},
 	
 	onRender: function(parentNode, containerIdx) {
 		var me = this;
 		me.callParent(arguments);
-		me.el.addCls(me.componentCls+'-'+me.scale);
+		me.el.addCls(me.baseCls+'-'+me.scale);
 	},
 	
 	setScale: function(scale) {
 		var me = this,
 			oldScale = me.scale;
 		if (me.rendered) {
-			me.el.removeCls(me.componentCls+'-'+oldScale);
-			me.el.addCls(me.componentCls+'-'+scale);
+			me.el.removeCls(me.baseCls+'-'+oldScale);
+			me.el.addCls(me.baseCls+'-'+scale);
 		}
 		me.scale = scale;
 	}

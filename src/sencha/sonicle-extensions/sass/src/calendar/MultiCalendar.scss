@@ -1,9 +1,16 @@
-.so-multical-highlight {
-	background-color: #eaf3fa;
-}
+
 .so-multical-dd-target {
 	border: 1px solid #9ACD32;
 }
+.so-multical-highlight {
+	background-color: #eaf3fa;
+}
+
+.x-datepicker-cell.so-multical-dd-target div.x-datepicker-date:hover {
+    background-color: #9acd32 !important;
+}
+
+/*
 .so-multicalendar .x-datepicker {
 	width: 182px;
 }
@@ -60,3 +67,4 @@
 .so-multicalendar .x-monthpicker-buttons .x-btn {
 	padding: 0;
 }
+*/

@@ -40,6 +40,7 @@ Ext.define('Sonicle.form.field.Image', {
 		'Sonicle.upload.Uploader'
 	],
 	
+	componentCls: 'so-' + 'form-image',
 	fieldCls: 'so-' + 'form-image-field',
 	fieldBodyCls: 'so-' + 'form-image-field-body',
 	
@@ -114,27 +115,27 @@ Ext.define('Sonicle.form.field.Image', {
 	
 	constructor: function(cfg) {
 		var me = this,
-				SoS = Sonicle.String,
-				SoU = Sonicle.Utils,
-				icfg = SoU.getConstructorConfigs(me, cfg, [
-					{triggers: true}, {uploadDisabled: true}, {triggersOverCls: true}, {clearTriggerCls: true}, {uploadTriggerCls: true}, {clearTriggerTooltip: true}, {uploadTriggerTooltip: true}, {uploaderConfig: true}
-				]),
-				overCls = SoS.join(' ', Ext.baseCSSPrefix + 'form-trigger-over', icfg.triggersOverCls),
-				triggers = {
-					clear: {
-						type: 'soclear',
-						weight: -1,
-						tooltip: icfg.clearTriggerTooltip,
-						cls: icfg.clearTriggerCls,
-						overCls: overCls,
-						handler: me.onClearClick
-					}
-				};
+			SoS = Sonicle.String,
+			SoU = Sonicle.Utils,
+			icfg = SoU.getConstructorConfigs(me, cfg, [
+				{triggers: true}, {uploadDisabled: true}, {triggersOverCls: true}, {clearTriggerCls: true}, {uploadTriggerCls: true}, {clearTriggerTooltip: true}, {uploadTriggerTooltip: true}, {uploaderConfig: true}
+			]),
+			overCls = SoS.join(' ', Ext.baseCSSPrefix + 'form-trigger-over', icfg.triggersOverCls),
+			triggers = {
+				clear: {
+					type: 'soclear',
+					weight: -1,
+					tooltip: icfg.clearTriggerTooltip,
+					cls: icfg.clearTriggerCls,
+					overCls: overCls,
+					handler: me.onClearClick
+				}
+			};
 		
 		if (!icfg.uploadDisabled) {
 			var tip = icfg.uploadTriggerTooltip;
-			if (Ext.isString(tip) && Ext.isString(icfg.maxSizeTooltip) && icfg.uploaderConfig && Ext.isNumber(icfg.uploaderConfig.maxFileSize)) {
-				tip = Ext.String.format(icfg.maxSizeTooltip, Sonicle.Bytes.format(icfg.uploaderConfig.maxFileSize));
+			if (Ext.isString(tip) && icfg.uploaderConfig && Ext.isNumber(icfg.uploaderConfig.maxFileSize)) {
+				tip = Ext.String.format(tip, Sonicle.Bytes.format(icfg.uploaderConfig.maxFileSize));
 			}
 			triggers['upload'] = {
 				type: 'sohideable',
@@ -151,7 +152,7 @@ Ext.define('Sonicle.form.field.Image', {
 		me.callParent([cfg]);
 	},
 	
-	destroy: function() {
+	onDestroy: function() {
 		var me = this;
 		if (me.uploader) {
 			me.uploader.destroy();

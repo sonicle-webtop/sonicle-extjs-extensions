@@ -1,8 +1,8 @@
 /*
  * Sonicle ExtJs UX
  * Copyright (C) 2015 Sonicle S.r.l.
- * sonicle@sonicle.com
- * http://www.sonicle.com
+ * sonicle[at]sonicle.com
+ * https://www.sonicle.com
  */
 Ext.define('Sonicle.grid.column.Icon', {
 	extend: 'Ext.grid.column.Column',
@@ -10,6 +10,7 @@ Ext.define('Sonicle.grid.column.Icon', {
 	
 	tdCls: 'so-'+'grid-cell-iconcolumn',
 	innerCls: 'so-'+'grid-cell-inner-iconcolumn',
+	noTextInnerCls: 'so-'+'iconcolumn-notext',
 	
 	iconIconCls: 'so-'+'iconcolumn-icon',
 	iconTextCls: 'so-'+'iconcolumn-text',
@@ -50,16 +51,26 @@ Ext.define('Sonicle.grid.column.Icon', {
 	
 	/**
 	 * @cfg {String} tipField
-	 * The fieldName for getting the tooltip to apply to the icon image.
-	 * To determine the class dynamically, configure the column with a `getTip` function.
 	 */
 	tipField: null,
 	
 	/**
-	 * @cfg {Function} getTip
-	 * A function which returns the tooltip to apply to the icon image.
+	 * @deprecated
 	 */
 	getTip: null,
+	
+	/**
+	 * @cfg {String} tooltipField
+	 * The fieldName for getting the tooltip to apply to icon image.
+	 * To calculate value dynamically, configure the column with a `getTooltip` function.
+	 */
+	tooltipField: null,
+	
+	/**
+	 * @cfg {Function} getTooltip
+	 * A function which returns a computed tooltip to apply to icon image.
+	 */
+	getTooltip: null,
 	
 	/**
 	 * @cfg {Number} iconSize
@@ -113,21 +124,30 @@ Ext.define('Sonicle.grid.column.Icon', {
 		me.callParent([cfg]);
 	},
 	
+	initComponent: function() {
+		var me = this;
+		me.callParent(arguments);
+		if (me.hideText === true) {
+			me.innerCls += ' ' + me.noTextInnerCls;
+		}
+	},
+	
 	buildHtml: function(value, rec) {
 		var me = this,
-				SoU = Sonicle.Utils,
-				clsico = me.iconIconCls,
-				clstxt = me.iconTextCls,
-				size = me.iconSize,
-				ico = SoU.rendererEvalValue(value, rec, me.iconClsField, me.getIconCls),
-				icoColor = SoU.rendererEvalValue(value, rec, null, me.getIconColor, null),
-				ttip = SoU.rendererEvalValue(value, rec, me.tipField, me.getTip, null),
-				icoStyle = 'width:'+size+'px;height:'+size+'px;',
-				text = '', sttip = '';
+			SoS = Sonicle.String,
+			SoU = Sonicle.Utils,
+			clsico = me.iconIconCls,
+			clstxt = me.iconTextCls,
+			size = me.iconSize,
+			ico = SoU.rendererEvalValue(value, rec, me.iconClsField, me.getIconCls),
+			icoColor = SoU.rendererEvalValue(value, rec, null, me.getIconColor, null),
+			ttip = SoU.rendererEvalValue(value, rec, me.tipField || me.tooltipField, me.getTip || me.getTooltip, null),
+			icoStyle = 'width:'+size+'px;height:'+size+'px;',
+			text = '', sttip = '';
 		
 		if (icoColor) icoStyle += 'color:'+icoColor+';';
 		if (ico) clsico += ' ' + ico;
-		if (!me.hideText) text = '<span class="'+clstxt+'">' + Sonicle.String.deflt(SoU.rendererEvalValue(value, rec, me.dataIndex, me.getText), '') + '</span>';
+		if (!me.hideText) text = '<span class="'+clstxt+'">' + Sonicle.String.deflt(SoU.rendererEvalValue(value, rec, me.dataIndex, me.getText, undefined, SoS.htmlEncode), '') + '</span>';
 		if (Ext.isFunction(me.handler)) icoStyle += 'cursor:pointer;';
 		if (Ext.isString(ttip)) {
 			sttip = ' data-qtip="' + ttip + '"';
@@ -139,7 +159,7 @@ Ext.define('Sonicle.grid.column.Icon', {
 	
 	defaultRenderer: function(value, cellValues, record, rowIdx, colIdx, store, view) {
 		var me = this,
-				cellCls = Sonicle.Utils.rendererEvalValue(value, record, me.cellClsField, me.getCellCls, null);
+			cellCls = Sonicle.Utils.rendererEvalValue(value, record, me.cellClsField, me.getCellCls, null);
 		if (cellValues && Ext.isString(cellCls)) cellValues.tdCls += cellCls;
 		return this.buildHtml(value, record);
 	},

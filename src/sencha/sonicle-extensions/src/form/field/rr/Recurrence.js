@@ -1,8 +1,8 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2018 Sonicle S.r.l.
- * sonicle@sonicle.com
- * http://www.sonicle.com
+ * Copyright (C) 2024 Sonicle S.r.l.
+ * sonicle[at]sonicle.com
+ * https://www.sonicle.com
  */
 Ext.define('Sonicle.form.field.rr.Recurrence', {
 	extend: 'Ext.form.FieldContainer',
@@ -25,17 +25,18 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 	
 	config: {
 		/**
-		 * @cfg {Date} startDate
-		 * The start date of the underlying recurrence series.
-		 */
-		startDate: null,
-		
-		/**
 		 * @cfg {Boolean} [allowRawFreqSelection=true]
 		 * Set to `false` in order to prevent user selection on raw freq. entry.
 		 */
 		allowRawFreqSelection: true
 	},
+	
+	/**
+	 * @cfg {Date} [defaultStartDate]
+	 * The default start-date when defining new rule.
+	 * If not defined, current date will be used instead.
+	 */
+	defaultStartDate: undefined,
 	
 	/**
 	 * @cfg {Number} [startDay=0]
@@ -118,7 +119,8 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 	},
 	
 	initComponent: function() {
-		var me = this;
+		var me = this,
+			ME = Sonicle.form.field.rr.Recurrence;
 		
 		me.items = [{
 			xtype: 'fieldcontainer',
@@ -252,14 +254,15 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 					element: 'inputEl',
 					fn: function(e) {
 						e.stopEvent();
-						var be = e.event, txt;
+						var be = e.event, paste, start, rr;
 						if (be && be.clipboardData && be.clipboardData.types && be.clipboardData.getData) {
-							txt = be.clipboardData.getData('text/plain');
-							if (me.fromRRuleString(txt)) {
-								me.setValue(txt);
+							paste = be.clipboardData.getData('text/plain');
+							start = me.getStartDate();
+							if (rr = ME.parseRRuleString(paste, start)) {
+								me.setValue(rr.toString());
 							} else {
 								me.fireEvent('rawpasteinvalid', me);
-							}
+							}	
 						}
 					}
 				}
@@ -276,15 +279,26 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		me.configureUi(me.rrule ? me.rrule.origOptions.freq : 'none', me.rrule);
 	},
 	
+	getDefaultStartDate: function() {
+		var deflt = this.defaultStartDate;
+		return Ext.isDate(deflt) ? deflt : new Date();
+	},
+	
+	setDefaultStartDate: function(date) {
+		this.defaultStartDate = date;
+	},
+	
 	setValue: function(value, /*private*/ uiSilent) {
-		var me = this, rr;
+		var me = this,
+			ME = Sonicle.form.field.rr.Recurrence,
+			rr;
 		
 		if (Ext.isEmpty(value)) {
 			me.value = null;
 			me.rrule = null;
 		} else {
 			me.value = value;
-			rr = me.fromRRuleString(value);
+			rr = ME.parseRRuleString(value);
 			me.rrule = rr ? rr : null;
 		}
 		if (!uiSilent) {
@@ -296,26 +310,9 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		return me;
 	},
 	
-	updateStartDate: function(newValue, oldValue) {
-		var me = this, optsCt, optCt, durCt;
-		if (me.rendered) {
-			me.suspendOnRRuleCfgChange++;
-			optsCt = me.getComponent('optsct');
-			optsCt.items.each(function(item) {
-				item.setStartDate(newValue, true);
-			});
-			durCt = me.getComponent('durct');
-			durCt.getComponent('dur').setStartDate(newValue);
-			Ext.defer(function() { me.suspendOnRRuleCfgChange--; }, 250);
-			//me.suspendOnRRuleCfgChange--;
-			
-			// If we have a valid rrule object, gets the updated  
-			// string according to startDate change
-			if (me.rrule) {
-				optCt = optsCt.getLayout().getActiveItem();
-				me.setValue(new RRule(me.buildRRuleCfg(optCt.getRRuleConfig(), null)).toString(), true);
-			}
-		}
+	getStartDate: function() {
+		var me = this;
+		return me.rrule ? me.rrule.options.dtstart : me.getDefaultStartDate();
 	},
 	
 	isEqual: function(value1, value2) {
@@ -333,12 +330,12 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		
 		configureUi: function(freq, rrule) {
 			var me = this,
-					freqCbo = me.getComponent(0).getComponent('freqcbo'),
-					optsCt = me.getComponent('optsct'),
-					durCt = me.getComponent('durct'),
-					rawFld = me.getComponent('rawfld');
-
-			rawFld.setValue(rrule ? rrule.toString() : null);
+				freqCbo = me.getComponent(0).getComponent('freqcbo'),
+				optsCt = me.getComponent('optsct'),
+				durCt = me.getComponent('durct'),
+				rawFld = me.getComponent('rawfld');
+			
+			rawFld.setValue(rrule ? Sonicle.form.field.rr.Recurrence.splitRRuleString(rrule.toString()).rrule : null);
 
 			if (freq === 'none') {
 				optsCt.hide();
@@ -399,8 +396,8 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		
 		buildRRuleCfg: function(freqCfg, durCfg) {
 			var me = this,
-					freqCbo, optsCt, durCt, freqCmp;
-
+				freqCbo, optsCt, durCt, freqCmp;
+			
 			if (!freqCfg) {
 				freqCbo = me.getComponent(0).getComponent('freqcbo');
 				optsCt = me.getComponent('optsct');
@@ -411,13 +408,15 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 				durCt = me.getComponent('durct');
 				durCfg = durCt.getComponent('dur').getRRuleConfig();
 			}
-			return Ext.apply(freqCfg, durCfg);
+			return Ext.apply(freqCfg, durCfg, {
+				dtstart: me.getStartDate()
+			});
 		},
 
 		buildFreqComboData: function(freqOptions) {
 			var me = this,
-					freqTexts = me.frequencyTexts,
-					data = [], freq;
+				freqTexts = me.frequencyTexts,
+				data = [], freq;
 			data.push(['none', freqTexts['none']]);
 			for (var i=0; i < freqOptions.length; i++) {
 				freq = freqOptions[i];
@@ -425,18 +424,38 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 			}
 			data.push(['raw', freqTexts['raw']]);
 			return data;
-		},
-
-		fromRRuleString: function(s) {
-			try {
-				return RRule.fromString(s);
-			} catch(err) {
-				return false;
-			}
 		}
 	},
 	
 	statics: {
+		
+		/**
+		 * Parses an RRule String with optionally a start Date with accoring format.
+		 * In source string, recurrence rule can be specified as plain string (eg. 'FREQ=DAILY;INTERVAL=1')
+		 * or using named-parameter notation (eg. 'RRULE:FREQ=DAILY;INTERVAL=1').
+		 * Starting date can be reported accordingly (eg. 'DTSTART:20240723T220000Z');
+		 * the separator between two named-parameters is '\n' character.
+		 * @param {String} s The input String to be parsed
+		 * @param {Date|String} [start] A start date as Date object or in String representation.
+		 * @param {String} [format] Format pattern for start Date, if was specified as String. Defaults to ISO date (`c`).
+		 */
+		parseRRuleString: function(s, start, format) {
+			var rr, start;
+			if (!Ext.isEmpty(s)) {
+				try {
+					rr = RRule.fromString(s);
+				} catch(err) {
+					return false;
+				}
+				if (start) {
+					start = Sonicle.Date.parse(start, format || 'c');
+					rr = new RRule(Ext.apply(rr.origOptions || {}, {
+						dtstart: start
+					}));
+				}
+			}
+			return rr;
+		},
 		
 		/**
 		 * Returns whether two RRules are logically equal. Comparison is NOT 
@@ -450,13 +469,113 @@ Ext.define('Sonicle.form.field.rr.Recurrence', {
 		 */
 		isRRuleEqual: function(rrule1, rrule2) {
 			var s1 = Ext.isString(rrule1) ? rrule1 : '',
-					s2 = Ext.isString(rrule2) ? rrule2 : '',
-					spl1 = s1.split(';'),
-					spl2 = s2.split(';');
+				s2 = Ext.isString(rrule2) ? rrule2 : '',
+				spl1 = s1.split(';'),
+				spl2 = s2.split(';');
 			if (spl1.length !== spl2.length) return false;
 			spl1.sort();
 			spl2.sort();
 			return spl1.join(';') === spl2.join(';');
+		},
+		
+		/**
+		 * Translates a JS weekday number into RRule's byWeekday value. Array are supported.
+		 * @param {Number|Number[]} jsWeekday One or many JS weekday numbers.
+		 * @return {Number|Number[]} byWeekday value(s)
+		 */
+		jsWeekdayToByWeekday: function(jsWeekday) {
+			var ME = Sonicle.form.field.rr.Recurrence;
+			if (Ext.isArray(jsWeekday)) {
+				var arr = [];
+				for (var i=0; i<jsWeekday.length; i++) {
+					arr.push(ME.jsWeekdayToRRuleWeekday(jsWeekday[i]));
+				}
+				return arr;
+			} else {
+				return ME.jsWeekdayToRRuleWeekday(jsWeekday);
+			}
+		},
+		
+		/**
+		 * Translates an RRule's byWeekday value into JS weekday. Array are supported.
+		 * @param {Number|Number[]} byWeekday One or many RRule's byWeekday values.
+		 * @return {Number|Number[]} weekday value(s)
+		 */
+		byWeekdayToJsWeekday: function(byWeekday) {
+			if (Ext.isArray(byWeekday)) {
+				var arr = [];
+				for (var i=0; i<byWeekday.length; i++) {
+					arr.push(byWeekday[i].getJsWeekday());
+				}
+				return arr;
+			} else {
+				return byWeekday.getJsWeekday();
+			}
+		},
+		
+		/**
+		 * @private
+		 */
+		jsWeekdayToRRuleWeekday: function(jsWeekday) {
+			switch(jsWeekday) {
+				case 0:
+					return RRule.SU;
+				case 1:
+					return RRule.MO;
+				case 2:
+					return RRule.TU;
+				case 3:
+					return RRule.WE;
+				case 4:
+					return RRule.TH;
+				case 5:
+					return RRule.FR;
+				case 6:
+					return RRule.SA;
+			}
+		},
+		
+		joinRRuleString: function(rrule, start) {
+			var SoS = Sonicle.String,
+				rr = SoS.removeStart(rrule, 'RRULE:'),
+				tokens = [];
+			if (Ext.isDate(start)) {
+				tokens.push('DTSTART:'+Sonicle.form.field.rr.Recurrence.formatDTStart(start));
+			}
+			if (!Ext.isEmpty(rrule)) {
+				tokens.push('RRULE:'+rr);
+			}
+			return SoS.join('\n', tokens);
+		},
+		
+		parseDTStart: function(s) {
+			var dtstart;
+			if (!Ext.isEmpty(s) && s.length === 16) {
+				dtstart = Ext.Date.parse(s.slice(0, 4)+'-'+s.slice(4, 6)+'-'+s.slice(6, 8)+'T'+s.slice(9, 11)+':'+s.slice(11, 13)+':'+s.slice(13), 'C');
+			}
+			return dtstart;
+		},
+		
+		formatDTStart: function(dtstart) {
+			return Ext.Date.format(dtstart, 'C')
+				.split('-').join('')
+				.split(':').join('')
+				.slice(0,15).concat('Z');
+		},
+		
+		splitRRuleString: function(text) {
+			var tokens = Sonicle.String.parseKVArray(text, [], undefined, '\n', ':'),
+				rrule, start, i;
+			if (!Ext.isEmpty(tokens)) {
+				for (i=0; i<tokens.length; i++) {
+					if (tokens[i][0] === 'RRULE') {
+						rrule = tokens[i][1];
+					} else if (tokens[i][0] === 'DTSTART') {
+						start = Sonicle.form.field.rr.Recurrence.parseDTStart(tokens[i][1]);
+					}
+				}
+			}
+			return {rrule: rrule, start: start};
 		}
 	}
 });

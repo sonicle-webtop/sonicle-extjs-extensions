@@ -42,6 +42,10 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 		'Sonicle.form.field.tinymce.tool.DevTools'
 	],
 	
+	style: {
+		marginBottom: '0px'
+	},
+		
 	focusable: true,
 	defaultBindProperty: 'value',
 	
@@ -1380,6 +1384,7 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 			return Ext.apply({
 				xtype: 'toolbar',
 				defaultButtonUI: me.defaultButtonUI,
+				cls: 'so-tmcehtmleditor-toolbar x-noborder-trbl', // Make sure toolbar displays no borders
 				enableOverflow: true,
 				items: items,
 				// stop form submits

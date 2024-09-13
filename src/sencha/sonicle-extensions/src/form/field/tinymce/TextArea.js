@@ -27,14 +27,14 @@ Ext.define('Sonicle.form.field.tinymce.TextArea', {
 	
 	componentCls: 'so-'+'tmcetextarea',
 	
-	getEditorDomElement: function() {
-		return this.inputEl ? this.inputEl.dom : undefined;
-	},
-	
-	doDestroy: function() {
+	onDestroy: function() {
 		var me = this;
 		me.setEditor(null);
 		me.callParent();
+	},
+	
+	getEditorDomElement: function() {
+		return this.inputEl ? this.inputEl.dom : undefined;
 	},
 	
 	setValue: function(value) {

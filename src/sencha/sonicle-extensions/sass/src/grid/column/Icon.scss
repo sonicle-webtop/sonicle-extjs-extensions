@@ -1,11 +1,10 @@
-/* Generate problems with classic 16x16 icons
-.so-grid-cell-inner-iconcolumn {
-    display: flex;
-    align-items: center;
+.so-grid-cell-inner-iconcolumn.so-iconcolumn-notext {
+	text-overflow: clip;
 }
-*/
 .so-grid-cell-inner-iconcolumn .so-iconcolumn-icon {
-	float: left;
+	display: inline-block;
+	vertical-align: middle;
+	background-repeat: no-repeat;
 }
 .so-grid-cell-inner-iconcolumn .so-iconcolumn-text {
 	margin-left: 5px;

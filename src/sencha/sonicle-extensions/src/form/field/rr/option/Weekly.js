@@ -1,8 +1,8 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2018 Sonicle S.r.l.
- * sonicle@sonicle.com
- * http://www.sonicle.com
+ * Copyright (C) 2024 Sonicle S.r.l.
+ * sonicle[at]sonicle.com
+ * https://www.sonicle.com
  */
 Ext.define('Sonicle.form.field.rr.option.Weekly', {
 	extend: 'Sonicle.form.field.rr.option.Abstract',
@@ -26,7 +26,7 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 	
 	initComponent: function() {
 		var me = this,
-				SoDate = Sonicle.Date;
+			SoD = Sonicle.Date;
 		me.callParent(arguments);
 		me.add([{
 			xtype: 'fieldcontainer',
@@ -61,7 +61,7 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 						change: me.fieldOnChange,
 						scope: me
 					},
-					width: 60
+					width: 80
 				}, {
 					xtype: 'label',
 					cls: 'x-form-cb-label-default',
@@ -78,7 +78,7 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 				{
 					itemId: 'opt1-day1',
 					bind: '{data.opt1Day1}',
-					boxLabel: SoDate.getShortDayName(1),
+					boxLabel: SoD.getShortDayName(1),
 					listeners: {
 						change: me.fieldOnChange,
 						scope: me
@@ -86,7 +86,7 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 				}, {
 					itemId: 'opt1-day2',
 					bind: '{data.opt1Day2}',
-					boxLabel: SoDate.getShortDayName(2),
+					boxLabel: SoD.getShortDayName(2),
 					listeners: {
 						change: me.fieldOnChange,
 						scope: me
@@ -94,7 +94,7 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 				}, {
 					itemId: 'opt1-day3',
 					bind: '{data.opt1Day3}',
-					boxLabel: SoDate.getShortDayName(3),
+					boxLabel: SoD.getShortDayName(3),
 					listeners: {
 						change: me.fieldOnChange,
 						scope: me
@@ -102,7 +102,7 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 				}, {
 					itemId: 'opt1-day4',
 					bind: '{data.opt1Day4}',
-					boxLabel: SoDate.getShortDayName(4),
+					boxLabel: SoD.getShortDayName(4),
 					listeners: {
 						change: me.fieldOnChange,
 						scope: me
@@ -110,7 +110,7 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 				}, {
 					itemId: 'opt1-day5',
 					bind: '{data.opt1Day5}',
-					boxLabel: SoDate.getShortDayName(5),
+					boxLabel: SoD.getShortDayName(5),
 					listeners: {
 						change: me.fieldOnChange,
 						scope: me
@@ -118,7 +118,7 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 				}, {
 					itemId: 'opt1-day6',
 					bind: '{data.opt1Day6}',
-					boxLabel: SoDate.getShortDayName(6),
+					boxLabel: SoD.getShortDayName(6),
 					listeners: {
 						change: me.fieldOnChange,
 						scope: me
@@ -126,7 +126,7 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 				}, {
 					itemId: 'opt1-day0',
 					bind: '{data.opt1Day0}',
-					boxLabel: SoDate.getShortDayName(0),
+					boxLabel: SoD.getShortDayName(0),
 					listeners: {
 						change: me.fieldOnChange,
 						scope: me
@@ -138,13 +138,13 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 	
 	getRRuleConfig: function() {
 		var me = this,
-				data = me.getVMData(),
-				byweekday = [];
+			data = me.getVMData(),
+			byweekday = [];
 		
 		if (data.opt1 === true) {
 			Ext.iterate([0,1,2,3,4,5,6], function(day) {
 				if (data['opt1Day'+day] === true) {
-					byweekday.push(me.jsWeekdayToRRuleWeekday(day));
+					byweekday.push(Sonicle.form.field.rr.Recurrence.jsWeekdayToRRuleWeekday(day));
 				}
 			});
 			return {
@@ -160,7 +160,7 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 	privates: {
 		validateRRule: function(rr) {
 			var me = this,
-					rrCfg = rr.origOptions;
+				rrCfg = rr.origOptions;
 			if (rrCfg.freq !== RRule.WEEKLY) return false;
 			if (!me.isOpt1(rrCfg)) return false;
 			return true;
@@ -168,15 +168,15 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 		
 		applyRRule: function(rr) {
 			var me = this,
-					rrCfg = rr.origOptions,
-					data = Ext.apply(me.getVMData(), {
-						opt1: false
-					}),
-					days;
+				rrCfg = rr.origOptions,
+				data = Ext.apply(me.getVMData(), {
+					opt1: false
+				}),
+				days;
 
 			if (me.isOpt1(rrCfg)) {
 				data.opt1 = true;
-				days = me.byWeekdayToJsWeekday(me.asArray(rrCfg.byweekday));
+				days = Sonicle.form.field.rr.Recurrence.byWeekdayToJsWeekday(me.asArray(rrCfg.byweekday));
 				Ext.iterate(days, function(day) {
 					data['opt1Day'+day] = true;
 				});

@@ -1,0 +1,15 @@
+.x-action-col-cell.so-actioncolumn-col-cell-visible-onselection > .x-grid-cell-inner-action-col {
+	display: none;
+}
+.x-action-col-cell.so-actioncolumn-col-cell-visible-onover > .x-grid-cell-inner-action-col {
+	display: none;
+}
+.x-action-col-cell.so-actioncolumn-col-cell-hidden > .x-grid-cell-inner-action-col {
+	display: none;
+}
+.x-grid-item.x-grid-item-selected .x-action-col-cell.so-actioncolumn-col-cell-visible-onselection .x-grid-cell-inner-action-col {
+	display: block;
+}
+.x-grid-item.x-grid-item-over .x-action-col-cell.so-actioncolumn-col-cell-visible-onover .x-grid-cell-inner-action-col {
+	display: block;
+}

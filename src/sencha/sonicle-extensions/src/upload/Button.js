@@ -53,7 +53,7 @@ Ext.define('Sonicle.upload.Button', {
 		]);
 	},
 	
-	destroy: function() {
+	onDestroy: function() {
 		var me = this;
 		if (me.uploader) {
 			me.uploader.destroy();

@@ -19,7 +19,7 @@ Ext.define('Sonicle.form.field.CodeEditor', {
 		editor: {}
 	},
 	
-	doDestroy: function() {
+	onDestroy: function() {
 		var me = this;
 		me.setEditor(null);
 		me.callParent();

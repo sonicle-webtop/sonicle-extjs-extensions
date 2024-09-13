@@ -1,5 +1,5 @@
 /**
- * Override default Ext.form.field.Base
+ * Override original {@link Ext.form.field.Base}
  * - ensure binded model being updated: the original implementation do not 
  *  publish the  value if there are any validation errors (see {@link Ext.form.field.Field#getErrors getErrors}).
  *  You can check this by adding a presence validator on binded field, if you 

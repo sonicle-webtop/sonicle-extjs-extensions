@@ -1,5 +1,5 @@
 /**
- * Override default Ext.window.Window
+ * Override original {@link Ext.window.Window}
  * - Support before-* events for maximize and restore functions
  */
 Ext.define('Sonicle.overrides.window.Window', {

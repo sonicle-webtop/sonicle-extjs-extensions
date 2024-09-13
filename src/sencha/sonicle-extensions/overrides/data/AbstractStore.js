@@ -1,5 +1,5 @@
 /**
- * Override default Ext.data.AbstractStore
+ * Override original {@link Ext.data.AbstractStore}
  * - Fix broken getGroupField: after the introduction of multi-grouping (EXTJS-29617)
  *  (see config {@link Ext.data.AbstractStore#groupers}) in ExtJS 7.4 seems 
  *  that the setter (setGroupField) sets data into Grouper, the getter 
@@ -10,12 +10,14 @@ Ext.define('Sonicle.overrides.data.AbstractStore', {
 	override: 'Ext.data.AbstractStore',
 	
 	/**
-	 * @override getGroupField to restore backward compatibility
+	 * @override Check me during ExtJs upgrade!
+	 * Override original {@link #getGroupField}
+	 * - Restore backward compatibility
 	 */
 	getGroupField: function() {
 		var me = this,
-				group = '',
-				grouper;
+			group = '',
+			grouper;
 		
 		if (me.usesGroupers === true) {
 			group = me.callParent(arguments);

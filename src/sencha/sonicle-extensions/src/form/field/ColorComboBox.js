@@ -113,7 +113,7 @@ Ext.define('Sonicle.form.field.ColorComboBox', {
 	},
 	
 	/**
-	 * Overrides default implementation of {@link Ext.form.field.ComboBox#afterRender}.
+	 * Override original {@link Ext.form.field.ComboBox#afterRender}
 	 */
 	afterRender: function() {
 		var me = this;
@@ -124,7 +124,7 @@ Ext.define('Sonicle.form.field.ColorComboBox', {
 	},
 	
 	/**
-	 * Overrides default implementation of {@link Ext.form.field.Field#onChange}.
+	 * Override original {@link Ext.form.field.Field#onChange}
 	 */
 	onChange: function(newVal, oldVal) {
 		var me = this;

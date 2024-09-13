@@ -50,7 +50,7 @@ Ext.define('Sonicle.form.trigger.Menu', {
 	cls: 'so-' + 'form-menu-trigger',
 	extraCls: 'fas fa-bars',
 	
-	destroy: function() {
+	onDestroy: function() {
 		this.setMenu(null);
 		this.callParent();
 	},

@@ -1,5 +1,5 @@
 /**
- * Override default Ext.data.Model
+ * Override original {@link Ext.data.Model}
  * - Add support to associations: provide setAssociated method, check in isValid and isDirty
  * - Add refresh option to isValid in order to make sure to have validation data recalculated
  */

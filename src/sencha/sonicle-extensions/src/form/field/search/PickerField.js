@@ -132,7 +132,7 @@ Ext.define('Sonicle.form.field.search.PickerField', {
 		me.on('specialkey', me.onSpecialKey, me);
 	},
 	
-	destroy: function() {
+	onDestroy: function() {
 		var me = this;
 		
 		Ext.iterate(me.storeCache, function(key, val) {

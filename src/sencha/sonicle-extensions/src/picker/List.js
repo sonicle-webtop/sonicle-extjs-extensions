@@ -137,7 +137,7 @@ Ext.define('Sonicle.picker.List', {
 	
 	initComponent: function() {
 		var me = this,
-				multi = (me.allowMultiSelection === true);
+			multi = (me.allowMultiSelection === true);
 		
 		me.selModel = multi ? 'checkboxmodel' : 'rowmodel';
 		me.viewConfig = {
@@ -171,7 +171,15 @@ Ext.define('Sonicle.picker.List', {
 			},
 			'->', {
 				xtype: 'button',
+				ui: '{secondary}',
+				text: me.cancelText,
+				handler: function() {
+					me.fireEvent('cancelclick', me);
+				}
+			}, {
+				xtype: 'button',
 				reference: 'btnok',
+				ui: '{primary}',
 				text: me.okText,
 				disabled: true,
 				handler: function() {
@@ -181,6 +189,7 @@ Ext.define('Sonicle.picker.List', {
 			}, {
 				xtype: 'button',
 				reference: 'btnyes',
+				ui: '{primary}',
 				text: me.yesText,
 				hidden: Ext.isEmpty(me.yesText),
 				disabled: true,
@@ -188,17 +197,10 @@ Ext.define('Sonicle.picker.List', {
 					me.fireEvent('yesclick', me);
 					me.firePick(me.getSelection(), 'yes');
 				}
-			}, {
-				xtype: 'button',
-				text: me.cancelText,
-				handler: function() {
-					me.fireEvent('cancelclick', me);
-				}
 			}
 		];
 		
 		me.callParent(arguments);
-		if (me.store) me.applySkipFilter(me.skipValues);
 		
 		me.on('beforeselect', me.onBeforeSelect, me);
 		me.on('selectionchange', me.onSelectionChange, me);
@@ -209,9 +211,18 @@ Ext.define('Sonicle.picker.List', {
 		}, me, {single: true});
 	},
 	
-	destroy: function() {
+	bindStore: function(store, initial) {
 		var me = this;
-		if (me.store) {
+		me.callParent(arguments);
+		if (store) {
+			me.applySkipFilter(me.skipValues);
+		}
+	},
+	
+	unbindStore: function() {
+		var me = this,
+			store = me.store;
+		if (store && !store.destroyed) {
 			me.applySearchFilter(null);
 			me.applySkipFilter(null);
 		}
@@ -275,9 +286,9 @@ Ext.define('Sonicle.picker.List', {
 		
 		applySkipFilter: function(valuesToSkip) {
 			var me = this,
-					field = me.valueField,
-					filters = me.getStore().getFilters(),
-					fi = filters.getByKey('solistpicker-skip');
+				field = me.valueField,
+				filters = me.getStore().getFilters(),
+				fi = filters.getByKey('solistpicker-skip');
 
 			filters.beginUpdate();
 			if (fi) filters.remove(fi);
@@ -294,8 +305,8 @@ Ext.define('Sonicle.picker.List', {
 		
 		applySearchFilter: function(value) {
 			var me = this,
-					filters = me.getStore().getFilters(),
-					fi = filters.getByKey('solistpicker-search');
+				filters = me.getStore().getFilters(),
+				fi = filters.getByKey('solistpicker-search');
 			
 			if (value) {
 				filters.beginUpdate();
@@ -321,7 +332,12 @@ Ext.define('Sonicle.picker.List', {
 		},
 		
 		onSearchSpecialkey: function(s, e) {
-			if (e.getKey() === e.DOWN) this.getSelectionModel().select(0);
+			var me = this;
+			if (e.getKey() === e.DOWN) {
+				me.getSelectionModel().select(0);
+			} else if (e.getKey() === e.ESC) {
+				me.fireEvent('cancelclick', me);
+			}
 		},
 		
 		onBeforeSelect: function(s) {
@@ -333,10 +349,10 @@ Ext.define('Sonicle.picker.List', {
 		
 		onSelectionChange: function(s, sel) {
 			var me = this,
-					min = me.minSelections,
-					count = sel.length,
-					minCount = Ext.isNumber(min) && (min > 0) ? me.minSelections : 1,
-					disabled = count < minCount;
+				min = me.minSelections,
+				count = sel.length,
+				minCount = Ext.isNumber(min) && (min > 0) ? me.minSelections : 1,
+				disabled = count < minCount;
 			me.lookupReference('btnok').setDisabled(disabled);
 			me.lookupReference('btnyes').setDisabled(disabled);
 			if (me.allowMultiSelection && sel) {

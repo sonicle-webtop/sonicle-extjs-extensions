@@ -268,37 +268,9 @@
     "requires": ["ux"],
 	
 	"builds": {
-		"triton": {
-			"toolkit": "classic",
-			"theme": "theme-triton"
-		},
-		"neptune": {
+		"base": {
 			"toolkit": "classic",
 			"theme": "theme-neptune"
-		},
-		"crisp": {
-			"toolkit": "classic",
-			"theme": "theme-crisp"
-		},
-		"classic": {
-			"toolkit": "classic",
-			"theme": "theme-classic"
-		},
-		"gray": {
-			"toolkit": "classic",
-			"theme": "theme-gray"
-		},
-		"graphite": {
-			"toolkit": "classic",
-			"theme": "theme-graphite"
-		},
-		"classic-material": {
-			"toolkit": "classic",
-			"theme": "theme-material"
-		},
-		"aria": {
-			"toolkit": "classic",
-			"theme": "theme-aria"
 		}
 	}
 }

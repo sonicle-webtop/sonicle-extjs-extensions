@@ -1,19 +1,19 @@
 /**
- * Override default Ext.form.field.ComboBox
- *  - Fix value NOT published when blurring-out quickly (remote + forceSelection false + value and display field set)	 WT-789
- *  - Add autoLoadOnQuery option: initially load the store only when the first 
- *    query is issued (for eg. by clicking the trigger). Useful in situations where 
- *    you do not want to preload all data when initially displaying the field.
- *  - Lookup single value record on setValue: when pagination is used, label may 
- *    NOT be decoded because the underlyning record may NOT be in the exact page 
- *    currently loaded into the Store. The beforeQuery override simply marks to 
- *    pass value to backend in the next Store load.
+ * Override original {@link Ext.form.field.ComboBox}
+ * - Fix value NOT published when blurring-out quickly (remote + forceSelection false + value and display field set)	 WT-789
+ * - Add autoLoadOnQuery option: initially load the store only when the first 
+ *   query is issued (for eg. by clicking the trigger). Useful in situations where 
+ *   you do not want to preload all data when initially displaying the field.
+ * - Lookup single value record on setValue: when pagination is used, label may 
+ *   NOT be decoded because the underlyning record may NOT be in the exact page 
+ *   currently loaded into the Store. The beforeQuery override simply marks to 
+ *   pass value to backend in the next Store load.
  * 
- *  - (Ext 6.2 - seems the fix is not working anymore)
- *    Fix binding not updated (value remains outdated) under some circumstances 
- *    when forceSelection is `false` and queryMode is `local`:
- *     1) typing value and blurring out quickly from the field
- *     2) whole value is cleared out using Backspace or Canc when store is NOT loaded yet
+ * - (Ext 6.2 - seems the fix is not working anymore)
+ *   Fix binding not updated (value remains outdated) under some circumstances 
+ *   when forceSelection is `false` and queryMode is `local`:
+ *    1) typing value and blurring out quickly from the field
+ *    2) whole value is cleared out using Backspace or Canc when store is NOT loaded yet
  */
 Ext.define('Sonicle.overrides.form.field.ComboBox', {
 	override: 'Ext.form.field.ComboBox',
@@ -63,6 +63,9 @@ Ext.define('Sonicle.overrides.form.field.ComboBox', {
 		this.loadStoreBuffered(options);
 	},
 	
+	/**
+	 * @override Check me during ExtJs upgrade!
+	 */
 	onBlur: function(e) {
 		var me = this,
 				inputEl = me.inputEl.dom;
@@ -78,6 +81,9 @@ Ext.define('Sonicle.overrides.form.field.ComboBox', {
 		me.callParent(arguments);
 	},
 	
+	/**
+	 * @override Check me during ExtJs upgrade!
+	 */
 	beforeQuery: function(queryPlan) {
 		var me = this,
 			qp = me.callParent(arguments),
@@ -119,6 +125,9 @@ Ext.define('Sonicle.overrides.form.field.ComboBox', {
 		}
 	},
 	
+	/**
+	 * @override Check me during ExtJs upgrade!
+	 */
 	doSetValue: function(value /* private for use by addValue */, add) {
 		var me = this;
 		

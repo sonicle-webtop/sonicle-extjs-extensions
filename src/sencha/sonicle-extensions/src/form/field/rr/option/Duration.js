@@ -1,8 +1,8 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2018 Sonicle S.r.l.
- * sonicle@sonicle.com
- * http://www.sonicle.com
+ * Copyright (C) 2024 Sonicle S.r.l.
+ * sonicle[at]sonicle.com
+ * https://www.sonicle.com
  */
 Ext.define('Sonicle.form.field.rr.option.Duration', {
 	extend: 'Sonicle.form.field.rr.option.Abstract',
@@ -63,7 +63,7 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 					change: me.fieldOnChange,
 					scope: me
 				},
-				width: 60
+				width: 80
 			}, {
 				xtype: 'label',
 				cls: 'x-form-cb-label-default',
@@ -96,7 +96,7 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 	
 	getRRuleConfig: function() {
 		var me = this,
-				data = me.getVMData();
+			data = me.getVMData();
 		
 		if (data.opt1 === true) {
 			return {};
@@ -114,12 +114,6 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 		}
 	},
 	
-	setStartDate: function(value) {
-		this.startDate = value;
-		// Here is NOT necessary, like parent method, to update values using 
-		// startDate just set. So, update its internal value and nothing else.
-	},
-	
 	privates: {
 		validateRRule: function(rr) {
 			return true;
@@ -127,12 +121,12 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 		
 		applyRRule: function(rr) {
 			var me = this,
-					rrCfg = rr.origOptions,
-					data = Ext.apply(me.getVMData(), {
-						opt1: false,
-						opt2: false,
-						opt3: false
-					});
+				rrCfg = rr.origOptions,
+				data = Ext.apply(me.getVMData(), {
+					opt1: false,
+					opt2: false,
+					opt3: false
+				});
 
 			if (me.isOpt2(rrCfg)) {
 				data.opt2 = true;
@@ -157,10 +151,10 @@ Ext.define('Sonicle.form.field.rr.option.Duration', {
 		},
 		
 		returnVMDataStartDependantDefaults: function() {
-			var stDt = this.startDate;
-			if (Ext.isDate(stDt)) {
+			var start = this.getStartDate();
+			if (Ext.isDate(start)) {
 				return {
-					until: stDt
+					until: start
 				};
 			} else {
 				return {};

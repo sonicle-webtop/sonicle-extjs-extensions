@@ -1,15 +1,19 @@
 .so-tbimage {
-	display: block;
+	padding: 3px;
 }
-.so-tbimage-small {
+.so-tbimage .so-tbimage-image {
+	display: block;
+	background-repeat: no-repeat;
+}
+.so-tbimage-small .so-tbimage-image {
 	width: 16px;
 	height: 16px;
 }
-.so-tbimage-medium {
+.so-tbimage-medium .so-tbimage-image {
 	width: 24px;
 	height: 24px;
 }
-.so-tbimage-large {
+.so-tbimage-large .so-tbimage-image {
 	width: 32px;
 	height: 32px;
 }

@@ -1,5 +1,5 @@
 /**
- * Override default Ext.app.ViewModel
+ * Override default {@link Ext.app.ViewModel}
  * - Add support to onRecordCreateWithId before record load
  */
 Ext.define('Sonicle.overrides.app.ViewModel', {

@@ -1,5 +1,5 @@
 /**
- * Override default Ext.grid.column.RowNumberer
+ * Override original {@link Ext.grid.column.RowNumberer}
  * - Add autoSize feature: when numbers has two or more digits, column's default
  *   size is not enough to accomodate the whole number, so text is truncated.
  */
@@ -8,6 +8,9 @@ Ext.define('Sonicle.overrides.grid.column.RowNumberer', {
 	
 	autoSize: true,
 	
+	/**
+	 * @override Check me during ExtJs upgrade!
+	 */
 	renumberRows: function() {
 		if (this.destroying || this.destroyed) {
 			return;

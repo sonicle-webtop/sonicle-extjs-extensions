@@ -1,8 +1,8 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2018 Sonicle S.r.l.
- * sonicle@sonicle.com
- * http://www.sonicle.com
+ * Copyright (C) 2024 Sonicle S.r.l.
+ * sonicle[at]sonicle.com
+ * https://www.sonicle.com
  */
 Ext.define('Sonicle.form.field.rr.option.Abstract', {
 	extend: 'Ext.container.Container',
@@ -20,22 +20,15 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 	 */
 	rrule: undefined,
 	
-	/**
-	 * @cfg {Date} startDate
-	 * The start date of the underlying recurrence series.
-	 */
-	startDate: undefined,
-	
 	suspendOnChange: 0, // Counter to ignore fields change events issuing change task!
 	rruleCfgChangeBuffer: 200,
 	
 	initComponent: function() {
 		var me = this;
 		me.callParent(arguments);
-		me.setStartDate(me.startDate);
 	},
 	
-	destroy: function() {
+	onDestroy: function() {
 		var me = this,
             task = me.rruleCfgChangeTask;
 		if (task) task.cancel();
@@ -52,26 +45,6 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 		Ext.raise('Override me');
 	},
 	
-	setStartDate: function(value, silent) {
-		var me = this,
-				isDate = Ext.isDate,
-				changed = isDate(me.startDate) && isDate(value) ? Sonicle.Date.compare(me.startDate, value, false, true) !== 0 : me.startDate !== value,
-				vm;
-		me.startDate = value;
-		if (changed && Ext.isDate(value)) {
-			vm = me.getViewModel();
-			me.suspendOnChange++;
-			me.getVMData(); // Make sure that data is initialized!
-			Ext.iterate(me.returnVMDataStartDependantDefaults(), function(key, value) {
-				vm.set('data.'+key, value);
-			});
-			if (!silent) {
-				me.startRRuleCfgChangeTask();
-			}
-			Ext.defer(function() { me.suspendOnChange--; }, 250);
-		}
-	},
-	
 	setRRule: function(value) {
 		var me = this;
 		me.rrule = value;
@@ -81,12 +54,19 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 			if (me.validateRRule(value) !== false) {
 				me.suspendOnChange++;
 				me.applyRRule(value);
+				// Keep delay otherwise internal field's change event may fire after updating internal viewModel, and we don't want it.
 				Ext.defer(function() { me.suspendOnChange--; }, 250);
 				return true;
 			} else {
 				return false;
 			}
 		}
+	},
+	
+	getStartDate: function() {
+		var me = this,
+			rrule = me.rrule;
+		return rrule ? rrule.options.dtstart : new Date();
 	},
 	
 	privates: {
@@ -177,8 +157,8 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 		
 		getVMData: function() {
 			var me = this,
-					vm = me.getViewModel(),
-					data = vm.get('data');
+				vm = me.getViewModel(),
+				data = vm.get('data');
 
 			if (data.opt1 !== null) {
 				return data;
@@ -191,7 +171,7 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 		
 		startRRuleCfgChangeTask: function() {
 			var me = this,
-					task = me.rruleCfgChangeTask;
+				task = me.rruleCfgChangeTask;
 			if (!task) {
 				me.rruleCfgChangeTask = task = new Ext.util.DelayedTask(me.doRRuleCfgChangeTask, me);
 			}
@@ -207,49 +187,6 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 				return item;
 			} else {
 				return Ext.isDefined(item) ? [item] : [];
-			}
-		},
-
-		byWeekdayToJsWeekday: function(byWeekday) {
-			if (Ext.isArray(byWeekday)) {
-				var arr = [];
-				for (var i=0; i<byWeekday.length; i++) {
-					arr.push(byWeekday[i].getJsWeekday());
-				}
-				return arr;
-			} else {
-				return byWeekday.getJsWeekday();
-			}
-		},
-
-		jsWeekdayToByWeekday: function(jsWeekday) {
-			if (Ext.isArray(jsWeekday)) {
-				var arr = [];
-				for (var i=0; i<jsWeekday.length; i++) {
-					arr.push(this.jsWeekdayToRRuleWeekday(jsWeekday[i]));
-				}
-				return arr;
-			} else {
-				return this.jsWeekdayToRRuleWeekday(jsWeekday);
-			}
-		},
-
-		jsWeekdayToRRuleWeekday: function(jsWeekday) {
-			switch(jsWeekday) {
-				case 0:
-					return RRule.SU;
-				case 1:
-					return RRule.MO;
-				case 2:
-					return RRule.TU;
-				case 3:
-					return RRule.WE;
-				case 4:
-					return RRule.TH;
-				case 5:
-					return RRule.FR;
-				case 6:
-					return RRule.SA;
 			}
 		}
 	}

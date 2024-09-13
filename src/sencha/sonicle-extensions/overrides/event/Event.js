@@ -1,5 +1,5 @@
 /**
- * Override default Ext.event.Event
+ * Override original {@link Ext.event.Event}
  * - Context menu data management: returns injected menuData
  */
 Ext.define('Sonicle.overrides.event.Event', {

@@ -35,12 +35,16 @@ Ext.define('Sonicle.form.field.tinymce.tool.Mixin', {
 	mixinConfig: {
 		id: 'tmcetool',
 		on: {
-			doDestroy: 'onDoDestroy'
+			onDestroy: 'tmceOnOnDestroy'
 		}
 	},
 	
 	config: {
 		htmlEditor: null
+	},
+	
+	tmceOnOnDestroy: function() {
+		this.setHtmlEditor(null);
 	},
 	
 	bindEditor: function(editor, htmlEditor) {
@@ -55,10 +59,6 @@ Ext.define('Sonicle.form.field.tinymce.tool.Mixin', {
 			delete me.editorMonitoredCallbacks;
 		}
 		return value;
-	},
-	
-	onDoDestroy: function() {
-		this.setHtmlEditor(null);
 	},
 	
 	getEditor: function() {

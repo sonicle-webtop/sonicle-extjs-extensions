@@ -1,0 +1,22 @@
+
+.x-panel.so-kanban-column {
+    border-top-left-radius: var(--kanban-column-border-radius, 0px);
+    border-top-right-radius: var(--kanban-column-border-radius, 0px);
+    border-bottom-left-radius: var(--kanban-column-border-radius, 0px);
+    border-bottom-right-radius: var(--kanban-column-border-radius, 0px);
+	-moz-box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.10), 0px 2px 4px 0px rgba(0, 0, 0, 0.06); /* FF3.5+ */
+	-webkit-box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.10), 0px 2px 4px 0px rgba(0, 0, 0, 0.06); /* Saf3.0+, Chrome */
+	box-shadow: 0px 4px 6px 0px rgba(0, 0, 0, 0.10), 0px 2px 4px 0px rgba(0, 0, 0, 0.06); /* Opera 10.5, IE 9.0 */
+}
+.x-panel.so-kanban-column .x-panel-header {
+    border-top-left-radius: var(--kanban-column-border-radius, 0px);
+    border-top-right-radius: var(--kanban-column-border-radius, 0px);
+}
+.x-panel.so-kanban-column .x-panel-header.x-panel-header-collapsed {
+    border-bottom-left-radius: var(--kanban-column-border-radius, 0px);
+    border-bottom-right-radius: var(--kanban-column-border-radius, 0px);
+}
+.x-panel.so-kanban-column .x-panel-body {
+    border-bottom-left-radius: var(--kanban-column-border-radius, 0px);
+    border-bottom-right-radius: var(--kanban-column-border-radius, 0px);
+}

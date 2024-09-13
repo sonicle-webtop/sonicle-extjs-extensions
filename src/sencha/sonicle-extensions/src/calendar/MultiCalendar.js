@@ -9,7 +9,7 @@ Ext.define('Sonicle.calendar.MultiCalendar', {
 	alias: 'widget.somulticalendar',
 	
 	requires: [
-		'Sonicle.calendar.DatePicker'
+		'Sonicle.fullcalendar.DatePicker'
 	],
 	mixins: [
 		'Ext.form.field.Field',
@@ -184,15 +184,14 @@ Ext.define('Sonicle.calendar.MultiCalendar', {
 			first = (i === 0);
 			last = (i === months-1);
 			me.add(Ext.create({
-				xtype: 'socalendarpicker',
+				xtype: 'sofullcalendardatepicker',
 				border: false,
 				showToday: false,
 				showMonthpicker: first,
 				startDay: me.startDay,
 				highlightMode: me.highlightMode,
-				boldDates: me.dates,
+				fullDates: me.dates,
 				ddTargetCls: 'so-multical-dd-target',
-				highlightCls: 'so-multical-highlight',
 				highlightPrevDays: first,
 				highlightNextDays: last,
 				hidePrevDays: !first,
@@ -244,7 +243,7 @@ Ext.define('Sonicle.calendar.MultiCalendar', {
 			});
 			Ext.suspendLayouts();
 			me.items.each(function(cmp) {
-				cmp.setBoldDates(dates, true);
+				cmp.setFullDates(dates, true);
 			});
 			Ext.resumeLayouts(true);
 		}
@@ -268,7 +267,7 @@ Ext.define('Sonicle.calendar.MultiCalendar', {
 		
 		Ext.suspendLayouts();
 		me.items.each(function(cmp, i) {
-			cmp.setBoldDates(null);
+			cmp.setFullDates(null);
 			cmp.setHighlightDate(date);
 			if(cmp === me.activePicker) {
 				cmp.setValue(date);

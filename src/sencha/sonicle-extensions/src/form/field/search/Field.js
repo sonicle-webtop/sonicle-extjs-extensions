@@ -71,9 +71,11 @@ Ext.define('Sonicle.form.field.search.Field', {
 	 * @param {String} name The name by which the field is referenced (used as keyword).
 	 * @param {String} mapping The keyword name to use (instead of above name) when producing the conditionArray in result.
 	 * @param {string|integer|number|boolean|date|time|combo|tag} type Controls the type of field derived class used to manage values.
+	 * @param {String} [hgroup] A group name. Fields with same group will be arranged together horizontally.
 	 * @param {String} [boolKeyword] Keyword to be associated to boolean field, instead of field name (eg. `has` or `is` verbs).
-	 * @param {top|left} [labelAlign=top] Controls the position and alignment of the {@link Ext.form.field.Base#fieldLabel}.
+	 * @param {top|left|right} [labelAlign=top] Controls the position and alignment of the {@link Ext.form.field.Base#fieldLabel}.
 	 * @param {String} [label] The label for the field.
+	 * @param {String} [emptyText] The emptyText for the field.
 	 * @param {Boolean} [textSink] `true` to use this field as destination field for alone text portions in query.
 	 * @param {Object} [fieldCfg] A custom {@link Ext.form.field.Field} config to apply.
 	 */
@@ -166,7 +168,7 @@ Ext.define('Sonicle.form.field.search.Field', {
 		//me.on('specialkey', me.onSpecialKey, me);
 	},
 	
-	destroy: function() {
+	onDestroy: function() {
 		var me = this;
 		
 		me.disarmListDelayedOpening();
@@ -603,10 +605,15 @@ Ext.define('Sonicle.form.field.search.Field', {
 			me.fireEvent('save', me, value, me.remapQueryObject(queryObject));
 		},
 		
+		/**
+		 * Remaps, if necessary, data in query Object.
+		 * @param {SearchString.Object} qobj SearchString's query object.
+		 * @return {SearchString.Object}
+		 */
 		remapQueryObject: function(qobj) {
 			var me = this,
-					conds = Ext.Array.clone(qobj.conditionArray),
-					field, fcc, iof;
+				conds = Ext.Array.clone(qobj.conditionArray),
+				field, fcc, iof;
 			Ext.iterate(conds, function(cond, i) {
 				field = Ext.Array.findBy(me.fields, function(item) { return cond.keyword === item.name; });
 				if (field) {

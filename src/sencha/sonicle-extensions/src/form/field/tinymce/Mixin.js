@@ -9,8 +9,8 @@ Ext.define('Sonicle.form.field.tinymce.Mixin', {
 	mixinConfig: {
 		id: 'tinymce',
 		on: {
-			onRender: 'onOnRender'
-			//onResize: 'onOnResize'
+			onRender: 'tmceOnOnRender'
+			//onResize: 'tmceOnOnResize'
 		}
 	},
 	
@@ -54,7 +54,7 @@ Ext.define('Sonicle.form.field.tinymce.Mixin', {
 		return config;
 	},
 	
-	onOnRender: function(parentNode, containerIdx) {
+	tmceOnOnRender: function(parentNode, containerIdx) {
 		var me = this,
 				config = me.getEditor();
 		// Defer editor creation in order to avoid startup failures: missing 
@@ -65,7 +65,7 @@ Ext.define('Sonicle.form.field.tinymce.Mixin', {
 	},
 	
 	/*
-	onOnResize: function(width, height, oldWidth, oldHeight) {
+	tmceOnOnResize: function(width, height, oldWidth, oldHeight) {
 		//TODO: hide floating panels after resize! (like v.4 tinymce.ui.FloatPanel.hideAll())
 		//https://github.com/tinymce/tinymce/issues/3592
 	},

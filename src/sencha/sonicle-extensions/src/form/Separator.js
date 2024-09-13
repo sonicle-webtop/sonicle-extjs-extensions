@@ -8,8 +8,7 @@ Ext.define('Sonicle.form.Separator', {
 	extend: 'Ext.form.FieldSet',
 	alias: ['widget.soformseparator', 'widget.formseparator'],
 	
-	//autoEl: 'div',
-	//cls: 'x-fieldset x-fieldset-collapsed x-fieldset-default'
+	componentCls: 'so-'+'form-separator',
 	collapsed: true,
 	anchor: '100%',
 	width: '100%'

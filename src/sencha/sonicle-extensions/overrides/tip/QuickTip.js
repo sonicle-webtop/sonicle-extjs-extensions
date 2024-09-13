@@ -1,5 +1,5 @@
 /**
- * Override default Ext.tip.QuickTip
+ * Override default {@link Ext.tip.QuickTip}
  * - Support dismissDelay on target el: like 'data-qshowDelay', lookup value from 'data-qdismissdelay' and 'data-qshowdelay' (note lowercase)
  */
 Ext.define('Sonicle.overrides.tip.QuickTip', {

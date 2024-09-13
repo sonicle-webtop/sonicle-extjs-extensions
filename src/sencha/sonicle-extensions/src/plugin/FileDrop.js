@@ -3,7 +3,8 @@
  * Copyright (C) 2015 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
- * Inspired by http://bensmithett.github.io/dragster/
+ * 
+ * @deprecated Use Sonicle.plugin.DropMask instead (DropMask is more generic and needs to be configured properly for filtering unwanted drag operations)
  */
 Ext.define('Sonicle.plugin.FileDrop', {
     extend: 'Ext.AbstractPlugin',
@@ -13,6 +14,7 @@ Ext.define('Sonicle.plugin.FileDrop', {
 	
 	init: function(cmp) {
 		var me = this;
+		Ext.log.warn('"Sonicle.plugin.FileDrop" is deprecated. Use "Sonicle.plugin.DropMask" instead.');
 		me.setCmp(cmp);
 		cmp.on({
 			element: 'el',

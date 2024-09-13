@@ -49,6 +49,9 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 	 */
 	tooltipType: 'qtip',
 	
+	iconWrapElCls: 'so-'+'fieldicon-wrap',
+	iconElCls: 'so-'+'fieldicon-icon',
+	
 	init: function(field) {
 		var me = this;
 		me.setCmp(field);
@@ -83,9 +86,9 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 			iconEl.replaceCls(me.iconCls, iconCls);
 			// Updates 'display' style of the wrapper, or the icon, according to iconClass value
 			if (field.iconWrapEl) {
-				field.iconWrapEl.setStyle('display', Ext.isEmpty(iconCls) ? 'none' : 'table-cell');
+				field.iconWrapEl.setStyle('display', Ext.isEmpty(iconCls) ? 'none' : null);
 			} else {
-				iconEl.setStyle('display', Ext.isEmpty(iconCls) ? 'none' : 'inline-block');
+				iconEl.setStyle('display', Ext.isEmpty(iconCls) ? 'none' : null);
 			}
 		}
 		me.iconCls = iconCls;
@@ -130,26 +133,17 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 			var me = this,
 				field = me.getCmp(),
 				isCheckbox = field.isXType('checkbox'),
+				isTextArea = field.isXType('textarea'),
 				icoElCfg = me.createIconElConfig(),
-				wrapElCfg = {
-					tag: 'div',
-					style: {
-						display: 'table-cell',
-						lineHeight: 0,
-						verticalAlign: 'middle',
-						width: (me.iconWidth + me.cellWidthAdjust) + 'px'
-					},
-					cn: [icoElCfg]
-				},
+				wrapElCfg = me.createWrapElConfig([icoElCfg]),
 				wrapEl, icoEl;
-
-			if (field.isXType('textarea')) {
-				Ext.apply(wrapElCfg.style, {
-					verticalAlign: 'bottom',
-					paddingTop: '3px'
-				});
+			
+			if (isCheckbox) {
+				wrapElCfg.cls += ' ' + me.iconWrapElCls + '-checkbox';
+			} else if (isTextArea) {
+				wrapElCfg.cls += ' ' + me.iconWrapElCls + '-textarea';
 			}
-
+			
 			switch(me.iconAlign) {
 				case 'afterInput':
 					if (isCheckbox) {
@@ -165,9 +159,6 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 					break;
 				case 'afterLabel':
 					if (isCheckbox && field.boxLabelEl) {
-						Ext.apply(icoElCfg.style, {
-							verticalAlign: 'middle'
-						});
 						icoEl = field.boxLabelEl.insertSibling(icoElCfg, 'after');
 					} else {
 						wrapEl = field.labelEl.insertSibling(wrapElCfg, 'after');
@@ -192,7 +183,6 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 
 			field.iconWrapEl = wrapEl;
 			field.iconEl = icoEl;
-
 			me.setIconCls(me.iconCls);
 			me.setTooltip(me.tooltip, true);
 		},
@@ -210,26 +200,56 @@ Ext.define('Sonicle.plugin.FieldIcon', {
 			}
 		},
 		
-		getTipAttr: function() {
-			return this.tooltipType === 'qtip' ? 'data-qtip' : 'title';
+		createWrapElConfig: function(children) {
+			var me = this,
+				cls = me.iconWrapElCls;
+			return {
+				tag: 'div',
+				cls: cls + ' ' + me.toAlignCls(cls, me.iconAlign),
+				style: {
+					//display: 'table-cell',
+					//lineHeight: 0,
+					//verticalAlign: 'middle',
+					width: (me.iconWidth + me.cellWidthAdjust) + 'px'
+				},
+				cn: children
+			};
 		},
 		
 		createIconElConfig: function() {
 			var me = this,
-				cfg = {
-					tag: 'i',
-					cls: me.iconCls,
-					style: {
-						display: 'inline-block',
-						width: me.iconWidth + 'px',
-						height: me.iconHeight + 'px',
-						//backgroundSize: me.iconWidth + 'px ' + me.iconHeight + 'px', // Enable 32px aligned svg on 16x16
-						fontSize: me.iconHeight + 'px',
-						margin: me.iconMargin
-					}
-				};
-			//if (!Ext.isEmpty(me.iconCursor)) cfg.style['cursor'] = me.iconCursor;
-			return cfg;
+				cls = me.iconElCls;
+			return {
+				tag: 'i',
+				cls: cls + ' ' + me.toAlignCls(cls, me.iconAlign) + ' ' + me.iconCls,
+				style: {
+					//display: 'inline-block',
+					width: me.iconWidth + 'px',
+					height: me.iconHeight + 'px',
+					//backgroundSize: me.iconWidth + 'px ' + me.iconHeight + 'px', // Enable 32px aligned svg on 16x16
+					fontSize: me.iconHeight + 'px'
+					//margin: me.iconMargin
+				}
+			};
+		},
+		
+		toAlignCls: function(baseCls, iconAlign) {
+			switch(iconAlign) {
+				case 'afterInput':
+					return baseCls + '-ai';
+				case 'beforeInput':
+					return baseCls + '-bi';
+				case 'afterLabel':
+					return baseCls + '-al';
+				case 'beforeLabel':
+					return baseCls + '-bl';
+				default:
+					return '';
+			}
+		},
+		
+		getTipAttr: function() {
+			return this.tooltipType === 'qtip' ? 'data-qtip' : 'title';
 		}
 	}
 });

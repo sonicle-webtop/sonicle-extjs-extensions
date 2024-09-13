@@ -1,5 +1,5 @@
 /**
- * Override default Ext.data.validator.Format
+ * Override original {@link Ext.data.validator.Format}
  * - Add support to conditional validation (through ConditionalValidator mixin)
  * - Supports many matchers (as array) to perform an OR validation.
  */

@@ -13,7 +13,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 		'Ext.form.field.Checkbox',
 		'Ext.form.field.Number',
 		'Ext.form.field.Text',
-		'Sonicle.form.field.Tag',
+		'Sonicle.form.field.LabelTag',
 		'Sonicle.form.field.search.EditorModel',
 		'Sonicle.form.trigger.Clear',
 		'Sonicle.plugin.FieldTooltip'
@@ -74,7 +74,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 		var me = this,
 			childViewModel = Ext.Factory.viewModel('sosearcheditormodel', {fields: cfg.fields, trueValue: cfg.trueValue, falseValue: cfg.falseValue}),
 			storeDependsOnMap = {},
-			layout, items, bbar;
+			bbarItems;
 		
 		if (cfg.trueValue) me.trueValue = cfg.trueValue;
 		if (cfg.falseValue) me.falseValue = cfg.falseValue;
@@ -88,22 +88,22 @@ Ext.define('Sonicle.form.field.search.Editor', {
 		
 		me.childViewModel = childViewModel;
 		
-		bbar = [{xtype: 'tbfill'}];
+		bbarItems = ['->'];
 		if (me.showSave) {
-			Ext.Array.push(bbar, [
+			Ext.Array.push(bbarItems, [
 				{
 					xtype: 'button',
+					ui: '{tertiary}',
 					iconCls: cfg.saveIconCls || me.saveIconCls,
 					tooltip: cfg.saveTooltip || me.saveTooltip,
 					handler: me.onSave,
 					scope: me
-				}, {
-					xtype: 'tbspacer'
 				}
 			]);
 		}
-		bbar.push({
+		bbarItems.push({
 			xtype: 'button',
+			ui: '{primary}',
 			text: cfg.okText || me.okText,
 			tooltip: cfg.okTooltip,
 			handler: me.onOk,
@@ -121,24 +121,15 @@ Ext.define('Sonicle.form.field.search.Editor', {
 				Sonicle.Object.multiValueMapMerge(storeDependsOnMap, result.storeDependsOnMap);
 				tbitems.push({
 					xtype: 'panel',
-					layout:'anchor',
+					layout: 'anchor',
 					scrollable: true,
 					//scrollable: tbitems.length === 0 ? null : true,
 					border: false,
-					bodyPadding: '0 10 0 10',
+					bodyPadding: '10 10 0 10',
 					title: Sonicle.String.deflt(tabCfg.title, ''),
 					items: result.items
 				});
 			});
-			layout = 'fit';
-			items = [{
-				xtype: 'tabpanel',
-				border: false,
-				tabPosition: 'bottom',
-				activeTab: 0,
-				deferredRender: false,
-				items: tbitems
-			}];
 		
 			Ext.apply(me, {
 				layout: 'fit',
@@ -149,13 +140,17 @@ Ext.define('Sonicle.form.field.search.Editor', {
 						tabPosition: 'bottom',
 						activeTab: 0,
 						deferredRender: false,
-						items: tbitems,
 						layout: 'anchor',
-						tabBar:	{
-							items: bbar
-						}
+						items: tbitems
+						//tabBar:	{
+						//	items: bbar
+						//}
 					}
-				]
+				],
+				bbar: {
+					ui: 'footer',
+					items: bbarItems
+				}
 			});
 			
 		} else {
@@ -163,9 +158,12 @@ Ext.define('Sonicle.form.field.search.Editor', {
 			Sonicle.Object.multiValueMapMerge(storeDependsOnMap, result.storeDependsOnMap);
 			Ext.apply(me, {
 				layout: 'anchor',
-				bodyPadding: '0 10 0 10',
+				bodyPadding: '10 10 0 10',
 				items: result.items,
-				bbar: bbar
+				bbar: {
+					ui: 'footer',
+					items: bbarItems
+				}
 			});
 		}
 		me.callParent([cfg]);
@@ -206,7 +204,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 		}
 	},
 	
-	destroy: function() {
+	onDestroy: function() {
 		var me = this;
 		delete me.reloadersMap;
 		me.clearListeners();
@@ -268,9 +266,22 @@ Ext.define('Sonicle.form.field.search.Editor', {
 		createFieldsCfg: function(vm, labelWidth, fields) {
 			var me = this,
 				storeDependsOnMap = {},
-				farr = [];
+				farr = [],
+				hgroups = {},
+				pendingGroup;
+			
+			// Preprocess fields consolidating groups
 			Ext.iterate(fields, function(field) {
-				var cfg = null;
+				if (!Ext.isEmpty(field.hgroup)) {
+					if (!hgroups[field.hgroup]) hgroups[field.hgroup] = [];
+					hgroups[field.hgroup].push(field.name);
+				}
+			});
+			
+			Ext.iterate(fields, function(field) {
+				var cfg = null,
+					hgroupMembers = field.hgroup ? hgroups[field.hgroup] : null;
+				
 				if (field.type === 'string') {
 					cfg = me.createTextField(field);
 				} else if (field.type === 'integer') {
@@ -293,6 +304,33 @@ Ext.define('Sonicle.form.field.search.Editor', {
 					cfg = me.createTagField(field);
 				}
 				if (cfg) {
+					// If there is a pending group and its name does NOT match 
+					// with processing field's group, we need to consolidate the 
+					// pending container adding it to the items list.
+					// Fields of same group MUST be together in the array, not scattered!
+					if (pendingGroup && pendingGroup.name !== field.hgroup) {
+						farr.push(pendingGroup.container);
+						pendingGroup = null;
+					}
+					
+					// If processing field needs to be grouped, make sure there 
+					// is a pending group, otherwise prepare it!
+					if (field.hgroup) {
+						if (!pendingGroup) {
+							pendingGroup = {
+								name: field.hgroup,
+								container: {
+									xtype: 'fieldcontainer',
+									layout: 'hbox',
+									items: [],
+									labelWidth: labelWidth,
+									anchor: '100%'
+								}
+							};
+						}
+						cfg.flex = 1;
+					}
+					
 					if (!cfg.anchor && !cfg.width) cfg.anchor = '100%';
 					// Handle storeDependsOn config, setting-up Store's onBeforeLoad in order to call passed handler
 					if (Ext.isObject(field.storeDependsOn) && Ext.isString(field.storeDependsOn.parentField)) {
@@ -306,14 +344,32 @@ Ext.define('Sonicle.form.field.search.Editor', {
 							Sonicle.Object.multiValueMapPut(storeDependsOnMap, field.storeDependsOn.parentField, field.name);
 						}
 					}
-					farr.push(Ext.apply(cfg, {
+					Ext.apply(cfg, {
 						viewModel: vm,
 						labelWidth: labelWidth,
 						tooltip: Ext.isEmpty(cfg.tooltip) ? me.generateUsage(field) : me.generateUsage(field) + '\n' + cfg.tooltip,
 						plugins: [{ptype: 'sofieldtooltip', tooltipTarget: 'label'}]
-					}));
+					});
+					
+					// If there is a pending group adds current field to its 
+					// container, otherwise push it directly to items list.
+					if (pendingGroup) {
+						if (hgroupMembers.indexOf(field.name) !== (hgroupMembers.length-1)) {
+							// Add margin to fields, except for the last one!
+							Ext.apply(cfg, {margin: '0 10 0 0'});
+						}
+						pendingGroup.container.items.push(cfg);
+					} else {
+						farr.push(cfg);
+					}
 				}
 			});
+			
+			// Process also remaining pending group
+			if (pendingGroup) {
+				farr.push(pendingGroup.container);
+				pendingGroup = null;
+			}
 
 			return {
 				items: farr,
@@ -330,7 +386,8 @@ Ext.define('Sonicle.form.field.search.Editor', {
 					hidden: '{hiddens.'+field.name+'}'
 				},
 				labelAlign: field.labelAlign || 'top',
-				fieldLabel: field.label || field.name
+				fieldLabel: field.label || field.name,
+				emptyText: field.emptyText
 			});
 		},
 
@@ -344,6 +401,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 				},
 				labelAlign: field.labelAlign || 'top',
 				fieldLabel: field.label || field.name,
+				emptyText: field.emptyText,
 				allowDecimals: !integer
 			});
 		},
@@ -358,6 +416,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 				},
 				labelAlign: field.labelAlign || 'top',
 				fieldLabel: field.label || field.name,
+				emptyText: field.emptyText,
 				triggers: {
 					clear: {
 						type: 'soclear',
@@ -379,6 +438,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 				},
 				labelAlign: field.labelAlign || 'top',
 				fieldLabel: field.label || field.name,
+				emptyText: field.emptyText,
 				triggers: {
 					clear: {
 						type: 'soclear',
@@ -415,9 +475,9 @@ Ext.define('Sonicle.form.field.search.Editor', {
 					[this.trueValue, this.trueText],
 					[this.falseValue, this.falseText]
 				],
-				//labelAlign: 'left',
 				labelAlign: field.labelAlign || 'top',
 				fieldLabel: field.label || field.name,
+				emptyText: field.emptyText,
 				triggers: {
 					clear: {
 						type: 'soclear',
@@ -439,6 +499,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 				},
 				labelAlign: field.labelAlign || 'top',
 				fieldLabel: field.label || field.name,
+				emptyText: field.emptyText,
 				triggers: {
 					clear: {
 						type: 'soclear',
@@ -452,19 +513,20 @@ Ext.define('Sonicle.form.field.search.Editor', {
 
 		createTagField: function(field) {
 			return Ext.apply(field.customConfig || {}, {
-				xtype: 'sotagfield',
+				xtype: 'solabeltagfield',
 				reference: field.name,
 				bind: {
-					value: '{values.'+field.name+'_raw}', //FIXME: is this still useful after introducing remapQueryObject?
-					labelValue: '{values.'+field.name+'}',
+					valueAsDisplay: '{values.'+field.name+'}',
 					hidden: '{hiddens.'+field.name+'}'
 				},
+				enableValueAsDisplay: true,
 				createNewOnEnter: false,
 				createNewOnBlur: false,
 				filterPickList: true,
 				forceSelection: true,
 				queryMode: 'local',
 				labelAlign: field.labelAlign || 'top',
+				emptyText: field.emptyText,
 				fieldLabel: field.label || field.name
 			});
 		},

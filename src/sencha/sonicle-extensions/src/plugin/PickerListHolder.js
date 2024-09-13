@@ -68,12 +68,12 @@ Ext.define('Sonicle.plugin.PickerListHolder', {
 	init: function(cmp) {
 		var me = this;
 		me.setCmp(cmp);
-		me.onInitComponent();
+		me.ddPickerHolderOnInitComponent();
 	},
 	
-	doDestroy: function() {
+	destroy: function() {
 		delete this.lookupStore;
-		this.beforeDoDestroy();
+		this.ddPickerHolderOnOnDestroy();
 	},
 	
 	getOwnerCmp: function() {

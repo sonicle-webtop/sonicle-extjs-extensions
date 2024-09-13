@@ -1,16 +1,21 @@
 /**
- * Override default Ext.grid.column.Check
+ * Override original {@link Ext.grid.column.Check}
  * - Fix broken rendering: in ExtJS 7.5 if text containing HTML with attributes, 
  *   the rendered markup is broken (EXTJS-29315)
+ * - Add support to component's cls config, ignored until now
  */
 Ext.define('Sonicle.overrides.grid.column.Check', {
 	override: 'Ext.grid.column.Check',
 	
+	/**
+	 * @override Check me during ExtJs upgrade!
+	 */
 	defaultRenderer: function(value, cellValues) {
 		var me = this,
 			cls = me.checkboxCls,
 			tip = '';
 		
+		if (!Ext.isEmpty(me.cls)) cls += ' ' + me.cls; // Added
 		if (me.invert) {
 			value = !value;
 		}

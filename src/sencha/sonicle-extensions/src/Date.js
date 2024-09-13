@@ -187,14 +187,14 @@ Ext.define('Sonicle.Date', {
 	/**
 	 * Parses the passed string using the specified date format.
 	 * {@link Sonicle.Date#parse Sonicle.Date.parse} is alias for {@link Ext.Date#parse Ext.Date.parse}
-	 * @param {String} input The raw date string.
+	 * @param {String/Date} input The raw date string. A ready Date object will be returned soon.
 	 * @param {String} format The expected date string format.
 	 * @param {Boolean} [strict=false] (optional) `true` to validate date strings while parsing (i.e. prevents JavaScript Date "rollover").
 	 * Invalid date strings will return `null` when parsed.
 	 * @return {Date/null} The parsed Date, or `null` if an invalid date string.
 	 */
 	parse: function(input, format, strict) {
-		return Ext.Date.parse(input, format, strict);
+		return Ext.isDate(input) ? input : Ext.Date.parse(input, format, strict);
 	},
 	
 	/**

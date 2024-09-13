@@ -1,23 +1,25 @@
 /**
- * Override default Ext.form.field.Text
+ * Override original {@link Ext.form.field.Text}
  * - Add support to position (left|right) config in triggers
+ * - Add caret position management methods and text selection
  */
 Ext.define('Sonicle.overrides.form.field.Text', {
 	override: 'Ext.form.field.Text',
 	
+	/**
+	 * @override Check me during ExtJs upgrade!
+	 */
 	onRender: function() {
 		var me = this,
 			triggers = me.getTriggers();
 		
 		me.callParent();
 		if (triggers) {
-			var els = me.triggerWrap.query('.' + Ext.baseCSSPrefix + 'form-trigger'), i;
+			var els = me.triggerWrap.query('.' + Ext.baseCSSPrefix + 'form-trigger-left'), i;
 			for (i=0; i<els.length; i++) {
 				Ext.iterate(triggers, function(name, trigger) {
 					if (els[i].id === trigger.domId) {
-						if (trigger.position === 'left') {
-							me.inputWrap.insertSibling(els[i], 'before', false);
-						}
+						me.inputWrap.insertSibling(els[i], 'before', false);
 					}
 				});
 			}

@@ -1,5 +1,5 @@
 /**
- * Override default Ext.grid.column.Column
+ * Override original {@link Ext.grid.column.Column}
  * - Add support to isActionHidden: allow to hide item dynamically (like isActionDisabled)
  */
 Ext.define('Sonicle.overrides.grid.column.Action', {

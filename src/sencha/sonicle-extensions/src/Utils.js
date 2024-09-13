@@ -7,8 +7,19 @@ Ext.define('Sonicle.Utils', {
     singleton: true,
 	uses: [
 		'Sonicle.Object',
-		'Sonicle.String'
+		'Sonicle.String',
+		'Sonicle.Number'
 	],
+	
+	/**
+	 * Returns first valid Number value of provided arguments.
+	 * {@link Sonicle.Utils#coalesceNumber} is alias for {@link Sonicle.Number#coalesce}
+	 * @param {Mixed...} numbers List of numbers.
+	 * @returns {Mixed} The first valid value.
+	 */
+	numberCoalesce: function(numbers) {
+		return Sonicle.Number.coalesce.apply(Sonicle.Number, arguments);
+	},
 	
 	/**
 	 * @deprecated use Sonicle.Object.setProp() instead
@@ -87,6 +98,61 @@ Ext.define('Sonicle.Utils', {
 			return triggers;
 		}
 		return Ext.apply(moreTriggers || {}, triggers);
+	},
+	
+	/**
+	 * Merges some more docked-items into new `dockedItems` object.
+	 * @param {Object|Object[]} dockedItems The source `dockedItems` object.
+	 * @param {Object|Object[]} moreComponents Components to be added as docked-item.
+	 * @returns {Object|Object[]} Object to use as {@link Ext.panel.Panel#dockedItems}.
+	 */
+	mergeDockedItems_old: function(dockedItems, moreComponents, append) {
+		if (append === undefined || !Ext.isBoolean(append)) append = true;
+		dockedItems = Ext.Array.from(dockedItems || {});
+		var ret = dockedItems;
+		if (moreComponents) {
+			ret = append ? Ext.Array.push(dockedItems, Ext.Array.from(moreComponents)) : Ext.Array.insert(dockedItems, 0, Ext.Array.from(moreComponents));
+		}
+		return ret;
+	},
+	
+	/**
+	 * Merges some more docked-items into new `dockedItems` object.
+	 * @param {Object|Object[]} dockedItems The source `dockedItems` object.
+	 * @param {top|bottom|left|right} dock The region where to dock passed items.
+	 * @param {Object|Object[]} moreComponents Components to be added as docked-item.
+	 * @returns {Object|Object[]} Object to use as {@link Ext.panel.Panel#dockedItems}.
+	 */
+	mergeDockedItems: function(dockedItems, dock, moreComponents, append) {
+		if (append === undefined || !Ext.isBoolean(append)) append = true;
+		dockedItems = Ext.Array.from(dockedItems);
+		var ret = dockedItems;
+		if (moreComponents) {
+			moreComponents = Ext.Array.from(moreComponents);
+			if (!append) ret = [];
+			Ext.iterate(moreComponents, function(cmp) {
+				ret.push(Ext.apply(cmp || {}, { dock: dock }));
+			});
+			if (!append) Ext.Array.push(ret, dockedItems);
+		}
+		return ret;
+	},
+	
+	/**
+	 * Merges some more items into passed toolbar configuration.
+	 * @param {Object|Object[]} toolbar An array of items or a Toolbar configuration object.
+	 * @param {Object|Object[]} items The items to add.
+	 * @param {Boolean} [append=true] Set to `false` to insert at beginning.
+	 * @returns {Object|Object[]}
+	 */
+	mergeToolbarItems: function(toolbar, items, append) {
+		if (append === undefined || !Ext.isBoolean(append)) append = true;
+		if (Ext.isArray(toolbar)) {
+			return append ? Ext.Array.push(toolbar, items) : Ext.Array.insert(toolbar, 0, items);
+		} else if (Ext.isObject(toolbar) && !toolbar.isComponent) {
+			toolbar.items =	append ? Ext.Array.push(toolbar.items || [], items) : Ext.Array.insert(toolbar.items || [], 0, items);
+			return toolbar;
+		}
 	},
 	
 	/**
@@ -178,6 +244,20 @@ Ext.define('Sonicle.Utils', {
 				}
 				//s += ' data-qdismissdelay="' + encode(opts.dismissDelay+'') + '"';
 			}
+			if (!Ext.isEmpty(opts.width)) {
+				if (rawOutput) {
+					out += ' data-qwidth="' + encode(opts.width+'') + '"';
+				} else {
+					out['data-qwidth'] = encodeMap ? encode(opts.width+'') : (opts.width+'');
+				}
+			}
+			if (!Ext.isEmpty(opts.cls)) {
+				if (rawOutput) {
+					out += ' data-qclass="' + encode(opts.cls+'') + '"';
+				} else {
+					out['data-qclass'] = encodeMap ? encode(opts.cls+'') : (opts.cls+'');
+				}
+			}
 			
 		} else {
 			if (Ext.isString(tooltip)) {
@@ -210,15 +290,43 @@ Ext.define('Sonicle.Utils', {
 	 * @param {String} [fieldName] The record field's name.
 	 * @param {Function} [getFn] The getter function.
 	 * @param {Mixed} [fallbackValue] If specified, the value to return as fallback instead of value param.
+	 * @param {Function} [formatFn] The format function to apply when getting value from Model's field.
 	 * @returns {Mixed}
 	 */
-	rendererEvalValue: function(value, record, fieldName, getFn, fallbackValue) {
+	rendererEvalValue: function(value, record, fieldName, getFn, fallbackValue, formatFn) {
 		if (record && Ext.isFunction(getFn)) {
 			return getFn.apply(this, [value, record]);
 		} else if (record && !Ext.isEmpty(fieldName)) {
-			return record.get(fieldName);
+			return Ext.isFunction(formatFn) ? formatFn.apply(this, [record.get(fieldName)]) : record.get(fieldName);
+			//return record.get(fieldName);
 		} else {
 			return (fallbackValue === undefined) ? value : fallbackValue;
+		}
+	},
+	
+	/**
+	 * Returns a template function capable to evaluate a value from a getter 
+	 * function or sustained by a field name. The getter function has precedence over the field's value.
+	 * @param {String} fieldName
+	 * @param {Function|Obect} getFn
+	 * @param {Mixed} [fallbackValue] A fallback value that the function will return.
+	 * @returns {Function} A function to use within {@link Ext.XTemplate} definition.
+	 */
+	tplValueGetterFn: function(fieldName, getFn, fallbackValue) {
+		if (Ext.isFunction(getFn) || (Ext.isObject(getFn) && Ext.isFunction(getFn.fn))) {
+			var fn = Ext.isFunction(getFn) ? getFn : getFn.fn,
+				scope = Ext.isObject(getFn) ? getFn.scope || this : this;
+			return function(values) {
+				return Sonicle.Object.coalesce(fn.apply(scope, [values, values[fieldName]]), fallbackValue);
+			};
+		} else if (!Ext.isEmpty(fieldName)) {
+			return function(values) {
+				return Sonicle.Object.coalesce(values[fieldName], fallbackValue);
+			};
+		} else {
+			return function(values) {
+				return fallbackValue;
+			};
 		}
 	},
 	
@@ -264,12 +372,12 @@ Ext.define('Sonicle.Utils', {
 	 */
 	lookupReference: function(container, path) {
 		var keys = path.split('.'),
-				cnt = container, i;
+			ct = container, i;
 		for (i=0; i < keys.length; i++) {
-			cnt = cnt.lookupReference(keys[i]);
-			if(!cnt) break;
+			ct = ct.lookupReference(keys[i]);
+			if(!ct) break;
 		}
-		return cnt;
+		return ct;
 	},
 	
 	/**
@@ -287,25 +395,56 @@ Ext.define('Sonicle.Utils', {
 	 * Any previous visible menu will be hide automatically.
 	 * @param {Ext.event.Event} evt The raw event object.
 	 * @param {Ext.menu.Menu} menu The menu component.
-	 * @param {Object} data Useful data to pass (data will be saved into menu.menuData property).
+	 * @param {Object} [data] Useful data to pass (data will be saved into menu.menuData property).
+	 * @param {Object} [opts] An object containing options.
+	 * @param {Ext.dom.Element|Ext.Component} [opts.alignTo] The HTMLElement/component to align the menu with (using menuAlign config).
+	 * @param {String} [opts.alignment] The position to align to. Defaults to "tl-bl?".
+	 * @param {Ext.dom.Element|Ext.Component} [opts.shownBy] The HTMLElement/component on which apply active CSS Class.
+	 * @param {String} [opts.shownByCls] The CSS Class to apply to owner's element.
 	 * @returns {Ext.menu.Menu}
 	 */
-	showContextMenu: function(evt, menu, data) {
-		var me = this;
+	showContextMenu: function(evt, menu, data, opts) {
+		opts = opts || {};
+		var me = this, lcm, alignEl;
 		
 		evt.stopEvent();
 		me.hideContextMenu();
 		if (!menu || !menu.isXType('menu')) return;
 		
 		menu.menuData = data || {};
-		me.lastContextMenu = menu;
+		me.lastContextMenu = lcm = {
+			menu: menu,
+			shownByEl: (opts.shownBy && opts.shownBy.isComponent) ? opts.shownBy.el : opts.shownBy,
+			shownByCls: opts.shownByCls || 'so-contextmenu-owner'
+		};
 		menu.on('hide', function(s) {
+			var lcm = me.lastContextMenu;
 			s.menuData = {};
-			if (me.lastContextMenu && me.lastContextMenu.getId() === s.getId()) {
-				me.lastContextMenu = null;
+			if (lcm && lcm.menu.getId() === s.getId()) {
+				if (Ext.isString(lcm.shownByCls) && lcm.shownByEl) {
+					lcm.shownByEl.removeCls(lcm.shownByCls);
+				}
+				delete me.lastContextMenu;
 			}
 		}, me, {single: true});
-		menu.showAt(evt.getXY());
+		
+		if (Ext.isString(lcm.shownByCls) && lcm.shownByEl) {
+			lcm.shownByEl.addCls(lcm.shownByCls);
+		}
+		
+		if (opts.alignTo) {
+			if (opts.alignTo.isComponent && opts.alignTo.el) {
+				alignEl = opts.alignTo.el;
+				if (!opts.alignment) opts.alignment = opts.alignTo.menuAlign;
+			} else {
+				alignEl = opts.alignTo;
+			}
+			menu.showBy(alignEl, opts.alignment || 'tl-bl?');
+			// Trick: call a fn to resets some internal props assigned by {@link Ext.Component#showBy} otherwise menu won't be positionable anymore!
+			menu.clearAlignEl();
+		} else {
+			menu.showAt(evt.getXY());
+		}
 		return menu;
 	},
 	
@@ -313,8 +452,8 @@ Ext.define('Sonicle.Utils', {
 	 * Hides currently visible context menu.
 	 */
 	hideContextMenu: function() {
-		var cxm = this.lastContextMenu;
-		if (cxm) cxm.hide();
+		var lcm = this.lastContextMenu;
+		if (lcm && lcm.menu) lcm.menu.hide();
 	},
 	
 	/**
@@ -322,8 +461,8 @@ Ext.define('Sonicle.Utils', {
 	 * @returns {Object} The data object.
 	 */
 	getContextMenuData: function() {
-		var cxm = this.lastContextMenu;
-		return (cxm) ? cxm.menuData : null;
+		var lcm = this.lastContextMenu;
+		return (lcm && lcm.menu) ? lcm.menu.menuData : null;
 	},
 	
 	configurePropertyGrid: function(propertyGrid, sourceConfig, store) {
@@ -354,5 +493,69 @@ Ext.define('Sonicle.Utils', {
 				if (recs.length > 0) store.add(recs);
 			}
 		}
+	},
+	
+	relaxConstrainRegion: function(region, opts) {
+		opts = opts || {};
+		if (region instanceof Ext.util.Region) {
+			if (opts.top === true) {
+				region.height = region.height + region.top;
+				region['1'] = region.y = region.top = 0;
+			}
+			if (opts.left === true) {
+				region.width = region.width + region.left;
+				region['0'] = region.x = region.left = 0;
+			}
+		}
+		return region;
+	},
+	
+	/**
+	 * Returns a renderer function for column cell, properly customized using options.
+	 * @param {Object} [opts] An object containing configuration.
+	 * 
+	 * This object may contain any of the following properties:
+	 * 
+	 * @param {Boolean} opts.useEmptyCls Set to `true` to use an empty-CSS class to mark empty cells.
+	 * @param {Boolean} opts.htmlEncode Set to `true` to apply HTML encoding to resulting output.
+	 * @returns {Function} The renderer function
+	 */
+	generateBaseColumnRenderer: function(opts) {
+		opts = opts || {};
+		return function(value, metaData) {
+			if (metaData && opts.useEmptyCls === true) {
+				// This is the same check for empty value done in Ext.view.Table!
+				if (value == null ||
+					value.length === 0 ||
+					(Ext.isString(value) && value.replace(/\s/g, '').length === 0)
+				) {
+					metaData.tdCls += ' x-grid-cell-empty';
+				}
+			}
+			if (opts.htmlEncode === true) value = Ext.String.htmlEncode(value);
+			return value;
+		};
+	},
+	
+	/**
+	 * Extract property's name of passed binding object.
+	 * @param {Ext.app.bind.Binding} binding
+	 * @returns {String}
+	 */
+	getBindingName: function(binding) {
+		return (binding && binding.isInstanceOfClass('Ext.app.bind.Binding')) ? binding.stub.name : undefined;
+	},
+	
+	/**
+	 * Removes configured header from passed Panel.
+	 * @param {Ext.Component} cmp
+	 */
+	removePanelHeader: function(cmp) {
+		if (!cmp.isPanel) return;
+		if (cmp.header && cmp.header.isHeader) {
+			cmp.header.destroy();
+		}
+		cmp.header = false;
+		cmp.updateHeader();
 	}
 });

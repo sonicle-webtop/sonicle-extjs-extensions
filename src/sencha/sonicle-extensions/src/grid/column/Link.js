@@ -3,6 +3,7 @@
  * Copyright (C) 2015 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
+ * @deprecated Use Sonicle.grid.plugin.ColumnLinkify plugin instead
  */
 Ext.define('Sonicle.grid.column.Link', {
 	extend: 'Ext.grid.column.Column',

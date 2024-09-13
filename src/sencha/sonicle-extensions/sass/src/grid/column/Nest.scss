@@ -6,15 +6,36 @@
 }
 .x-grid-cell-inner > .so-nestcolumn-wrap:first-child {
     display: inline-block;
+	vertical-align: middle;
 }
 .x-grid-cell-inner > .so-nestcolumn-wrap:last-child {
    display: inline;
+   vertical-align: middle;
 }
 .so-nestcolumn-wrap > .so-iconcolumn-icon {
     float: none;
     display: inline-block;
-    vertical-align: top;
+    /*vertical-align: top;*/
+}
+.so-nestcolumn-wrap > .so-nestcolumn-hierarchysymbol {
+	display: inline-block;
+	overflow: hidden;
+	width: 16px;
+	height: 16px;
 }
 .so-nestcolumn-wrap > .so-iconcolumn-text {
-    vertical-align: top;
+    /*vertical-align: top;*/
+}
+.so-nestcolumn-wrap-child {
+    height: 16px;
+}
+.so-nestcolumn-padder {
+	display: inline-block;
+	width: 20px;
+}
+.so-nestcolumn-wrap-root > span:nth-of-type(1), .so-nestcolumn-wrap-root > i:nth-of-type(1) {
+	margin-right: 5px;
+}
+.so-nestcolumn-wrap-child > span:nth-of-type(1), .so-nestcolumn-wrap-child > i:nth-of-type(1) {
+	margin-right: 5px;
 }

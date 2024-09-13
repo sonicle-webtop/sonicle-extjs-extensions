@@ -1,5 +1,5 @@
 /**
- * Override default Ext.menu.Item
+ * Override default {@link Ext.menu.Item}
  * - Context menu data management: inject menuData into raw event during item click
  */
 Ext.define('Sonicle.overrides.menu.Item', {

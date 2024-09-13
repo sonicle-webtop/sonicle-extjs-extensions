@@ -42,7 +42,7 @@ Ext.define('Sonicle.rtc.Panel', {
 		Sonicle.FullscreenMgr.on('change', me.onFullscreenChange, me);
 	},
 	
-	destroy: function() {
+	onDestroy: function() {
 		var me = this;
 		Sonicle.FullscreenMgr.un('change', me.onFullscreenChange);
 		me.callParent();	

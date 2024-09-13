@@ -53,8 +53,8 @@ Ext.define('Sonicle.Emojis', {
 	
 	destroy: function() {
 		var me = this;
-		me.callParent();
 		me.emjconv = null;
+		me.callParent();
 	},
 	
 	replaceUnified: function(s) {

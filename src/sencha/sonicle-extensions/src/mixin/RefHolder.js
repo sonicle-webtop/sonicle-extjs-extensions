@@ -8,7 +8,10 @@ Ext.define('Sonicle.mixin.RefHolder', {
 	extend: 'Ext.Mixin',
 	
 	mixinConfig: {
-		id: 'refholder'
+		id: 'refholder',
+		on: {
+			onDestroy: 'refHolderOnOnDestroy'
+		}
 	},
 	
 	__refs: null,
@@ -17,7 +20,7 @@ Ext.define('Sonicle.mixin.RefHolder', {
 		this.__refs = {};
 	},
 	
-	destroy: function() {
+	refHolderOnOnDestroy: function() {
 		this.__refs = null;
 	},
 	

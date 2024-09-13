@@ -1,12 +1,20 @@
 /*
  * Sonicle ExtJs UX
  * Copyright (C) 2019 Sonicle S.r.l.
- * sonicle@sonicle.com
- * http://www.sonicle.com
+ * sonicle[at]sonicle.com
+ * https://www.sonicle.com
  */
 Ext.define('Sonicle.button.Toggle', {
 	extend: 'Ext.button.Button',
 	alias: ['widget.sotogglebutton'],
+	requires: [
+		'Sonicle.Utils'
+	],
+	
+	/**
+	 * @cfg {Boolean} disablePressedStyle
+	 * Set to `true` to turn-off pressed styling.
+	 */
 	
 	/**
 	 * @cfg {String} onIconCls
@@ -53,9 +61,12 @@ Ext.define('Sonicle.button.Toggle', {
 	 */
 	
 	constructor: function(cfg) {
-		this.callParent([Ext.apply(cfg || {}, {
-				enableToggle: true
-		})]);
+		var me = this,
+			icfg = Sonicle.Utils.getConstructorConfigs(me, cfg, ['disablePressedStyle']);
+		
+		cfg.enableToggle = true;
+		if (icfg.disablePressedStyle === true) cfg._pressedCls = '';
+		this.callParent([cfg]);
 	},
 	
 	beforeRender: function() {

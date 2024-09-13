@@ -59,6 +59,28 @@ Ext.define('Sonicle.VMUtils', {
 		}
 	},
 	
+	
+	/**
+	 * Sets arbitrary data into ViewModel
+	 * @param {Ext.data.ViewModel} vm The ViewModel instance.
+	 * @param {String} [pathPrefix] The path prefix inside ViewModel where to place data content.
+	 * @param {Obejct} data A data Object containing props with values to set.
+	 */
+	set: function(vm, pathPrefix, data) {
+		if (arguments.length < 3) {
+			data = pathPrefix;
+			pathPrefix = undefined;
+		}
+		if (vm && vm.isViewModel) {
+			var prefix = (Ext.isString(pathPrefix) && !Ext.isEmpty(pathPrefix)) ? pathPrefix + '.' : '';
+			if (Ext.isObject(data)) {
+				Ext.iterate(data, function(name, value) {
+					vm.set(prefix + name, value);
+				});
+			}
+		}
+	},
+	
 	/**
 	 * Sets passed data object into 'data' property of specified viewModel.
 	 * @param {Ext.data.ViewModel} vm The ViewModel instance.

@@ -1,6 +1,67 @@
 .so-tagfield .x-tagfield-item {
+	/*maybe move this in theme specific css???*/
     margin-right: 2px;
 }
-.x-form-readonly li.x-tagfield-item {
+.so-tagfield.x-form-readonly li.x-tagfield-item {
 	padding-right: 5px;
+}
+.so-tagfield li.x-tagfield-item.so-tagfield-item-editable {
+	padding-right: 38px;
+}
+.so-tagfield li.x-tagfield-item.so-tagfield-item-clickable .x-tagfield-item-text:hover .so-tagfield-item-text-after-icon {
+	text-decoration: underline;
+	cursor: pointer;
+}
+.so-tagfield .x-tagfield-item-close.so-tagfield-item-edit {
+	right: 20px;
+	font-family: 'Font Awesome 5 Free';
+	background-image: none;
+}
+.so-tagfield.so-tagfield-theme0-classic .x-tagfield-item-close.so-tagfield-item-edit {
+	top: 0px;
+	opacity: 0.4;
+}
+.so-tagfield.so-tagfield-theme0-neptune:not(.so-tagfield-theme-1-triton) .x-tagfield-item-close.so-tagfield-item-edit {
+    top: 0px;
+    opacity: 0.4;
+}
+.so-tagfield .so-tagfield-item-edit:before {
+    content: '\f044';
+}
+.so-tagfield .x-tagfield-item-text.so-tagfield-item-text-with-icon {
+	display: flex;
+	align-items: center;
+}
+.so-tagfield .x-tagfield-item-text.so-tagfield-item-text-with-icon .so-tagfield-item-text-icon {
+	display: inline-block;
+	font-family: 'Font Awesome 5 Free';
+	font-size: 16px;
+	line-height: 16px;
+	width: 16px;
+	height: 16px;
+	margin-right: 3px;
+}
+.so-tagfield.so-tagfield-theme0-classic .x-tagfield-item-text.so-tagfield-item-text-with-icon .so-tagfield-item-text-icon {
+	width: 12px;
+	height: 12px;
+}
+.so-tagfield.so-tagfield-theme0-neptune .x-tagfield-item-text.so-tagfield-item-text-with-icon .so-tagfield-item-text-icon {
+	width: 14px;
+	height: 14px;
+}
+.so-tagfield-editor-field.x-tagfield-input-field {
+	border-radius: 0px;
+    padding: 0px;
+    min-height: 1em;
+}
+/* The following is used for free markup rendering */
+.so-tagfield-item-displayonly {
+	-webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -ms-border-radius: 3px;
+    -o-border-radius: 3px;
+    border-radius: 3px;
+	border: 1px solid;
+	margin: 0 0 0 2px;
+	padding: 0 2px 0 2px;
 }

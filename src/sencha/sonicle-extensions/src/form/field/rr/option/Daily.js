@@ -1,8 +1,8 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2018 Sonicle S.r.l.
- * sonicle@sonicle.com
- * http://www.sonicle.com
+ * Copyright (C) 2024 Sonicle S.r.l.
+ * sonicle[at]sonicle.com
+ * https://www.sonicle.com
  */
 Ext.define('Sonicle.form.field.rr.option.Daily', {
 	extend: 'Sonicle.form.field.rr.option.Abstract',
@@ -54,7 +54,7 @@ Ext.define('Sonicle.form.field.rr.option.Daily', {
 						change: me.fieldOnChange,
 						scope: me
 					},
-					width: 60
+					width: 80
 				}, {
 					xtype: 'label',
 					cls: 'x-form-cb-label-default',
@@ -89,7 +89,7 @@ Ext.define('Sonicle.form.field.rr.option.Daily', {
 	
 	getRRuleConfig: function() {
 		var me = this,
-				data = me.getVMData();
+			data = me.getVMData();
 		
 		if (data.opt1 === true) {
 			return {
@@ -109,7 +109,7 @@ Ext.define('Sonicle.form.field.rr.option.Daily', {
 	privates: {
 		validateRRule: function(rr) {
 			var me = this,
-					rrCfg = rr.origOptions;
+				rrCfg = rr.origOptions;
 			if (rrCfg.freq !== RRule.DAILY) return false;
 			if (!me.isOpt1(rrCfg) && !me.isOpt2(rrCfg)) return false;
 			return true;
@@ -117,11 +117,11 @@ Ext.define('Sonicle.form.field.rr.option.Daily', {
 		
 		applyRRule: function(rr) {
 			var me = this,
-					rrCfg = rr.origOptions,
-					data = Ext.apply(me.getVMData(), {
-						opt1: false,
-						opt2: false
-					});
+				rrCfg = rr.origOptions,
+				data = Ext.apply(me.getVMData(), {
+					opt1: false,
+					opt2: false
+				});
 
 			if (me.isOpt1(rrCfg)) {
 				data.opt1 = true;

@@ -1,0 +1,75 @@
+.so-formfeedback {
+	border-style: solid;
+    border-width: 0px;
+}
+.so-formfeedback.so-formfeedback-info {
+	color: var(--so-formfeedback-color-info);
+    background-color: var(--so-formfeedback-color-info-bg);
+}
+.so-formfeedback.so-formfeedback-alert {
+	color: var(--so-formfeedback-color-alert);
+    background-color: var(--so-formfeedback-color-alert-bg);
+}
+.so-formfeedback.so-formfeedback-warning {
+	color: var(--so-formfeedback-color-warning);
+    background-color: var(--so-formfeedback-color-warning-bg);
+}
+.so-formfeedback.so-formfeedback-success {
+	color: var(--so-formfeedback-color-success);
+    background-color: var(--so-formfeedback-color-success-bg);
+}
+.so-formfeedback.so-formfeedback-accent {
+	border-left-width: 4px;
+}
+.so-formfeedback.so-formfeedback-accent.so-formfeedback-info {
+    border-color: var(--so-formfeedback-color-info);
+}
+.so-formfeedback.so-formfeedback-accent.so-formfeedback-alert {
+    border-color: var(--so-formfeedback-color-alert);
+}
+.so-formfeedback.so-formfeedback-accent.so-formfeedback-warning {
+    border-color: var(--so-formfeedback-color-warning);
+}
+.so-formfeedback.so-formfeedback-accent.so-formfeedback-success {
+    border-color: var(--so-formfeedback-color-success);
+}
+.so-formfeedback-wrap {
+	display: flex;
+	padding: 10px;
+}
+.so-formfeedback-icon {
+	flex-shrink: 0;
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+}
+.so-formfeedback.so-formfeedback-icon.so-formfeedback-info {
+	color: var(--so-formfeedback-color-info);
+}
+.so-formfeedback.so-formfeedback-icon.so-formfeedback-alert {
+	color: var(--so-formfeedback-color-alert);
+}
+.so-formfeedback.so-formfeedback-icon.so-formfeedback-warning {
+	color: var(--so-formfeedback-color-warning);
+}
+.so-formfeedback.so-formfeedback-icon.so-formfeedback-success {
+	color: var(--so-formfeedback-color-success);
+}
+.so-formfeedback .so-formfeedback-textwrap {
+	margin-left: 8px;
+}
+.so-formfeedback .so-formfeedback-title {
+	margin-bottom: 8px;
+}
+.so-formfeedback.so-formfeedback-info .so-formfeedback-text {
+	color: var(--so-formfeedback-color-info-bg-on);
+}
+.so-formfeedback.so-formfeedback-alert .so-formfeedback-text {
+	color: var(--so-formfeedback-color-alert-bg-on);
+}
+.so-formfeedback.so-formfeedback-warning .so-formfeedback-text {
+	color: var(--so-formfeedback-color-warning-bg-on);
+}
+.so-formfeedback.so-formfeedback-success .so-formfeedback-text {
+	color: var(--so-formfeedback-color-success-bg-on);
+}

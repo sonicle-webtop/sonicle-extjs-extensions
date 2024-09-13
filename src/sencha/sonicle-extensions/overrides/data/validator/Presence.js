@@ -1,5 +1,5 @@
 /**
- * Override default Ext.data.validator.Presence
+ * Override original {@link Ext.data.validator.Presence}
  * - Add support to conditional validation
  */
 Ext.define('Sonicle.overrides.data.validator.Presence', {

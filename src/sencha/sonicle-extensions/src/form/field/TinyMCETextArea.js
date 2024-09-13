@@ -32,7 +32,9 @@
  - Tracking dirty state.
  - Storing and restoring cursor position by inserting of a place holder over a popup window.
  -------------------------------------------------------------------*/
-
+/**
+ * @deprecated use Sonicle.form.field.tinymce.TextArea
+ */
 Ext.define('Sonicle.form.field.TinyMCETextArea', {
 
     extend: 'Ext.form.field.TextArea',

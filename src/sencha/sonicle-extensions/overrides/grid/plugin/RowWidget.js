@@ -1,5 +1,5 @@
 /**
- * Override default Ext.grid.plugin.RowWidget
+ * Override original {@link Ext.grid.plugin.RowWidget}
  * - Default implementation tracks expanded rows using their internal ID; 
  *   this NOT guarantee the correct expansion of the row after reloading the 
  *   source Store: we replaced record.internalId with record.getId()

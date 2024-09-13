@@ -153,7 +153,7 @@ Ext.define('Sonicle.grid.property.Panel', {
 		me.editorsMap = me.createEditorsMap(me.typesConfig);
 	},
 	
-	destroy: function() {
+	onDestroy: function() {
 		var me = this;
 		me.callParent();
 		delete me.renderersMap;

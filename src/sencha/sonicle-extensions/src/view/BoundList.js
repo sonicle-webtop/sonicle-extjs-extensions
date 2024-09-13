@@ -1,10 +1,10 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2019 Sonicle S.r.l.
- * sonicle@sonicle.com
- * http://www.sonicle.com
+ * Copyright (C) 2023 Sonicle S.r.l.
+ * malbinola[at]sonicle.com
+ * https://www.sonicle.com
  * 
- * Inspired by http://www.coding-ideas.de/2018/03/22/grouping-combobox-field/?cookie-state-change=1572450122746
+ * Some modifications inspired by http://www.coding-ideas.de/2018/03/22/grouping-combobox-field/?cookie-state-change=1572450122746
  */
 Ext.define('Sonicle.view.BoundList', {
 	extend: 'Ext.view.BoundList',
@@ -15,6 +15,7 @@ Ext.define('Sonicle.view.BoundList', {
 	
 	/**
 	 * @cfg {Boolean} disableFocusSaving
+	 * Disables saving/restoring of the previously focused item.
 	 */
 	disableFocusSaving: false,
 	
@@ -31,8 +32,23 @@ Ext.define('Sonicle.view.BoundList', {
 	 */
 	
 	/**
+	 * @cfg {cls|src} [iconMode]
+	 * Controls how to define the icon:
+	 *  - cls: {@link #colorField} value returns a CSS class
+	 *  - src: {@link #colorField} value returns the image URL
+	 */
+	iconMode: 'cls',
+	
+	/**
 	 * @cfg {String} [iconField]
 	 * The field from the store to show icon in the view.
+	 */
+	
+	/**
+	 * @cfg {Function} [getIcon]
+	 * A function which returns the icon info in the view (eg. useful for computing title dynamically).
+	 * @param {Object} values An Object with item fields.
+	 * @param {Mixed} value The value sustained by {@link #iconField}.
 	 */
 	
 	/**
@@ -94,7 +110,7 @@ Ext.define('Sonicle.view.BoundList', {
 	groupingThreshold: 1,
 	
 	/**
-	 * @cfg {swatch|text} colorize [colorize=swatch]
+	 * @cfg {swatch|icon|text} colorize [colorize=swatch]
 	 * Specify the target element on which apply the color: the marker itself or display text.
 	 */
 	colorize: 'swatch',
@@ -167,6 +183,9 @@ Ext.define('Sonicle.view.BoundList', {
 		}
 	},
 	
+	/**
+	 * @override Check me during ExtJs upgrade!
+	 */
 	generateTpl: function() {
 		var me = this,
 			hasGroup = !Ext.isEmpty(me.groupField),
@@ -238,6 +257,7 @@ Ext.define('Sonicle.view.BoundList', {
 					},
 					showButton: showButtonTplGetterFn(me.shouldShowButton),
 					buttonTipAttr: tooltipAttrTplGetterFn(me.getButtonTooltip),
+					iconValue: valueTplGetterFn(me.getIcon, me.iconField),
 					sourceValue: valueTplGetterFn(me.getSource, me.sourceField, '&nbsp;'),
 					groupValue: valueTplGetterFn(me.getGroup, me.groupField, '&nbsp;')
 				}
@@ -253,6 +273,7 @@ Ext.define('Sonicle.view.BoundList', {
 				{
 					showButton: showButtonTplGetterFn(me.shouldShowButton),
 					buttonTipAttr: tooltipAttrTplGetterFn(me.getButtonTooltip),
+					iconValue: valueTplGetterFn(me.getIcon, me.iconField),
 					sourceValue: valueTplGetterFn(me.getSource, me.sourceField, '&nbsp;'),
 					groupValue: valueTplGetterFn(me.getGroup, me.groupField, '&nbsp;')
 				}
@@ -266,29 +287,36 @@ Ext.define('Sonicle.view.BoundList', {
 	
 	generateInnerTpl: function(displayField) {
 		var me = this,
+			iconMode = me.iconMode,
 			origInnerTpl = me.getInnerTpl(displayField),
-			hasIcon = !Ext.isEmpty(me.iconField),
+			hasIcon = !Ext.isEmpty(me.iconField) || Ext.isFunction(me.getIcon),
 			hasColor = !Ext.isEmpty(me.colorField),
 			hasSource = !Ext.isEmpty(me.sourceField) || Ext.isFunction(me.getSource),
 			useButton = me.enableButton,
 			floating = hasSource || useButton,
-			colorizeSwatch = (me.colorize === 'swatch'),
-			geomSwatchCls, swatchStyle, displayStyle, source;
+			colorize = me.colorize,
+			colorizeSwatch = (colorize === 'swatch'),
+			geomSwatchCls, swatchStyle, iconStyle, displayStyle, icon, source;
 		
 		if (hasIcon || hasColor || hasSource || useButton) { // Return modified innerTpl to support new features
 			if (hasIcon && hasColor && colorizeSwatch) hasColor = false;
 			geomSwatchCls = me.itemSwatchCls + '-' + me.swatchGeometry;
 			swatchStyle = (hasColor && colorizeSwatch) ? '{[this.generateSwatchColorStyles(values, "' + me.colorField + '")]}' : '';
-			displayStyle = (hasColor && !colorizeSwatch) ? '{[this.generateDisplayColorStyles(values, "' + me.colorField + '")]}' : '';
-			source = '[this.sourceValue(values)]';
+			displayStyle = (hasColor && colorize === 'text') ? '{[this.generateDisplayColorStyles(values, "' + me.colorField + '")]}' : '';
+			iconStyle = (hasColor && colorize === 'icon') ? '{[this.generateDisplayColorStyles(values, "' + me.colorField + '")]}' : '';
+			icon = '{[this.iconValue(values)]}',
+			source = '{[this.sourceValue(values)]}';
 			
 			return (floating ? '<div class="so-boundlist-floating">' : '')
-				+ (hasIcon ? '<div class="' + me.itemIconCls + ' {' + me.iconField + '}"></div>' : '')
+				+ (hasIcon ? '<div ' : '')
+				+ (hasIcon && ('cls' === iconMode) ? 'class="' + me.itemIconCls + ' ' + icon + '"' : '')
+				+ (hasIcon && ('src' === iconMode) ? 'class="' + me.itemIconCls + ' ' + me.itemIconCls + '-bg" style="background-image:url(' + icon + ');"' : '')
+				+ (hasIcon ? ' style="' + iconStyle + '"></div>' : '')
 				+ (hasColor && colorizeSwatch ? '<div class="' + me.itemSwatchCls + ' ' + geomSwatchCls + '" style="' + swatchStyle + '"></div>' : '')
 				+ '<span class="' + me.itemDisplayCls + '" style="' + displayStyle + '">' + origInnerTpl + '</span>'
 				+ (floating ? '</div>' : '')
 				+ (floating ? '<div class="' + me.itemRightDockedCls + '">' : '')
-				+ (floating && hasSource ? '<span class="' + Sonicle.String.deflt(me.sourceCls, '') + '">{' + source + '}</span>' : '')
+				+ (floating && hasSource ? '<span class="' + Sonicle.String.deflt(me.sourceCls, '') + '">' + source + '</span>' : '')
 				+ (floating && useButton ? '<tpl if="this.showButton(values) === true"><i class="so-boundlist-button ' + me.buttonIconCls + '" {[this.buttonTipAttr(values)]}></i></tpl>' : '')
 				+ (floating ? '</div>' : '');
 			

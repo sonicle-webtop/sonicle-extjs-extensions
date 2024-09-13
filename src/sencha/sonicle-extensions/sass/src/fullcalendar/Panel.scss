@@ -1,0 +1,230 @@
+:root{
+    --fc-day-other-color: rgba(214,214,214,.2);
+    --fc-non-business-color: rgba(234,243,250,.3);
+    --fc-event-resizer-swatch-bg-color: #ffffff;
+    --fc-event-resizer-swatch-border-color: #111827;
+}
+
+/* top-toolbar: style month item */
+.so-fullcalendar-panel-toolbar-month {
+	display: inline-flex;
+	gap: 5px;
+}
+/* fullcalendar: disarm browser bold for TH elements */
+.so-fullcalendar th {
+	font-weight: normal;
+}
+/* fullcalendar: add support to other-day color var */
+.so-fullcalendar .fc-day.fc-day-other {
+	background-color: var(--fc-day-other-color);
+}
+/* fullcalendar: disable decoration on event when active */
+.so-fullcalendar a.fc-event:active {
+    text-decoration: none;
+}
+/* fullcalendar: display circle indicator next to now-line */
+.so-fullcalendar .fc-timegrid-now-indicator-container {
+    overflow: visible;
+}
+.so-fullcalendar .fc-timegrid-now-indicator-line:before {
+	position: absolute;
+	left: -4px;
+	top: -4.5px;
+	/*top: -7px;*/
+	pointer-events: none;
+	background-color: var(--fc-now-indicator-color);
+	/*border: 2px solid var(--fc-now-indicator-color);*/
+    border-radius: 100%;
+    width: 8px;
+	height: 8px;
+	content: "";
+	opacity: 1;
+	z-index: 4;
+}
+/* fullcalendar: add resize handles */
+.so-fullcalendar .fc-event-resizer:before {
+    position: absolute;
+    height: 8px;
+    width: 8px;
+    background-color: var(--fc-event-resizer-swatch-bg-color);
+    border: 2px solid var(--fc-event-resizer-swatch-border-color);
+    border-radius: 50%;
+    opacity: 1;
+    z-index: 4;
+}
+.so-fullcalendar .fc-event:not(.fc-event-selected) .fc-event-resizer.fc-event-resizer-start:before {
+    content: "";
+    top: calc(50% - 4px);
+    left: 0px;
+}
+.so-fullcalendar .fc-event:not(.fc-event-selected) .fc-event-resizer.fc-event-resizer-end:before {
+    content: "";
+    top: calc(50% - 4px);
+    right: 0px;
+}
+.so-fullcalendar .fc-v-event:not(.fc-event-selected) .fc-event-resizer.fc-event-resizer-start:before {
+    content: "";
+    top: 0px;
+    left: calc(50% - 4px);
+}
+.so-fullcalendar .fc-v-event:not(.fc-event-selected) .fc-event-resizer.fc-event-resizer-end:before {
+    content: "";
+    bottom: 0px;
+    left: calc(50% - 4px);
+}
+/* fullcalendar: resore default font in custom dayGrid views (eg. biweek) */
+.so-fullcalendar .fc-daygrid-month-start {
+    font-size: 1em;
+    font-weight: normal;
+}
+/* fullcalendar: ignore pointer events */
+.so-fullcalendar .fc-col-header-cell {
+    /* Ignore pointer events for column headers */
+    cursor: pointer;
+}
+.so-fullcalendar .fc-daygrid-bg-harness {
+    /* Ignore pointer events for bg */
+    pointer-events: none;
+}
+.so-fullcalendar .fc-timegrid-bg-harness {
+    /* Ignore pointer events for bg */
+    pointer-events: none;
+}
+/* fullcalendar: reset pointer if event is not draggable */
+.so-fullcalendar .fc-event[data-draggable="false"] {
+    cursor: default;
+}
+/* fullcalendar: appointment */
+.so-cal-appo.fc-v-event > .fc-event-main {
+    display: flex;
+    flex-direction: column;
+}
+.so-cal-appo.fc-h-event > .fc-event-main {
+    display: flex;
+    align-items: center;
+}
+.fc-direction-ltr .so-cal-appo.fc-h-event > .fc-event-main {
+    flex-direction: row;
+}
+.fc-direction-rtl .so-cal-appo.fc-h-event > .fc-event-main {
+    flex-direction: row-reverse;
+}
+.so-cal-appo-swatch {
+    border: calc(var(--fc-daygrid-event-dot-width)/2) solid;
+    border-radius: calc(var(--fc-daygrid-event-dot-width)/2);
+    box-sizing: content-box;
+    margin: 0px 4px;
+    width: 0px;
+    height: 0px;
+}
+.fc-direction-ltr .so-cal-appo.fc-daygrid-event.fc-daygrid-dot-event .so-cal-appo-swatch {
+    margin-left: 0px;
+}
+.fc-direction-rtl .so-cal-appo.fc-daygrid-event.fc-daygrid-dot-event .so-cal-appo-swatch {
+    margin-right: 0px;
+}
+.so-cal-appo-title {
+    /*height: fit-content;*/
+    /*word-break: normal;*/
+    flex-grow: 1;
+    overflow: hidden;
+    line-height: 17px;
+	padding-left: 1px; /* align a little with icons below */
+}
+.so-cal-appo-title:not(.so-cal-appo-title-spanning) {
+	word-break: break-all;
+}
+.so-cal-appo-title-icon {
+    display: inline-block;
+    margin-right: 2px;
+}
+.so-cal-appo-bottomline {
+    flex-shrink: 0;
+    flex-basis: 16px;
+}
+.so-cal-appo-icons {
+    position: absolute;
+    left: 3px; /* set to left due to ff layout management overlapping */
+    /*right: 2px;*/
+    bottom: 0px;
+    display: inline-flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 3px;
+    /*padding: 3px 3px 0 4px;*/
+    /*border-radius: 3px;*/
+}
+.so-cal-appo-tags {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+.fc-direction-ltr .so-cal-appo-tags {
+    margin-left: 2px;
+}
+.fc-direction-rtl .so-cal-appo-tags {
+    margin-right: 2px;
+}
+/* fullcalendar: original (legacy) appointment */
+.so-cal-appo-o > .fc-event-main {
+    overflow: hidden;
+    word-break: break-all;
+    line-height: normal;
+}
+.so-cal-appo-o-icon {
+    padding-right: 2px;
+    font-size: smaller;
+}
+.so-cal-appo-o-tag {
+    padding-left: 2px;
+    font-size: smaller;
+}
+.so-cal-appo-o-icons {
+    display: inline-block;
+}
+.so-cal-appo-o-icons > i {
+    padding-right: 2px;
+    font-size: smaller;
+}
+.so-cal-appo-o-title {
+    font-weight: 600;
+}
+.so-cal-appo-o-location {
+    margin-left: 4px;
+    font-size: smaller
+}
+.so-cal-appo-o-tags {
+    display: inline-block;
+}
+.so-cal-appo-o-tags > i {
+    padding-left: 2px;
+    font-size: smaller;
+}
+.so-cal-appo-hov {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+	font-size: var(--wt-theme-fontsize-sm);
+    font-weight: var(--wt-theme-fontweight-regular);
+}
+.so-cal-appo-hov-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-self: stretch;
+    gap: 5px;
+}
+.so-cal-appo-hov-title {
+    flex: 1 0 0;
+}
+.so-cal-appo-hov-calendar > i,
+.so-cal-appo-hov-where > i,
+.so-cal-appo-hov-organizer > i {
+    margin-right: 5px;
+}
+.so-cal-appo-hov-separator {
+    background: #bcc0c5;
+    width: 100%;
+    height: 1px;
+}

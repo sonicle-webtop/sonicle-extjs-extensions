@@ -1,0 +1,25 @@
+.so-tagdnd-itemhighlight:after {
+	display: block;
+	position: absolute;
+	top: -1px;
+	bottom: -1px;
+	box-sizing: content-box;
+	content: '';
+	border: 1px solid #77c137;
+}
+.so-tagdnd-itemhighlight.so-tagdnd-itemhighlight-before:after {
+	left: -3px;
+}
+.so-tagdnd-itemhighlight.so-tagdnd-itemhighlight-after:after {
+	right: -2px;
+}
+.so-tagdnd-inputhighlight:after {
+	display: block;
+	position: absolute;
+	top: -1px;
+	bottom: -1px;
+	left: 0px;
+	box-sizing: content-box;
+	content: '';
+	border: 1px solid #77c137;	
+}

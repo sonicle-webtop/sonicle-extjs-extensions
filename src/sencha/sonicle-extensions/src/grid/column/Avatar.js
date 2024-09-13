@@ -97,9 +97,10 @@ Ext.define('Sonicle.grid.column.Avatar', {
 	
 	buildHtml: function(value, rec) {
 		var me = this,
+			SoU = Sonicle.Utils,
 				//xxx = (Math.floor(Math.random() * 10)>=5) ? null : 'https:/'+'/www.w3schools.com/howto/img_avatar2.png',
-				picUrl = me.evalValue(value, rec, me.pictureUrlField, me.getPictureUrl, null),
-				iconCls = me.evalValue(value, rec, null, me.getIconCls, null),
+				picUrl = SoU.rendererEvalValue(value, rec, me.pictureUrlField, me.getPictureUrl, null),
+				iconCls = SoU.rendererEvalValue(value, rec, null, me.getIconCls, null),
 				useImg = !Ext.isEmpty(picUrl) || !Ext.isEmpty(iconCls),
 				useIni = false,
 				divCls = me.avatarWrapCls,
@@ -114,7 +115,7 @@ Ext.define('Sonicle.grid.column.Avatar', {
 				name, ini, bgColor;
 		
 		if (!useImg) {
-			name = me.evalValue(value, rec, me.nameField, me.getName, null);
+			name = SoU.rendererEvalValue(value, rec, me.nameField, me.getName, null);
 			ini = Sonicle.form.field.InitialsAvatar.calcInitials(name, 2);
 			useIni = !Ext.isEmpty(ini);
 		}
@@ -150,16 +151,6 @@ Ext.define('Sonicle.grid.column.Avatar', {
 	},
 	
 	privates: {
-		evalValue: function(value, rec, field, getFn, fallbackValue) {
-			if (rec && Ext.isFunction(getFn)) {
-				return getFn.apply(this, [value, rec]);
-			} else if(rec && !Ext.isEmpty(field)) {
-				return rec.get(field);
-			} else {
-				return (fallbackValue === undefined) ? value : fallbackValue;
-			}
-		},
-		
 		randomColor: function(seed, colors) {
 			return colors[(seed+3) % (colors.length)];
 		},

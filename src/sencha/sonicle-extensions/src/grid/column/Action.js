@@ -7,11 +7,35 @@
 Ext.define('Sonicle.grid.column.Action', {
 	extend: 'Ext.grid.column.Action',
 	alias: 'widget.soactioncolumn',
+	uses: [
+		'Sonicle.Utils'
+	],
 	
 	draggable: false,
 	hideable: false,
 	groupable: false,
+	editable: false, /* Disable editing */
+	editRenderer: function(){ return ''; }, /* Disable cloning of icons when using row-editing */
 	align: 'center',
+	
+	/**
+	 * @cfg {Boolean} [showOnSelection=false]
+	 * Set to `true` to initially hide all actions, they become visible when row is selected.
+	 */
+	showOnSelection: false,
+	
+	/**
+	 * @cfg {Boolean} [showOnOver=false]
+	 * Set to `true` to initially hide all actions, they become visible when cursor is over the row.
+	 */
+	showOnOver: false,
+	
+	/**
+	 * @cfg {String} [hideDataIndex=null]
+	 * Set the field name specifying visibility of the action on a record per record basis.
+	 * When the field of the record is `true`, the action is hidden.
+	 */
+	hideDataIndex: null,
 	
 	/**
 	 * True to calculate width automatically based on action item's count.
@@ -27,8 +51,8 @@ Ext.define('Sonicle.grid.column.Action', {
 	
 	constructor: function(cfg) {
 		var me = this,
-				items = cfg.items || me.items || [me],
-				width = cfg.width || me.width;
+			items = cfg.items || me.items || [me],
+			width = cfg.width || me.width;
 		me.callParent([cfg]);
 		
 		if (Ext.isArray(items) && !width) {
@@ -44,11 +68,73 @@ Ext.define('Sonicle.grid.column.Action', {
 					me.setWidth(me.calculateColumnWidth(items));
 				}
 			}, me, {single: true});
+			
+			Ext.iterate(items, function(item) {
+				if (item.menu) {
+					if (!Ext.isDefined(item.destroyMenu)) item.destroyMenu = true;
+					me.setItemMenu(item, item.menu, /* destroyMenu */ false, true);
+					item.handler = function(view, ridx, cidx, itm, e, rec) {
+						if (itm.menu.isMenu) {
+							Sonicle.Utils.showContextMenu(e, itm.menu, {view: view, ridx: ridx, cidx: cidx, rec: rec}, {alignTo: e.getTarget()});
+						}
+					};
+				}
+			});
 		}
 		//me.on('move', me.onColumnMove, me);
 	},
 	
+	doDestroy: function() {
+		var me = this;
+		Ext.iterate(me.items, function(item) {
+			if (item.menu) me.setItemMenu(item, null, true);
+		});
+		me.callParent();
+	},
+	
+	defaultRenderer: function(v, cellValues, record, rowIdx, colIdx, store, view) {
+		
+		var hideOnThisRecord = this.hideDataIndex && record.get(this.hideDataIndex);
+		
+		if (hideOnThisRecord) {
+			cellValues.tdCls += ' ' + 'so-' + 'actioncolumn-col-cell-hidden';
+		} else {
+			if (this.showOnSelection === true || (Ext.isFunction(this.showOnSelection) && this.showOnSelection(record)) ) {
+				cellValues.tdCls += ' ' + 'so-' + 'actioncolumn-col-cell-visible-onselection';
+			}
+			if (this.showOnOver === true || (Ext.isFunction(this.showOnOver) && this.showOnOver(record)) ) {
+				cellValues.tdCls += ' ' + 'so-' + 'actioncolumn-col-cell-visible-onover';
+			}
+		}
+		return this.callParent(arguments);
+	},
+	
 	privates: {
+		setItemMenu: function(item, menu, destroyMenu, initial) {
+			var me = this,
+				oldMenu = item.menu,
+				instanced;
+
+			if (oldMenu && !initial) {
+				if (destroyMenu !== false && item.destroyMenu) {
+					oldMenu.destroy();
+				}
+				oldMenu.ownerCmp = null;
+			}
+
+			if (menu) {
+				instanced = menu.isMenu;
+				menu = Ext.menu.Manager.get(menu, {
+					ownerCmp: me
+				});
+				menu.setOwnerCmp(me, instanced);
+				menu.menuClickBuffer = 250;
+				item.menu = menu;
+			} else {
+				item.menu = null;
+			}
+		},
+		
 		onColumnMove: function(s, x, y) {
 			console.log('onColumnMove');
 			console.log('index: '+s.getIndex());
@@ -57,7 +143,10 @@ Ext.define('Sonicle.grid.column.Action', {
 		
 		calculateColumnWidth: function(items) {
 			var me = this,
-				cmeas = Sonicle.grid.column.Action.measureCell(),
+				ownGrid = me.getView().grid,
+				// Pass any custom componentCls to measuring element in order to make right calculations.
+				dummyElCls = ownGrid.componentCls !== ownGrid.baseCls ? ownGrid.componentCls : undefined,
+				cmeas = Sonicle.grid.column.Action.measureCell(dummyElCls),
 				imeas = me.measureActionItems(),
 				count = (me.autoWidth !== true && Ext.isNumber(me.autoWidth)) ? me.autoWidth : items.length;
 			return (count * imeas.width) + (count * imeas.midSpacing) + imeas.beforeSpacing + imeas.afterSpacing + cmeas.margin + cmeas.padding;
@@ -65,9 +154,9 @@ Ext.define('Sonicle.grid.column.Action', {
 		
 		measureActionItems: function() {
 			var me = this,
-					view = me.getView(),
-					sto = me.getView().getStore(),
-					html, width, mid, before, after;
+				view = me.getView(),
+				sto = me.getView().getStore(),
+				html, width, mid, before, after;
 			
 			if (sto && me.items) {
 				try {
@@ -125,11 +214,12 @@ Ext.define('Sonicle.grid.column.Action', {
 	},
 	
 	statics: {
-		measureCell: function() {
+		measureCell: function(dummyElCls) {
 			var ctxId = Ext.id(null, 'so-actioncolumn-dummycell-'),
 				ctxEl = Ext.getBody().appendChild({
 					id: ctxId,
 					tag: 'div',
+					cls: dummyElCls,
 					style: 'visibility:hidden;pointer-events:none;border:none;',
 					html: '<div class="x-grid-cell-inner x-grid-cell-inner-action-col"></div>'
 				}),
