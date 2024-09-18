@@ -17,7 +17,7 @@ Ext.define('Sonicle.overrides.Component', {
 		var me = this,
 			pseudoUIRegex = me.rePseudoUI,
 			match = ui.match(pseudoUIRegex),
-			pseudoUIs, i, realUI;
+			pseudoUIs, i, realUI, newui;
 		
 		// Pseudo UIs are semantic names that map a real UI name value defined in themes.
 		// Here, we initially try to match its pattern (name wrappen into curly braces) and 
@@ -26,14 +26,16 @@ Ext.define('Sonicle.overrides.Component', {
 		// be appended again to the real UI name: buttons uses this behaviour (eg. toolbar-default-small).
 		
 		if (match) {
-			pseudoUIs = Ext.Array.slice(match, 1);
+			pseudoUIs = Ext.Array.slice(match, 1); // match[1] is the desired value, match[2] is the inline fallback value
 			for (i=0; i<pseudoUIs.length; i++) {
 				if (!Ext.isEmpty(pseudoUIs[i]) && (realUI = me.findRealUi(pseudoUIs[i]))) {
-					return me.callParent([ui.replace(pseudoUIRegex, realUI)]);
+					newui = ui.replace(pseudoUIRegex, realUI);
+					break;
 				}
 			}
 			// If no match was found, return the defined default UI value!
-			return me.callParent([ui.replace(pseudoUIRegex, me.defaultUI)]);
+			if (!newui) newui = ui.replace(pseudoUIRegex, me.defaultUI);
+			return me.callParent([newui]);
 		}
 		return me.callParent(arguments);
 	},
