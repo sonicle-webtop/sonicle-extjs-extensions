@@ -1,6 +1,6 @@
 
 /* Support x-grid-no-items-bg bodyClass to draw transparent items */
-.x-grid-body.x-grid-no-items-bg .x-grid-item:not(.x-grid-item-over) {
+.x-grid-body.x-grid-no-items-bg .x-grid-item:not(.x-grid-item-over, .x-grid-item-selected) {
     background-color: transparent;
 }
 
