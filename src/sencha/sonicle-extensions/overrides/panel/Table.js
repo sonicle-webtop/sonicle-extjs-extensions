@@ -10,7 +10,10 @@ Ext.define('Sonicle.overrides.panel.Table', {
 	
 	/**
 	 * @cfg {Boolean} hideRowBackground
-	 * Hides row item background
+	 * Hides row items background: tree/grid components have a theme built-in 
+	 * background that is applied to any row item, if you need a layout with a 
+	 * customized background color you have to set this to `true` and customize 
+	 * behind panel's coloring.
 	 */
 	hideRowBackground: false,
 	
