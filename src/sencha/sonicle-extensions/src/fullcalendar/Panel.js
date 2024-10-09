@@ -111,6 +111,12 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 	showCurrentMonth: true,
 	
 	/**
+	 * @cfg {Number} [currentMonthMinWidth]
+	 * The minimum value in pixels which current-month text will set its width to.
+	 */
+	currentMonthMinWidth: undefined,
+	
+	/**
 	 * @cfg {currentdate|viewstart} [currentMonthSource=currentdate]
 	 * Specifies from where to extract the date for displaying current month 
 	 * in top-toolbar: from view's start or from current date.
@@ -786,7 +792,8 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 					xtype: 'tbtext',
 					itemId: 'monthText',
 					cls: me.componentCls+'-toolbar-month',
-					html: me.formatCurrentMonth(me.initialDate)
+					html: me.formatCurrentMonth(me.initialDate),
+					minWidth: me.currentMonthMinWidth
 				});
 				items.push(' ');
 			}

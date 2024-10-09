@@ -15,6 +15,8 @@ Ext.define('Sonicle.FakeInput', {
 	 */
 	type: 'text',
 	
+	width: 0,
+	
 	initComponent: function() {
 		var me = this;
 		
