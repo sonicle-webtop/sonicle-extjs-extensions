@@ -125,5 +125,12 @@ Ext.define('Sonicle.CssUtils', {
 			}
 			styleSheet.insertRule(selector + '{' + style + '}', styleSheetLength);
 		}
+	},
+	
+	setVariable: function(name, value) {
+		var root = document.querySelector(':root');
+		if (root) {
+			root.style.setProperty(name, value);
+		}
 	}
 });
