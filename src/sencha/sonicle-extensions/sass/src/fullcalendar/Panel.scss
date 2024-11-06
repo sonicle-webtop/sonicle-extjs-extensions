@@ -143,16 +143,19 @@
     flex-basis: 16px;
 }
 .so-cal-appo-icons {
-    position: absolute;
-    left: 3px; /* set to left due to ff layout management overlapping */
-    /*right: 2px;*/
-    bottom: 0px;
     display: inline-flex;
     justify-content: flex-end;
     align-items: center;
     gap: 3px;
     /*padding: 3px 3px 0 4px;*/
     /*border-radius: 3px;*/
+}
+.fc-timegrid-event .so-cal-appo-icons {
+    position: absolute;
+    left: 3px;
+    /* set to left due to ff layout management overlapping */
+    /*right: 2px;*/
+    bottom: 0px;
 }
 .so-cal-appo-tags {
     display: inline-flex;
