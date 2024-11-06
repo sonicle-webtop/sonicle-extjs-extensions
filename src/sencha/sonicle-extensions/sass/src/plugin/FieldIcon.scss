@@ -9,8 +9,15 @@
 }
 .so-fieldicon-icon {
 	display: inline-block;
+	/*margin: 0 5px 0 0;*/
+}
+.so-fieldicon-icon-ai {
+	margin: 0 0 0 5px;
+}
+.so-fieldicon-icon-bi {
 	margin: 0 5px 0 0;
 }
 .so-fieldicon-icon-al {
 	vertical-align: middle;
 }
+.so-fieldicon-icon-bl {}
