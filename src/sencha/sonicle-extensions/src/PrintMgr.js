@@ -1,8 +1,8 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2015 Sonicle S.r.l.
- * sonicle@sonicle.com
- * http://www.sonicle.com
+ * Copyright (C) 2024 Sonicle S.r.l.
+ * sonicle[at]sonicle.com
+ * https://www.sonicle.com
  * 
  * https://stackoverflow.com/questions/468881/print-div-id-printarea-div-only/15900835#15900835
  * https://stackoverflow.com/questions/45642831/window-print-position-div-center-of-the-page
@@ -53,27 +53,25 @@ Ext.define('Sonicle.PrintMgr', {
 	
 	privates: {
 		printRawHtml: function(html) {
-			var ifId = Ext.id(null, 'so-printer-if-'),
-					ifEl, cw;
-			ifEl = Ext.getBody().appendChild({
-				id: ifId,
-				tag: 'iframe',
-				width: '100%',
-				height: '100%',
-				// This fixes Chrome display bug: see https://bugs.chromium.org/p/chromium/issues/detail?id=735059
-				style: 'visibility:hidden;pointer-events:none;border:none;'
-			});
-
-			cw = ifEl.dom.contentWindow;
-			cw.document.open();
-			cw.document.write(html);
-			cw.document.close();
-
-			Ext.defer(function() {
-				cw.focus();
-				cw.print();
-				Ext.fly(ifId).destroy();
-			}, 500);
+			var iframeId = Ext.id(null, 'so-printer-if-'),
+				iframeEl = Ext.getBody().appendChild({
+					id: iframeId,
+					tag: 'iframe',
+					width: '100%',
+					height: '100%',
+					// This fixes Chrome display bug: see https://bugs.chromium.org/p/chromium/issues/detail?id=735059
+					style: 'visibility:hidden;pointer-events:none;border:none;'
+				}),
+				iframeCW = iframeEl.dom.contentWindow;
+			
+			iframeEl.dom.onload = function() {
+				iframeCW.focus();
+				iframeCW.print();
+				Ext.fly(iframeId).destroy();
+			};
+			iframeCW.document.open();
+			iframeCW.document.write(html);
+			iframeCW.document.close();
 		},
 		
 		verticalAlignToCssProp: function(va) {
