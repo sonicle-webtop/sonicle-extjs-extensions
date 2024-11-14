@@ -31,19 +31,9 @@ Ext.define('Sonicle.form.field.Display', {
 	preventDefault: true,
 	
 	/**
-	 * @cfg {Function/String} handler
-	 * A function called when the button is clicked (can be used instead of click event).
-	 * @param {Ext.form.field.Display} field This field.
-	 * @param {Ext.event.Event} e The click event.
+	 *  @cfg {String/Object} tooltip
+	 *  The tooltip for the button - can be a string or QuickTips config object.
 	 */
-	
-	/**
-	 * @cfg {Object} scope
-	 * The scope (**this** reference) in which the `{@link #handler}` is executed. Defaults to this Field.
-	 */
-	
-	// Force HTML encoding by default!
-	htmlEncode: true,
 	
 	/**
 	 *  @cfg {String} iconCls
@@ -64,12 +54,26 @@ Ext.define('Sonicle.form.field.Display', {
 	swatchGeometry: 'rounded',
 	
 	/**
+	 * @cfg {Function/String} handler
+	 * A function called when the button is clicked (can be used instead of click event).
+	 * @param {Ext.form.field.Display} field This field.
+	 * @param {Ext.event.Event} e The click event.
+	 */
+	
+	/**
+	 * @cfg {Object} scope
+	 * The scope (**this** reference) in which the `{@link #handler}` is executed. Defaults to this Field.
+	 */
+	
+	/**
      * @event click
      * Fires when this button is clicked, before the configured {@link #handler} is invoked.
      * Execution of the {@link #handler} may be vetoed by returning `false` to this event.
      * @param {Ext.button.Button} this 
      * @param {Event} e The click event
      */
+	
+	htmlEncode: true, // Force HTML encoding by default!
 	
 	clickableCls: 'so-' + 'displayfield-clickable',
 	displayIconCls: 'so-' + 'displayfield-icon',
@@ -111,15 +115,18 @@ Ext.define('Sonicle.form.field.Display', {
 	getDisplayValue: function() {
 		var me = this,
 			value = me.getRawValue(),
+			tooltip = me.tooltip,
 			renderer = me.renderer,
-			display;
+			display = '';
 		
+		if (!Ext.isEmpty(tooltip)) display += '<span ' + Sonicle.Utils.generateTooltipAttrs(tooltip) + '>';
+		if (!Ext.isEmpty(me.iconCls)) display += '<i class="' + me.displayIconCls + ' ' + me.iconCls + '" aria-hidden="true"></i>';
 		if (renderer) {
-			display = Ext.callback(renderer, me.scope, [value, me], 0, me);
+			display += Ext.callback(renderer, me.scope, [value, me], 0, me);
 		} else {
-			display = Ext.isEmpty(me.iconCls) ? '' : '<i class="' + me.displayIconCls + ' ' + me.iconCls + '" aria-hidden="true"></i>';
 			display += (me.htmlEncode ? Ext.util.Format.htmlEncode(value) : value);
 		}
+		if (!Ext.isEmpty(tooltip)) display += '</span>';
 		return display;
 	},
 	
