@@ -703,7 +703,18 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
-	 * Wraps passed string using specified separator (at begin and end).
+	 * Wraps passed string using specified wrapper char (at begin and end).
+	 * @param {String} s The String to be wrapped, may be null.
+	 * @param {String|String[]} separator The separator String or a 2-items array with beginning and ending separator.
+	 */
+	wrap: function(s, separator) {
+		if (Ext.isEmpty(separator)) return s;
+		var start = separator[0], end = separator[separator.length-1];
+		return start + s + end;
+	},
+	
+	/**
+	 * UN-wraps passed string using specified separator (at begin and end).
 	 * @param {String} s The String to be wrapped, may be null.
 	 * @param {String|String[]} separator The separator String or a 2-items array with beginning and ending separator.
 	 */

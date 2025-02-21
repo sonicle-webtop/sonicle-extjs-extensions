@@ -148,6 +148,12 @@ Ext.define('Sonicle.form.field.Tag', {
 	 */
 	dummyIcon: 'warning',
 	
+	/**
+	 * @cfg {Boolean} addDisabled
+	 * Set to `true` to disable items insertion.
+	 */
+	addDisabled: false,
+	
 	clipboardDelimiter: ',',
 	
 	/**
@@ -598,6 +604,16 @@ Ext.define('Sonicle.form.field.Tag', {
 	},
 	
 	/**
+	 * Overrides original {@link Ext.form.field.ComboBox#onTriggerClick}:
+	 *  - if picker is disabled, prevent trigger opening when DOWN arrow is pressed
+	 */
+	onTriggerClick: function(comboBox, trigger, e) {
+		if (!this.addDisabled) {
+			this.callParent(arguments);
+		}
+	},
+	
+	/**
 	 * Overrides original {@link Ext.form.field.Tag#onKeyDown}:
 	 *  - handle item editing (if enabled)
 	 */
@@ -611,7 +627,7 @@ Ext.define('Sonicle.form.field.Tag', {
 			stopEvent = false,
 			rec, item;
 		
-		if (me.destroyed || me.readOnly || me.disabled || !me.editable) {
+		if (me.destroyed || me.readOnly || me.disabled || !me.editable || me.addDisabled) {
 			return;
 		}
 		if (isEdit && me.itemEditable) {
@@ -673,6 +689,29 @@ Ext.define('Sonicle.form.field.Tag', {
 			
 		} else {
 			me.callParent(arguments);
+		}
+	},
+	
+	setAddDisabled: function(addDisabled) {
+		var me = this,
+			old = me.addDisabled,
+			triggers = me.getTriggers(),
+			hideTriggers = me.getHideTrigger(),
+			trigger, id;
+		
+		addDisabled = !!addDisabled;
+		me[addDisabled ? 'addCls' : 'removeCls'](me.readOnlyCls);
+		me.addDisabled = addDisabled;
+		
+		me.setEditable(!addDisabled);
+		
+		if (triggers) {
+			for (id in triggers) {
+				trigger = triggers[id];
+				if (trigger.hideOnReadOnly === true || (trigger.hideOnReadOnly !== false && !hideTriggers)) {
+					trigger.setVisible(!addDisabled);
+				}
+			}
 		}
 	},
 	
