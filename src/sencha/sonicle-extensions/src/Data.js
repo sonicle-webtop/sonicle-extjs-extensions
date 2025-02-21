@@ -126,12 +126,12 @@ Ext.define('Sonicle.Data', {
 	 * Returns an array of Records of the specified IDs.
 	 * A null element will be added in case the Record is missing for an ID.
 	 * @param {Ext.data.Store} store The data store.
-	 * @param {Mixed[]} ids Array of IDs for which to collect records.
+	 * @param {Mixed|Mixed[]} ids Array of IDs for which to collect records.
 	 * @returns {Ext.data.Model[]}
 	 */
 	getByIds: function(store, ids) {
 		var ret = [], rec;
-		Ext.iterate(ids, function(id) {
+		Ext.iterate(Ext.Array.from(ids), function(id) {
 			rec = store.getById(id);
 			ret.push(rec);
 		});
