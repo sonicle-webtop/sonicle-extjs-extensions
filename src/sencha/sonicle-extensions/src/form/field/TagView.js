@@ -53,7 +53,9 @@ Ext.define('Sonicle.form.field.TagView', {
 	
 	/**
 	 * @cfg {Function} itemsStoreRecordCreator
-	 * A function which is used as a record creation function.
+	 * A function which is used as a record creation function when a new entry is 
+	 * being created for appending to items Store (that holds selected items). This 
+	 * is useful to customize data: eg. setting some defaults or implement custom logic.
 	 * @param {Object} data Raw data to transform into a record.
 	 * @param {Function} Model Model constructor to create a record from the passed data.
 	 * @return {Ext.data.Model} The resulting new Model instance.
