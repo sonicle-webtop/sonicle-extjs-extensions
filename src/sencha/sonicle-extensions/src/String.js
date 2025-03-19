@@ -339,13 +339,14 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
-	 * Returns first non-NULL value of provided arguments.
+	 * Returns first non-NULL/non-EMPTY/non-UNDEFINED value of provided arguments.
+	 * If you want to not leverage on EMPTY values, use {@link Sonicle.Object.coalesce} instead.
 	 * @param {Mixed...} values List of values.
-	 * @returns {Mixed} The first non-NULL value.
+	 * @returns {Mixed} The first non-NULL/non-EMPTY/non-UNDEFINED value.
 	 */
 	coalesce: function(values) {
 		for (var i=0; i<arguments.length; i++) {
-			if ((arguments[i] !== null) && (arguments[i] !== undefined)) return arguments[i];
+			if (!Ext.isEmpty(arguments[i])) return arguments[i];
 		}
 		return null;
 	},
