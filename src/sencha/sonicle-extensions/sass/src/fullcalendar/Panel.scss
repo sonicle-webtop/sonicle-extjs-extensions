@@ -3,13 +3,19 @@
     --fc-non-business-color: rgba(234,243,250,.3);
     --fc-event-resizer-swatch-bg-color: #ffffff;
     --fc-event-resizer-swatch-border-color: #111827;
+	--fc-event-style-shadow: rgba(0,0,0,.1);
 }
 
-/* top-toolbar: style month item */
-.so-fullcalendar-panel-toolbar-month {
+/* top-toolbar: style header-text items */
+.so-fullcalendar-panel-toolbar-hdtext {
 	display: inline-flex;
 	gap: 5px;
 }
+/*
+.so-fullcalendar-panel-toolbar-hdtext-cmyo {
+
+}
+*/
 /* fullcalendar: disarm browser bold for TH elements */
 .so-fullcalendar th {
 	font-weight: normal;
@@ -93,6 +99,10 @@
 /* fullcalendar: reset pointer if event is not draggable */
 .so-fullcalendar .fc-event[data-draggable="false"] {
     cursor: default;
+}
+/* fullcalendar: support colorswatch in resource cell */
+.so-fullcalendar .fc-datagrid-cell-main .so-cal-appo-swatch {
+	display: inline-block;
 }
 /* fullcalendar: appointment */
 .so-cal-appo.fc-v-event > .fc-event-main {
@@ -230,4 +240,21 @@
     background: #bcc0c5;
     width: 100%;
     height: 1px;
+}
+/* event styling */
+/*repeating-linear-gradient(90deg, transparent 0 5px, rgb(from var(--fc-button-active-border-color) r g b /  0.1) 5px 10px)*/
+.fc-event.fc-event-style-dashed {
+	background-image: repeating-linear-gradient(0deg, transparent 0 5px, var(--fc-event-style-shadow) 5px 10px);
+}
+.fc-event.fc-event-style-piped {
+	background-image: repeating-linear-gradient(90deg, transparent 0 5px, var(--fc-event-style-shadow) 5px 10px);
+}
+.fc-event.fc-event-style-backslashed {
+	background-image: repeating-linear-gradient(45deg, transparent 0 5px, var(--fc-event-style-shadow) 5px 10px);
+}
+.fc-event.fc-event-style-slashed {
+	background-image: repeating-linear-gradient(-45deg, transparent 0 5px, var(--fc-event-style-shadow) 5px 10px);
+}
+.fc-event.fc-event-style-crossed {
+	background-image: repeating-linear-gradient(-45deg, transparent 0 5px, var(--fc-event-style-shadow) 5px 10px), repeating-linear-gradient(45deg, transparent 0 5px, var(--fc-event-style-shadow) 5px 10px);
 }

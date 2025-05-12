@@ -26,6 +26,16 @@ Ext.define('Sonicle.fullcalendar.FullCalendar', {
 		calendar: true,
 		
 		/**
+		 * @cfg {Number|String|auto} [resourceAreaInitialWidth]
+		 * The initial width of resourceArea.
+		 * A numeric value will be interpreted as the number of pixels; a string 
+		 * value will be treated as a CSS value with units. If set to `auto`, 
+		 * resources column width will be adjusted to automatically adopt 
+		 * the width of the larger label.
+		 */
+		resourceAreaWidth: undefined,
+		
+		/**
 		 * @cfg {Boolean} [selectForAdd]
 		 * A selection represents a new event being created. To disable this behaviour set this to `false`.
 		 */
@@ -187,10 +197,14 @@ Ext.define('Sonicle.fullcalendar.FullCalendar', {
 	
 	onResize: function(width, height, oldWidth, oldHeight) {
 		var me = this,
-			cal = me.getCalendar();
+			fc = me.getCalendar();
 		me.callParent(arguments);
-		if (cal && cal.isReady) {
-			cal.updateSize();
+		if (fc && fc.isReady) {
+			fc.updateSize();
+			// Is this the unique hook-point with sense for updating width?
+			if (me.resourcesAreaWidthNeedsSync) {
+				if (me.doAutoSizeResourceArea(fc.getCurrentData().viewApi)) delete me.resourcesAreaWidthNeedsSync;
+			}
 		}
 	},
 	
@@ -277,6 +291,18 @@ Ext.define('Sonicle.fullcalendar.FullCalendar', {
 	},
 	
 	/**
+	 * Returns active view's name.
+	 * @returns {String}
+	 */
+	getViewName: function() {
+		var cal = this.getCalendar(), ret;
+		if (cal && cal.isReady) {
+			ret = cal.getCurrentData().viewApi.type;
+		}
+		return ret;
+	},
+	
+	/**
 	 * Returns an object containing active view's boundary dates.
 	 * @returns {Object}
 	 */
@@ -300,17 +326,9 @@ Ext.define('Sonicle.fullcalendar.FullCalendar', {
 			moveType: moveType
 		});
 		
-		/*
-		if (Ext.isString(view)) {
-			me.fireEvent('viewchange', me, view, {
-				start: viewStart,
-				end: viewEnd,
-				date: Ext.isDate(date) ? date : XD.parse(date, 'Y-m-d')
-			});
-		} else if (Ext.isObject(view)) {
-			
+		if (me.resourcesAreaWidthNeedsSync) {
+			if (me.doAutoSizeResourceArea(view)) delete me.resourcesAreaWidthNeedsSync;
 		}
-		*/
 	},
 	
 	/**
@@ -377,7 +395,7 @@ Ext.define('Sonicle.fullcalendar.FullCalendar', {
 			} else {
 				fc.refetchEvents();
 			}
-		}	
+		}
 	},
 	
 	/**
@@ -392,7 +410,7 @@ Ext.define('Sonicle.fullcalendar.FullCalendar', {
 	
 	/**
 	 * Removes an event.
-	 * @param {String|Nummer} id The event ID.
+	 * @param {String|Number} id The event ID.
 	 * @returns {Boolean}
 	 */
 	removeEvent: function(id) {
@@ -421,6 +439,54 @@ Ext.define('Sonicle.fullcalendar.FullCalendar', {
 				return true;
 			}
 		}	
+	},
+	
+	/**
+	 * Reloads resources.
+	 */
+	reloadResources: function() {
+		var fc = this.getCalendar();
+		if (fc && fc.isReady) {
+			fc.refetchResources();
+		}
+	},
+	
+	/**
+	 * Adds Resource instances to Calendar component.
+	 * @param {Object[]|Object} fcResources
+	 * @param {String|Object|true} source The event Source: a String ID, a Source Object or `true` for the first event Source.
+	 */
+	addResources: function(fcResources) {
+		fcResources = Ext.Array.from(fcResources);
+		var fc = this.getCalendar(), i;
+		if (fc && fc.isReady) {
+			for (i=0; i<fcResources.length; i++) {
+				fc.addResource(fcResources[i]);
+			}
+		}
+	},
+	
+	/**
+	 * Removes the specified resource(s) from Calendar component.
+	 * @param {String[]|String} ids The resource ID.
+	 * @returns {Boolean[]|undefined}
+	 */
+	removeResources: function(ids) {
+		ids = Ext.Array.from(ids);
+		var fc = this.getCalendar(), ret, i, resource;
+		if (fc && fc.isReady) {
+			ret = [];
+			for (i=0; i<ids.length; i++) {
+				resource = fc.getResourceById(ids[i]);
+				if (resource) {
+					resource.remove();
+					ret.push(true);
+				} else {
+					ret.push(false);
+				}
+			}
+			return ret;
+		}
 	},
 	
 	/**
@@ -534,6 +600,10 @@ Ext.define('Sonicle.fullcalendar.FullCalendar', {
 			var me = this;
 			me.fireEvent('selectadd', me, start, end, allDay);
 			me.clearSelection();
+		},
+		
+		onFCResourcesSet: function(resources) {
+			this.resourcesAreaWidthNeedsSync = true;
 		},
 		
 		onFCDayEvent: function(e) {
@@ -655,10 +725,39 @@ Ext.define('Sonicle.fullcalendar.FullCalendar', {
 			}
 		},
 		
+		doAutoSizeResourceArea: function(fcView) {
+			var fc = fcView.calendar,
+				btype = Sonicle.fullcalendar.FullCalendar.fcViewBaseType(fcView),
+				maxWidth = this.measureResourceAreaMaxWidth(fc.el);
+
+			if (maxWidth !== undefined && 'timeline' === btype) {
+				fc.setOption('resourceAreaWidth', maxWidth);
+				return true;
+			}
+		},
+		
+		measureResourceAreaMaxWidth: function(fcEl) {
+			var resourcesEls = Ext.fly(fcEl).query('.fc-datagrid-cell.fc-resource', false),
+				maxWidth, resourceEl, i;
+
+			for (i=0; i<resourcesEls.length; i++) {
+				resourceEl = resourcesEls[i];
+				var cellWidth = 0;
+				// Resource cell's elements are wrapped into a cell-cushion wrapper
+				//TODO: verify if this really works with tree-style column (see expander)
+				cellWidth += resourceEl.down('.fc-datagrid-expander').getWidth(); // Add expander element width
+				cellWidth += resourceEl.down('.fc-datagrid-cell-main').getWidth(); // Add label element width
+				cellWidth += resourceEl.down('.fc-datagrid-cell-cushion').getPadding('lr'); // Add wrapper element padding
+				maxWidth = Math.max(maxWidth || 0, cellWidth);
+			}
+			return maxWidth;
+		},
+		
 		createCalendar: function(config) {
 			var me = this,
 				el = me.innerEl,
 				baseConfig = me.createCalendarBaseConfig(config),
+				resourceAreaWidth = me.getResourceAreaWidth(),
 				cfg, cal;
 			
 			if (el) {
@@ -668,6 +767,8 @@ Ext.define('Sonicle.fullcalendar.FullCalendar', {
 					expandRows: true,
 					headerToolbar: false,
 					footerToolbar: false
+				}, {
+					resourceAreaWidth: 'auto' === resourceAreaWidth ? '30%' : resourceAreaWidth
 				}));
 				cal.isReady = true;
 				return cal;
@@ -689,6 +790,7 @@ Ext.define('Sonicle.fullcalendar.FullCalendar', {
 				};
 			
 			return {
+				resourcesSet: hook('resourcesSet', me.onFCResourcesSet),
 				eventDidMount: hook('eventDidMount', me.onFCEventDidMount),
 				dayCellDidMount: hook('dayCellDidMount', me.onFCDayCellDidMount),
 				viewDidMount: hook('viewDidMount', me.onFCViewDidMount),
@@ -713,16 +815,17 @@ Ext.define('Sonicle.fullcalendar.FullCalendar', {
 		/**
 		* Returns the base-type of a FullCalendar's View: passing a Month view this
 		* will return `dayGrid`.
-		* @param {FullCalendar.View} view FullCalendar view.
+		* @param {FullCalendar.View|String} view FullCalendar view or a type name.
 		* @returns {undefined|String}
 		*/
 		fcViewBaseType: function(view) {
 			var SoS = Sonicle.String,
-				type = view.getOption('type');
+				type = Ext.isString(view) ? view : view.getOption('type');
 			if (SoS.startsWith(type, 'timeGrid')) return 'timeGrid';
 			if (SoS.startsWith(type, 'dayGrid')) return 'dayGrid';
 			if (SoS.startsWith(type, 'list')) return 'list';
-			if (SoS.startsWith(type, 'resourceTimeline')) return 'resourceTimeline';
+			if (SoS.startsWith(type, 'timeline') || SoS.startsWith(type, 'resourceTimeline')) return 'timeline';
+			//if (SoS.startsWith(type, 'resourceTimeline')) return 'resourceTimeline';
 			return undefined;
 		},
 	   

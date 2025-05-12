@@ -4,7 +4,7 @@
  * malbinola[at]sonicle.com
  * https://www.sonicle.com
  */
-Ext.define('Sonicle.fullcalendar.api.FullCalendarDataMixin', {
+Ext.define('Sonicle.fullcalendar.api.EventDataMixin', {
 	extend: 'Ext.Mixin',
 	requires: [
 		'Sonicle.Object',
@@ -12,7 +12,7 @@ Ext.define('Sonicle.fullcalendar.api.FullCalendarDataMixin', {
 	],
 	
 	mixinConfig: {
-		id: 'sofullcalendardata'
+		id: 'sofullcalendareventdata'
 	},
 	
 	idField: 'id',
@@ -22,6 +22,7 @@ Ext.define('Sonicle.fullcalendar.api.FullCalendarDataMixin', {
 	titleField: 'title',
 	colorField: 'color',
 	colorShadeMode: 'brightness',
+	resourceIdField: undefined, // Relates an event to a resource
 	
 	toFCEvent: function(opts) {
 		opts = opts || {};
@@ -39,9 +40,9 @@ Ext.define('Sonicle.fullcalendar.api.FullCalendarDataMixin', {
 			},
 			editable = me.fcIsEditable(),
 			startEditable = me.fcIsStartEditable(),
-			durationEditable = me.fcIsDurationEditable()
-			;
+			durationEditable = me.fcIsDurationEditable();
 		
+		if (Ext.isString(me.resourceIdField)) Ext.apply(obj, { resourceId: Sonicle.Object.stringValue(me.get(me.resourceIdField)) });
 		if (Ext.isBoolean(editable)) Ext.apply(obj, { editable: editable });
 		if (Ext.isBoolean(startEditable)) Ext.apply(obj, { startEditable: startEditable });
 		if (Ext.isBoolean(durationEditable)) Ext.apply(obj, { durationEditable: durationEditable });
