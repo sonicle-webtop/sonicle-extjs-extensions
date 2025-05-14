@@ -211,69 +211,71 @@ Ext.define('Sonicle.Utils', {
 			encodeMap = opts.outputType === 'map',
 			out = rawOutput ? '' : {};
 		
-		if (qtips) {
-			if (Ext.isString(tooltip)) {
-				if (rawOutput) {
-					out += ' data-qtip="' + encode(tooltip) + '"';
-				} else {
-					out['data-qtip'] = encodeMap ? encode(tooltip) : tooltip;
+		if (Ext.isString(tooltip) || Ext.isObject(tooltip)) {
+			if (qtips) {
+				if (Ext.isString(tooltip)) {
+					if (rawOutput) {
+						out += ' data-qtip="' + encode(tooltip) + '"';
+					} else {
+						out['data-qtip'] = encodeMap ? encode(tooltip) : tooltip;
+					}
+					//s += ' data-qtip="' + encode(tooltip) + '"';
+				} else if (Ext.isObject(tooltip)) {
+					if (rawOutput) {
+						out += ' data-qtitle="' + encode(tooltip.title) + '" data-qtip="' + encode(tooltip.text) + '"';
+					} else {
+						out['data-qtitle'] = encodeMap ? encode(tooltip.title) : tooltip.title;
+						out['data-qtip'] = encodeMap ? encode(tooltip.text) : tooltip.text;
+					}
+					//s += ' data-qtitle="' + encode(tooltip.title) + '" data-qtip="' + encode(tooltip.text) + '"';
 				}
-				//s += ' data-qtip="' + encode(tooltip) + '"';
-			} else if (Ext.isObject(tooltip)) {
-				if (rawOutput) {
-					out += ' data-qtitle="' + encode(tooltip.title) + '" data-qtip="' + encode(tooltip.text) + '"';
-				} else {
-					out['data-qtitle'] = encodeMap ? encode(tooltip.title) : tooltip.title;
-					out['data-qtip'] = encodeMap ? encode(tooltip.text) : tooltip.text;
+				if (Ext.isNumber(opts.showDelay)) {
+					if (rawOutput) {
+						out += ' data-qshowdelay="' + encode(opts.showDelay+'') + '"';
+					} else {
+						out['data-qshowdelay'] = encodeMap ? encode(opts.showDelay+'') : (opts.showDelay+'');
+					}
+					//s += ' data-qshowdelay="' + encode(opts.showDelay+'') + '"';
 				}
-				//s += ' data-qtitle="' + encode(tooltip.title) + '" data-qtip="' + encode(tooltip.text) + '"';
-			}
-			if (Ext.isNumber(opts.showDelay)) {
-				if (rawOutput) {
-					out += ' data-qshowdelay="' + encode(opts.showDelay+'') + '"';
-				} else {
-					out['data-qshowdelay'] = encodeMap ? encode(opts.showDelay+'') : (opts.showDelay+'');
+				if (Ext.isNumber(opts.dismissDelay)) {
+					if (rawOutput) {
+						out += ' data-qdismissdelay="' + encode(opts.dismissDelay+'') + '"';
+					} else {
+						out['data-qdismissdelay'] = encodeMap ? encode(opts.dismissDelay+'') : (opts.dismissDelay+'');
+					}
+					//s += ' data-qdismissdelay="' + encode(opts.dismissDelay+'') + '"';
 				}
-				//s += ' data-qshowdelay="' + encode(opts.showDelay+'') + '"';
-			}
-			if (Ext.isNumber(opts.dismissDelay)) {
-				if (rawOutput) {
-					out += ' data-qdismissdelay="' + encode(opts.dismissDelay+'') + '"';
-				} else {
-					out['data-qdismissdelay'] = encodeMap ? encode(opts.dismissDelay+'') : (opts.dismissDelay+'');
+				if (!Ext.isEmpty(opts.width)) {
+					if (rawOutput) {
+						out += ' data-qwidth="' + encode(opts.width+'') + '"';
+					} else {
+						out['data-qwidth'] = encodeMap ? encode(opts.width+'') : (opts.width+'');
+					}
 				}
-				//s += ' data-qdismissdelay="' + encode(opts.dismissDelay+'') + '"';
-			}
-			if (!Ext.isEmpty(opts.width)) {
-				if (rawOutput) {
-					out += ' data-qwidth="' + encode(opts.width+'') + '"';
-				} else {
-					out['data-qwidth'] = encodeMap ? encode(opts.width+'') : (opts.width+'');
+				if (!Ext.isEmpty(opts.cls)) {
+					if (rawOutput) {
+						out += ' data-qclass="' + encode(opts.cls+'') + '"';
+					} else {
+						out['data-qclass'] = encodeMap ? encode(opts.cls+'') : (opts.cls+'');
+					}
 				}
-			}
-			if (!Ext.isEmpty(opts.cls)) {
-				if (rawOutput) {
-					out += ' data-qclass="' + encode(opts.cls+'') + '"';
-				} else {
-					out['data-qclass'] = encodeMap ? encode(opts.cls+'') : (opts.cls+'');
+
+			} else {
+				if (Ext.isString(tooltip)) {
+					if (rawOutput) {
+						out += ' title="' + encode(tooltip) + '"';
+					} else {
+						out['title'] = encode(tooltip);
+					}
+					//s += ' title="' + encode(tooltip) + '"';
+				} else if (Ext.isObject(tooltip)) {
+					if (rawOutput) {
+						out += ' title="' + encode(SoS.deflt(tooltip.text, tooltip.title)) + '"';
+					} else {
+						out['title'] = encode(SoS.deflt(tooltip.text, tooltip.title));
+					}
+					//s += ' title="' + encode(SoS.deflt(tooltip.text, tooltip.title)) + '"';
 				}
-			}
-			
-		} else {
-			if (Ext.isString(tooltip)) {
-				if (rawOutput) {
-					out += ' title="' + encode(tooltip) + '"';
-				} else {
-					out['title'] = encode(tooltip);
-				}
-				//s += ' title="' + encode(tooltip) + '"';
-			} else if (Ext.isObject(tooltip)) {
-				if (rawOutput) {
-					out += ' title="' + encode(SoS.deflt(tooltip.text, tooltip.title)) + '"';
-				} else {
-					out['title'] = encode(SoS.deflt(tooltip.text, tooltip.title));
-				}
-				//s += ' title="' + encode(SoS.deflt(tooltip.text, tooltip.title)) + '"';
 			}
 		}
 		return out;

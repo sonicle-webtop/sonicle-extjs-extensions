@@ -857,7 +857,7 @@ Ext.define('Sonicle.String', {
 	 */
 	parseArray: function(s, defValue, transformFn, itemsSep) {
 		if (!Ext.isString(itemsSep)) itemsSep = ',';
-		if (Ext.isEmpty(s)) defValue;
+		if (Ext.isEmpty(s)) return defValue;
 		var fn = Ext.isFunction(transformFn) ? transformFn : function(value, index) {
 			return value;
 		};
