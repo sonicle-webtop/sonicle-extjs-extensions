@@ -13,7 +13,8 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 		'Sonicle.Utils',
 		'Sonicle.fullcalendar.FullCalendar',
 		'Sonicle.fullcalendar.api.DropZone',
-		'Sonicle.fullcalendar.api.FullCalendarDataMixin'
+		'Sonicle.fullcalendar.api.EventDataMixin',
+		'Sonicle.fullcalendar.api.EventWithResourceDataMixin'
 	],
 	mixins: [
 		'Ext.util.StoreHolder'
@@ -105,29 +106,41 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 	toolbarBorder: false,
 	
 	/**
-	 * @cfg {Boolean} [showCurrentMonth]
-	 * Specifies whether to display current month details in top-toolbar.
+	 * @cfg {String[]} [toolbarLayout]
+	 * An array indicating the configuration layout of top-toolbar.
+	 * You can omit some items or alter the order to customize the resulting layot.
+	 * Allowed items are the following:
+	 *  - 'headerText': the header item displaying a sort of view title
+	 *  - 'controlButtons': section for control buttons (previous, today, next)
+	 *  - 'viewButtons': section for view selection buttons
+	 *  - 'extraItems': section that groups any specified extra-item
+	 *  
+	 * Plus the following items to control spacing ad alignment:
+	 *  - '->': begin using the right-justified container
+	 *  - ' ': add horizontal space between elements
+	 *  - '-': add a vertical separator bar between toolbar items
 	 */
-	showCurrentMonth: true,
+	toolbarLayout: ['controlButtons', '->', 'headerText', '->', 'viewButtons'],
 	
 	/**
-	 * @cfg {Number} [currentMonthMinWidth]
-	 * The minimum value in pixels which current-month text will set its width to.
+	 * @cfg {Object/Object[]} [toolbarExtraItems]
+	 * A single extra item, or an array of extra child items to be added to the toolbar.
 	 */
-	currentMonthMinWidth: undefined,
+	toolbarExtraItems: undefined,
 	
 	/**
-	 * @cfg {currentdate|viewstart} [currentMonthSource=currentdate]
-	 * Specifies from where to extract the date for displaying current month 
-	 * in top-toolbar: from view's start or from current date.
+	 * @cfg {Number} [headerTextMinWidth]
+	 * The minimum value in pixels which header text will set its width to.
 	 */
-	currentMonthSource: 'currentdate',
+	headerTextMinWidth: undefined,
 	
 	/**
-	 * @cfg {center|left|right} [viewButtonsPosition]
-	 * Specifies whether to display current month details in top-toolbar.
+	 * @cfg {Function/String} headerTextRenderer
+	 * A renderer is an 'interceptor' method which can be used to transform data (value,
+	 * appearance, etc.) before it is rendered.
+	 * @param {Object} value The data value for the current cell
 	 */
-	viewButtonsPosition: 'center',
+	headerTextRenderer: false,	
 	
 	/**
 	 * @cfg {Boolean/Object} [reloadButton]
@@ -169,6 +182,8 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 	
 	/**
 	 * @cfg {String} [initialView]
+	 * The initial view to apply, one of the follwing: day, week5,
+	 * week, biweek, month, daytimeline, weektimeline, monthtimeline
 	 */
 	initialView: 'day',
 	
@@ -211,6 +226,37 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 	 * - `iconCls`: {String} The CSS icon class to use with button.
 	 */
 	monthView: true,
+	
+	/**
+	 * @cfg {Boolean/Object} [dayTimelineView]
+	 * Set to `true` to show day timeline view.
+	 * An object may be given to customize button configuration:
+	 * - `iconCls`: {String} The CSS icon class to use with button.
+	 */
+	dayTimelineView: false,
+	
+	/**
+	 * @cfg {Boolean/Object} [weekTimelineView]
+	 * Set to `true` to show week timeline view.
+	 * An object may be given to customize button configuration:
+	 * - `iconCls`: {String} The CSS icon class to use with button.
+	 */
+	weekTimelineView: false,
+	
+	/**
+	 * @cfg {Boolean/Object} [monthTimelineView]
+	 * Set to `true` to show month timeline view.
+	 * An object may be given to customize button configuration:
+	 * - `iconCls`: {String} The CSS icon class to use with button.
+	 */
+	monthTimelineView: false,
+	
+	/**
+	 * @cfg {Object} [extraViewConfig]
+	 * Keyed configuration object that allows to customize default internal 
+	 * views configuration: use view name as key.
+	 */
+	extraViewConfig: undefined,
 	
 	/**
 	 * @cfg {Number} [startDay]
@@ -268,6 +314,46 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 	 * Set to `false` to disable non-current days and thus no events will be displayed.
 	 */
 	showNonCurrentDates: true,
+	
+	/**
+	 * @cfg {Boolean} [showResources]
+	 * Activates the resources column avaiable when using timeline views.
+	 * It also enables {@link #resources} config to instructing how to populate resources data.
+	 */
+	showResources: false,
+	
+	/**
+	 * @cfg {String} [resourcesOrderBy]
+	 * The order-by String to apply in the format: "<field> [ASC|DESC], ..." (e.g. "title, id DESC")
+	 * Default to "title".
+	 */
+	
+	/**
+	 * @cfg {Object[]|Object|Function} [resources]
+	 * Specifies how to retrieve data for resources; value can be:
+	 *  - Object[]|Object: defines data statically by passing a single or multiple items
+	 *  - Function: defines a loading function that allow any sort of asynchronous
+	 *  behaviour to retrieve data.
+	 *    function( fetchInfo, successCallback, failureCallback ) { }
+	 *  - none (meaning not defined): if {@link #showResources} is enabled, and {@link #store store's}
+	 *  model uses {@link Sonicle.fullcalendar.api.EventWithResourceDataMixin} will force to extract 
+	 *  resources data directly from main event's Store
+	 */
+	
+	/**
+	 * @cfg {Boolean} [reloadResourcesOnNavigate]
+	 * Determines whether to reload resources when navigating.
+	 */
+	reloadResourcesOnNavigate: false,
+	
+	/**
+	 * @cfg {Number|String|auto} [resourceAreaWidth]
+	 * The initial width of resourceArea.
+	 * A numeric value will be interpreted as the number of pixels; a string 
+	 * value will be treated as a CSS value with units. If set to `auto`, 
+	 * resources column width will be adjusted to automatically adopt 
+	 * the width of the larger label.
+	 */
 	
 	/**
 	 * @cfg {Boolean/Object/Object[]} [businessHours]
@@ -338,23 +424,35 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 		},
 		dayView: {
 			text: 'Day',
-			tooltip: 'Day view'
+			tooltip: 'Daily view'
 		},
 		week5View: {
 			text: 'Week (5days)',
-			tooltip: 'Week view (business week)'
+			tooltip: 'Weekly view (business week)'
 		},
 		weekView: {
 			text: 'Week',
-			tooltip: 'Week view'
+			tooltip: 'Weekly view'
 		},
 		biweekView: {
 			text: 'Bi-Week',
-			tooltip: 'Bi-Week view'
+			tooltip: 'Bi-Weekly view'
 		},
 		monthView: {
 			text: 'Month',
-			tooltip: 'Month view'
+			tooltip: 'Monthly view'
+		},
+		daytimelineView: {
+			text: 'Day',
+			tooltip: 'Daily timeline view'
+		},
+		weektimelineView: {
+			text: 'Week',
+			tooltip: 'Weekly timeline view'
+		},
+		monthtimelineView: {
+			text: 'Month',
+			tooltip: 'Monthly timeline view'
 		}
 	},
 	
@@ -362,6 +460,7 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 	 * @cfg {Object} [texts]
 	 */
 	texts: {
+		resourcesAreaTitle: 'Resources',
 		weekShort: 'W',
 		//more: '+{0} more...',
 		ddCreate: 'New: {0}',
@@ -388,11 +487,14 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 	},
 	
 	rendererNames: {
+		headerText: 'headerTextRenderer',
 		eventContent: 'eventContentRenderer',
-		eventTooltip: 'eventTooltipRenderer'
+		eventTooltip: 'eventTooltipRenderer',
+		resourceLabelContent: 'resourceLabelContentRenderer'
 	},
 	
 	storeQuerying: false,
+	lastResources: null,
 	suspendViewButtonToggle: 0,
 	
 	/**
@@ -530,12 +632,16 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 		me.bindStore(me.store || 'ext-empty-store', true, true);
 		
 		if (me.showToolbar) items.push(me.createToolbarItemCfg({width: '100%'}));
+		me.lastView = me.initialView;
 		items.push(me.createCalendarItemCfg({width: '100%', flex: 1}));
 		Ext.apply(me, {
 			layout: 'vbox',
 			items: items
 		});
+		me.setupRenderer('headerText');
 		me.setupRenderer('eventContent');
+		me.setupRenderer('eventTooltip');
+		me.setupRenderer('resourceLabelContent');
 		me.callParent(arguments);
 		me.initialized = true;
 	},
@@ -698,7 +804,57 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 		this.getCalendar().clearSelection();
 	},
 	
+	refreshResources: function() {
+		this.getCalendar().reloadResources();
+	},
+	
 	privates: {
+		toolbarCls: function() {
+			return this.componentCls + '-toolbar';
+		},
+		
+		toolbarHeaderTextCls: function() {
+			return this.toolbarCls() + '-hdtext';
+		},
+		
+		// HeaderText: ('headerText', fcViewType, fcViewDate, fcViewStart, fcViewEnd, fcArg, context)
+		// EventContent ('eventContent', fcViewType, fcEvent, fcArg, context)
+		// EventTooltip: ('eventTooltip', fcViewType, fcEvent, fcArg, context)
+		// ResourceLabelContent ('resourceLabelContent, fcViewType, fcResource, fcArg, context)
+		
+		defaultHeaderTextRenderer: function(fcViewType, fcViewDate, fcViewStart, fcViewEnd, fcArg, context) {
+			var SoS = Sonicle.String,
+				baseCls = context.toolbarHeaderTextCls(),
+				options = {
+					year: 'numeric',
+					month: 'long',
+					day: 'numeric',
+					separator: ' - ',
+					isEndExclusive: true
+				},
+				html = '';
+			
+			html += '<span class="'+baseCls+'-deflt">';
+			if (SoS.contains(fcViewType, 'week')) Ext.apply(options, {month: 'short'});
+			html += Sonicle.String.htmlEncode(this.fcViewFormatRange(fcArg.view, fcViewStart, fcViewEnd, options));
+			html += '</span>';
+			return html;
+		},
+		
+		defaultEventContentRenderer: function(fcViewType, fcEvent, fcArg, context) {
+			// Returning `true` means to use internal default rendering!
+			return true;
+		},
+		
+		defaultEventToolipRenderer: function(fcView, fcEvent, fcArg, context) {
+			return fcEvent.title;
+		},
+		
+		defaultResourceLabelContentRenderer: function(fcViewType, fcResource, fcArg, context) {
+			// Returning `true` means to use internal default rendering!
+			return true;
+		},
+		
 		viewButton: function(name) {
 			var hb = this.getHeaderBar(),
 				segComp, comp;
@@ -722,7 +878,6 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 		createToolbarItemCfg: function(cfg) {
 			var me = this,
 				SoS = Sonicle.String,
-				vbPos = me.viewButtonsPosition,
 				segButton = function(name, propSuffix, cfg) {
 					cfg = cfg || {};
 					var texts = me.buttonTexts[name + (propSuffix || '')] || {},
@@ -779,6 +934,16 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 			if (me.monthView != false) {
 				viewButtons.push(segButton('month', 'View'));
 			}
+			if (me.dayTimelineView != false) {
+				viewButtons.push(segButton('daytimeline', 'View'));
+			}
+			if (me.weekTimelineView != false) {
+				viewButtons.push(segButton('weektimeline', 'View'));
+			}
+			if (me.monthTimelineView != false) {
+				viewButtons.push(segButton('monthtimeline', 'View'));
+			}
+			
 			/*
 			items.push(button('dayListView', null, {
 					handler: function() {
@@ -787,53 +952,67 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 				}));
 			*/
 			
-			if (me.showCurrentMonth === true) {
-				items.push({
-					xtype: 'tbtext',
-					itemId: 'monthText',
-					cls: me.componentCls+'-toolbar-month',
-					html: me.formatCurrentMonth(me.initialDate),
-					minWidth: me.currentMonthMinWidth
-				});
-				items.push(' ');
-			}
-			if (!Ext.isEmpty(controlButtons)) {
-				items.push({
-					xtype: 'segmentedbutton',
-					itemId: 'controlButtons',
-					allowToggle: false,
-					items: controlButtons
-				});
-			}
-			if (me.reloadButton != false) {
-				items.push(segButton('reload', null, {
-					iconCls: 'fas fa-arrows-rotate',
-					handler: function() {
-						me.fireEvent('reloadclick', me);
+			Ext.iterate(me.toolbarLayout, function(item) {
+				if ('headerText' === item) {
+					items.push({
+						xtype: 'tbtext',
+						itemId: 'headerText',
+						cls: me.toolbarHeaderTextCls(),
+						html: '',
+						//html: me.renderHeaderText(me.initialDate, me.initialView),
+						minWidth: me.headerTextMinWidth
+					});
+					
+				} else if ('controlButtons' === item) {
+					if (!Ext.isEmpty(controlButtons)) {
+						items.push({
+							xtype: 'segmentedbutton',
+							itemId: 'controlButtons',
+							allowToggle: false,
+							items: controlButtons
+						});
 					}
-				}));
-			}
-			if (SoS.isIn(vbPos, ['right', 'center'])) items.push('->');
-			if (!Ext.isEmpty(viewButtons)) {
-				items.push({
-					xtype: 'segmentedbutton',
-					itemId: 'viewButtons',
-					items: viewButtons,
-					value: me.initialView,
-					listeners: {
-						toggle: function(s, btn, pressed) {
-							if (me.suspendViewButtonToggle === 0 && pressed) {
-								me.changeView(btn.getItemId());
+					if (me.reloadButton != false) {
+						items.push(segButton('reload', null, {
+							iconCls: 'fas fa-arrows-rotate',
+							handler: function() {
+								me.fireEvent('reloadclick', me);
 							}
-						}
+						}));
 					}
-				});
-			}
-			if (SoS.isIn(vbPos, ['left', 'center'])) items.push('->');
+					
+				} else if ('viewButtons' === item) {
+					if (!Ext.isEmpty(viewButtons)) {
+						items.push({
+							xtype: 'segmentedbutton',
+							itemId: 'viewButtons',
+							items: viewButtons,
+							value: me.initialView,
+							listeners: {
+								toggle: function(s, btn, pressed) {
+									if (me.suspendViewButtonToggle === 0 && pressed) {
+										me.changeView(btn.getItemId());
+									}
+								}
+							}
+						});
+					}
+					
+				} else if ('extraItems' === item && Ext.isDefined(me.toolbarExtraItems)) {
+					Ext.iterate(Ext.Array.from(me.toolbarExtraItems), function(extraItem) {
+						//TODO: sanitize itemId (reserved names are 'headerText', 'controlButtons', 'viewButtons')
+						items.push(extraItem);
+					});
+					
+				} else if (SoS.isIn(item, ['->', ' ', '-'])) {
+					// Directly use it as toolbar item...
+					items.push(item);
+				}
+			});
 			
 			return Ext.apply({
 				xtype: 'toolbar',
-				cls: me.componentCls+'-toolbar',
+				cls: me.toolbarCls(),
 				border: me.toolbarBorder,
 				items: items
 			}, cfg || {});
@@ -841,51 +1020,87 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 		
 		createCalendarItemCfg: function(cfg) {
 			var me = this,
+				SoS = Sonicle.String,
 				SoO = Sonicle.Object,
+				showResources = me.showResources,
+				viewExtraConfig = SoO.objectValue(me.extraViewConfig, {}),
+				viewCfg = function(key, type, extraConfig, defaultConfig) {
+					var cfg = Ext.apply({}, SoO.objectValue(extraConfig[key], {}), defaultConfig);
+					return Ext.apply(cfg, {
+						type: type
+					});
+				},
 				texts = me.texts || {},
 				views = {}, sources = [],
+				resources,
 				iniDate;
 			
 			if (me.dayView != false) {
-				views['day'] = {
-					type: 'timeGridDay',
-					dayHeaderFormat: me.fcDayHeaderFmtOptions('timeGrid')
-				};
+				views['day'] = viewCfg('day', 'timeGridDay', viewExtraConfig, {
+					dayHeaderFormat: me.fcDayHeaderFmtOptions('timeGrid'),
+					slotLabelFormat: me.fcSlotHeaderFmtOptions('timeGrid')
+				});
 			}
 			if (me.week5View != false) {
-				views['week5'] = {
-					type: 'timeGridWeek',
+				views['week5'] = viewCfg('week5', 'timeGridWeek', viewExtraConfig, {
 					hiddenDays: [0, 6],
-					dayHeaderFormat: me.fcDayHeaderFmtOptions('timeGrid')
-				};
+					dayHeaderFormat: me.fcDayHeaderFmtOptions('timeGrid'),
+					slotLabelFormat: me.fcSlotHeaderFmtOptions('timeGrid')
+				});
 			}
 			if (me.weekView != false) {
-				views['week'] = {
-					type: 'timeGridWeek',
-					dayHeaderFormat: me.fcDayHeaderFmtOptions('timeGrid')
-				};
+				views['week'] = viewCfg('week', 'timeGridWeek', viewExtraConfig, {
+					dayHeaderFormat: me.fcDayHeaderFmtOptions('timeGrid'),
+					slotLabelFormat: me.fcSlotHeaderFmtOptions('timeGrid')
+				});
 			}
 			if (me.biweekView != false) {
-				views['biweek'] = {
-					type: 'dayGrid',
+				views['biweek'] = viewCfg('biweek', 'dayGrid', viewExtraConfig, {
 					duration: {weeks: 2},
-					dayHeaderFormat: me.fcDayHeaderFmtOptions('dayGrid')
-				};
+					dayHeaderFormat: me.fcDayHeaderFmtOptions('dayGrid'),
+					slotLabelFormat: me.fcSlotHeaderFmtOptions('timeGrid')
+				});
 			}
 			if (me.monthView != false) {
-				views['month'] = {
-					type: 'dayGridMonth',
+				views['month'] = viewCfg('month', 'dayGridMonth', viewExtraConfig, {
 					dayHeaderFormat: me.fcDayHeaderFmtOptions('dayGrid')
-				};
+				});
 				//https://github.com/fullcalendar/fullcalendar/issues/5762
 			}
-				views['daylist'] = {
-					type: 'listDay'
-					//dayHeaderFormat: me.fcDayHeaderFmtOptions('month')
-				};
+			if (me.dayTimelineView != false) {
+				views['daytimeline'] = viewCfg('daytimeline', showResources ? 'resourceTimelineDay' : 'timelineDay', viewExtraConfig, {
+					slotLabelFormat: me.fcSlotHeaderFmtOptions('timeline', {viewType: 'daytimeline'})
+				});
+			}
+			if (me.weekTimelineView != false) {
+				views['weektimeline'] = viewCfg('weektimeline', showResources ? 'resourceTimelineWeek' : 'timelineWeek', viewExtraConfig, {
+					slotLabelFormat: [
+						me.fcSlotHeaderFmtOptions('timeline', {viewType: 'weektimeline', level: 0}),
+						me.fcSlotHeaderFmtOptions('timeline', {viewType: 'weektimeline', level: 1})
+					]
+				});
+			}
+			if (me.monthTimelineView != false) {
+				views['monthtimeline'] = viewCfg('monthtimeline', showResources ? 'resourceTimelineMonth' : 'timelineMonth', viewExtraConfig, {
+					slotLabelFormat: me.fcSlotHeaderFmtOptions('timeline', {viewType: 'monthtimeline'})
+				});
+			}
+			
+			views['daylist'] = viewCfg('daylist', 'listDay', viewExtraConfig, {
+				//dayHeaderFormat: me.fcDayHeaderFmtOptions('month')
+			});
 			
 			// Default source: store's data
 			sources.push(me.createDefaultSource());
+			
+			// Populate resources if necessary
+			if (showResources === true) {
+				if (Ext.isFunction(me.resources)) {
+					resources = me.resources;
+				} else if (Ext.isDefined(me.resources)) {
+					resources = Ext.Array.from(me.resources);
+				}
+			}
 			
 			if (Ext.isDate(me.initialDate)) {
 				iniDate = Ext.Date.format(me.initialDate, 'Y-m-d');
@@ -895,10 +1110,12 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 			
 			return Ext.apply({
 				xtype: 'sofullcalendar',
+				resourceAreaWidth: me.resourceAreaWidth,
 				selectForAdd: SoO.booleanValue(me.selectable, true),
 				eventAllowAllDayMutation: SoO.booleanValue(me.eventAllowAllDayMutation, true),
 				texts: me.texts,
 				calendar: Ext.merge({
+					schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
 					locale: SoO.stringValue(me.locale, 'en'),
 					firstDay: SoO.numberValue(me.startDay, 1),
 					direction: SoO.stringValue(me.direction, 'ltr'),
@@ -912,10 +1129,15 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 					nowIndicator: SoO.booleanValue(me.showNowIndicator, true),
 					weekNumbers: SoO.booleanValue(me.showWeekNumbers, false),
 					weekText: SoO.stringValue(texts.weekShort, 'W'),
+					resources: resources,
+					resourceOrder: SoS.deflt(me.toResourceOrder(me.resourcesOrderBy), 'title'),
+					refetchResourcesOnNavigate: me.reloadResourcesOnNavigate,
+					//resourceAreaWidth: me.resourceAreaInitialWidth,
+					resourceAreaHeaderContent: texts.resourcesAreaTitle,
 					slotMinTime: SoO.stringValue(me.slotMinTime, '00:00:00'),
 					slotMaxTime: SoO.stringValue(me.slotMaxTime, '24:00:00'),
 					slotDuration: Sonicle.Date.formatDuration(SoO.numberValue(me.slotResolution, 30) * 60),
-					slotLabelFormat: me.fcTimeFmtOptions({hour: 'numeric', minute: '2-digit'}),
+					//slotLabelFormat: me.fcTimeFmtOptions({hour: 'numeric', minute: '2-digit'}),
 					fixedWeekCount: SoO.booleanValue(me.fixedWeekCount, false),
 					showNonCurrentDates: SoO.booleanValue(me.showNonCurrentDates, true),
 					businessHours: me.businessHours,
@@ -925,8 +1147,8 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 					datesSet: function(info) {
 						var hb = me.getHeaderBar(), cmp;
 						if (hb) {
-							cmp = hb.getComponent('monthText');
-							if (cmp) cmp.setHtml(me.formatCurrentMonth(me.currentMonthSource === 'viewstart' ? info.view.currentStart : info.view.calendar.getDate()));
+							cmp = hb.getComponent('headerText');
+							if (cmp) cmp.setHtml(me.callRenderer('headerText', info.view.type, info.view.calendar.getDate(), info.view.currentStart, info.view.currentEnd, info, me));
 						}
 					},
 					eventDataTransform: function(eventData) {
@@ -948,32 +1170,39 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 					//	var XS = Ext.String;
 					//	Ext.fly(arg.el).setHtml(XS.htmlEncode(XS.format(texts.more, arg.num)));
 					//},
-					dayHeaderContent: function(arg) {
-						// Customize day-header
+					slotLabelContent: function(arg) { // Customize default slotLabelFormat
+						//var btype = Sonicle.fullcalendar.FullCalendar.fcViewBaseType(arg.view);
+						
+						//TODO: for weekly timeline customize the first day (level 0) of each month to display the month reference
+						//if ('timeline' === btype) {
+						//	return me.fcViewFormatDate(arg.view, arg.date, me.fcSlotHeaderFmtOptions(btype), {level: arg.level, viewType: arg.view.type});
+						//}
+						return arg.text;
+					},
+					dayHeaderContent: function(arg) { // Customize default dayHeaderFormat
 						var btype = Sonicle.fullcalendar.FullCalendar.fcViewBaseType(arg.view),
 							dateFormat = function(date) {
 								return Ext.Date.format(date, 'Ymd');
 							},
 							reformat;
 						
-						if ('timeGrid' === btype) {
+						if ('timeGrid' === btype) { // Make formatting dynamic in some cases
 							reformat = arg.isToday
 								|| (dateFormat(arg.date) === dateFormat(arg.view.activeStart));
 							if (reformat) {
-								return me.fcViewFormatDate(arg.view, arg.date, me.fcDayHeaderFmtOptions(btype, true));
+								return me.fcViewFormatDate(arg.view, arg.date, me.fcDayHeaderFmtOptions(btype, {detailed: true}));
 							}
 						}
 						return arg.text;
 					},
-					dayCellContent: function(arg) {
-						// Customize day-number
+					dayCellContent: function(arg) { // Customize day-number
 						var btype = Sonicle.fullcalendar.FullCalendar.fcViewBaseType(arg.view),
 							dateFormat = function(date) {
 								return Ext.Date.format(date, 'Ymd');
 							},
 							reformat;
 						
-						if ('dayGrid' === btype) {
+						if ('dayGrid' === btype) { // Make formatting dynamic in some cases
 							reformat = arg.isToday
 								// Reformats first day-box in previous month
 								|| (arg.isOther && dateFormat(arg.date) === dateFormat(arg.view.activeStart))
@@ -1003,21 +1232,17 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 							return [];
 						}
 					},
-					eventDidMount: function(info) {
-						var ttRenderer = me.eventTooltipRenderer,
-							ttip, attrs;
-						if (ttRenderer && ttRenderer.call) {
-							ttip = ttRenderer.call(me, info.view.type, info.event, info, me);
+					eventDidMount: function(arg) {
+						var ttip = me.callRenderer('eventTooltip', arg.view.type, arg.event, arg, me),
 							attrs = Sonicle.Utils.generateTooltipAttrs(ttip, Ext.apply(ttip.options || {}, {outputType: 'el'}));
-							if (!Ext.isEmpty(attrs)) Ext.fly(info.el).set(attrs);
-						}
+						if (!Ext.isEmpty(attrs)) Ext.fly(arg.el).set(attrs);
 					},
 					eventContent: function(arg, createElement) {
-						var renderer = me.eventContentRenderer,
-							html;
-						if (renderer && renderer.call) {
-							html = renderer.call(me, arg.view.type, arg.event, arg, me);
-						}
+						var html = me.callRenderer('eventContent', arg.view.type, arg.event, arg, me); // internal default renderer will return `true`
+						return html === true ? true : {html: html || ''};
+					},
+					resourceLabelContent: function(arg) {
+						var html = me.callRenderer('resourceLabelContent', arg.view.type, arg.resource, arg, me); // internal default renderer will return `true`
 						return html === true ? true : {html: html || ''};
 					},
 					eventDrop: function(info) {
@@ -1053,12 +1278,13 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 				events: function(fetchInfo, successCallback, failureCallback) {
 					if (me.nextFetchWillGetNoItems === true) {
 						delete me.nextFetchWillGetNoItems;
+						me.setupResources(null);
 						successCallback([]);
 						
 					} else if (me.nextFetchWillGetFromStore === true) {
 						delete me.nextFetchWillGetFromStore;
 						if (me.store) {
-							successCallback(me.toFCEvents(me.store.getData().items));
+							successCallback(me.toFCData(me.store.getData().items, true).events);
 						} else {
 							failureCallback({message: 'no store'});
 						}
@@ -1066,7 +1292,10 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 					} else {
 						me.queryStore(fetchInfo, function(recs, op, success) {
 							if (success) {
-								successCallback(me.toFCEvents(recs));
+								var resourcesFromStore = me.buildResourcesFromStore(),
+									data = me.toFCData(recs, resourcesFromStore);
+								me.setupResources(data.resources);
+								successCallback(data.events);
 							} else {
 								failureCallback({message: op.error});
 							}
@@ -1076,18 +1305,31 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 			};
 		},
 		
-		defaultEventContentRenderer: function(fcView, fcEvent, fcArg, context) {
-			return true;
+		buildResourcesFromStore: function() {
+			return this.showResources === true && !Ext.isDefined(this.resources); 
 		},
 		
-		defaultEventToolipRenderer: function(fcView, fcEvent, fcArg, context) {
-			return fcEvent.title;
+		setupResources: function(resources) {
+			var me = this,
+				ores = me.lastResources,
+				nres = null,
+				cal;
+			
+			if (resources) {
+				cal = me.getCalendar();
+				if (cal) {
+					if (ores) cal.removeResources(Ext.Object.getKeys(ores.ids));
+					cal.addResources(resources.items);
+					nres = resources;
+				}
+			}
+			me.lastResources = nres;
 		},
 		
 		onStoreLoad: function(store, recs, success) {
-			var me = this;
+			var me = this, cal;
 			if (success && !me.storeQuerying) {
-				var cal = me.getCalendar();
+				cal = me.getCalendar();
 				me.nextFetchWillGetFromStore = true;
 				cal.reloadEvents('default');
 			}
@@ -1180,9 +1422,32 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 			me.fireEvent('eventresize', me, orec);
 		},
 		
-		fcDayHeaderFmtOptions: function(btype, detailed) {			
+		fcSlotHeaderFmtOptions: function(btype, opts) {
+			opts = opts || {};
+			var me = this;
 			if ('timeGrid' === btype) {
-				if (detailed === true) {
+				return {hour: 'numeric', minute: '2-digit'}; // 00:00 or 12am
+			} else if ('timeline' === btype) {
+				if (opts.viewType === 'daytimeline') {
+					return {hour: 'numeric', minute: '2-digit'}; // 00:00 or 12am
+				} else if (opts.viewType === 'weektimeline') {
+					if (opts.level === 0) {
+						return me.fcDayHeaderFmtOptions('timeGrid');
+					} else if (opts.level === 1) {
+						return {hour: 'numeric', minute: '2-digit'}; // 00:00 or 12am
+					}
+				} else if (opts.viewType === 'monthtimeline') {
+					return {day: '2-digit', weekday: 'short', omitCommas: true};
+				}
+			}
+			console.log('fcSlotHeaderFmtOptions: missing options for "' + btype + '"');
+			return undefined;
+		},
+		
+		fcDayHeaderFmtOptions: function(btype, opts) {
+			opts = opts || {};
+			if ('timeGrid' === btype) {
+				if (opts.detailed === true) {
 					return {month: 'short', day: '2-digit', weekday: 'short', omitCommas: true};
 				} else {
 					return {day: '2-digit', weekday: 'short', omitCommas: true};
@@ -1190,6 +1455,8 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 			} else if ('dayGrid' === btype) {
 				return {weekday: 'long', omitCommas: true};
 			}
+			console.log('fcDayHeaderFmtOptions: missing options for "' + btype + '"');
+			return undefined;
 		},
 		
 		fcDayCellFmtOptions: function(btype, opts) {
@@ -1200,9 +1467,9 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 				} else {
 					return {day: '2-digit'};
 				}
-			} else {
-				return {};
 			}
+			console.log('fcDayCellFmtOptions: missing options for "' + btype + '"');
+			return {};
 		},
 		
 		fcTimeFmtOptions: function(opts) {
@@ -1220,20 +1487,16 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 			}
 		},
 		
-		formatCurrentMonth: function(date) {
-			var SoD = Sonicle.Date, html = '';
-			date = SoD.parse(date, 'Y-m-d');
-			if (Ext.isDate(date)) {
-				html += '<span>' + Sonicle.String.htmlEncode(SoD.format(date, 'F')) + '</span>';
-				html += '<span>' + SoD.format(date, 'Y') + '</span>';
-			}
-			return html;
-		},
-		
 		fcViewFormatDate: function(view, date, options) {
 			// Directly call formatDate reaching calendar from view's context.
 			// This avoids calls to component wrapper.
 			return view.calendar.formatDate(date, this.fcTimeFmtOptions(options));
+		},
+		
+		fcViewFormatRange: function(view, start, end, options) {
+			// Directly call formatDate reaching calendar from view's context.
+			// This avoids calls to component wrapper.
+			return view.calendar.formatRange(start, end, this.fcTimeFmtOptions(options));
 		},
 		
 		fcProxyPointerEvent: function(name) {
@@ -1277,22 +1540,107 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 			}
 		},
 		
-		toFCEvents: function(recs) {
-			var events = [], i;
-			for (i=0; i<recs.length; i++) {
-				events.push(recs[i].toFCEvent());
+		toFCData: function(recs, resources) {
+			var events = [],
+				resItems, resIds,
+				res;
+			
+			if (resources === true) {
+				resItems = [];
+				resIds = {};
 			}
-			return events;
+			Ext.iterate(recs, function(rec) {
+				events.push(rec.toFCEvent());
+				if (resources === true && Ext.isFunction(rec.toFCResource)) {
+					res = rec.toFCResource();
+					if (!resIds[res.id]) {
+						resIds[res.id] = true;
+						resItems.push(res);
+					}
+				}
+			});
+			if (resources === true) {
+				resItems = Ext.Array.sort(resItems, function(a, b) {
+					return a > b ? 1 : (a === b) ? 0 : -1;
+				});
+			}
+			
+			return {
+				events: events,
+				resources: {
+					items: resItems,
+					ids: resIds
+				}
+			};
+		},
+		
+		toResourceOrder: function(s) {
+			var SoS = Sonicle.String,
+				parsed = SoS.parseArray(s, undefined, function(v) {
+					return SoS.parseArray(v, undefined, undefined, ' ');
+				}),
+				sort = [];
+			
+			Ext.iterate(parsed, function(value) {
+				if (Ext.isArray(value) && !Ext.isEmpty(value)) {
+					if (value.length > 1 && value[1].toUpperCase() === 'DESC') {
+						sort += ('-'+value[0]);
+					} else {
+						sort += value[0];
+					}
+				}
+			});
+			
+			return SoS.join(',', sort);
+		},
+		
+		/**
+		 * Internal method to call a named renderer.
+		 * @param {String} name
+		 * @param {Mixed} arg1
+		 * @param {Mixed} arg2
+		 * @param {Mixed} argX
+		 * @returns {Mixed}
+		 */
+		callRenderer: function(name, arg1, arg2, argX) {
+			var me = this,
+				renderer = me[me.rendererNames[name]], ret;
+			if (renderer && renderer.call) {
+				ret = renderer.apply(me, Ext.Array.slice(arguments, 1));
+			}
+			return ret;
 		}
 	},
 	
 	statics: {
+		currentMonthYearOnlyHeaderTextRenderer: function(fcViewType, fcViewDate, fcViewStart, fcViewEnd, fcArg, context) {
+			var SoD = Sonicle.Date,
+				baseCls = context.toolbarHeaderTextCls(),
+				date, html = '';
+			html += '<span class="'+baseCls+'-cmyo">';
+			date = SoD.parse(fcViewDate, 'Y-m-d');
+			if (Ext.isDate(date)) {
+				html += '<span data-part="view-month">' + Sonicle.String.htmlEncode(SoD.format(date, 'F')) + '</span>';
+				html += ' ';
+				html += '<span data-part="view-year">' + SoD.format(date, 'Y') + '</span>';
+			}
+			html += '</span>';
+			return html;
+		},
 		
-		appointmentEventClassNamesFunction: function(fcView, fcArg, context) {
+		appointmentEventClassNamesFunction: function(fcViewType, fcEvent, fcArg, context) {
 			return ['so-cal-appo'];
 		},
 		
-		appointmentEventContentRenderer: function(fcView, fcEvent, fcArg, context) {
+		resourceLabelWithSwatchContentRenderer: function(fcViewType, fcResource, fcArg, context) {
+			var fcExProps = fcResource.extendedProps,
+				html = '';
+			html += Sonicle.String.htmlEncode(fcArg.fieldValue);
+			html += '<div class="so-cal-appo-swatch" style="border-color:' + fcExProps.color + ';"></div>';
+			return html;
+		},
+		
+		appointmentEventContentRenderer: function(fcViewType, fcEvent, fcArg, context) {
 			var SoS = Sonicle.String,
 				SoD = Sonicle.Date,
 				icons = context.eventIconsCls,
@@ -1389,13 +1737,17 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 					html +=	'</div>';
 				}
 				html +=	'</div>';
+			} else if (SoS.isIn(btype, ['timeline'])) {
+				html +=	'<div class="so-cal-appo-title">';
+				html +=	SoS.htmlEncode(fcEvent.title);
+				html +=	'</div>';
 			} else {
 				html = true;
 			}
 			return html;
 		},
 		
-		appointmentEventTooltipRenderer: function(fcView, fcEvent, fcArg, context) {
+		appointmentEventTooltipRenderer: function(fcViewType, fcEvent, fcArg, context) {
 			var SoS = Sonicle.String,
 				SoD = Sonicle.Date,
 				SoTag = Sonicle.form.field.Tag,
@@ -1531,11 +1883,11 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 		},
 		*/
 		
-		appointmentOrigEventClassNamesFunction: function(fcView, fcArg, context) {
+		appointmentOrigEventClassNamesFunction: function(fcViewType, fcArg, context) {
 			return ['so-cal-appo-o'];
 		},
 		
-		appointmentOrigEventContentRenderer: function(fcView, fcEvent, fcArg, context) {
+		appointmentOrigEventContentRenderer: function(fcViewType, fcEvent, fcArg, context) {
 			var SoS = Sonicle.String,
 				icons = context.eventIconsCls,
 				btype = Sonicle.fullcalendar.FullCalendar.fcViewBaseType(fcArg.view),
