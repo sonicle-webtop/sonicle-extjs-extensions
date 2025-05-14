@@ -102,7 +102,7 @@ Ext.define('Sonicle.grid.column.Color', {
 		if (hasLabel || !colorizeSwatch) label = SoS.deflt(SoU.rendererEvalValue(value, rec, me.labelField, me.getLabel), '', Ext.String.htmlEncode);
 		if (tt) ttAttrs = Sonicle.Utils.generateTooltipAttrs(tt);
 		if (colorizeSwatch) {
-			return '<div class="' + swatchElCls + ' ' + geomSwatchElCls + '" style="' + BL.generateColorStyles('swatch', color) + '" ' + ttAttrs + '></div>' + (hasLabel ? '<span class="' + labelElCls + ' ' + labelCls + '">' + label + '</span>' : '');
+			return '<div class="' + swatchElCls + ' ' + geomSwatchElCls + '" style="' + BL.generateColorStyles('swatch', color) + '" ' + ttAttrs + '></div>' + (hasLabel ? '<span class="' + labelElCls + ' ' + labelCls + '" ' + ttAttrs + '>' + label + '</span>' : '');
 		} else {
 			return '<span class="' + labelElCls + ' ' + labelCls + '" style="' + BL.generateColorStyles('text', color) + '" ' + ttAttrs + '>' + label + '</span>';
 		}
