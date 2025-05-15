@@ -329,6 +329,33 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 	 */
 	
 	/**
+	 * @cfg {String|String[]} [resourcesOrder]
+	 * Determines the ordering of the resource list.
+	 * Configuration supports the following values:
+	 *  - a comma-separated string of field names, like `title,propA,-propB`
+	 *  - an array of field names like `['title','propA','-propB']`
+	 * To produce a descending ordering, a field name needs to be pefixed by `-` (minus) character.
+	 */
+	
+	/**
+	 * @cfg {String|String[]|Function|Mixed[]} [eventsOrder]
+	 * Determines the ordering events within the same day.
+	 * For most views, this determines the vertical ordering of events within the same day.
+	 * For TimeGrid view however, it determines the horizontal ordering of events within the same day.
+	 * Configuration supports the following values:
+	 *  - a comma-separated string of field names, like `title,propA,-propB`
+	 *  - an array of field names like `['title','propA','-propB']`
+	 *  - a function that accepts two arguments and returns `1` or `-1`, similar to compare functions
+	 *  - an array of mixed field names and functions
+	 */
+	
+	/**
+	 * @cfg {Boolean} [eventsOrderStrict]
+	 * Ensures that {@link #eventsOrder} setting is strictly followed, meaning 
+	 * layout compactness will be prioritized over following `eventsOrder`.
+	 */
+	
+	/**
 	 * @cfg {Object[]|Object|Function} [resources]
 	 * Specifies how to retrieve data for resources; value can be:
 	 *  - Object[]|Object: defines data statically by passing a single or multiple items
@@ -1125,12 +1152,15 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 					initialDate: iniDate,
 					editable: SoO.booleanValue(me.editable, true),
 					selectable: SoO.booleanValue(me.selectable, true),
+					eventOrder: SoS.coalesce(me.eventsOrder, 'start,-duration,allDay,title'),
+					eventOrderStrict: SoO.booleanValue(me.eventOrderStrict, false),
 					eventResizableFromStart: SoO.booleanValue(me.eventResizableFromStart, true),
 					nowIndicator: SoO.booleanValue(me.showNowIndicator, true),
 					weekNumbers: SoO.booleanValue(me.showWeekNumbers, false),
 					weekText: SoO.stringValue(texts.weekShort, 'W'),
 					resources: resources,
-					resourceOrder: SoS.deflt(me.toResourceOrder(me.resourcesOrderBy), 'title'),
+					resourceOrder: SoS.coalesce(Ext.isArray(me.resourcesOrderBy) ? SoS.join(',', me.resourcesOrderBy) : me.resourcesOrderBy, 'title'),
+					//resourceOrder: SoS.deflt(Ext.isArray(me.resourcesOrderBy) ? SoS.join(',', me.resourcesOrderBy) : me.resourcesOrderBy, 'title'),
 					refetchResourcesOnNavigate: me.reloadResourcesOnNavigate,
 					//resourceAreaWidth: me.resourceAreaInitialWidth,
 					resourceAreaHeaderContent: texts.resourcesAreaTitle,
@@ -1574,6 +1604,7 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 			};
 		},
 		
+		/*
 		toResourceOrder: function(s) {
 			var SoS = Sonicle.String,
 				parsed = SoS.parseArray(s, undefined, function(v) {
@@ -1593,6 +1624,7 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 			
 			return SoS.join(',', sort);
 		},
+		*/
 		
 		/**
 		 * Internal method to call a named renderer.
