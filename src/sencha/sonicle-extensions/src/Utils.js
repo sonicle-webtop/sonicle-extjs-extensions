@@ -22,6 +22,16 @@ Ext.define('Sonicle.Utils', {
 	},
 	
 	/**
+	 * Returns first valid String value of provided arguments.
+	 * {@link Sonicle.Utils#stringCoalesce} is alias for {@link String.Number#coalesce}
+	 * @param {Mixed...} strings List of strings.
+	 * @returns {Mixed} The first valid value.
+	 */
+	stringCoalesce: function(strings) {
+		return Sonicle.String.coalesce.apply(Sonicle.String, arguments);
+	},
+	
+	/**
 	 * @deprecated use Sonicle.Object.setProp() instead
 	 */
 	setProp: function(object, name, value) {
