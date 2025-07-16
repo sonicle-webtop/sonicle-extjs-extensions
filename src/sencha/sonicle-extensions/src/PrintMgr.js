@@ -65,9 +65,11 @@ Ext.define('Sonicle.PrintMgr', {
 				iframeCW = iframeEl.dom.contentWindow;
 			
 			iframeEl.dom.onload = function() {
-				iframeCW.focus();
-				iframeCW.print();
-				Ext.fly(iframeId).destroy();
+				setTimeout(function() {
+					iframeCW.focus();
+					iframeCW.print();
+					Ext.fly(iframeId).destroy();
+				}, 500);
 			};
 			iframeCW.document.open();
 			iframeCW.document.write(html);
