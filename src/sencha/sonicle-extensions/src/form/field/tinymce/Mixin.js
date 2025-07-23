@@ -88,6 +88,7 @@ Ext.define('Sonicle.form.field.tinymce.Mixin', {
 		Ext.apply(cfg, {
 			selector: domEl.tagName + '#' + domEl.id,
 			height: '100%',
+			promotion: false, // Disable top promotion button (https://www.tiny.cloud/docs/tinymce/6/editor-premium-upgrade-promotion/#premium-upgrade-promotion-defaults)
 			branding: false, // Hide 'Powered by Tiny' watermark
 			resize: false, // Disable the resize handle
 			menubar: '', // Hide top menu-bar

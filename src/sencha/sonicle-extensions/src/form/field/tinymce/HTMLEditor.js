@@ -217,6 +217,12 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 	pluginPowerPaste: false,
 	
 	/**
+	 * @cfg {Boolean} [pluginMarkdown=false]
+	 * Set to `true` to enable Markdown plugin.
+	 */
+	pluginMarkdown: false,
+	
+	/**
 	 * @cfg {Boolean} [pluginCaseChange=false]
 	 * Set to `true` to enable CaseChange plugin.
 	 */
@@ -1083,8 +1089,8 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 				return Ext.apply({
 					xtype: 'sotmcetextarea',
 					editor: Ext.merge({
+						license_key: 'GPL', // Explicitly adhere to GPL licensing
 						language: me.language,
-						promotion: false, // Disable top promotion button (https://www.tiny.cloud/docs/tinymce/6/editor-premium-upgrade-promotion/#premium-upgrade-promotion-defaults)
 						skin: me.skin,
 						//skin: useDarkMode ? 'oxide-dark' : 'oxide',
 						//content_css: useDarkMode ? 'dark' : 'default',
@@ -1193,10 +1199,11 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 		buildTMCEPlugins: function() {
 			var me = this;
 			return [
-				'template quickbars',
+				'quickbars',
 				(me.pluginCaseChange && me.enableCaseTools) ? 'casechange' : '',
 				me.pluginAutoCorrect ? 'autocorrect' : '',
 				me.pluginPowerPaste ? 'powerpaste' : '',
+				me.pluginMarkdown ? 'markdown' : '',
 				me.enableLists ? 'advlist lists' : '',
 				me.enableEmoticons ? 'emoticons' : '',
 				me.enableSymbols ? 'charmap' : '',
@@ -1564,6 +1571,37 @@ Ext.define('Sonicle.form.field.tinymce.HTMLEditor', {
 				if (colors.indexOf(color) > -1) ret = Sonicle.String.prepend(color, '#', true);
 			}
 			return ret;
+		},
+		
+		generateTextPatterns: function(types) {
+			var SoS = Sonicle.String,
+				arr = [];
+			if (SoS.isIn('formats', types)) {
+				arr.push({ start: '*', end: '*', format: 'italic' });
+				arr.push({ start: '**', end: '**', format: 'bold' });
+			}
+			if (SoS.isIn('headings', types)) {
+				arr.push({ start: '#', format: 'h1', trigger: 'space' });
+				arr.push({ start: '##', format: 'h2', trigger: 'space' });
+				arr.push({ start: '###', format: 'h3', trigger: 'space' });
+				arr.push({ start: '####', format: 'h4', trigger: 'space' });
+				arr.push({ start: '#####', format: 'h5', trigger: 'space' });
+				arr.push({ start: '######', format: 'h6', trigger: 'space' });
+			}
+			if (SoS.isIn('lists', types)) {
+				arr.push({ start: '*', cmd: 'InsertUnorderedList', trigger: 'space' });
+				arr.push({ start: '- ', cmd: 'InsertUnorderedList', trigger: 'enter' });
+				arr.push({ start: '1.', cmd: 'InsertOrderedList', value: { 'list-style-type': 'decimal' }, trigger: 'space' });
+				arr.push({ start: '1) ', cmd: 'InsertOrderedList', value: { 'list-style-type': 'decimal' }, trigger: 'enter' });
+				arr.push({ start: 'a.', cmd: 'InsertOrderedList', value: { 'list-style-type': 'lower-alpha' }, trigger: 'space' });
+				arr.push({ start: 'a) ', cmd: 'InsertOrderedList', value: { 'list-style-type': 'lower-alpha' }, trigger: 'enter' });
+				arr.push({ start: 'i.', cmd: 'InsertOrderedList', value: { 'list-style-type': 'lower-roman' }, trigger: 'space' });
+				arr.push({ start: 'i) ', cmd: 'InsertOrderedList', value: { 'list-style-type': 'lower-roman' }, trigger: 'enter' });
+			}
+			if (SoS.isIn('symbols', types)) {
+				arr.push({ start: '(c)', replacement: '©' });
+			}
+			return arr;
 		}
 	}
 });
