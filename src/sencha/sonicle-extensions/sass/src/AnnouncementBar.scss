@@ -36,18 +36,18 @@
     margin-left: 6px
 }
 .so-announcementbar .so-announcementbar-wrap-info {
-	color: var(--so-announcementbar-color-info-bg-on);
-    background-color: var(--so-announcementbar-color-info-bg)
+	color: var(--so-announcementbar-color-info-bg-on, #fff);
+    background-color: var(--so-announcementbar-color-info-bg, #c2ddf2)
 }
 .so-announcementbar .so-announcementbar-wrap-alert {
-	color: var(--so-announcementbar-color-alert-bg-on);
-    background-color: var(--so-announcementbar-color-alert-bg)
+	color: var(--so-announcementbar-color-alert-bg-on, #fff);
+    background-color: var(--so-announcementbar-color-alert-bg, #cc4b31)
 }
 .so-announcementbar .so-announcementbar-wrap-warning {
-	color: var(--so-announcementbar-color-warning-bg-on);
-    background-color: var(--so-announcementbar-color-warning-bg)
+	color: var(--so-announcementbar-color-warning-bg-on, #fff);
+    background-color: var(--so-announcementbar-color-warning-bg, #e9b665)
 }
 .so-announcementbar .so-announcementbar-wrap-success {
-	color: var(--so-announcementbar-color-success-bg-on);
-    background-color: var(--so-announcementbar-color-success-bg)
+	color: var(--so-announcementbar-color-success-bg-on, #000);
+    background-color: var(--so-announcementbar-color-success-bg, #4da07d)
 }

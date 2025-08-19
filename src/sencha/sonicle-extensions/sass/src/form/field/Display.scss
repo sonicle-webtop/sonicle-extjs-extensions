@@ -1,6 +1,10 @@
 .so-displayfield-clickable {
 	cursor: pointer;
 	user-select: none;
+	color: var(--so-displayfield-clickable-color, initial);
+}
+.so-displayfield-clickable:hover {
+	color: var(--so-displayfield-clickable-hover-color, initial);
 }
 .so-displayfield-icon {
 	display: inline-block;
