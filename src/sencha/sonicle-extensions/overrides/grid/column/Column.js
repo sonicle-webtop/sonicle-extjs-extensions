@@ -12,10 +12,10 @@ Ext.define('Sonicle.overrides.grid.column.Column', {
 	defaultRenderer: Sonicle.Utils.generateBaseColumnRenderer({useEmptyCls: true, htmlEncode: true}),
 	
 	/**
-	 * @cfg {boolean} [cellTooltip]
-	 * Set to 'true' to display a cell tooltip using the value referenced by specified {@link #dataIndex}.
+	 * @cfg {String} tooltipDataIndex
+	 * The name of the field in the grid's {@link Ext.data.Store}'s {@link Ext.data.Model}
+	 * definition from which to fill the column's tooltip.
 	 */
-	cellTooltip: false,
 	
 	/**
 	 * @cfg {'start'/'center'/'end'} [headerAlign]
@@ -33,6 +33,7 @@ Ext.define('Sonicle.overrides.grid.column.Column', {
 	
 	setupRenderer: function(type) {
 		var me = this,
+			tooltipDataIndex = me.tooltipDataIndex,
 			isColumnRenderer, rendererName, renderer;
 		
 		type = type || 'column';
@@ -40,12 +41,14 @@ Ext.define('Sonicle.overrides.grid.column.Column', {
 		rendererName = me.rendererNames[type];
 		me.callParent(arguments);
 		
-		if (isColumnRenderer && me.cellTooltip === true) {
+		if (isColumnRenderer && Ext.isString(tooltipDataIndex)) {
 			renderer = me[rendererName];
 			if (Ext.isFunction(renderer)) {
-				me[rendererName] = Ext.Function.wrap(renderer, function(origResult, value) {
-					if (Ext.isString(origResult) && value) {
-						return '<span ' + Sonicle.Utils.generateTooltipAttrs(value) + '>' + origResult + '</span>';
+				me[rendererName] = Ext.Function.wrap(renderer, function(origResult, value, meta, rec) {
+					var ttip;
+					if (Ext.isString(tooltipDataIndex)) ttip = rec.get(tooltipDataIndex);
+					if (Ext.isString(origResult) && ttip) {
+						return '<span ' + Sonicle.Utils.generateTooltipAttrs(ttip) + '>' + origResult + '</span>';
 					} else {
 						return origResult;
 					}
