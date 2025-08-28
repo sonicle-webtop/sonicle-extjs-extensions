@@ -11,6 +11,8 @@ Ext.define('Sonicle.button.Toggle', {
 		'Sonicle.Utils'
 	],
 	
+	cls: 'so-'+'toggle-button',
+	
 	/**
 	 * @cfg {Boolean} disablePressedStyle
 	 * Set to `true` to turn-off pressed styling.

@@ -1,0 +1,12 @@
+.x-btn.so-toggle-button.x-btn-pressed .x-btn-icon-el {
+    color: var(--so-toggle-button-icon-color-pressed, reset);
+}
+.x-btn.so-toggle-button:not(.x-btn-pressed) .x-btn-icon-el {
+    color: var(--so-toggle-button-icon-color-unpressed, reset);
+}
+.x-btn.so-toggle-button.x-btn-pressed .x-btn-inner {
+    color: var(--so-toggle-button-text-color-pressed, reset);
+}
+.x-btn.so-toggle-button:not(.x-btn-pressed) .x-btn-inner {
+    color: var(--so-toggle-button-text-color-unpressed, reset);
+}
