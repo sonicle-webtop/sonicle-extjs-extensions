@@ -8,13 +8,13 @@ Ext.define('Sonicle.button.PlainToggle', {
 	extend: 'Sonicle.button.Toggle',
 	alias: ['widget.soplaintogglebutton'],
 	
-	cls: 'so-plaintoggle-button',
+	cls: 'so-'+'plaintoggle-button',
 	
 	constructor: function(cfg) {
 		this.callParent([Ext.apply(cfg || {}, {
-				focusable: false,
-				_focusCls: '',
-				_pressedCls: ''
+			focusable: false,
+			_focusCls: '',
+			_pressedCls: ''
 		})]);
 	}
 });

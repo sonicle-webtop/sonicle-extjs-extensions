@@ -1,0 +1,12 @@
+.so-mask-button-wrap {
+	display: flex;
+	justify-content: center;
+}
+.so-mask-button {
+	cursor: pointer;
+	text-decoration: none;
+	color: var(--so-mask-button-text-color, initial);
+}
+.so-mask-button:hover {
+	text-decoration: underline;
+}
