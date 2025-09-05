@@ -3,6 +3,10 @@
  * Copyright (C) 2023 Sonicle S.r.l.
  * sonicle[at]sonicle.com
  * https://www.sonicle.com
+ * Inspired by:
+ *  - https://eliep.github.io/vue-avatar/
+ *  - https://flatuicolors.com/
+ *  - https://github.com/google/palette.js/tree/master
  */
 Ext.define('Sonicle.mixin.Avatar', {
 	extend: 'Ext.Mixin',
@@ -42,7 +46,7 @@ Ext.define('Sonicle.mixin.Avatar', {
 	 * @cfg {Number/Number[]} [foreColorShade=0.4]
 	 * The percentage increment (0-1) applied when calculating the (lighter/darker) foreground color shade.
 	 */
-	foreColorShade: 0.4,
+	foreColorShade: 0.6,
 	
 	/**
 	 * @cfg {String} [emptyColor=#F1F3F4]
@@ -57,16 +61,12 @@ Ext.define('Sonicle.mixin.Avatar', {
 	pictureBgColor: '#F1F3F4',
 	
 	/**
-	 * @property {String[]} colors
+	 * @property {String[]} [colors]
 	 * An array of 7-chars color hex code strings (with leading # symbol).
 	 * This array can contain any number of colors, and each hex code should be unique.
+	 * Defaults to {@link #palette color palette}.
 	 */
-	colors: [
-		'#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5',
-		'#2196F3', '#03A9F4', '#00BCD4', '#009688', '#4CAF50',
-		'#8BC34A', '#CDDC39', /*'#FFEB3B',*/ '#FFC107', '#FF9800',
-		'#FF5722', '#795548', '#9E9E9E', '#607D8B'
-	],
+	colors: undefined,
 	
 	/**
 	 * @private
@@ -81,66 +81,100 @@ Ext.define('Sonicle.mixin.Avatar', {
 	
 	privates: {
 		
+		/**
+		 * Configures an HTML element (span) that represents the avatar using passed configuration data.
+		 * @param {Object} data An object containing data.
+		 * @param {String} [data.pictureUrl] The picture URL to use to fill the avatar HTML element. It has precedence over {@link data.name}.
+		 * @param {String} [data.iconCls] The icon Class to use to fill the avatar HTML element. It has precedence over {@link data.name}.
+		 * @param {String} [data.name] The String name for which build the avatar.
+		 * @param {Object} opts An object containing options.
+		 * @param {String} [opts.wrapElType=span] The type of the returned HTML element: span or div.
+		 * @param {String} [opts.dataRef] The data-ref attritute to apply to the returned HTML element.
+		 * @param {String} [opts.wrapCls] The CSS Class that define the style of the returned HTML element (main wrap). Note that a Class like '<wrapCls>-empty' will be added when avatar cannot be computed.
+		 * @param {String} [opts.pictureCls] The CSS Class to define the style of the returned HTML element when using a picture.
+		 * @param {String} [opts.initialsCls] The CSS Class to define the style of the returned HTML element when initials are rendered.
+		 * @param {Integer} [opts.size=32] The size in pixel of the returned HTML element (only useful when {@link #opts.forceWrapSize} is on).
+		 * @param {Boolean} [opts.forceWrapSize=true] Set to `false` to not force any size to the returned HTML element.
+		 * @returns {String}
+		 */
 		buildAvatarHtml: function(data, opts) {
 			data = data || {};
 			opts = opts || {};
 			var me = this,
 				SoS = Sonicle.String,
+				wrapElType = opts.wrapElType || 'span',
 				dataRef = Ext.isString(opts.dataRef) ? ('data-ref="' + SoS.htmlAttributeEncode(opts.dataRef) + '"') : '',
-				swatchCls = opts.swatchCls || '',
+				wrapCls = opts.wrapCls || '',
 				pictureCls = opts.pictureCls || '',
 				initialsCls = opts.initialsCls || '',
 				size = Ext.isNumber(opts.size) ? opts.size : 32,
-				swatchStyles = {
-					borderRadius: me.swatchRadius()
+				wrapStyles = {
+					borderRadius: me.wrapRadius()
 				},
 				render = (!Ext.isEmpty(data.pictureUrl) || !Ext.isEmpty(data.iconCls)) ? 1 : (!Ext.isEmpty(data.name) ? 2 : 0),
 				html = '',
 				spanStyles;
 			
 			if (opts.forceWrapSize !== false) {
-				Ext.apply(swatchStyles, {
+				Ext.apply(wrapStyles, {
 					width: size + 'px',
-					height: size + 'px'
+					height: size + 'px',
+					lineHeight: size + 'px'
 				});
 			}
 			
 			if (render === 1) {
 				if (!Ext.isEmpty(data.iconCls)) {
-					swatchCls += (' '+Ext.String.trim(data.iconCls));
+					wrapCls += (' '+Ext.String.trim(data.iconCls));
 				} else {
-					swatchCls += (' '+pictureCls);
-					Ext.apply(swatchStyles, {
+					wrapCls += (' '+pictureCls);
+					Ext.apply(wrapStyles, {
 						backgroundColor: me.pictureBgColor,
 						backgroundImage: !Ext.isEmpty(data.pictureUrl) ? 'url(' + data.pictureUrl + ')' : null
 					});
 				}
 				
 			} else if (render === 2) {
-				var bgColor = me.randomColor(data.name.length, me.colors);
-				swatchCls += (' '+initialsCls);
-				swatchStyles.backgroundColor = bgColor;
+				var bgColor = me.randomColor(data.name, me.colorPalette()) || me.emptyColor;
+				wrapCls += (' '+initialsCls);
+				wrapStyles.backgroundColor = bgColor;
 				spanStyles = me.initialsStyles(bgColor, size);
 				
 			} else {
-				swatchStyles.backgroundColor = me.emptyColor;
+				if (!Ext.isEmpty(opts.wrapCls)) wrapCls += (' '+opts.wrapCls+'-empty');
+				wrapStyles.backgroundColor = me.emptyColor;
 			}
 			
-			html += '<span ' + dataRef + ' class="' + swatchCls + '" style="' + Ext.dom.Helper.generateStyles(swatchStyles) + '">';
+			html += '<' + wrapElType + ' ' + dataRef + ' class="' + wrapCls + '" style="' + Ext.dom.Helper.generateStyles(wrapStyles) + '">';
 			if (render === 2) {
 				html += '<span style="' + Ext.dom.Helper.generateStyles(spanStyles) + '">';
 				html += Sonicle.mixin.Avatar.calcInitials(data.name, 2);
 				html += '</span>';
 			}
-			html += '</span>';
+			html += '</' + wrapElType + '>';
 			return html;
 		},
 		
-		randomColor: function(seed, colors) {
-			return colors[(seed+3) % (colors.length)];
+		/**
+		 * Selects a random color for the passed text.
+		 * In case of empty colors or text, `undefined` will be returned.
+		 * @param {String} text The source text.
+		 * @param {Array} colors The palette of colors from which to choose.
+		 * @returns {String|undefined}
+		 */
+		randomColor: function(text, colors) {
+			if (!Ext.isArray(colors) || Ext.isEmpty(colors) || !Ext.isString(text) || Ext.isEmpty(text)) {
+				return undefined;
+			} else {
+				return colors[text.length % (colors.length)];
+			}
 		},
 		
-		swatchRadius: function() {
+		colorPalette: function() {
+			return this.colors || Sonicle.mixin.Avatar.palette;
+		},
+		
+		wrapRadius: function() {
 			var style = this.avatarStyle;
 			if ('circular' === style) return '50%';
 			else if ('rounded' === style) return '15%';
@@ -161,6 +195,18 @@ Ext.define('Sonicle.mixin.Avatar', {
 	},
 	
 	statics: {
+		
+		/**
+		 * The default color palette consisting of an array of 
+		 * 7-chars color hex code strings (with leading # symbol).
+		 */
+		palette: [
+			'#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5',
+			'#2196F3', '#03A9F4', '#00BCD4', '#009688', '#4CAF50',
+			'#8BC34A', '#CDDC39', /*'#FFEB3B',*/ '#FFC107', '#FF9800',
+			'#FF5722', '#795548', '#9E9E9E', '#607D8B'
+		],
+		
 		/**
 		 * Compute initials of a name
 		 * These rule will be followed:

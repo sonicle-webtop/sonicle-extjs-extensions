@@ -27,7 +27,7 @@ Ext.define('Sonicle.button.Avatar', {
 	},
 	
 	componentCls: 'so-btn-avatar',
-	avatarSwatchCls: 'so-btn-avatar-swatch',
+	avatarWrapCls: 'so-btn-avatar-wrap',
 	avatarPictureCls: 'so-btn-avatar-picture',
 	avatarInitialsCls: 'so-btn-avatar-initials',
 	
@@ -83,8 +83,8 @@ Ext.define('Sonicle.button.Avatar', {
 	
 	privates: {
 		generateInnerHtml: function() {
-			var me = this,
-				baseIconCls = me._baseIconCls;
+			var me = this;
+				//baseIconCls = me._baseIconCls;
 			return me.buildAvatarHtml({
 					pictureUrl: me.pictureUrl,
 					iconCls: me.iconCls,
@@ -93,8 +93,8 @@ Ext.define('Sonicle.button.Avatar', {
 					//dataRef: 'btnIconEl',
 					pictureCls: me.avatarPictureCls,
 					initialsCls: me.avatarInitialsCls,
-					swatchCls: me.avatarSwatchCls,
-					//swatchCls: baseIconCls + ' ' + (baseIconCls + '-' + me.ui) + ' ' + me.avatarSwatchCls,
+					wrapCls: me.avatarWrapCls,
+					//wrapCls: baseIconCls + ' ' + (baseIconCls + '-' + me.ui) + ' ' + me.avatarWrapCls,
 					size: me.avatarSize(),
 					forceWrapSize: false
 			});
