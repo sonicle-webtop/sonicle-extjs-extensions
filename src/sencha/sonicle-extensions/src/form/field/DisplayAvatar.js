@@ -27,7 +27,7 @@ Ext.define('Sonicle.form.field.DisplayAvatar', {
 		
 		if (me.rendered) {
 			me.inputEl.applyStyles({
-				backgroundColor: me.randomColor(value, me.colors) || me.emptyColor
+				backgroundColor: me.randomColor(value, me.colorPalette()) || me.emptyColor
 			});
 		}
 		return ret;
@@ -59,7 +59,7 @@ Ext.define('Sonicle.form.field.DisplayAvatar', {
 		if (me.renderer) {
 			return display;
 		} else {
-			var bgColor = me.randomColor(display, me.colors),
+			var bgColor = me.randomColor(display, me.colorPalette()),
 				spanStyles = me.initialsStyles(bgColor, me.avatarSize);
 			
 			return '<span style="' + Ext.dom.Helper.generateStyles(spanStyles) + '">'
