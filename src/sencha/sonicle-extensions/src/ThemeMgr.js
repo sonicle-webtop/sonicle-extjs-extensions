@@ -25,15 +25,17 @@ Ext.define('Sonicle.ThemeMgr', {
 	},
 	
 	/**
-	 * The unique theme identifier.
+	 * The unique theme identifier. In lower-case form: eg. triton, classic, etc.
 	 * @returns {Ext.themeName}
 	 */
 	getId: function() {
+		// ExtJS sets the internal theme-name into `themeName` property of `Ext` singleton.
+		// Despite the name, the value it's actually indicating the theme ID.
 		return Ext.themeName;
 	},
 	
 	/**
-	 * The unique theme name.
+	 * The unique theme name. In pascal-case form: eg. Triton, Classic, etc.
 	 * @returns {Ext.theme.name}
 	 */
 	getName: function() {

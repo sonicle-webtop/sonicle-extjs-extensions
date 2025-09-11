@@ -1,7 +1,7 @@
 
 .so-colorswatch-framed {
 	border-width: 1px !important;
-    border-color: #A8A8A8;
+	border-color: var(--so-colorswatch-framed-border-color, #a3a3a3); /* Neutral/400 */
 }
 .so-colorswatch-square {
 	font-size: 90%;
@@ -15,8 +15,8 @@
 	border-radius: 50%;
 }
 .so-colorswatch-darkmark {
-	color: #6b7280;
+	color: var(--so-colorswatch-darkmark-color, #171717); /* Neutral/900 */
 }
 .so-colorswatch-lightmark {
-	color: #f9fafb;
+	color: var(--so-colorswatch-lightmark-color, #fafafa); /* Neutral/50 */
 }

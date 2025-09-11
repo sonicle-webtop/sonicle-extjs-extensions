@@ -19,7 +19,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.ColorBack', {
 	
 	tooltip: 'Background color',
 	
-	toolIconCls: 'fas fa-pencil-alt',
+	toolIconCls: 'fas fa-highlighter',
 	removeColorIconCls: 'fas fa-eraser',
 	removeColorText: 'Remove color',
 	
