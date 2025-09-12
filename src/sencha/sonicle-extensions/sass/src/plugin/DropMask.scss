@@ -15,16 +15,16 @@
 	bottom: 5px;
 	left: 5px;
 	right: 5px;
-	border-color: var(--dropmask-border-color, #cfcfcf);
-	border-width: var(--dropmask-border-width, 4px);
-	border-style: var(--dropmask-border-style, dashed);
+	border-color: var(--so-dropmask-border-color, #cfcfcf);
+	border-width: var(--so-dropmask-border-width, 4px);
+	border-style: var(--so-dropmask-border-style, dashed);
 	/*border: 4px dashed #cfcfcf;*/
 	content: '';
 }
 .so-dropmask .x-mask-msg-inner {
     width: 100%;
-	color: var(--dropmask-text-color, #cfcfcf);
-    font-size: var(--dropmask-text-size, 30px);
+	color: var(--so-dropmask-text-color, #cfcfcf);
+    font-size: var(--so-dropmask-text-size, 30px);
 	/*
 	color: #cfcfcf;
     font-size: 30px;
