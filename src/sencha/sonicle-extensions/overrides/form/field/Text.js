@@ -6,6 +6,52 @@
 Ext.define('Sonicle.overrides.form.field.Text', {
 	override: 'Ext.form.field.Text',
 	
+	/*
+	preSubTpl: [
+		'<div id="{cmpId}-triggerWrap" data-ref="triggerWrap"',
+				'<tpl if="ariaEl == \'triggerWrap\'">',
+					'<tpl foreach="ariaElAttributes"> {$}="{.}"</tpl>',
+				'<tpl else>',
+					' role="presentation"',
+				'</tpl>',
+				' class="{triggerWrapCls} {triggerWrapCls}-{ui}">',
+			'<tpl for="triggersAtLeft">{[values.renderTrigger(parent)]}</tpl>', // <-- added
+			'<div id={cmpId}-inputWrap data-ref="inputWrap"',
+				' role="presentation" class="{inputWrapCls} {inputWrapCls}-{ui}">'
+	],
+	
+	postSubTpl: [
+			'<tpl if="!Ext.supports.Placeholder">',
+			'<label id="{cmpId}-placeholderLabel" data-ref="placeholderLabel" for="{id}" class="{placeholderCoverCls} {placeholderCoverCls}-{ui}">{placeholder}</label>',
+			'</tpl>',
+			'</div>', // end inputWrap
+			'<tpl for="triggers">{[values.renderTrigger(parent, xindex, xcount)]}</tpl>', // <-- modified
+		'</div>' // end triggerWrap
+	],
+	*/
+	
+	/*
+	getSubTplData: function(fieldData) {
+		var data = this.callParent(arguments),
+			triggers = data.triggers,
+			rightTriggers = [],
+			leftTriggers = [];
+		
+		Ext.iterate(triggers, function(trigger) {
+			if (trigger && 'left' === trigger.position) {
+				leftTriggers.push(trigger);
+			} else {
+				rightTriggers.push(trigger);
+			}
+		});
+		
+		return Ext.apply(data, {
+			triggersAtRight: rightTriggers,
+			triggersAtLeft: leftTriggers
+		});
+	},
+	*/
+	
 	/**
 	 * @override Check me during ExtJs upgrade!
 	 */
@@ -24,6 +70,24 @@ Ext.define('Sonicle.overrides.form.field.Text', {
 				});
 			}
 		}
+	},
+	
+	/**
+	 * @override Check me during ExtJs upgrade!
+	 */
+	applyTriggers: function(triggers) {
+		var me = this,
+			ret = me.callParent(arguments);
+		// Rework triggers built-in ordered array (see Ext.form.field.Text#applyTriggers) 
+		// for the purpose to arrange items by their position: left items are before right one!
+		if (me.orderedTriggers) {
+			Ext.Array.sort(me.orderedTriggers, function(l, r) {
+				var lw = l.position === 'left' ? -1 : 1;
+				var rw = r.position === 'left' ? -1 : 1;
+				return lw === rw ? 0 : (lw < rw ? -1 : 1);
+			});
+		}
+		return ret;
 	},
 	
 	/**

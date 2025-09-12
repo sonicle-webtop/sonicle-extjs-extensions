@@ -1,9 +1,14 @@
 /**
  * Override original {@link Ext.form.trigger.Trigger}
- * - Add support to CSS class for left-handed positioning
+ * - Add support to CCS classes to track trigger positioning: right/left and first/last (useful for custom CSS rules)
  */
 Ext.define('Sonicle.overrides.form.trigger.Trigger', {
 	override: 'Ext.form.trigger.Trigger',
+	
+	/**
+	 * @cfg {right|left} position [position=right]
+	 */
+	position: 'right',
 	
 	/**
 	 * @override Check me during ExtJs upgrade!
@@ -21,8 +26,13 @@ Ext.define('Sonicle.overrides.form.trigger.Trigger', {
 		// <-- added
 		{
 			positionCls: function(values) {
-				var cmp = values.$trigger;
-				return values.baseCls + '-' + (cmp.position === 'left' ? 'left' : 'right');
+				var cmp = values.$trigger,
+					cls = values.baseCls + '-' + (cmp.position === 'left' ? 'left' : 'right'),
+					orderedTriggers = values.fieldData.triggers,
+					index = orderedTriggers.indexOf(cmp);
+				if (index === 0) cls += ' ' + values.baseCls + '-first';
+				if (index === orderedTriggers.length-1) cls += ' ' + values.baseCls + '-last';
+				return cls;
 			}
 		}
 	]
