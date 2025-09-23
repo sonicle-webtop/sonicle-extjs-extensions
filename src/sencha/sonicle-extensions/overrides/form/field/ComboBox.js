@@ -1,5 +1,6 @@
 /**
  * Override original {@link Ext.form.field.ComboBox}
+ * - Add explicit CSS class (x-form-field-combobox) to help distinguishing combos from base pickerfields/textfields
  * - Fix value NOT published when blurring-out quickly (remote + forceSelection false + value and display field set)	 WT-789
  * - Add autoLoadOnQuery option: initially load the store only when the first 
  *   query is issued (for eg. by clicking the trigger). Useful in situations where 
@@ -45,6 +46,7 @@ Ext.define('Sonicle.overrides.form.field.ComboBox', {
 	
 	initComponent: function() {
 		var me = this;
+		me.addCls(me.fieldCls + '-combobox');
 		me.callParent(arguments);
 		me.doQueryTask = new Ext.util.DelayedTask(Ext.Function.createInterceptor(me.doRawQuery, function() {
 			me.doQueryTaskCount++;
