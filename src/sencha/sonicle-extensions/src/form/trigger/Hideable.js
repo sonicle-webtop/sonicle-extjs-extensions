@@ -83,5 +83,47 @@ Ext.define('Sonicle.form.trigger.Hideable', {
 			return false;
 		}
 		return true;
+	},
+	
+	/**
+	 * @override Ext.form.trigger.Trigger#hide
+	 * This allows subsequent call to setVisible.
+	 */
+	hide: function() {
+		var me = this,
+			el = me.el;
+		me.callParent();
+		if (el) {
+			// NB: using !important (thanks to specific override in Ext.dom.Element)
+			el.setVisible('none !important', false);
+		}
+	},
+	
+	/**
+	 * @override Check me during ExtJs upgrade!
+	 * Override original {@link Ext.form.trigger.Trigger#renderTrigger}:
+	 * - Customize initial style (see !important).
+	 */
+	renderTrigger: function(fieldData) {
+		var me = this,
+			width = me.width,
+			triggerStyle = me.hidden ? 'display:none !important;' : ''; // <- modified
+		
+		if (width) {
+			triggerStyle += 'width:' + width;
+		}
+		
+		return Ext.XTemplate.getTpl(me, 'renderTpl').apply({
+			$trigger: me,
+			fieldData: fieldData,
+			ui: fieldData.ui,
+			childElCls: fieldData.childElCls,
+			triggerId: me.domId = me.field.id + '-trigger-' + me.id,
+			cls: me.cls,
+			triggerStyle: triggerStyle,
+			extraCls: me.extraCls,
+			baseCls: me.baseCls,
+			ariaRole: me.ariaRole
+		});
 	}
 });
