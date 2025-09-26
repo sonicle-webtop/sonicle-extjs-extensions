@@ -19,6 +19,13 @@ Ext.define('Sonicle.button.Toggle', {
 	 */
 	
 	/**
+	 * @cfg {String} iconCls
+	 * One or more space separated CSS classes to be applied to the icon 
+	 * element when the button is both pressed/not pressed.
+	 * It's meant to be used instead of {@link #onIconCls} and {@link offIconCls}.
+	 */
+	
+	/**
 	 * @cfg {String} onIconCls
 	 * One or more space separated CSS classes to be applied to the icon 
 	 * element when the button is pressed.
@@ -28,6 +35,13 @@ Ext.define('Sonicle.button.Toggle', {
 	 * @cfg {String} offIconCls
 	 * One or more space separated CSS classes to be applied to the icon 
 	 * element when the button is not pressed.
+	 */
+	
+	/**
+	 * @cfg {Number/String} glyph
+	 * A numeric unicode character code to use as the icon  
+	 * element when the button is both pressed/not pressed.
+	 * It's meant to be used instead of {@link onGlyph} and {@link offGlyph}.
 	 */
 	
 	/**
@@ -43,6 +57,12 @@ Ext.define('Sonicle.button.Toggle', {
 	 */
 	
 	/**
+	 * @cfg {String} text
+	 * Text to display when the button is both pressed/not pressed.
+	 * It's meant to be used instead of {@link onText} and {@link offText}.
+	 */
+	
+	/**
 	 * @param {String} onText
 	 * Text to display when the button is pressed.
 	 */
@@ -50,6 +70,12 @@ Ext.define('Sonicle.button.Toggle', {
 	/**
 	 * @param {String} offText
 	 * Text to display when the button is pressed.
+	 */
+	
+	/**
+	 * @cfg {String} tooltip
+	 * Tooltip to display when the button is both pressed/not pressed.
+	 * It's meant to be used instead of {@link onTooltip} and {@link offTooltip}.
 	 */
 	
 	/**
@@ -63,13 +89,19 @@ Ext.define('Sonicle.button.Toggle', {
 	 */
 	
 	constructor: function(cfg) {
+		this.callParent([Ext.apply(cfg || {}, {enableToggle: true})]);
+	},
+	
+	/*
+	constructor: function(cfg) {
 		var me = this,
 			icfg = Sonicle.Utils.getConstructorConfigs(me, cfg, ['disablePressedStyle']);
 		
 		cfg.enableToggle = true;
-		if (icfg.disablePressedStyle === true) cfg._pressedCls = '';
-		this.callParent([cfg]);
+		if (icfg.disablePressedStyle === true) cfg._pressedCls = me._pressedCls + '-disarmed';
+		me.callParent([cfg]);
 	},
+	*/
 	
 	beforeRender: function() {
 		var me = this;

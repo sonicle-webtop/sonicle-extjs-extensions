@@ -10,3 +10,26 @@
 .x-btn.so-toggle-button:not(.x-btn-pressed) .x-btn-inner {
     color: var(--so-toggle-button-text-color-unpressed, reset);
 }
+.x-btn .x-btn-toggle-indicator-el {
+	display: inline-block;
+	border-radius: 2px;
+	margin-right: 2px;
+	width: var(--so-button-toggle-indicator-width, 4px);
+	height: var(--so-button-toggle-indicator-height, 10px);
+	background-color: var(--so-button-toggle-indicator-color-off, #52525b); // Zinc/600
+}
+.x-btn.x-btn-pressed .x-btn-toggle-indicator-el {
+	background-color: var(--so-button-toggle-indicator-color-on, #65a30d); // Lime/600
+}
+/*
+.x-btn.x-btn-pressed .x-btn-toggle-indicator-el, .x-btn.x-btn-pressed-disarmed .x-btn-toggle-indicator-el {
+	background-color: var(--so-button-toggle-indicator-color-on, #65a30d); // Lime/600
+}
+*/
+.x-btn.x-btn-pressed-nostyle:not(.x-btn-over) {
+	background-color: transparent !important;
+	background-image: none !important;
+}
+.x-btn.x-btn-pressed-nostyle .x-btn-inner {
+	color: var(--so-button-pressed-nostyle-color, initial) !important;
+}
