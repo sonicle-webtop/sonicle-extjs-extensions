@@ -60,7 +60,7 @@ Ext.define('Sonicle.menu.StoreMenu', {
 	textField: 'text',
 	
 	/**
-	 * @cfg {String} tooltip
+	 * @cfg {String} tooltipField
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as tooltip.
 	 */
 	
@@ -68,19 +68,16 @@ Ext.define('Sonicle.menu.StoreMenu', {
 	 * @cfg {String} tagField
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as tag data.
 	 */
-	//tagField: null,
 	
 	/**
 	 * @cfg {String} iconField
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as icon.
 	 */
-	//iconField: null,
 	
 	/**
 	 * @cfg {String} iconClsField
 	 * The underlying {@link Ext.data.Field#name data field name} to bind as iconCls.
 	 */
-	//iconClsField: null,
 	
 	/**
 	 * @cfg {Object/Object[]} topStaticItems
@@ -177,12 +174,12 @@ Ext.define('Sonicle.menu.StoreMenu', {
 	
 	updateCheckedItems: function(nv, ov) {
 		var me = this,
-				arr = Ext.isArray(nv) ? nv : [nv];
+			arr = Ext.isArray(nv) ? nv : [nv];
 		if (me.store && (me.itemsInitialized === true)) {
 			me.store.each(function(rec) {
 				var id = Ext.isString(me.idField) ? rec.get(me.idField) : rec.getId(),
-						chk = arr.indexOf(id) !== -1 ? true : false,
-						itm = me.getComponent(me.buildItemId(id));
+					chk = arr.indexOf(id) !== -1 ? true : false,
+					itm = me.getComponent(me.buildItemId(id));
 				if (itm) itm.setChecked(chk, false);
 			});
 		}
@@ -224,13 +221,13 @@ Ext.define('Sonicle.menu.StoreMenu', {
 	
 	createStoreItem: function(rec) {
 		var me = this,
-				idFld = me.idField,
-				textFld = me.textField,
-				tipFld = me.tooltipField,
-				iconFld = me.iconField,
-				iconClsFld = me.iconClsField,
-				tagFld = me.tagField,
-				cfg = Ext.callback(me.itemCfgCreator, me, [rec]);
+			idFld = me.idField,
+			textFld = me.textField,
+			tipFld = me.tooltipField,
+			iconFld = me.iconField,
+			iconClsFld = me.iconClsField,
+			tagFld = me.tagField,
+			cfg = Ext.callback(me.itemCfgCreator, me, [rec]);
 		
 		return Ext.apply({
 			itemId: me.buildItemId(Ext.isString(idFld) ? rec.get(idFld) : rec.getId()),
@@ -246,10 +243,20 @@ Ext.define('Sonicle.menu.StoreMenu', {
 	
 	findStoreRecordByItemId: function(id) {
 		var me = this,
-				sto = me.store;
+			sto = me.store;
 		if (sto) {
 			return Ext.isString(me.idField) ? sto.findRecord(me.idField, id, 0, false, true, true) : sto.getById(id);
 		}
+	},
+	
+	/**
+	 * Reloads the underlying store.
+	 * @param {Object} [opts] An object matching the format used by Store's {@link Ext.data.Store#load load} method
+	 */
+	reloadStore: function(opts) {
+		opts = opts || {};
+		var sto = this.store;
+		if (sto) sto.load(opts);
 	},
 	
 	privates: {

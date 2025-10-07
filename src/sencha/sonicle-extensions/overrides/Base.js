@@ -34,11 +34,11 @@ Ext.define('Sonicle.overrides.Base', {
 	 * Returns the method that will be called in callParent; suitable for delaying invocation.
 	 * @returns {Ext.Function}
 	 */
-	getCallParentMethod: function() {
+	getParentMethod: function() {
 		var method,
-			superMethod = (method = this.getCallParentMethod.caller) && (method.$previous || ((method = method.$owner ? method : method.caller) && method.$owner.superclass[method.$name]));
+			superMethod = (method = this.getParentMethod.caller) && (method.$previous || ((method = method.$owner ? method : method.caller) && method.$owner.superclass[method.$name]));
 		if (!superMethod) {
-			method = this.getCallParentMethod.caller;
+			method = this.getParentMethod.caller;
 			/* eslint-disable-next-line vars-on-top */
 			var parentClass, methodName;
 			if (!method.$owner) {
