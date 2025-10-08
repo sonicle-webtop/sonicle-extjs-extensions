@@ -47,7 +47,7 @@ Ext.define('Sonicle.form.trigger.Menu', {
 	 * with the {@link #cfg-menu} config option.
 	 */
 	
-	cls: 'so-' + 'form-menu-trigger',
+	cls: Sonicle.baseCSSPrefix + 'form-fa-trigger',
 	extraCls: 'fas fa-bars',
 	
 	onDestroy: function() {

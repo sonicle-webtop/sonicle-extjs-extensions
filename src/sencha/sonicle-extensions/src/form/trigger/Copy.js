@@ -23,7 +23,7 @@ Ext.define('Sonicle.form.trigger.Copy', {
 	 * @param {Ext.form.field.Text} this
      */
 	
-	cls: 'so-' + 'form-copy-trigger',
+	cls: Sonicle.baseCSSPrefix + 'form-fa-trigger',
 	extraCls: 'far fa-clone',
 
 	handler: function(cmp) {

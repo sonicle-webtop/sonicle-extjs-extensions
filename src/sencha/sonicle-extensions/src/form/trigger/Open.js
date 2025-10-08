@@ -27,7 +27,7 @@ Ext.define('Sonicle.form.trigger.Open', {
 	 * @param {Ext.form.field.Text} this
      */
 	
-	cls: 'so-' + 'form-open-trigger',
+	cls: Sonicle.baseCSSPrefix + 'form-fa-trigger',
 	extraCls: 'fas fa-external-link-alt',
 
 	handler: function(cmp) {
