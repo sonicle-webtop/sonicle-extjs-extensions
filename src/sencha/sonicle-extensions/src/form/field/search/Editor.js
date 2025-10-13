@@ -30,7 +30,8 @@ Ext.define('Sonicle.form.field.search.Editor', {
 	falseText: 'No',
 	okText: 'Search',
 	usageText: 'manual syntax: "{0}:{1}"',
-	saveTooltip: 'Save as favorite search',
+	saveText: 'Save as favorite',
+	saveTooltip: 'Save current search as favorite',
 	saveIconCls: 'fas fa-save',
 	labelWidth: 110,
 	
@@ -82,6 +83,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 		if (cfg.falseText) me.falseText = cfg.falseText;
 		if (cfg.okText) me.okText = cfg.okText;
 		if (cfg.usageText) me.usageText = cfg.usageText;
+		if (cfg.saveText) me.saveText = cfg.saveText;
 		if (cfg.saveTooltip) me.saveTooltip = cfg.saveTooltip;
 		if (cfg.saveIconCls) me.saveIconCls = cfg.saveIconCls;
 		if (Ext.isBoolean(cfg.showSave)) me.showSave = cfg.showSave;
@@ -93,8 +95,9 @@ Ext.define('Sonicle.form.field.search.Editor', {
 			Ext.Array.push(bbarItems, [
 				{
 					xtype: 'button',
-					ui: '{tertiary}',
+					ui: '{secondary}',
 					iconCls: cfg.saveIconCls || me.saveIconCls,
+					text: cfg.saveText || me.saveText,
 					tooltip: cfg.saveTooltip || me.saveTooltip,
 					handler: me.onSave,
 					scope: me

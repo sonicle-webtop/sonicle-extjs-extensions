@@ -9,7 +9,7 @@ Ext.define('Sonicle.form.field.search.Field', {
 	xtype: 'sosearchfield',
 	requires: [
 		'Ext.layout.container.Fit',
-		'Sonicle.ExtUtils',
+		'Sonicle.Utils',
 		'Sonicle.form.field.search.Editor',
 		'Sonicle.form.trigger.Clear',
 		'Sonicle.plugin.FieldTooltip'
@@ -45,13 +45,24 @@ Ext.define('Sonicle.form.field.search.Field', {
 	searchTooltip: undefined,
 	clearText: 'Clear',
 	usageText: 'Manual syntax: "{0}:{1}"',
-	saveTooltip: 'Save as favorite',
+	favoritesText: 'Show favorites searches',
+	favoritesResultsEmptyText: 'No searches saved as favorites yet',
+	queryResultsEmptyText: 'No matching search to display',
+	
+	saveIconCls: 'fas fa-star',
+	favoritesIconCls: 'fas fa-star',
 	
 	/**
 	 * @cfg {Boolean} [saveButton]
 	 * Set to `true` to enable save button.
 	 */
 	saveButton: false,
+	
+	/**
+	 * @cfg {Boolean} [favoritesButton]
+	 * Set to `true` to enable favorites button.
+	 */
+	favoritesButton: true,
 	
 	/**
 	 * @cfg {Number} [listOpeningDelayOnClick]
@@ -114,31 +125,53 @@ Ext.define('Sonicle.form.field.search.Field', {
 	 */
 	suspendInputFocusing: 0,
 	
+	/**
+	 * @private
+	 */
+	querySaved: 0,
+	
 	constructor: function(cfg) {
 		var me = this,
-			SoEU = Sonicle.ExtUtils,
-			searchText = cfg.searchText || me.searchText,
-			clearText = cfg.clearText || me.clearText;
+			SoU = Sonicle.Utils,
+			icfg = SoU.getConstructorConfigs2(me, cfg, ['searchText', 'clearText', 'favoritesButton', 'favoritesText', 'favoritesIconCls']);
 		
 		cfg.autoSelectLast = false;
-		cfg.plugins = SoEU.mergePlugins(cfg, 'sofieldtooltip');
-		cfg.triggers = SoEU.mergeTriggers(cfg, {
-			search: {
-				cls: Ext.baseCSSPrefix + 'form-search-trigger',
-				position: 'left', // this is possible thanks to custom override!!!
-				tooltip: searchText,
-				handler: function(s) {
-					me.fireQuery(s.getValue());
+		cfg.plugins = SoU.mergePlugins(cfg.plugins, 'sofieldtooltip');
+		cfg.triggers = SoU.mergeTriggers(cfg.triggers, SoU.applyIfDefined({
+				search: {
+					cls: Ext.baseCSSPrefix + 'form-search-trigger',
+					position: 'left', // this is possible thanks to custom override!!!
+					tooltip: icfg.searchText,
+					handler: function(s) {
+						me.fireQuery(s.getValue());
+					}
+				},
+				clear: {
+					type: 'soclear',
+					weight: -1,
+					tooltip: icfg.clearText,
+					hideWhenEmpty: true,
+					hideWhenMouseOut: true
 				}
-			},
-			clear: {
-				type: 'soclear',
-				weight: -1,
-				tooltip: clearText,
-				hideWhenEmpty: true,
-				hideWhenMouseOut: true
-			}
-		});
+			}, {
+				favorites: icfg.favoritesButton === true ? {
+					weight: -1,
+					cls: Sonicle.baseCSSPrefix + 'form-fa-trigger',
+					extraCls: icfg.favoritesIconCls,
+					tooltip: icfg.favoritesText,
+					handler: function() {
+						me.collapseDDPicker();
+						if (me.querySaved > 0 || me.lastQuery !== '') {
+							me.querySaved = 0;
+							me.lastQuery = null; // Make sure to have always fresh data (query caching will NOT interfere)
+						}
+						// Set picker emptyText for favorites result
+						me.setPickerEmptyText(me.favoritesResultsEmptyText);
+						me.doQuery(me.allQuery, true);
+					}
+				} : undefined
+			})
+		);
 		me.callParent([cfg]);
 	},
 	
@@ -335,7 +368,9 @@ Ext.define('Sonicle.form.field.search.Field', {
 					okTooltip: me.searchTooltip,
 					usageText: me.usageText,
 					showSave: me.saveButton,
+					saveText: me.saveText,
 					saveTooltip: me.saveTooltip,
+					saveIconCls: me.saveIconCls,
 					labelWidth: me.fieldsLabelWidth
 				},
 				minWidth: 200
@@ -486,6 +521,13 @@ Ext.define('Sonicle.form.field.search.Field', {
 		this.callParent(arguments);
 	},
 	
+	doRawQuery: function() {
+		// Resets picker emptyText back to default
+		var me = this;
+		me.setPickerEmptyText(me.queryResultsEmptyText);
+		me.callParent(arguments);
+	},
+	
 	privates: {
 		disarmListDelayedOpening: function() {
 			var me = this;
@@ -602,7 +644,13 @@ Ext.define('Sonicle.form.field.search.Field', {
 				SoSS = Sonicle.SearchString,
 				queryObject = SoSS.toQueryObject(SoSS.parseHumanQuery(value));
 			
+			me.querySaved++;
 			me.fireEvent('save', me, value, me.remapQueryObject(queryObject));
+		},
+		
+		setPickerEmptyText: function(emptyText) {
+			var picker = this.getPicker();
+			if (picker) picker.emptyText = emptyText;
 		},
 		
 		/**
