@@ -70,7 +70,7 @@ Ext.define('Sonicle.Utils', {
 	},
 	
 	/**
-	 * 
+	 * @deprecated use getConstructorConfigs2 (check usage first)
 	 * @param {Ext.Base} classInst The class instance.
 	 * @param {Object} constructorConfig The config object passed to constructor.
 	 * @param {String[]|String|Object|Object[]|Mixed[]} names Array of config names to get value for.
@@ -93,6 +93,29 @@ Ext.define('Sonicle.Utils', {
 			icfg[key] = isProp ? classInst[key] : classInst.getInitialConfig(key);
 		});
 		return Ext.apply(icfg, Sonicle.Object.remap(constructorConfig, Ext.Object.getKeys(namesMap)));
+	},
+	
+	/**
+	 * This is an utility funcition that should be called in Constructors in 
+	 * order to retrieve right Config values.
+	 * It returns an Object with values of configs names specified as parameter:
+	 * for each config is returned the value directly specified in Constructor
+	 * config Object, if any, or the default value of the Config (be it a real
+	 * Config definition or a simple property).
+	 * @param {Ext.Base} classInst The class instance.
+	 * @param {Object} constructorConfig The config object passed to constructor.
+	 * @param {String[]|String} names Array of config names to get value for.
+	 * @returns {Object} The resulting values object.
+	 */
+	getConstructorConfigs2: function(classInst, constructorConfig, names) {
+		var okNames = [], data = {};
+		Ext.iterate(Ext.Array.from(names, false), function(name) {
+			if (Ext.isString(name)) {
+				data[name] = classInst.hasConfig(name) ? classInst.getInitialConfig(name) : classInst[name];
+				okNames.push(name);
+			}
+		});
+		return Ext.apply(data, Sonicle.Object.remap(constructorConfig, okNames));
 	},
 	
 	/**
