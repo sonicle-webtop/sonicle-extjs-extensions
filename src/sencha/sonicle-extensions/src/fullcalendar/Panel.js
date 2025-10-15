@@ -1667,8 +1667,8 @@ Ext.define('Sonicle.fullcalendar.Panel', {
 		resourceLabelWithSwatchContentRenderer: function(fcViewType, fcResource, fcArg, context) {
 			var fcExProps = fcResource.extendedProps,
 				html = '';
-			html += Sonicle.String.htmlEncode(fcArg.fieldValue);
 			html += '<div class="so-cal-appo-swatch" style="border-color:' + fcExProps.color + ';"></div>';
+			html += Sonicle.String.htmlEncode(fcArg.fieldValue);
 			return html;
 		},
 		
