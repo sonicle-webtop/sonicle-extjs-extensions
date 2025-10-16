@@ -156,7 +156,6 @@ Ext.define('Sonicle.form.field.search.Field', {
 			}, {
 				favorites: icfg.favoritesButton === true ? {
 					weight: -1,
-					cls: Sonicle.baseCSSPrefix + 'form-fa-trigger',
 					extraCls: icfg.favoritesIconCls,
 					tooltip: icfg.favoritesText,
 					handler: function() {
