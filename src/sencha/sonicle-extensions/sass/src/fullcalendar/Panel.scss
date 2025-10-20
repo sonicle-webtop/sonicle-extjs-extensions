@@ -14,7 +14,7 @@
 	font-weight: normal;
 }
 /* fullcalendar: add support to other-day color var */
-.so-fullcalendar .fc-day.fc-day-other {
+.so-fullcalendar .fc-day.fc-day-other:not(.fc-popover) {
 	background-color: var(--fc-day-other-color);
 }
 /* fullcalendar: disable decoration on event when active */
