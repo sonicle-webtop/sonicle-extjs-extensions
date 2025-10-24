@@ -12,51 +12,6 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
         singleton: true,
 		uses: ['Sonicle.Number'],
 		
-		
-		generateColorSwatch: function(colorize, color, opts) {
-			opts = opts || {};
-			var ME = Sonicle.ColorUtils,
-				//geometry = opts.swatchGeometry,
-				framedCls = opts.framedCls || 'so-colorswatch-framed',
-				lum = Ext.isNumber(opts.luminanceThreshold) ? opts.luminanceThreshold : 0.8,
-				swatchCls, swatchStyle, inputStyle;
-			
-			if ('text' === colorize) {
-				inputStyle = inputStyle || {};
-				inputStyle.color = color;
-				
-			} else if ('swatch' === colorize) {
-				swatchStyle = {};
-				swatchStyle.backgroundColor = color;
-				//FIXME: support dark theme: luminance test may be not enough
-				if (ME.luminance(color) > lum) {
-					swatchCls = framedCls;
-					// Border-color needs to be customized in CSS class
-					swatchStyle.borderColor = '';
-				} else {
-					swatchStyle.borderColor = color;
-				}
-				/*
-				if ('square' === geometry) {
-					swatchCls.push(opts.squareSwatchCls || 'so-colorswatch-square');
-				} else if ('circle' === geometry) {
-					swatchCls.push(opts.circleSwatchCls || 'so-colorswatch-circle');
-				} else if ('rounded' === geometry) {
-					swatchCls.push(opts.roundedSwatchCls || 'so-colorswatch-rounded');
-				}
-				*/
-			}
-			
-			return {
-				swatchCls: swatchCls,
-				swatchStyle: swatchStyle,
-				inputStyle: inputStyle
-			};
-		},
-		
-		
-		
-
         constructor: function () {
             ColorUtils = this;
         },
@@ -618,6 +573,82 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
 			}	
 			return closestColor;
 		},
+		
+		similarColor: function(color, list, opts) {
+			opts = opts || {};
+			list = Ext.Array.from(list);
+			if (!Ext.isString(opts.method)) opts.method = 'euclideanDistance';
+			if (!Ext.isNumber(opts.euclideanDistanceThres)) opts.euclideanDistanceThres = 32;
+			if (!Ext.isNumber(opts.ciede2000Thres)) opts.ciede2000Thres = 2;
+			var me = this,
+				cobj = me.parseColor(color),
+				euclideanDistance, ciede2000,
+				similarColor;
+			
+			if (cobj) {
+				Ext.iterate(list, function(lcolor) {
+					var lcobj = me.parseColor(lcolor), dist;
+					if (lcobj) {
+						if (opts.method === 'ciede2000') {
+							var delta = me.ciede2000(lcobj.r, lcobj.g, lcobj.b, cobj.r, cobj.g, cobj.b);
+							if ((delta < opts.ciede2000Thres) && (delta < ciede2000 || ciede2000 === undefined)) {
+								ciede2000 = delta;
+								similarColor = lcolor;
+							}
+							
+						} else {
+							var dist = me.euclideanDistance(lcobj.r, lcobj.g, lcobj.b, cobj.r, cobj.g, cobj.b);
+							if ((dist < opts.euclideanDistanceThres) && (dist < euclideanDistance || euclideanDistance === undefined)) {
+								euclideanDistance = dist;
+								similarColor = lcolor;
+							}
+						}
+					}
+				});
+			}
+			return similarColor;
+		},
+		
+		generateColorSwatch: function(colorize, color, opts) {
+			opts = opts || {};
+			var ME = Sonicle.ColorUtils,
+				//geometry = opts.swatchGeometry,
+				framedCls = opts.framedCls || 'so-colorswatch-framed',
+				lum = Ext.isNumber(opts.luminanceThreshold) ? opts.luminanceThreshold : 0.8,
+				swatchCls, swatchStyle, inputStyle;
+			
+			if ('text' === colorize) {
+				inputStyle = inputStyle || {};
+				inputStyle.color = color;
+				
+			} else if ('swatch' === colorize) {
+				swatchStyle = {};
+				swatchStyle.backgroundColor = color;
+				//FIXME: support dark theme: luminance test may be not enough
+				if (ME.luminance(color) > lum) {
+					swatchCls = framedCls;
+					// Border-color needs to be customized in CSS class
+					swatchStyle.borderColor = '';
+				} else {
+					swatchStyle.borderColor = color;
+				}
+				/*
+				if ('square' === geometry) {
+					swatchCls.push(opts.squareSwatchCls || 'so-colorswatch-square');
+				} else if ('circle' === geometry) {
+					swatchCls.push(opts.circleSwatchCls || 'so-colorswatch-circle');
+				} else if ('rounded' === geometry) {
+					swatchCls.push(opts.roundedSwatchCls || 'so-colorswatch-rounded');
+				}
+				*/
+			}
+			
+			return {
+				swatchCls: swatchCls,
+				swatchStyle: swatchStyle,
+				inputStyle: inputStyle
+			};
+		},
 
         colorMap: {
             aliceblue:              [240, 248, 255],
@@ -767,7 +798,94 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
             whitesmoke:             [245, 245, 245],
             yellow:                 [255, 255, 0],
             yellowgreen:            [154, 205, 5]
-        }
+        },
+		
+		/**
+		 * https://nesin.io/blog/find-closest-color-javascript
+		 * Computes the euclidean distance between two colors.
+		 * @param {Number} r_1
+		 * @param {Number} g_1
+		 * @param {Number} b_1
+		 * @param {Number} r_2
+		 * @param {Number} g_2
+		 * @param {Number} b_2
+		 * @returns {Number}
+		 */
+		euclideanDistance: function(r_1, g_1, b_1, r_2, g_2, b_2) {
+			return Math.sqrt(Math.pow(r_2 - r_1, 2) + Math.pow(g_2 - g_1, 2) + Math.pow(b_2 - b_1, 2));
+		},
+		
+		/**
+		 * https://github.com/michel-leonard/ciede2000-color-matching
+		 * The classic CIE ΔE2000 implementation, which operates on two L*a*b* colors, and returns their difference.
+		 * "l" ranges from 0 to 100, while "a" and "b" are unbounded and commonly clamped to the range of -128 to 127.
+		 * @param {Number} l_1
+		 * @param {Number} a_1
+		 * @param {Number} b_1
+		 * @param {Number} l_2
+		 * @param {Number} a_2
+		 * @param {Number} b_2
+		 * @returns {Number}
+		 */
+		ciede2000: function(l_1, a_1, b_1, l_2, a_2, b_2) {
+			// Working in JavaScript with the CIEDE2000 color-difference formula.
+			// k_l, k_c, k_h are parametric factors to be adjusted according to
+			// different viewing parameters such as textures, backgrounds...
+			var k_l = 1.0, k_c = 1.0, k_h = 1.0;
+			var n = (Math.sqrt(a_1 * a_1 + b_1 * b_1) + Math.sqrt(a_2 * a_2 + b_2 * b_2)) * 0.5;
+			n = n * n * n * n * n * n * n;
+			// A factor involving chroma raised to the power of 7 designed to make
+			// the influence of chroma on the total color difference more accurate.
+			n = 1.0 + 0.5 * (1.0 - Math.sqrt(n / (n + 6103515625.0)));
+			// Application of the chroma correction factor.
+			var c_1 = Math.sqrt(a_1 * a_1 * n * n + b_1 * b_1);
+			var c_2 = Math.sqrt(a_2 * a_2 * n * n + b_2 * b_2);
+			// atan2 is preferred over atan because it accurately computes the angle of
+			// a point (x, y) in all quadrants, handling the signs of both coordinates.
+			var h_1 = Math.atan2(b_1, a_1 * n), h_2 = Math.atan2(b_2, a_2 * n);
+			h_1 += 2.0 * Math.PI * (h_1 < 0.0);
+			h_2 += 2.0 * Math.PI * (h_2 < 0.0);
+			n = Math.abs(h_2 - h_1);
+			// Cross-implementation consistent rounding.
+			if (Math.PI - 1E-14 < n && n < Math.PI + 1E-14)
+				n = Math.PI;
+			// When the hue angles lie in different quadrants, the straightforward
+			// average can produce a mean that incorrectly suggests a hue angle in
+			// the wrong quadrant, the next lines handle this issue.
+			var h_m = (h_1 + h_2) * 0.5, h_d = (h_2 - h_1) * 0.5;
+			if (Math.PI < n) {
+				h_d += Math.PI;
+				// 📜 Sharma’s formulation doesn’t use the next line, but the one after it,
+				// and these two variants differ by ±0.0003 on the final color differences.
+				h_m += Math.PI;
+				// h_m += h_m < Math.PI ? Math.PI : -Math.PI;
+			}
+			var p = 36.0 * h_m - 55.0 * Math.PI;
+			n = (c_1 + c_2) * 0.5;
+			n = n * n * n * n * n * n * n;
+			// The hue rotation correction term is designed to account for the
+			// non-linear behavior of hue differences in the blue region.
+			var r_t = -2.0 * Math.sqrt(n / (n + 6103515625.0))
+				* Math.sin(Math.PI / 3.0 * Math.exp(p * p / (-25.0 * Math.PI * Math.PI)));
+			n = (l_1 + l_2) * 0.5;
+			n = (n - 50.0) * (n - 50.0);
+			// Lightness.
+			var l = (l_2 - l_1) / (k_l * (1.0 + 0.015 * n / Math.sqrt(20.0 + n)));
+			// These coefficients adjust the impact of different harmonic
+			// components on the hue difference calculation.
+			var t = 1.0	+ 0.24 * Math.sin(2.0 * h_m + Math.PI * 0.5)
+					+ 0.32 * Math.sin(3.0 * h_m + 8.0 * Math.PI / 15.0)
+					- 0.17 * Math.sin(h_m + Math.PI / 3.0)
+					- 0.20 * Math.sin(4.0 * h_m + 3.0 * Math.PI / 20.0);
+			n = c_1 + c_2;
+			// Hue.
+			var h = 2.0 * Math.sqrt(c_1 * c_2) * Math.sin(h_d) / (k_h * (1.0 + 0.0075 * n * t));
+			// Chroma.
+			var c = (c_2 - c_1) / (k_c * (1.0 + 0.0225 * n));
+			// Returning the square root ensures that dE00 accurately reflects the
+			// geometric distance in color space, which can range from 0 to around 185.
+			return Math.sqrt(l * l + h * h + c * c + c * h * r_t);
+		}
     };
 },
 function(ColorUtils) {
