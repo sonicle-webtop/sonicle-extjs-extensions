@@ -26,11 +26,12 @@ Ext.define('Sonicle.form.field.tinymce.tool.BullListSelect', {
 	tooltip: 'Bullet list',
 	
 	toolIconCls: 'fas fa-list-ul',
-	defaultIconCls: 'so-tmcetoolbulllistselect-default',
+	listButtonIconCls: 'so-'+'tmcetoolbulllistselect-listbutton-icon',
+	defaultIconCls: 'so-'+'tmcetoolbulllistselect-default',
 	defaultText: 'Default',
-	circleIconCls: 'so-tmcetoolbulllistselect-circle',
+	circleIconCls: 'so-'+'tmcetoolbulllistselect-circle',
 	circleText: 'Circle',
-	squareIconCls: 'so-tmcetoolbulllistselect-square',
+	squareIconCls: 'so-'+'tmcetoolbulllistselect-square',
 	squareText: 'Square',
 	
 	listStyleMap: {
@@ -48,6 +49,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.BullListSelect', {
 				items: [
 					{
 						xtype: 'buttongroup',
+						frame: false,
 						columns: 3,
 						defaults: {
 							xtype: 'button',
@@ -63,17 +65,17 @@ Ext.define('Sonicle.form.field.tinymce.tool.BullListSelect', {
 							{
 								xtype: 'so-tmcetoolstatebutton',
 								itemId: 'default',
-								iconCls: me.defaultIconCls,
+								iconCls: me.listButtonIconCls + ' ' + me.defaultIconCls,
 								tooltip: me.defaultText
 							}, {
 								xtype: 'so-tmcetoolstatebutton',
 								itemId: 'circle',
-								iconCls: me.circleIconCls,
+								iconCls: me.listButtonIconCls + ' ' + me.circleIconCls,
 								tooltip: me.circleText
 							}, {
 								xtype: 'so-tmcetoolstatebutton',
 								itemId: 'square',
-								iconCls: me.squareIconCls,
+								iconCls: me.listButtonIconCls + ' ' + me.squareIconCls,
 								tooltip: me.squareText
 							}
 						]

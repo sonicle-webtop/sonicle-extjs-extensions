@@ -23,17 +23,18 @@ Ext.define('Sonicle.form.field.tinymce.tool.NumListSelect', {
 	tooltip: 'Numbered list',
 	
 	toolIconCls: 'fas fa-list-ol',
-	defaultIconCls: 'so-tmcetoolnumlistselect-default',
+	listButtonIconCls: 'so-'+'tmcetoolnumlistselect-listbutton-icon',
+	defaultIconCls: 'so-'+'tmcetoolnumlistselect-default',
 	defaultText: 'Default',
-	lowerAlphaIconCls: 'so-tmcetoolnumlistselect-lowerAlpha',
+	lowerAlphaIconCls: 'so-'+'tmcetoolnumlistselect-lowerAlpha',
 	lowerAlphaText: 'Lower Alpha',
-	lowerGreekIconCls: 'so-tmcetoolnumlistselect-lowerGreek',
+	lowerGreekIconCls: 'so-'+'tmcetoolnumlistselect-lowerGreek',
 	lowerGreekText: 'Lower Greek',
-	lowerRomanIconCls: 'so-tmcetoolnumlistselect-lowerRoman',
+	lowerRomanIconCls: 'so-'+'tmcetoolnumlistselect-lowerRoman',
 	lowerRomanText: 'Lower Roman',
-	upperAlphaIconCls: 'so-tmcetoolnumlistselect-upperAlpha',
+	upperAlphaIconCls: 'so-'+'tmcetoolnumlistselect-upperAlpha',
 	upperAlphaText: 'Upper Alpha',
-	upperRomanIconCls: 'so-tmcetoolnumlistselect-upperRoman',
+	upperRomanIconCls: 'so-'+'tmcetoolnumlistselect-upperRoman',
 	upperRomanText: 'Upper Roman',
 	
 	listStyleMap: {
@@ -54,6 +55,7 @@ Ext.define('Sonicle.form.field.tinymce.tool.NumListSelect', {
 				items: [
 					{
 						xtype: 'buttongroup',
+						frame: false,
 						columns: 3,
 						defaults: {
 							xtype: 'button',
@@ -69,32 +71,32 @@ Ext.define('Sonicle.form.field.tinymce.tool.NumListSelect', {
 							{
 								xtype: 'so-tmcetoolstatebutton',
 								itemId: 'default',
-								iconCls: me.defaultIconCls,
+								iconCls: me.listButtonIconCls + ' ' + me.defaultIconCls,
 								tooltip: me.defaultText
 							}, {
 								xtype: 'so-tmcetoolstatebutton',
 								itemId: 'lowerAlpha',
-								iconCls: me.lowerAlphaIconCls,
+								iconCls: me.listButtonIconCls + ' ' + me.lowerAlphaIconCls,
 								tooltip: me.lowerAlphaText
 							}, {
 								xtype: 'so-tmcetoolstatebutton',
 								itemId: 'lowerGreek',
-								iconCls: me.lowerGreekIconCls,
+								iconCls: me.listButtonIconCls + ' ' + me.lowerGreekIconCls,
 								tooltip: me.lowerGreekText
 							}, {
 								xtype: 'so-tmcetoolstatebutton',
 								itemId: 'lowerRoman',
-								iconCls: me.lowerRomanIconCls,
+								iconCls: me.listButtonIconCls + ' ' + me.lowerRomanIconCls,
 								tooltip: me.lowerRomanText
 							}, {
 								xtype: 'so-tmcetoolstatebutton',
 								itemId: 'upperAlpha',
-								iconCls: me.upperAlphaIconCls,
+								iconCls: me.listButtonIconCls + ' ' + me.upperAlphaIconCls,
 								tooltip: me.upperAlphaText
 							}, {
 								xtype: 'so-tmcetoolstatebutton',
 								itemId: 'upperRoman',
-								iconCls: me.upperRomanIconCls,
+								iconCls: me.listButtonIconCls + ' ' + me.upperRomanIconCls,
 								tooltip: me.upperRomanText
 							}
 						]
