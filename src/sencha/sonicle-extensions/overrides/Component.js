@@ -43,7 +43,7 @@ Ext.define('Sonicle.overrides.Component', {
 	findRealUi: function(pseudoUI) {
 		var me = this, map, realUI;
 		
-		if (me.isXType('button')) map = Ext.theme.ui.button;
+		if (me.isXType('button') || me.isXType('segmentedbutton')) map = Ext.theme.ui.button;
 		else if (me.isXType('panel')) map = Ext.theme.ui.panel;
 		
 		if (map) realUI = map[pseudoUI];
