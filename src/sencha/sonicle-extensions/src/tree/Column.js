@@ -37,7 +37,7 @@ Ext.define('Sonicle.tree.Column', {
             '</tpl>',
             ' role="presentation" class="{childCls} {baseIconCls} {customIconCls} ',
             '{baseIconCls}-<tpl if="leaf">leaf<tpl else><tpl if="expanded">parent-expanded<tpl else>parent</tpl></tpl> {iconCls}" ',
-            '<tpl if="icon">style="background-image:url({icon})"/><tpl else> <tpl if="checkboxStyle">style="{iconStyle}"</tpl>></div></tpl>',
+            '<tpl if="icon">style="background-image:url({icon})"/><tpl else> <tpl if="iconStyle">style="{iconStyle}"</tpl>></div></tpl>', // added iconStyle
         '</tpl>',
         '<tpl if="href">',
             '<a href="{href}" role="link" target="{hrefTarget}" class="{textCls} {childCls}">{value}</a>',
