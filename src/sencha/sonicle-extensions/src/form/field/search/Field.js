@@ -164,6 +164,8 @@ Ext.define('Sonicle.form.field.search.Field', {
 							me.querySaved = 0;
 							me.lastQuery = null; // Make sure to have always fresh data (query caching will NOT interfere)
 						}
+						
+						me.setPickerTopListButtonHidden(false);
 						// Set picker emptyText for favorites result
 						me.setPickerEmptyText(me.favoritesResultsEmptyText);
 						me.doQuery(me.allQuery, true);
@@ -523,6 +525,7 @@ Ext.define('Sonicle.form.field.search.Field', {
 	doRawQuery: function() {
 		// Resets picker emptyText back to default
 		var me = this;
+		me.setPickerTopListButtonHidden(true);
 		me.setPickerEmptyText(me.queryResultsEmptyText);
 		me.callParent(arguments);
 	},
@@ -647,9 +650,14 @@ Ext.define('Sonicle.form.field.search.Field', {
 			me.fireEvent('save', me, value, me.remapQueryObject(queryObject));
 		},
 		
+		setPickerTopListButtonHidden: function(hidden) {
+			var picker = this.getPicker();
+			if (picker) picker.setListTopButtonVisible(hidden);
+		},
+		
 		setPickerEmptyText: function(emptyText) {
 			var picker = this.getPicker();
-			if (picker) picker.emptyText = emptyText;
+			if (picker) picker.setEmptyText(emptyText);
 		},
 		
 		/**

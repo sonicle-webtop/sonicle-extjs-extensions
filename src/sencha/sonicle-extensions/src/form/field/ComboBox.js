@@ -80,6 +80,34 @@ Ext.define('Sonicle.form.field.ComboBox', {
 	 * An additional CSS class (or classes) to be added to source element.
 	 */
 	
+	/**
+	 * @cfg {Boolean} [enableListTopButton=false]
+	 * Set to `true` to enable displaying of a special button-item (with text and/or icon) in top of the list.
+	 */
+	
+	/**
+	 * @cfg {String} [listTopButtonExtraCls]
+	 * An additional CSS class (or classes) to be added to the button element.
+	 */
+	
+	/**
+	 * @cfg {String} [listTopButtonIconCls]
+	 * The icon CSS Class to apply to button icon element.
+	 */
+	
+	/**
+	 * @cfg {String} [listTopButtonText]
+	 * The text to apply to top button.
+	 */
+	
+	/**
+	 * @cfg {Function/String} listTopButtonHandler
+	 * A function called when the button is clicked.
+	 * @param {Sonicle.view.BoundList} list This list.
+	 * @param {Ext.event.Event} e The click event.
+	 * @param {HTMLElement} el The item's element.
+	 */
+	
 	componentCls: 'so-'+'combo',
 	swatchWrapCls: 'so-'+'combo-swatch-wrap',
 	swatchCls: 'so-'+'combo-swatch',
@@ -143,7 +171,12 @@ Ext.define('Sonicle.form.field.ComboBox', {
 				sourceField: me.sourceField,
 				getSource: me.getSource,
 				groupCls: me.groupCls,
-				sourceCls: me.sourceCls
+				sourceCls: me.sourceCls,
+				enableListTopButton: me.enableListTopButton,
+				listTopButtonExtraCls: me.listTopButtonExtraCls,
+				listTopButtonIconCls: me.listTopButtonIconCls,
+				listTopButtonText: me.listTopButtonText,
+				listTopButtonHandler: me.listTopButtonHandler
 			};
 		
 		if (me.store && !Ext.isEmpty(me.store.getGroupField())) {

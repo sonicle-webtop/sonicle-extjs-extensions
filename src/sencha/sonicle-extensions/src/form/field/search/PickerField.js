@@ -3,6 +3,7 @@
  * Copyright (C) 2019 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
+ * @deprecated
  */
 Ext.define('Sonicle.form.field.search.PickerField', {
 	extend: 'Ext.form.field.Picker',

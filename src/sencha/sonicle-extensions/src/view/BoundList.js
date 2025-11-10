@@ -75,6 +75,43 @@ Ext.define('Sonicle.view.BoundList', {
 	enableButton: false,
 	
 	/**
+	 * @cfg {Boolean} [enableListTopButton=false]
+	 * Set to `true` to enable displaying of a special button-item (with text and/or icon) in top of the list.
+	 */
+	enableListTopButton: false,
+	
+	/**
+	 * @cfg {Boolean} [listTopButtonHidden=false]
+	 * Controls the visibility of the top-button.
+	 */
+	listTopButtonHidden: false,
+	
+	/**
+	 * @cfg {String} [listTopButtonExtraCls]
+	 * An additional CSS class (or classes) to be added to the button element.
+	 */
+	
+	/**
+	 * @cfg {String} [listTopButtonIconCls]
+	 * The icon CSS Class to apply to button icon element.
+	 */
+	listTopButtonIconCls: undefined,
+	
+	/**
+	 * @cfg {String} [listTopButtonText]
+	 * The text to apply to top button.
+	 */
+	listTopButtonText: 'Top static-item here',
+	
+	/**
+	 * @cfg {Function/String} listTopButtonHandler
+	 * A function called when the button is clicked.
+	 * @param {Sonicle.view.BoundList} list This list.
+	 * @param {Ext.event.Event} e The click event.
+	 * @param {HTMLElement} el The item's element.
+	 */
+	
+	/**
 	 * @cfg {String} [buttonIconCls]
 	 * The icon Class to use with button.
 	 */
@@ -131,6 +168,7 @@ Ext.define('Sonicle.view.BoundList', {
 	 * An additional CSS class (or classes) to be added to source element.
 	 */
 	
+	listTopButtonCls: 'so-'+'boundlist-listtopbutton',
 	listItemCls: 'so-'+'boundlist-item',
 	groupListItemCls: 'so-'+'boundlist-groupitem',
 	swatchListItemCls: 'so-'+'boundlist-swatchitem',
@@ -140,6 +178,39 @@ Ext.define('Sonicle.view.BoundList', {
 	itemRightDockedCls: 'so-'+'boundlist-right',
 	itemSwatchCls: 'so-'+'boundlist-swatch',
 	
+	/**
+	 * @override Check me during ExtJs upgrade!
+	 */
+	/* eslint-disable indent, max-len */
+	renderTpl: [
+		'<div id="{id}-listWrap" data-ref="listWrap"',
+				' class="{baseCls}-list-ct ', Ext.dom.Element.unselectableCls, '">',
+		'<tpl if="enableListTopButton">', // <-- added
+			'<div id="{id}-listTopBtnEl" data-ref="listTopBtnEl" class="{listTopButtonWrapCls}" style="{listTopButtonStyle}">', // <-- added
+			'<tpl if="listTopButtonIconCls">', // <-- added
+				'<i class="{listTopButtonCls}-icon {listTopButtonIconCls}"></i>', // <-- added
+			'</tpl>', // <-- added
+				'<span class="{listTopButtonCls}-text">{listTopButtonText}</span>', // <-- added
+			'</div>', // <-- added
+		'</tpl>', // <-- added
+			'<ul id="{id}-listEl" data-ref="listEl" class="', Ext.baseCSSPrefix, 'list-plain"',
+				'<tpl foreach="ariaAttributes"> {$}="{.}"</tpl>',
+			'>',
+			'</ul>',
+		'</div>',
+		'{%',
+			'var pagingToolbar=values.$comp.pagingToolbar;',
+			'if (pagingToolbar) {',
+				'Ext.DomHelper.generateMarkup(pagingToolbar.getRenderTree(), out);',
+			'}',
+		'%}',
+		{
+			disableFormats: true
+		}
+	],
+	/* eslint-enable indent, max-len */
+	childEls: ['listWrap', 'listTopBtnEl', 'listEl'],
+	
 	initComponent: function() {
 		var me = this;
 		me.callParent(arguments);
@@ -147,6 +218,33 @@ Ext.define('Sonicle.view.BoundList', {
 		// This allows to use the original class within the new group-item 
 		// and so make it look similar (across themes) to the other list-items.
 		me.itemSelector = '.' + me.listItemCls;
+	},
+	
+	initRenderData: function() {
+		var me = this;
+		return Ext.apply(me.callParent(), {
+			enableListTopButton: me.enableListTopButton,
+			listTopButtonCls: me.listTopButtonCls,
+			listTopButtonWrapCls: Sonicle.String.join(' ', me.itemCls, me.listTopButtonCls, me.listTopButtonExtraCls),
+			listTopButtonStyle: me.listTopButtonHidden === true ? 'display:none;' : '',
+			listTopButtonIconCls: me.listTopButtonIconCls,
+			listTopButtonText: Ext.htmlEncode(me.listTopButtonText)
+		});
+	},
+	
+	setListTopButtonVisible: function(visible) {
+		var me = this;
+		if (me.rendered && me.listTopBtnEl) {
+			me.listTopBtnEl.setVisibilityMode(Ext.dom.Element.DISPLAY)[visible ? 'show' : 'hide']();
+		}
+	},
+	
+	setListTopButtonText: function(text) {
+		var me = this;
+		text = text == null ? '' : String(text);
+		if (me.rendered && me.listTopBtnEl) {
+			me.listTopBtnEl.down('.' + me.listTopButtonCls + '-text').setHtml(Ext.htmlEncode(text) || '\x26#160;');
+		}
 	},
 	
 	saveFocusState: function() {
@@ -183,11 +281,22 @@ Ext.define('Sonicle.view.BoundList', {
 		}
 	},
 	
+	onContainerMouseDown: function(e) {
+		var me = this;
+		if (e.getTarget('.' + me.listTopButtonCls)) {
+			if (me.listTopButtonHandler) {
+				Ext.callback(me.listTopButtonHandler, me.scope, [me, e], 0, me);
+			}
+			return false;
+		}
+	},
+	
 	/**
 	 * @override Check me during ExtJs upgrade!
 	 */
 	generateTpl: function() {
 		var me = this,
+			SoS = Sonicle.String,
 			hasGroup = !Ext.isEmpty(me.groupField),
 			hasIcon = !Ext.isEmpty(me.iconField),
 			hasColor = !Ext.isEmpty(me.colorField),
@@ -212,11 +321,10 @@ Ext.define('Sonicle.view.BoundList', {
 			valueTplGetterFn = function(getFn, field, defValue) {
 				if (Ext.isFunction(getFn)) {
 					return function(values) {
-						return Sonicle.String.deflt(getFn.apply(me, [values, values[field]]), defValue);
+						return SoS.deflt(getFn.apply(me, [values, values[field]]), defValue);
 					};
 				} else if (!Ext.isEmpty(field)) {
 					return function(values) {
-						var SoS = Sonicle.String;
 						return SoS.deflt(SoS.htmlEncode(values[field]), defValue);
 					};
 				} else {
@@ -231,7 +339,7 @@ Ext.define('Sonicle.view.BoundList', {
 			me.tpl = new Ext.XTemplate(
 				'<tpl for=".">',
 					'<tpl if="this.grouping && this.groupingThreshold && this.showGroupItem(' + me.groupField + ')">',
-						'<li class="' + me.itemCls + ' ' + me.groupListItemCls + '"> ' + me.generateGroupInnerTpl(me.groupField) + '</li>',
+						'<li class="' + me.itemCls + ' ' + me.groupListItemCls + '">' + me.generateGroupInnerTpl(me.groupField) + '</li>',
 					'</tpl>',
 					'<li role="option" unselectable="on" class="' + liCls + '">' + me.generateInnerTpl(me.displayField) + '</li>',
 				'</tpl>',
