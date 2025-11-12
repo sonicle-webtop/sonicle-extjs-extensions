@@ -10,7 +10,10 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
 
     return {
         singleton: true,
-		uses: ['Sonicle.Number'],
+		uses: [
+			'Sonicle.String',
+			'Sonicle.Number'
+		],
 		
         constructor: function () {
             ColorUtils = this;
@@ -43,6 +46,15 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
                 el.applyStyles(bgStyle);
             }
         },
+		
+		/**
+		 * Make sure that passed color has trailing `#` char.
+		 * @param {String} hexColor
+		 * @returns {String}
+		 */
+		hexColor: function(hexColor) {
+			return Sonicle.String.prepend(hexColor, '#', true);
+		},
 
         // parse and format functions under objects that match supported format config
         // values of the color picker; parse() methods recieve the supplied color value

@@ -11,8 +11,15 @@ Ext.define('Sonicle.form.field.Palette', {
 	alias: ['widget.sopalettefield'],
 	uses: [
 		'Sonicle.String',
+		'Sonicle.ColorUtils',
 		'Sonicle.picker.Color'
 	],
+	
+	componentCls: 'so-'+'palettefield',
+	editable: false,
+	regex: /^[\#]?[0-9A-F]{6}$/i,
+	matchFieldWidth: false,
+	invalidText: 'Colors must be in hex format (like [#]FFFFFF)',
 	
 	/**
 	 * @cfg {Boolean} useHash
@@ -30,15 +37,10 @@ Ext.define('Sonicle.form.field.Palette', {
 	 * An array of 6-digit color hex code strings (WITHOUT the # symbol and UPPERCASE).
 	 */
 	
-	editable: false,
-	regex: /^[\#]?[0-9A-F]{6}$/i,
-	invalidText: "Colors must be in hex format (like [#]FFFFFF)",
-	matchFieldWidth: false,
-	
 	afterRender: function() {
 		var me = this;
 		me.callParent();
-		me.updateColor(me.value);
+		me.refreshColor(me.value);
 	},
 	
 	getValue: function() {
@@ -53,24 +55,7 @@ Ext.define('Sonicle.form.field.Palette', {
 			SoS = Sonicle.String,
 			value = me.useHash ? SoS.prepend(color, '#', true) : SoS.removeStart(color, '#');
 		me.callParent([value]);
-		me.updateColor(value);
-	},
-	
-	updateColor: function(color) {
-		var SoS = Sonicle.String,
-				el = this.inputEl,
-				style = this.hideTrigger ? {cursor: 'pointer'} : {};
-		if (el) {
-			if (!Ext.isEmpty(color)) {
-				Ext.apply(style, {
-					color: SoS.prepend(color, '#', true),
-					backgroundColor: SoS.prepend(color, '#', true),
-					backgroundImage: 'none',
-					boxShadow: '0px 0px 0px 1px white inset'
-				});
-			}
-			el.setStyle(style);
-		}
+		me.refreshColor(value);
 	},
 	
 	createPicker: function() {
@@ -91,11 +76,33 @@ Ext.define('Sonicle.form.field.Palette', {
 	},
 			
 	onExpand: function() {
-		var value = this.getValue();
-		if (value) this.picker.select(value, true);
+		this.picker.select(this.getValue(), true);
 	},
 	
 	onCollapse: function() {
 		this.setValue(this.picker.getValue());
+	},
+	
+	privates: {
+		refreshColor: function(color) {
+			var SoCU = Sonicle.ColorUtils,
+				el = this.inputEl,
+				style = this.hideTrigger ? {cursor: 'pointer'} : {};
+
+			if (el) {
+				var hexColor, bgImage, boxShadow;
+				if (!Ext.isEmpty(color)) {
+					hexColor = SoCU.hexColor(color);
+					bgImage = 'none';
+					boxShadow = '0px 0px 0px 1px white inset';
+				}
+				el.setStyle(Ext.apply(style, {
+					color: hexColor,
+					backgroundColor: hexColor,
+					backgroundImage: bgImage,
+					boxShadow: boxShadow
+				}));
+			}
+		}
 	}
 });
