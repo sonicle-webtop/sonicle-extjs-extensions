@@ -46,15 +46,6 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
                 el.applyStyles(bgStyle);
             }
         },
-		
-		/**
-		 * Make sure that passed color has trailing `#` char.
-		 * @param {String} hexColor
-		 * @returns {String}
-		 */
-		hexColor: function(hexColor) {
-			return Sonicle.String.prepend(hexColor, '#', true);
-		},
 
         // parse and format functions under objects that match supported format config
         // values of the color picker; parse() methods recieve the supplied color value
@@ -82,6 +73,15 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
                 return hex;
             }
         },
+		
+		/**
+		 * Make sure that passed color has trailing `#` char.
+		 * @param {String} hexColor
+		 * @returns {String}
+		 */
+		ensureHexFormat: function(hexColor) {
+			return Sonicle.String.prepend(hexColor, '#', true);
+		},
 		
 		/* eslint-disable no-useless-escape */
         hexRe: /^#?(([0-9a-f]{8})|((?:[0-9a-f]{3}){1,2}))$/i,
@@ -507,22 +507,22 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
 		 *  - brightness: computes HSV object and find the new Value using a mapping table.
 		 *  - fixed: evaluates luminance against a threshold value and return a fixed dark (#000000) or ligth color (#FFFFFF).
 		 * @param {String} bgColor A color value.
-		 * @param {shade|brightness|fixed} mode The evaluation mode.
+		 * @param {shade|brightness|fixed} [method] The evaluation method. Defaults to `fixed`.
 		 * @param {Object} opts An object containing configuration options:
 		 * @param {Number} [opts.luminance] The luminance threshold value. Defaults to 0.64. (shade+fixed)
 		 * @param {Number} [opts.darkColor] The dark color value. Defaults to #000000. (fixed)
 		 * @param {Number} [opts.lightColor] The light color value. Defaults to #FFFFFF. (fixed)
 		 */
-		bestForeColor: function(bgColor, mode, opts) {
+		bestForeColor: function(bgColor, method, opts) {
 			opts = opts || {};
 			var ME = Sonicle.ColorUtils;
-			if ('shade' === mode) {
+			if ('shade' === method) {
 				// Computes the relative-luminance of the color and then shade the color using a fixed percentage
 				var lum = ME.luminance(bgColor),
 					thres = Sonicle.Number.between(opts.luminance, 0, 1) ? opts.luminance : 0.64;
 				return ME.shade(bgColor, (lum > thres) ? -0.5 : 0.7);
 				
-			} else if ('brightness' === mode) {
+			} else if ('brightness' === method) {
 				// Computes HSV object and find the new Value using a mapping table
 				// https://stackoverflow.com/questions/635022/calculating-contrasting-colours-in-javascript
 				var cobj = ME.parseColor(bgColor), v;
@@ -542,23 +542,67 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
 		 * https://stackoverflow.com/questions/12228548/finding-equivalent-color-with-opacity
 		 * @param {String/Object} base Base color
 		 * @param {String/Object} fore Foreground color with aplha
-		 * @returns {String} Hex
+		 * @returns {String} Color Hex string
 		 */
 		blendColors: function(base, fore) {
 			var me = this,
 				cobjB = me.parseColor(base),
 				cobjF = me.parseColor(fore),
-				rgb;
-			
-			rgb = {
-				r: parseInt(cobjB.r + (cobjF.r - cobjB.r) * cobjF.a),
-				g: parseInt(cobjB.g + (cobjF.g - cobjB.g) * cobjF.a),
-				b: parseInt(cobjB.b + (cobjF.b - cobjB.b) * cobjF.a)
-			};
+				rgb = {
+					r: parseInt(cobjB.r + (cobjF.r - cobjB.r) * cobjF.a),
+					g: parseInt(cobjB.g + (cobjF.g - cobjB.g) * cobjF.a),
+					b: parseInt(cobjB.b + (cobjF.b - cobjB.b) * cobjF.a)
+				};
 			return me.rgb2hex(rgb, true);
 		},
 		
 		/**
+		 * Finds the closest color, among those in the list, to the original one passed as parameter.
+		 * @param {String/Object} color The original color
+		 * @param {String[]/Object[]} list Lists of colors to evaluate
+		 * @param {euclideanDistance|ciede2000} [method] The method to use in evaluation. Defaults to 'euclideanDistance'.
+		 * @param {Object} [opts] An object containing configuration options:
+		 * @param {Number} [opts.euclideanDistanceThres] A threshold value for euclideanDistance. See https://nesin.io/blog/find-closest-color-javascript
+		 * @param {Number} [opts.ciede2000Thres] A threshold value for ciede2000 method. See https://github.com/michel-leonard/ciede2000-color-matching
+		 * @returns {String}
+		 */
+		similarColor: function(color, list, method, opts) {
+			opts = opts || {};
+			list = Ext.Array.from(list);
+			if (!Ext.isString(method)) method = 'euclideanDistance';
+			if (!Ext.isNumber(opts.euclideanDistanceThres)) opts.euclideanDistanceThres = 32;
+			if (!Ext.isNumber(opts.ciede2000Thres)) opts.ciede2000Thres = 2;
+			var me = this,
+				cobj = me.parseColor(color),
+				euclideanDistance, ciede2000,
+				similarColor;
+			
+			if (cobj) {
+				Ext.iterate(list, function(lcolor) {
+					var lcobj = me.parseColor(lcolor), dist;
+					if (lcobj) {
+						if (method === 'ciede2000') {
+							var delta = me.ciede2000(lcobj.r, lcobj.g, lcobj.b, cobj.r, cobj.g, cobj.b);
+							if ((delta < opts.ciede2000Thres) && (delta < ciede2000 || ciede2000 === undefined)) {
+								ciede2000 = delta;
+								similarColor = lcolor;
+							}
+							
+						} else {
+							var dist = me.euclideanDistance(lcobj.r, lcobj.g, lcobj.b, cobj.r, cobj.g, cobj.b);
+							if ((dist < opts.euclideanDistanceThres) && (dist < euclideanDistance || euclideanDistance === undefined)) {
+								euclideanDistance = dist;
+								similarColor = lcolor;
+							}
+						}
+					}
+				});
+			}
+			return similarColor;
+		},
+		
+		/**
+		 * @deprecated use similarColor
 		 * Finds the closest color looking into passed list of colors.
 		 * https://nesin.io/blog/find-closest-color-javascript
 		 * @param {String/Object} color Base color
@@ -584,41 +628,6 @@ Ext.define('Sonicle.ColorUtils', function(ColorUtils) {
 				});
 			}	
 			return closestColor;
-		},
-		
-		similarColor: function(color, list, opts) {
-			opts = opts || {};
-			list = Ext.Array.from(list);
-			if (!Ext.isString(opts.method)) opts.method = 'euclideanDistance';
-			if (!Ext.isNumber(opts.euclideanDistanceThres)) opts.euclideanDistanceThres = 32;
-			if (!Ext.isNumber(opts.ciede2000Thres)) opts.ciede2000Thres = 2;
-			var me = this,
-				cobj = me.parseColor(color),
-				euclideanDistance, ciede2000,
-				similarColor;
-			
-			if (cobj) {
-				Ext.iterate(list, function(lcolor) {
-					var lcobj = me.parseColor(lcolor), dist;
-					if (lcobj) {
-						if (opts.method === 'ciede2000') {
-							var delta = me.ciede2000(lcobj.r, lcobj.g, lcobj.b, cobj.r, cobj.g, cobj.b);
-							if ((delta < opts.ciede2000Thres) && (delta < ciede2000 || ciede2000 === undefined)) {
-								ciede2000 = delta;
-								similarColor = lcolor;
-							}
-							
-						} else {
-							var dist = me.euclideanDistance(lcobj.r, lcobj.g, lcobj.b, cobj.r, cobj.g, cobj.b);
-							if ((dist < opts.euclideanDistanceThres) && (dist < euclideanDistance || euclideanDistance === undefined)) {
-								euclideanDistance = dist;
-								similarColor = lcolor;
-							}
-						}
-					}
-				});
-			}
-			return similarColor;
 		},
 		
 		generateColorSwatch: function(colorize, color, opts) {

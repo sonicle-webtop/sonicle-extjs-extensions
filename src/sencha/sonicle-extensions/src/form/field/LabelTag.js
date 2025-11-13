@@ -7,7 +7,23 @@
 Ext.define('Sonicle.form.field.LabelTag', {
 	extend: 'Sonicle.form.field.Tag',
 	alias: 'widget.solabeltagfield',
+	requires: [
+		'Sonicle.Utils'
+	],
 	
+	/**
+	 * @cfg {hex|cls} [listColorMode]
+	 * Controls how to define the icon:
+	 *  - hex: {@link colorField} value returns a HEX color string
+	 *  - cls: {@link colorField} value returns a CSS class
+	 */
+	listColorMode: 'hex',
+	
+	/**
+	 * @cfg {String} [listItemIconCls]
+	 * The icon CSS Class to apply to each picker's list item by specifying the {@link #getIcon} method.
+	 * This is only used if {@link #iconField} and {@link #getIcon} are not specified.
+	 */
 	listItemIconCls: 'fas fa-tag',
 	
 	/**
@@ -16,9 +32,10 @@ Ext.define('Sonicle.form.field.LabelTag', {
 	 */
 	initListConfig: function() {
 		var me = this;
-		return Ext.apply(me.callParent() || {}, {
+		return Sonicle.Utils.applyIfDefined(me.callParent() || {}, {
 			colorize: 'icon',
-			getIcon: function() {
+			colorMode: me.listColorMode,
+			getIcon: (Ext.isString(me.iconField) || Ext.isFunction(me.getIcon)) ? undefined : function() {
 				return me.listItemIconCls;
 			}
 		});

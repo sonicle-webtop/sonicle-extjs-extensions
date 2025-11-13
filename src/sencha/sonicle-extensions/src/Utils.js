@@ -356,7 +356,8 @@ Ext.define('Sonicle.Utils', {
 			};
 		} else if (!Ext.isEmpty(fieldName)) {
 			return function(values) {
-				return Sonicle.Object.coalesce(values[fieldName], fallbackValue);
+				var value = values[fieldName];
+				return Sonicle.Object.coalesce(Ext.isString(value) ? Sonicle.String.htmlEncode(value) : value, fallbackValue);
 			};
 		} else {
 			return function(values) {

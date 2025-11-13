@@ -85,7 +85,7 @@ Ext.define('Sonicle.form.field.Tag', {
 	
 	/**
 	 * @cfg {Function} [getIcon]
-	 * A function which returns the value of icon.
+	 * A function which returns the value of icon instead of using the field above.
 	 * @param {Object} values An Object with item fields.
 	 * @param {Mixed} value The value sustained by {@link #iconField}.
 	 */
@@ -103,7 +103,7 @@ Ext.define('Sonicle.form.field.Tag', {
 	
 	/**
 	 * @cfg {Function} [getSource]
-	 * A function which returns the value of source.
+	 * A function which returns the value of source instead of using the field above.
 	 * @param {Object} values An Object with item fields.
 	 * @param {Mixed} value The value sustained by {@link #sourceField}.
 	 */
@@ -267,7 +267,8 @@ Ext.define('Sonicle.form.field.Tag', {
 			iconField: me.iconField,
 			getIcon: me.getIcon,
 			colorField: me.colorField,
-			sourceField: me.sourceField
+			sourceField: me.sourceField,
+			getSource: me.getSource
 		});
 	},
 	

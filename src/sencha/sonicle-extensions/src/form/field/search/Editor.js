@@ -47,6 +47,7 @@ Ext.define('Sonicle.form.field.search.Editor', {
 	 * @param {String} mapping The keyword name to use (instead of above name) when producing the conditionArray in result.
 	 * @param {string|integer|number|boolean|date|time|combo|tag} type Controls the type of field derived class used to manage values.
 	 * @param {String} [boolKeyword] Keyword to be associated to boolean field, instead of field name (eg. `has` or `is` verbs).
+	 * @param {String} [tagUsagePlaceholder] Name to use as placeholder in usage text for tag fields. Defaults to `tag`.
 	 * @param {top|left} [labelAlign=top] Controls the position and alignment of the {@link Ext.form.field.Base#fieldLabel}.
 	 * @param {String} [label] The label for the field.
 	 * @param {Boolean} [textSink] `true` to use this field as destination field for alone text portions in query.
@@ -562,7 +563,8 @@ Ext.define('Sonicle.form.field.search.Editor', {
 			} else if (field.type === 'combo') {
 				value = '&lt;ID&gt;';
 			}  else if (field.type === 'tag') {
-				value = '&lt;tag1&gt;,...,&lt;tagN&gt;';
+				var uname = Sonicle.String.coalesce(field.tagUsagePlaceholder, 'tag');
+				value = '&lt;' + uname + '1&gt;,...,&lt;' + uname + 'N&gt;';
 			}
 			return Ext.String.format(this.usageText, kw, value);
 		}

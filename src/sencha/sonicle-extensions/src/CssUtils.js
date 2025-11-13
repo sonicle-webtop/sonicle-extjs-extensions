@@ -7,6 +7,9 @@
  */
 Ext.define('Sonicle.CssUtils', {
     singleton: true,
+	uses: [
+		'Ext.util.CSS'
+	],
 	
 	/**
 	 * Mapping between a Font Name and its Font Family.
@@ -127,10 +130,30 @@ Ext.define('Sonicle.CssUtils', {
 		}
 	},
 	
+	/**
+	 * Sets a CSS :root variable value.
+	 * @param {String} name The name of the variable to set. 
+	 * @param {Mixed} value The value to set.
+	 */
 	setVariable: function(name, value) {
 		var root = document.querySelector(':root');
 		if (root) {
 			root.style.setProperty(name, value);
 		}
+	},
+	
+	/**
+	 * Returns the value of a CSS property for a specific CSS selector.
+	 * @param {String/String[]} selector The CSS selector or an array of selectors to try. The first selector that is found is returned.
+	 * @param {String} property The CSS property name whose value needs to be returned.
+	 * @param {Opject} [opts] Object containing computation options:
+	 * @param {Opject} [opts.refreshCache] Set to `true` to refresh cache before getting Rule.
+	 * @returns {String|undefined} The CSS property value.
+	 */
+	getRule: function(selector, property, opts) {
+		opts = opts || {};
+		if (!Ext.isBoolean(opts.refreshCache)) opts.refreshCache = false;
+		var rule = Ext.util.CSS.getRule(selector, opts.refreshCache);
+		return rule ? rule.style[property] : undefined;
 	}
 });

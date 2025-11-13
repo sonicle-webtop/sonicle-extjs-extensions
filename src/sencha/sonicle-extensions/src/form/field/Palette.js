@@ -92,7 +92,7 @@ Ext.define('Sonicle.form.field.Palette', {
 			if (el) {
 				var hexColor, bgImage, boxShadow;
 				if (!Ext.isEmpty(color)) {
-					hexColor = SoCU.hexColor(color);
+					hexColor = SoCU.ensureHexFormat(color);
 					bgImage = 'none';
 					boxShadow = '0px 0px 0px 1px white inset';
 				}

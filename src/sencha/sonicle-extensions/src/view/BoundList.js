@@ -46,15 +46,30 @@ Ext.define('Sonicle.view.BoundList', {
 	
 	/**
 	 * @cfg {Function} [getIcon]
-	 * A function which returns the icon info in the view (eg. useful for computing title dynamically).
+	 * A function which returns the icon data in the view (eg. useful for computing icon dynamically).
 	 * @param {Object} values An Object with item fields.
 	 * @param {Mixed} value The value sustained by {@link #iconField}.
 	 */
 	
 	/**
 	 * @cfg {String} [colorField]
-	 * The field from the store to use as swatch fill color.
+	 * The field from the store to use as fill color or color CSS class.
 	 */
+	
+	/**
+	 * @cfg {Function} [getColor]
+	 * A function which returns the color data in the view (eg. useful for computing icon dynamically).
+	 * @param {Object} values An Object with item fields.
+	 * @param {Mixed} value The value sustained by {@link colorField}.
+	 */
+	
+	/**
+	 * @cfg {hex|cls} [colorMode]
+	 * Controls how to define the icon:
+	 *  - hex: {@link colorField} value returns a HEX color string
+	 *  - cls: {@link colorField} value returns a CSS class
+	 */
+	colorMode: 'hex',
 	
 	/**
 	 * @cfg {String} [sourceField]
@@ -63,7 +78,7 @@ Ext.define('Sonicle.view.BoundList', {
 	
 	/**
 	 * @cfg {Function} [getSource]
-	 * A function which returns the source/origin info in the view.
+	 * A function which returns the source/origin data in the view.
 	 * @param {Object} values An Object with item fields.
 	 * @param {Mixed} value The value sustained by {@link #sourceField}.
 	 */
@@ -148,7 +163,7 @@ Ext.define('Sonicle.view.BoundList', {
 	
 	/**
 	 * @cfg {swatch|icon|text} colorize [colorize=swatch]
-	 * Specify the target element on which apply the color: the marker itself or display text.
+	 * Specify the target element on which apply the color: the marker itself, the icon or display text.
 	 */
 	colorize: 'swatch',
 	
@@ -296,10 +311,10 @@ Ext.define('Sonicle.view.BoundList', {
 	 */
 	generateTpl: function() {
 		var me = this,
-			SoS = Sonicle.String,
-			hasGroup = !Ext.isEmpty(me.groupField),
-			hasIcon = !Ext.isEmpty(me.iconField),
-			hasColor = !Ext.isEmpty(me.colorField),
+			SoU = Sonicle.Utils,
+			hasGroup = !Ext.isEmpty(me.groupField) || Ext.isFunction(me.getGroup),
+			hasIcon = !Ext.isEmpty(me.iconField) || Ext.isFunction(me.getIcon),
+			hasColor = !Ext.isEmpty(me.colorField) || Ext.isFunction(me.getColor),
 			showButtonTplGetterFn = function(getFn) {
 				if (Ext.isFunction(getFn)) {
 					return function(values) {
@@ -318,19 +333,9 @@ Ext.define('Sonicle.view.BoundList', {
 					return function() { return ''; };
 				}
 			},
-			valueTplGetterFn = function(getFn, field, defValue) {
-				if (Ext.isFunction(getFn)) {
-					return function(values) {
-						return SoS.deflt(getFn.apply(me, [values, values[field]]), defValue);
-					};
-				} else if (!Ext.isEmpty(field)) {
-					return function(values) {
-						return SoS.deflt(SoS.htmlEncode(values[field]), defValue);
-					};
-				} else {
-					return Ext.emptyFn;
-				}
-			},
+			iconValue = SoU.tplValueGetterFn(me.iconField, {fn: me.getIcon, scope: me}),
+			sourceValue = SoU.tplValueGetterFn(me.sourceField, {fn: me.getSource, scope: me}, '&nbsp;'),
+			groupValue = SoU.tplValueGetterFn(me.groupField, {fn: me.getGroup, scope: me}, '&nbsp;'),
 			liCls;
 		
 		if (hasGroup || hasIcon || hasColor) { // Setup modified template supporting new markup
@@ -357,17 +362,20 @@ Ext.define('Sonicle.view.BoundList', {
 							return false;
 						}
 					},
+					//TODO: support getColor here
 					generateSwatchColorStyles: function(values, colorField) {
 						return !Ext.isEmpty(colorField) ? Sonicle.view.BoundList.generateColorStyles('swatch', values[colorField]) : '';
 					},
+					//TODO: support getColor here
 					generateDisplayColorStyles: function(values, colorField) {
 						return !Ext.isEmpty(colorField) ? Sonicle.view.BoundList.generateColorStyles('text', values[colorField]) : '';
 					},
 					showButton: showButtonTplGetterFn(me.shouldShowButton),
 					buttonTipAttr: tooltipAttrTplGetterFn(me.getButtonTooltip),
-					iconValue: valueTplGetterFn(me.getIcon, me.iconField),
-					sourceValue: valueTplGetterFn(me.getSource, me.sourceField, '&nbsp;'),
-					groupValue: valueTplGetterFn(me.getGroup, me.groupField, '&nbsp;')
+					iconValue: iconValue,
+					sourceValue: sourceValue,
+					groupValue: groupValue,
+					colorValue: SoU.tplValueGetterFn(me.colorField, {fn: me.getColor, scope: me}, '')
 				}
 			);
 			
@@ -381,9 +389,9 @@ Ext.define('Sonicle.view.BoundList', {
 				{
 					showButton: showButtonTplGetterFn(me.shouldShowButton),
 					buttonTipAttr: tooltipAttrTplGetterFn(me.getButtonTooltip),
-					iconValue: valueTplGetterFn(me.getIcon, me.iconField),
-					sourceValue: valueTplGetterFn(me.getSource, me.sourceField, '&nbsp;'),
-					groupValue: valueTplGetterFn(me.getGroup, me.groupField, '&nbsp;')
+					iconValue: iconValue,
+					sourceValue: sourceValue,
+					groupValue: groupValue
 				}
 			);
 		}		
@@ -396,28 +404,30 @@ Ext.define('Sonicle.view.BoundList', {
 	generateInnerTpl: function(displayField) {
 		var me = this,
 			iconMode = me.iconMode,
+			colorModeIsCls = me.colorMode === 'cls',
 			origInnerTpl = me.getInnerTpl(displayField),
 			hasIcon = !Ext.isEmpty(me.iconField) || Ext.isFunction(me.getIcon),
-			hasColor = !Ext.isEmpty(me.colorField),
+			hasColor = !Ext.isEmpty(me.colorField) || Ext.isFunction(me.getColor),
 			hasSource = !Ext.isEmpty(me.sourceField) || Ext.isFunction(me.getSource),
 			useButton = me.enableButton,
 			floating = hasSource || useButton,
 			colorize = me.colorize,
 			colorizeSwatch = (colorize === 'swatch'),
-			geomSwatchCls, swatchStyle, iconStyle, displayStyle, icon, source;
+			geomSwatchCls, swatchStyle, iconStyle, displayStyle, icon, source, colorCls;
 		
 		if (hasIcon || hasColor || hasSource || useButton) { // Return modified innerTpl to support new features
 			if (hasIcon && hasColor && colorizeSwatch) hasColor = false;
 			geomSwatchCls = me.itemSwatchCls + '-' + me.swatchGeometry;
-			swatchStyle = (hasColor && colorizeSwatch) ? '{[this.generateSwatchColorStyles(values, "' + me.colorField + '")]}' : '';
-			displayStyle = (hasColor && colorize === 'text') ? '{[this.generateDisplayColorStyles(values, "' + me.colorField + '")]}' : '';
-			iconStyle = (hasColor && colorize === 'icon') ? '{[this.generateDisplayColorStyles(values, "' + me.colorField + '")]}' : '';
+			swatchStyle = (hasColor && !colorModeIsCls && colorizeSwatch) ? '{[this.generateSwatchColorStyles(values, "' + me.colorField + '")]}' : '';
+			displayStyle = (hasColor && !colorModeIsCls && colorize === 'text') ? '{[this.generateDisplayColorStyles(values, "' + me.colorField + '")]}' : '';
+			iconStyle = (hasColor && !colorModeIsCls && colorize === 'icon') ? '{[this.generateDisplayColorStyles(values, "' + me.colorField + '")]}' : '';
+			colorCls = (hasColor && colorModeIsCls) ? '{[this.colorValue(values)]}' : '';
 			icon = '{[this.iconValue(values)]}',
 			source = '{[this.sourceValue(values)]}';
 			
 			return (floating ? '<div class="so-boundlist-floating">' : '')
 				+ (hasIcon ? '<div ' : '')
-				+ (hasIcon && ('cls' === iconMode) ? 'class="' + me.itemIconCls + ' ' + icon + '"' : '')
+				+ (hasIcon && ('cls' === iconMode) ? 'class="' + me.itemIconCls + ' ' + colorCls + ' ' + icon + '"' : '')
 				+ (hasIcon && ('src' === iconMode) ? 'class="' + me.itemIconCls + ' ' + me.itemIconCls + '-bg" style="background-image:url(' + icon + ');"' : '')
 				+ (hasIcon ? ' style="' + iconStyle + '"></div>' : '')
 				+ (hasColor && colorizeSwatch ? '<div class="' + me.itemSwatchCls + ' ' + geomSwatchCls + '" style="' + swatchStyle + '"></div>' : '')
