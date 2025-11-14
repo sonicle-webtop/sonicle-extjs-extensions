@@ -9,6 +9,7 @@
  */
 Ext.define('Sonicle.overrides.form.field.Base', {
 	override: 'Ext.form.field.Base',
+	mixins: ['Sonicle.form.Labelable'],
 	
 	publishValue: function() {
 		var me = this;
@@ -17,5 +18,13 @@ Ext.define('Sonicle.overrides.form.field.Base', {
 		} else {
 			me.callParent();
 		}
+	},
+	
+	/**
+	 * Override original {@link Ext.form.FieldContainer#getLabelableRenderData}
+	 *  - Modify retured data (thus is not possible using a override direct in {@link Ext.form.Labelable} mixin)
+	 */
+	getLabelableRenderData: function() {
+		return this.overrideLabelableRenderData(this.callParent(arguments));
 	}
 });

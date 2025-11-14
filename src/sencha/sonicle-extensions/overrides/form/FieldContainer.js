@@ -6,6 +6,7 @@
  */
 Ext.define('Sonicle.overrides.form.FieldContainer', {
 	override: 'Ext.form.FieldContainer',
+	mixins: ['Sonicle.form.Labelable'],
 	
 	/**
 	 * @cfg {Boolean} [labelIsForFirstField=true]
@@ -27,5 +28,13 @@ Ext.define('Sonicle.overrides.form.FieldContainer', {
 			});
 		}
 		return inputId;
+	},
+	
+	/**
+	 * Override original {@link Ext.form.FieldContainer#getLabelableRenderData}
+	 *  - Modify retured data (thus is not possible using a override direct in {@link Ext.form.Labelable} mixin)
+	 */
+	getLabelableRenderData: function() {
+		return this.overrideLabelableRenderData(this.callParent(arguments));
 	}
 });
