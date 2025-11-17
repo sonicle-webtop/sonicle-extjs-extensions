@@ -717,48 +717,68 @@ Ext.define('Sonicle.Date', {
 	/**
 	 * Converts passed value in seconds in a human readable format: like `1y 2d 10h 22m 3s`.
 	 * @param {Integer} seconds Duration value in seconds.
-	 * @param {Object/Boolean} [units] A config object to control time units to use in 
-	 * output: when not provided or set to `true`, all units are activated by default.
-	 * @param {Object} [symbols] A config object that can override defaults units 
-	 * symbols: `['y', 'd', 'h', 'm', 's']`: `y` for years, `d` for days, 
-	 * `h` for hours, `m` for minutes, `s` for seconds.
+	 * @param {Object} [opts] An object containing configuration options:
+	 * @param {Object/Boolean} [opts.units] Controls which time-units to use in output
+	 * in the form `unit-key: bool-value` where unit-key can be one of the following:
+	 * `years`, `days`, `hours`, `minutes`, `seconds`. When not provided or set 
+	 * to `true`, all units are activated by default.
+	 * @param {String[]|String[][]} [opts.symbols] Positional array to override defaults 
+	 * units symbols: `['y', 'd', 'h', 'm', 's']` (`y` for years, `d` for days, `h` for hours, `m` for minutes, `s` for seconds).
+	 * You can provide a 2-items-array for each unit to specify symbols to use when value is 1
+	 * and when value is >1, respectively.
+	 * @param {String} [opts.unitSeparator=''] The separator to use when joining value with its unit. Defaults to ``.
+	 * @param {String} [opts.separator=' '] The separator to use when joining duration parts. Defaults to ` `.
 	 * @returns {String} Duration value String in readable format
 	 */
-	humanReadableDuration: function(seconds, units, symbols) {
-		if (units === true) units = {};
-		units = Ext.apply({}, units || {}, {years: true, days: true, hours: true, minutes: true, seconds: true});
+	humanReadableDuration: function(seconds, opts) {
+		opts = opts || {};
+		if (opts.units === true) opts.units = {};
+		if (Ext.isString(opts.units)) {
+			var u = {};
+			if (opts.units.indexOf('y') === -1) u.years = false;
+			if (opts.units.indexOf('d') === -1) u.days = false;
+			if (opts.units.indexOf('h') === -1) u.hours = false;
+			if (opts.units.indexOf('m') === -1) u.minutes = false;
+			if (opts.units.indexOf('s') === -1) u.seconds = false;
+			opts.units = u;
+		}
+		if (!Ext.isString(opts.unitSeparator)) opts.unitSeparator = '';
+		if (!Ext.isString(opts.separator)) opts.separator = ' ';
+		opts.units = Ext.apply({}, opts.units || {}, {years: true, days: true, hours: true, minutes: true, seconds: true});
 		var flo = Math.floor,
-				syms = Ext.isArray(symbols) ? symbols : ['y', 'd', 'h', 'm', 's'],
-				vals = [0, 0, 0, 0, 0],
-				toks = [], v = seconds, i;
+			SoS = Sonicle.String,
+			syms = Ext.isArray(opts.symbols) ? opts.symbols : ['y', 'd', 'h', 'm', 's'],
+			vals = [0, 0, 0, 0, 0],
+			toks = [], v = seconds, i;
 		
 		if (Ext.isNumber(v)) {
-			if (units['years'] === true) {
+			if (opts.units['years'] === true) {
 				vals[0] = flo(v / 31536000);
 				v = v % 31536000;
 			}
-			if (units['days'] === true) {
+			if (opts.units['days'] === true) {
 				vals[1] = flo(v / 86400);
 				v = v % 86400;
 			}
-			if (units['hours'] === true) {
+			if (opts.units['hours'] === true) {
 				vals[2] = flo(v / 3600);
 				v = v % 3600;
 			}
-			if (units['minutes'] === true) {
+			if (opts.units['minutes'] === true) {
 				vals[3] = flo(v / 60);
 			}
-			if (units['seconds'] === true) {
+			if (opts.units['seconds'] === true) {
 				vals[4] = flo(v % 60);
 			}
 		}
 		
 		for (i=0; i<vals.length; i++) {
 			if (vals[i] > 0) {
-				toks.push(vals[i]+''+syms[i]);
+				var sym = Ext.isArray(syms[i]) ? [syms[i][0], syms[i][1]] : [syms[i], syms[i]];
+				toks.push(vals[i] + opts.unitSeparator + SoS.ifString(vals[i] === 1 ? sym[0] : sym[1], ''));
 			}
 		}
-		return Sonicle.String.join(toks.length > 2 ? ', ' : ' ', toks);
+		return SoS.join(opts.separator, toks);
 	}
 	
 	/*
