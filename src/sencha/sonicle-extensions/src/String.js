@@ -671,12 +671,12 @@ Ext.define('Sonicle.String', {
 	 */
 	join: function(separator, values) {
 		var sep = separator || '',
-				arr = Ext.isArray(values) ? values : Ext.Array.slice(arguments, 1),
-				s = '', i;
+			arr = Ext.isArray(values) ? values : Ext.Array.slice(arguments, 1),
+			s = '', i;
 		for (i=0; i<arr.length; i++) {
 			if (!Ext.isEmpty(arr[i])) s = s.concat(arr[i], sep);
 		}
-		return s.slice(0, -sep.length);
+		return !Ext.isEmpty(sep) ? s.slice(0, -sep.length) : s;
 	},
 	
 	/**
@@ -688,8 +688,8 @@ Ext.define('Sonicle.String', {
 	 */
 	ellipsisJoin: function(separator, max, values) {
 		var sep = separator || '',
-				arr = Ext.isArray(values) ? values : Ext.Array.slice(arguments, 1),
-				s = '', count = 0, ellipsed = false, i;
+			arr = Ext.isArray(values) ? values : Ext.Array.slice(arguments, 1),
+			s = '', count = 0, ellipsed = false, i;
 		for (i=0; i<arr.length; i++) {
 			if (count > max) {
 				ellipsed = true;
@@ -700,7 +700,26 @@ Ext.define('Sonicle.String', {
 				s = s.concat(arr[i], sep);
 			}
 		}
-		return ellipsed ? s + '...' : s.slice(0, -sep.length);
+		return ellipsed ? (s + '...') : (!Ext.isEmpty(sep) ? s.slice(0, -sep.length) : s);
+	},
+	
+	/**
+	 * Shuffles the passed string.
+	 * @param {String} s The String to be shuffled, may be null.
+	 * @returns {String} The shuffled string
+	 */
+	shuffle: function(s) {
+		if (Ext.isEmpty(s)) return s;
+		var chars = s.split(''),
+			len = chars.length,
+			i;
+		
+		for (i = len-1; i>0; i--) {
+			var j = Math.floor(Math.random() * (i + 1)), tmp = chars[i];
+			chars[i] = chars[j];
+			chars[j] = tmp;
+		}
+		return chars.join('');
 	},
 	
 	/**
