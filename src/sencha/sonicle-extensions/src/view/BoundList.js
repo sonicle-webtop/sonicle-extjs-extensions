@@ -190,7 +190,7 @@ Ext.define('Sonicle.view.BoundList', {
 	itemIconCls: 'so-'+'boundlist-icon',
 	itemDisplayCls: 'so-'+'boundlist-display',
 	itemSourceCls: 'so-'+'boundlist-source',
-	itemRightDockedCls: 'so-'+'boundlist-right',
+	itemRightDockedCls: 'so-'+'boundlist-dock-right',
 	itemSwatchCls: 'so-'+'boundlist-swatch',
 	
 	/**
@@ -410,7 +410,7 @@ Ext.define('Sonicle.view.BoundList', {
 			hasColor = !Ext.isEmpty(me.colorField) || Ext.isFunction(me.getColor),
 			hasSource = !Ext.isEmpty(me.sourceField) || Ext.isFunction(me.getSource),
 			useButton = me.enableButton,
-			floating = hasSource || useButton,
+			docking = hasSource || useButton,
 			colorize = me.colorize,
 			colorizeSwatch = (colorize === 'swatch'),
 			geomSwatchCls, swatchStyle, iconStyle, displayStyle, icon, source, colorCls;
@@ -425,18 +425,18 @@ Ext.define('Sonicle.view.BoundList', {
 			icon = '{[this.iconValue(values)]}',
 			source = '{[this.sourceValue(values)]}';
 			
-			return (floating ? '<div class="so-boundlist-floating">' : '')
+			return (docking ? '<div class="so-boundlist-dock-main">' : '')
 				+ (hasIcon ? '<div ' : '')
 				+ (hasIcon && ('cls' === iconMode) ? 'class="' + me.itemIconCls + ' ' + colorCls + ' ' + icon + '"' : '')
 				+ (hasIcon && ('src' === iconMode) ? 'class="' + me.itemIconCls + ' ' + me.itemIconCls + '-bg" style="background-image:url(' + icon + ');"' : '')
 				+ (hasIcon ? ' style="' + iconStyle + '"></div>' : '')
 				+ (hasColor && colorizeSwatch ? '<div class="' + me.itemSwatchCls + ' ' + geomSwatchCls + '" style="' + swatchStyle + '"></div>' : '')
 				+ '<span class="' + me.itemDisplayCls + '" style="' + displayStyle + '">' + origInnerTpl + '</span>'
-				+ (floating ? '</div>' : '')
-				+ (floating ? '<div class="' + me.itemRightDockedCls + '">' : '')
-				+ (floating && hasSource ? '<span class="' + Sonicle.String.deflt(me.sourceCls, '') + '">' + source + '</span>' : '')
-				+ (floating && useButton ? '<tpl if="this.showButton(values) === true"><i class="so-boundlist-button ' + me.buttonIconCls + '" {[this.buttonTipAttr(values)]}></i></tpl>' : '')
-				+ (floating ? '</div>' : '');
+				+ (docking ? '</div>' : '')
+				+ (docking ? '<div class="' + me.itemRightDockedCls + '">' : '')
+				+ (docking && hasSource ? '<span class="' + Sonicle.String.deflt(me.sourceCls, '') + '">' + source + '</span>' : '')
+				+ (docking && useButton ? '<tpl if="this.showButton(values) === true"><i class="so-boundlist-button ' + me.buttonIconCls + '" {[this.buttonTipAttr(values)]}></i></tpl>' : '')
+				+ (docking ? '</div>' : '');
 			
 		} else { // Return original innerTpl
 			return origInnerTpl;

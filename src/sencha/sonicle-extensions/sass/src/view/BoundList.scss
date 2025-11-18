@@ -35,14 +35,16 @@
 .so-boundlist-display {
 	white-space: pre;
 }
-.so-boundlist-floating {
-	float: left;
+.so-boundlist-item:has(.so-boundlist-dock-main) {
+	display: flex;
+}
+.so-boundlist-dock-main {
+	flex: 1;
 	white-space: pre;
 }
-.so-boundlist-right {
+.so-boundlist-dock-right {
 	text-align: right;
 	white-space: pre;
-	/*width: 100%;*/
 }
 .so-boundlist-groupitem .so-boundlist-display {
 	font-weight: bold;
