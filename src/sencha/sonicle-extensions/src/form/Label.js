@@ -19,7 +19,7 @@ Ext.define('Sonicle.form.Label', {
 	
 	initComponent: function() {
 		var me = this,
-				appe = me.buildAppearance(me.getAppearance());
+			appe = me.buildAppearance(me.getAppearance());
 		
 		if (appe[0]) me.cls = appe[0];
 		if (appe[1]) me.style = appe[1];
@@ -30,9 +30,9 @@ Ext.define('Sonicle.form.Label', {
 		buildAppearance: function(appe) {
 			var me = this;
 			if (appe === 'title') {
-				return [me.titleCls, me.titleCls];
+				return [me.titleCls, me.titleStyle];
 			} else if (appe === 'hint') {
-				return [me.hintCls, me.hintCls];
+				return [me.hintCls, me.hintStyle];
 			} else {
 				return [null, null];
 			}
