@@ -85,10 +85,23 @@ Ext.define('Sonicle.grid.column.Icon', {
 	getText: null,
 	
 	/**
+	 * @deprecated description
 	 * @cfg {Boolean} hideText
 	 * False to display column's value next to the icon.
 	 */
 	hideText: true,
+	
+	/**
+	 * @cfg {Function} getLabel
+	 * A function which returns the text to display next to the icon image.
+	 */
+	//getLabel: null,
+	
+	/**
+	 * @cfg {Boolean} hideLabel
+	 * False to display column's value next to the icon.
+	 */
+	//hideLabel: true,
 	
 	/**
 	 * @cfg {Boolean} [stopSelection=false]

@@ -3,6 +3,7 @@
  * Copyright (C) 2023 Sonicle S.r.l.
  * malbinola[at]sonicle.com
  * https://www.sonicle.com
+ * @deprecated
  */
 Ext.define('Sonicle.fullcalendar.api.FullCalendarDataMixin', {
 	extend: 'Ext.Mixin',

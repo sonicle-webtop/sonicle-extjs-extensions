@@ -3,6 +3,7 @@
  * Copyright (C) 2019 Sonicle S.r.l.
  * sonicle@sonicle.com
  * http://www.sonicle.com
+ * @deprecated seems unused
  */
 Ext.define('Sonicle.grid.List', {
 	extend: 'Ext.grid.Panel',
@@ -18,6 +19,7 @@ Ext.define('Sonicle.grid.List', {
 	emptyText: 'No items to display',
 	searchText: 'Search...',
 	removeText: 'Delete',
+	removeIconCls: 'far fa-trash-alt',
 	
 	valueField: null,
 	displayField: null,
@@ -77,14 +79,16 @@ Ext.define('Sonicle.grid.List', {
 				flex: 1
 			}, {
 				xtype: 'soactioncolumn',
-				items: [{
-					iconCls: 'far fa-trash-alt',
-					tooltip: me.removeText,
-					handler: function(g, ridx) {
-						var rec = g.getStore().getAt(ridx);
-						me.fireEvent('itemremoveclick', me, rec, ridx);
+				items: [
+					{
+						iconCls: me.removeIconCls,
+						tooltip: me.removeText,
+						handler: function(g, ridx) {
+							var rec = g.getStore().getAt(ridx);
+							me.fireEvent('itemremoveclick', me, rec, ridx);
+						}
 					}
-				}]
+				]
 			}];
 		}
 		if (me.searchField) {
@@ -122,9 +126,9 @@ Ext.define('Sonicle.grid.List', {
 	
 	firePick: function(recs) {
 		var me = this,
-				vfld = me.valueField,
-				handler = me.handler,
-				values = [];
+			vfld = me.valueField,
+			handler = me.handler,
+			values = [];
 		
 		Ext.iterate(recs, function(rec) {
 			values.push(vfld ? rec.get(vfld) : rec.getId());
@@ -136,29 +140,31 @@ Ext.define('Sonicle.grid.List', {
 	privates: {
 		buildDockedItems: function() {
 			var me = this;
-			return [{
-				xtype: 'textfield',
-				itemId: 'fldsearch',
-				dock: 'top',
-				hideFieldLabel: true,
-				emptyText: me.searchText,
-				triggers: {
-					clear: {
-						type: 'soclear'
-					}
-				},
-				listeners: {
-					change: {
-						fn: me.onSearchChange,
-						scope: me,
-						options: {buffer: 300}
+			return [
+				{
+					xtype: 'textfield',
+					itemId: 'fldsearch',
+					dock: 'top',
+					hideFieldLabel: true,
+					emptyText: me.searchText,
+					triggers: {
+						clear: {
+							type: 'soclear'
+						}
 					},
-					specialkey: {
-						fn: me.onSearchSpecialkey,
-						scope: me
+					listeners: {
+						change: {
+							fn: me.onSearchChange,
+							scope: me,
+							options: {buffer: 300}
+						},
+						specialkey: {
+							fn: me.onSearchSpecialkey,
+							scope: me
+						}
 					}
 				}
-			}];
+			];
 		},
 		
 		onSearchChange: function(s) {
