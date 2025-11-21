@@ -1,13 +1,14 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2024 Sonicle S.r.l.
+ * Copyright (C) 2025 Sonicle S.r.l.
  * sonicle[at]sonicle.com
  * https://www.sonicle.com
  */
 Ext.define('Sonicle.form.field.rr.option.Abstract', {
 	extend: 'Ext.container.Container',
 	requires: [
-		'Sonicle.Date'
+		'Sonicle.Date',
+		'Sonicle.VMUtils'
 	],
 	
 	referenceHolder: true,
@@ -71,7 +72,7 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 	
 	privates: {
 		/**
-		 * This method must be overridden into child classes 
+		 * This method must be overridden in child classes 
 		 * to implement required custom logic.
 		 * 
 		 * @param {RRule} rr The RRule instance.
@@ -82,28 +83,17 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 		},
 		
 		/**
-		 * This method should be overridden into child classes 
+		 * This method should be overridden in child classes 
 		 * to implement required custom logic.
 		 * 
 		 * @param {RRule} rr The RRule instance.
 		 */
 		applyRRule: function(rr) {
-
+			// Override me!
 		},
 		
 		/**
-		 * This method should be overridden into child classes 
-		 * to implement required custom logic.
-		 * 
-		 * @param {Ext.form.field.Base} field
-		 * @return {Boolean}
-		 */
-		shouldSkipChange: function(field) {
-			return false;
-		},
-		
-		/**
-		 * This method can be overridden into child classes 
+		 * This method can be overridden in child classes 
 		 * to implement required custom logic.
 		 * 
 		 * @return {Object} Dynamic default configuration.
@@ -113,7 +103,7 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 		},
 
 		/**
-		 * This method must be overridden into child classes
+		 * This method must be overridden in child classes
 		 * to implement required custom logic.
 		 * 
 		 * @return {Object} Base default configuration.
@@ -122,32 +112,42 @@ Ext.define('Sonicle.form.field.rr.option.Abstract', {
 			Ext.raise('Override me');
 		},
 		
-		fieldOnChange: function(s, nv, ov) {
+		/**
+		 * Helper method to be called in child classes to define a formula
+		 * for a field dependend to an Option.
+		 * @param {String} prefix ViewModel's property prefix.
+		 * @param {String} name Property name to bind.
+		 * @param {String} refOpt Boolean property name from which the bound property is related to.
+		 * @param {String[]} resetOpts An array of Boolean property names to reset to `false` when a value to the bound property is set.
+		 * @param {Object} [opts] An object containing configuration.
+		 * @param {Function} [opts.getFn] A custom get Function to use.
+		 * @param {Function} [opts.beforeSetFn] A hook point add logic before setting to the bound property value, it's executed just after resetting values.
+		 * @return {Object} Formula configuration object
+		 */
+		bindFormulaOptField: function(prefix, name, refOpt, resetOpts, opts) {
+			opts = opts || {};
 			var me = this;
-			if (me.shouldSkipChange(s) === false) {
-				if (s.isXType('combo')) {
-					// Within combos this is called by the select event in which
-					// new and old values are not available. It' always a valid change.
-					me.onRRuleCfgChange();
-				} else if (s.isXType('checkboxfield') || s.isXType('radiofield')) {
-					// For checkbox and radio fields we cannot rely on oldValue 
-					// (is oldValue null?); we must use a private duringSetValue flag.
-					if (!s.duringSetValue) me.onRRuleCfgChange();
-				} else {
-					//if (ov !== null) me.onRRuleCfgChange();
-					me.onRRuleCfgChange();
+			return Sonicle.VMUtils.foPropTwoWay(prefix, name,
+				Ext.isFunction(opts.getFn) ? opts.getFn : function(v) { return v; },
+				function(v, path) {
+					me.suspendOnChange++;
+					for (var i=0; i<resetOpts.length; i++) this.set(prefix+'.'+resetOpts[i], false);
+					Ext.callback(opts.beforeSetFn, this, [v, path, prefix]);
+					me.suspendOnChange--;
+					this.set(prefix+'.'+refOpt, true);
+					return v;
 				}
-			}
+			);
 		},
 		
-		optionSelectorOnChange: function(s, nv, ov) {
-			var me = this;
-			// Skip value changes originating from code/binding, we are interested
-			// only in changes coming from user interaction.
-			if (s.isXType('radiofield')) {
-				// For radio fields we cannot rely on oldValue (is oldValue null?); 
-				// we must use a private duringSetValue flag.
-				if (!s.duringSetValue && (nv === true)) me.onRRuleCfgChange();
+		/**
+		 * A ready-to-use handler to be called in child classes for properly setup a deep bind listener.
+		 * @param {Mixed} nv
+		 * @param {Mixed} ov
+		 */
+		onBindFieldsChanged: function(nv, ov) {
+			if (ov !== undefined && this.suspendOnChange === 0) {
+				this.onRRuleCfgChange();
 			}
 		},
 		

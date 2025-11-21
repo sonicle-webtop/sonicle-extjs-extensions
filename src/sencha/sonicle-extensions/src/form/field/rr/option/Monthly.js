@@ -1,6 +1,6 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2024 Sonicle S.r.l.
+ * Copyright (C) 2025 Sonicle S.r.l.
  * sonicle[at]sonicle.com
  * https://www.sonicle.com
  */
@@ -22,6 +22,19 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 		}
 	},
 	
+	constructor: function(cfg) {
+		var me = this;
+		me.callParent([cfg]);
+		
+		Sonicle.VMUtils.applyFormulas(me.getViewModel(), {
+			foOpt1ByMonthDay: me.bindFormulaOptField('data', 'opt1ByMonthDay', 'opt1', ['opt2']),
+			foOpt1Interval: me.bindFormulaOptField('data', 'opt1Interval', 'opt1', ['opt2']),
+			foOpt2ByPos: me.bindFormulaOptField('data', 'opt2ByPos', 'opt2', ['opt1']),
+			foOpt2ByWeekDay: me.bindFormulaOptField('data', 'opt2ByWeekDay', 'opt2', ['opt1']),
+			foOpt2Interval: me.bindFormulaOptField('data', 'opt2Interval', 'opt2', ['opt1'])
+		});
+	},
+	
 	initComponent: function() {
 		var me = this,
 			SoD = Sonicle.Date;
@@ -36,29 +49,19 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 			items: [
 				{
 					xtype: 'radiofield',
-					itemId: 'opt1',
 					name: me.id + '-monthlytype',
-					bind: '{data.opt1}',
-					listeners: {
-						change: me.optionSelectorOnChange,
-						scope: me
-					}
+					bind: '{data.opt1}'
 				}, {
 					xtype: 'label',
 					cls: 'x-form-cb-label-default',
 					text: me.onTheText
 				}, {
 					xtype: 'numberfield',
-					itemId: 'opt1-bymonthday',
-					bind: '{data.opt1ByMonthDay}',
+					bind: '{foOpt1ByMonthDay}',
 					minValue: 1,
 					maxValue: 31,
 					allowDecimals: false,
 					allowBlank: false,
-					listeners: {
-						change: me.fieldOnChange,
-						scope: me
-					},
 					width: 80
 				}, {
 					xtype: 'label',
@@ -66,16 +69,11 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 					text: me.thDayText + ', ' + me.ofEveryText
 				}, {
 					xtype: 'numberfield',
-					itemId: 'opt1-interval',
-					bind: '{data.opt1Interval}',
+					bind: '{foOpt1Interval}',
 					minValue: 1,
 					maxValue: 99,
 					allowDecimals: false,
 					allowBlank: false,
-					listeners: {
-						change: me.fieldOnChange,
-						scope: me
-					},
 					width: 80
 				}, {
 					xtype: 'label',
@@ -93,21 +91,15 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 			items: [
 				{
 					xtype: 'radiofield',
-					itemId: 'opt2',
 					name: me.id + '-monthlytype',
-					bind: '{data.opt2}',
-					listeners: {
-						change: me.optionSelectorOnChange,
-						scope: me
-					}
+					bind: '{data.opt2}'
 				}, {
 					xtype: 'label',
 					cls: 'x-form-cb-label-default',
 					text: me.onTheText
 				}, {
 					xtype: 'combo',
-					itemId: 'opt2-bypos',
-					bind: '{data.opt2ByPos}',
+					bind: '{foOpt2ByPos}',
 					editable: false,
 					typeAhead: false,
 					forceSelection: true,
@@ -131,15 +123,10 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 					allowBlank: false,
 					valueField: 'id',
 					displayField: 'desc',
-					listeners: {
-						select: me.fieldOnChange,
-						scope: me
-					},
 					width: 120
 				}, {
 					xtype: 'combo',
-					itemId: 'opt2-byweekday',
-					bind: '{data.opt2ByWeekDay}',
+					bind: '{foOpt2ByWeekDay}',
 					editable: false,
 					typeAhead: false,
 					forceSelection: true,
@@ -167,10 +154,6 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 					allowBlank: false,
 					valueField: 'id',
 					displayField: 'desc',
-					listeners: {
-						select: me.fieldOnChange,
-						scope: me
-					},
 					width: 120
 				}, {
 					xtype: 'label',
@@ -178,16 +161,11 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 					text: me.ofEveryText
 				}, {
 					xtype: 'numberfield',
-					itemId: 'opt2-interval',
-					bind: '{data.opt2Interval}',
+					bind: '{foOpt2Interval}',
 					minValue: 1,
 					maxValue: 99,
 					allowDecimals: false,
 					allowBlank: false,
-					listeners: {
-						change: me.fieldOnChange,
-						scope: me
-					},
 					width: 80
 				}, {
 					xtype: 'label',
@@ -196,6 +174,8 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 				}
 			]
 		}]);
+		
+		me.getViewModel().bind('{data}', me.onBindFieldsChanged, me, {deep: true});
 	},
 	
 	getRRuleConfig: function() {
@@ -303,13 +283,6 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 			me.getViewModel().set('data', data);
 		},
 		
-		shouldSkipChange: function(field) {
-			var data = this.getVMData();
-			if ((data.opt1 === true) && (field.getItemId().indexOf('opt1-') === -1)) return true;
-			if ((data.opt2 === true) && (field.getItemId().indexOf('opt2-') === -1)) return true;
-			return false;
-		},
-		
 		returnVMDataStartDependantDefaults: function() {
 			var start = this.getStartDate(), nth;
 			if (Ext.isDate(start)) {
@@ -334,16 +307,6 @@ Ext.define('Sonicle.form.field.rr.option.Monthly', {
 				opt2ByWeekDay: 1,
 				opt2Interval: 1
 			};
-		},
-		
-		fieldOnChange: function(s, nv, ov) {
-			var me = this, vm = me.getViewModel();
-			if (me.suspendOnChange === 0) {
-				vm.set('data.opt1', false);
-				vm.set('data.opt2', false);
-				vm.set('data.'+s.getItemId().split('-')[0], true);
-			}
-			me.callParent(arguments);
 		},
 		
 		isOpt1: function(rrCfg) {

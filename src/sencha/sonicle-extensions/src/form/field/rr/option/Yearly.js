@@ -1,6 +1,6 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2024 Sonicle S.r.l.
+ * Copyright (C) 2025 Sonicle S.r.l.
  * sonicle[at]sonicle.com
  * https://www.sonicle.com
  */
@@ -9,21 +9,6 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 	alias: 'widget.sorryearly',
 	
 	viewModel: {
-		formulas: {
-			foOpt1ByMonthDayMaxValue: function(get) {
-				return Sonicle.Date.getDaysInMonth(parseInt(get('data.opt1ByMonth')) || 31);
-			},
-			foOpt1ByMonthDay: {
-				get: function(get) {
-					var max = get('foOpt1ByMonthDayMaxValue'),
-						val = get('data.opt1ByMonthDay');
-					return val > max ? max : val;
-				},
-				set: function(val) {
-					this.set('data.opt1ByMonthDay', val);
-				}
-			}
-		},
 		data: {
 			data: {
 				opt1: null,
@@ -37,6 +22,36 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 				opt2Interval: null
 			}
 		}
+	},
+	
+	constructor: function(cfg) {
+		var me = this,
+			getDaysInMonth = function(month) { return Sonicle.Number.coalesce(Sonicle.Date.getDaysInMonth(month), 31); };
+		me.callParent([cfg]);
+		
+		Sonicle.VMUtils.applyFormulas(me.getViewModel(), {
+			foOpt1ByMonth: me.bindFormulaOptField('data', 'opt1ByMonth', 'opt1', ['opt2'], {
+				beforeSetFn: function(v, path, prefix) {
+					var maxDay = getDaysInMonth(parseInt(v)),
+						day = this.get(prefix+'.opt1ByMonthDay');
+					if (day > maxDay) this.set(prefix+'.opt1ByMonthDay', maxDay);
+				}
+			}),
+			foOpt1ByMonthDay: me.bindFormulaOptField('data', 'opt1ByMonthDay', 'opt1', ['opt2'], {
+				getFn: function(v) {
+					var maxDay = getDaysInMonth(parseInt(this.get('data.opt1ByMonth')));
+					return v > maxDay ? maxDay : v;
+				}
+			}),
+			foOpt1ByMonthDayMaxValue: Sonicle.VMUtils.foPropGet('data', 'opt1ByMonth', function(val) {
+				return getDaysInMonth(parseInt(val));
+			}),
+			foOpt1Interval: me.bindFormulaOptField('data', 'opt1Interval', 'opt1', ['opt2']),
+			foOpt2ByPos: me.bindFormulaOptField('data', 'opt2ByPos', 'opt2', ['opt1']),
+			foOpt2ByWeekDay: me.bindFormulaOptField('data', 'opt2ByWeekDay', 'opt2', ['opt1']),
+			foOpt2ByMonth: me.bindFormulaOptField('data', 'opt2ByMonth', 'opt2', ['opt1']),
+			foOpt2Interval: me.bindFormulaOptField('data', 'opt2Interval', 'opt2', ['opt1'])
+		});
 	},
 	
 	initComponent: function() {
@@ -53,21 +68,15 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 			items: [
 				{
 					xtype: 'radiofield',
-					itemId: 'opt1',
 					name: me.id + '-yearlytype',
-					bind: '{data.opt1}',
-					listeners: {
-						change: me.optionSelectorOnChange,
-						scope: me
-					}
+					bind: '{data.opt1}'
 				}, {
 					xtype: 'label',
 					cls: 'x-form-cb-label-default',
 					text: me.onDayText
 				}, {
 					xtype: 'combo',
-					itemId: 'opt1-bymonth',
-					bind: '{data.opt1ByMonth}',
+					bind: '{foOpt1ByMonth}',
 					editable: false,
 					typeAhead: false,
 					forceSelection: true,
@@ -97,24 +106,15 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 					allowBlank: false,
 					valueField: 'id',
 					displayField: 'desc',
-					listeners: {
-						select: me.fieldOnChange,
-						scope: me
-					},
 					width: 120
 				}, {
 					xtype: 'numberfield',
-					itemId: 'opt1-bymonthday',
 					bind: {
 						value: '{foOpt1ByMonthDay}',
 						maxValue: '{foOpt1ByMonthDayMaxValue}'
 					},
 					minValue: 1,
 					allowBlank: false,
-					listeners: {
-						change: me.fieldOnChange,
-						scope: me
-					},
 					width: 80
 				}, {
 					xtype: 'label',
@@ -122,16 +122,11 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 					text: me.ofEveryText
 				}, {
 					xtype: 'numberfield',
-					itemId: 'opt1-interval',
-					bind: '{data.opt1Interval}',
+					bind: '{foOpt1Interval}',
 					minValue: 1,
 					maxValue: 99,
 					allowDecimals: false,
 					allowBlank: false,
-					listeners: {
-						change: me.fieldOnChange,
-						scope: me
-					},
 					width: 80
 				}, {
 					xtype: 'label',
@@ -149,21 +144,15 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 			items: [
 				{
 					xtype: 'radiofield',
-					itemId: 'opt2',
 					name: me.id + '-yearlytype',
-					bind: '{data.opt2}',
-					listeners: {
-						change: me.optionSelectorOnChange,
-						scope: me
-					}
+					bind: '{data.opt2}'
 				}, {
 					xtype: 'label',
 					cls: 'x-form-cb-label-default',
 					text: me.onTheText
 				}, {
 					xtype: 'combo',
-					itemId: 'opt2-bypos',
-					bind: '{data.opt2ByPos}',
+					bind: '{foOpt2ByPos}',
 					editable: false,
 					typeAhead: false,
 					forceSelection: true,
@@ -187,15 +176,10 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 					allowBlank: false,
 					valueField: 'id',
 					displayField: 'desc',
-					listeners: {
-						select: me.fieldOnChange,
-						scope: me
-					},
 					width: 120
 				}, {
 					xtype: 'combo',
-					itemId: 'opt2-byweekday',
-					bind: '{data.opt2ByWeekDay}',
+					bind: '{foOpt2ByWeekDay}',
 					editable: false,
 					typeAhead: false,
 					forceSelection: true,
@@ -223,10 +207,6 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 					allowBlank: false,
 					valueField: 'id',
 					displayField: 'desc',
-					listeners: {
-						select: me.fieldOnChange,
-						scope: me
-					},
 					width: 120
 				}, {
 					xtype: 'label',
@@ -234,8 +214,7 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 					text: me.ofText
 				}, {
 					xtype: 'combo',
-					itemId: 'opt2-bymonth',
-					bind: '{data.opt2ByMonth}',
+					bind: '{foOpt2ByMonth}',
 					editable: false,
 					typeAhead: false,
 					forceSelection: true,
@@ -265,10 +244,6 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 					allowBlank: false,
 					valueField: 'id',
 					displayField: 'desc',
-					listeners: {
-						select: me.fieldOnChange,
-						scope: me
-					},
 					width: 120
 				}, {
 					xtype: 'label',
@@ -276,16 +251,11 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 					text: me.ofEveryText
 				}, {
 					xtype: 'numberfield',
-					itemId: 'opt2-interval',
-					bind: '{data.opt2Interval}',
+					bind: '{foOpt2Interval}',
 					minValue: 1,
 					maxValue: 99,
 					allowDecimals: false,
 					allowBlank: false,
-					listeners: {
-						change: me.fieldOnChange,
-						scope: me
-					},
 					width: 80
 				}, {
 					xtype: 'label',
@@ -294,6 +264,8 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 				}
 			]
 		}]);
+		
+		me.getViewModel().bind('{data}', me.onBindFieldsChanged, me, {deep: true});
 	},
 	
 	getRRuleConfig: function() {
@@ -408,13 +380,6 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 			me.getViewModel().set('data', data);
 		},
 		
-		shouldSkipChange: function(field) {
-			var data = this.getVMData();
-			if ((data.opt1 === true) && (field.getItemId().indexOf('opt1-') === -1)) return true;
-			if ((data.opt2 === true) && (field.getItemId().indexOf('opt2-') === -1)) return true;
-			return false;
-		},
-		
 		returnVMDataStartDependantDefaults: function() {
 			var start = this.getStartDate(), nth;
 			if (Ext.isDate(start)) {
@@ -443,16 +408,6 @@ Ext.define('Sonicle.form.field.rr.option.Yearly', {
 				opt2ByMonth: 1,
 				opt2Interval: 1
 			};
-		},
-		
-		fieldOnChange: function(s, nv, ov) {
-			var me = this, vm = me.getViewModel();
-			if (me.suspendOnChange === 0) {
-				vm.set('data.opt1', false);
-				vm.set('data.opt2', false);
-				vm.set('data.'+s.getItemId().split('-')[0], true);
-			}
-			me.callParent(arguments);
 		},
 		
 		isOpt1: function(rrCfg) {

@@ -122,5 +122,55 @@ Ext.define('Sonicle.VMUtils', {
 			}
 		}
 		return data;
+	},
+	
+	/**
+	 * Helper method for defining a {@link Ext.app.bind.Formula} that is able   
+	 * to perform a two-way binding within a ViewModel's property.
+	 * @param {String} pathPrefix ViewModel's property prefix.
+	 * Specify as empty string if you're working directly with viewModel.
+	 * @param {String} propName Property name to bind.
+	 * @param {Function} getFn Function that calculate and return the value to get.
+	 * @param {Function} setFn Function that calculate and return the value to set.
+	 * @param {Object} [opts] An object containing configuration.
+	 * @param {Function} [opts.noset] Set to `true` to NOT set the returned value in set method.
+	 * @returns {Object} Formula configuration object
+	 */
+	foPropTwoWay: function(pathPrefix, propName, getFn, setFn, opts) {
+		opts = opts || {};
+		var path = Sonicle.String.join('.', pathPrefix, propName);
+		return {
+			bind: {bindTo: '{'+path+'}'},
+			get: function(val) {
+				return Ext.callback(getFn, this, [val]);
+			},
+			set: function(val) {
+				var ret = Ext.callback(setFn, this, [val, path]);
+				if (!opts.noset) this.set(path, ret);
+			}
+		};
+	},
+	
+	/**
+	 * Helper method for defining a {@link Ext.app.bind.Formula} that is able   
+	 * to setup binding within a ViewModel's property and return a value 
+	 * computed by a customized function passed as parameter.
+	 * @param {String} pathPrefix ViewModel's property prefix.
+	 * Specify as empty string if you're working directly with viewModel.
+	 * @param {String} propName Property name to bind
+	 * @param {Function} getFn Function that calculate and return the value to get.
+	 * @param {Mixed} getFn.val Property value to process.
+	 * @param {Object} [opts] An object containing configuration.
+	 * @returns {Object} Formula configuration object
+	 */
+	foPropGet: function(pathPrefix, propName, getFn, opts) {
+		opts = opts || {};
+		var path = Sonicle.String.join('.', pathPrefix, propName);
+		return {
+			bind: {bindTo: '{'+path+'}'},
+			get: function(val) {
+				return Ext.callback(getFn, this, [val]);
+			}
+		};
 	}
 });

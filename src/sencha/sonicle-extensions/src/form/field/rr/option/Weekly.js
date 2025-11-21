@@ -1,6 +1,6 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2024 Sonicle S.r.l.
+ * Copyright (C) 2025 Sonicle S.r.l.
  * sonicle[at]sonicle.com
  * https://www.sonicle.com
  */
@@ -38,29 +38,19 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 			items: [
 				{
 					xtype: 'radiofield',
-					itemId: 'opt1',
 					name: me.id + '-weeklytype',
-					bind: '{data.opt1}',
-					listeners: {
-						change: me.optionSelectorOnChange,
-						scope: me
-					}
+					bind: '{data.opt1}'
 				}, {
 					xtype: 'label',
 					cls: 'x-form-cb-label-default',
 					text: me.onEveryText
 				}, {
 					xtype: 'numberfield',
-					itemId: 'opt1-interval',
 					bind: '{data.opt1Interval}',
 					minValue: 1,
 					maxValue: 99,
 					allowDecimals: false,
 					allowBlank: false,
-					listeners: {
-						change: me.fieldOnChange,
-						scope: me
-					},
 					width: 80
 				}, {
 					xtype: 'label',
@@ -76,64 +66,31 @@ Ext.define('Sonicle.form.field.rr.option.Weekly', {
 			},
 			items: [
 				{
-					itemId: 'opt1-day1',
 					bind: '{data.opt1Day1}',
-					boxLabel: SoD.getShortDayName(1),
-					listeners: {
-						change: me.fieldOnChange,
-						scope: me
-					}
+					boxLabel: SoD.getShortDayName(1)
 				}, {
-					itemId: 'opt1-day2',
 					bind: '{data.opt1Day2}',
-					boxLabel: SoD.getShortDayName(2),
-					listeners: {
-						change: me.fieldOnChange,
-						scope: me
-					}
+					boxLabel: SoD.getShortDayName(2)
 				}, {
-					itemId: 'opt1-day3',
 					bind: '{data.opt1Day3}',
-					boxLabel: SoD.getShortDayName(3),
-					listeners: {
-						change: me.fieldOnChange,
-						scope: me
-					}
+					boxLabel: SoD.getShortDayName(3)
 				}, {
-					itemId: 'opt1-day4',
 					bind: '{data.opt1Day4}',
-					boxLabel: SoD.getShortDayName(4),
-					listeners: {
-						change: me.fieldOnChange,
-						scope: me
-					}
+					boxLabel: SoD.getShortDayName(4)
 				}, {
-					itemId: 'opt1-day5',
 					bind: '{data.opt1Day5}',
-					boxLabel: SoD.getShortDayName(5),
-					listeners: {
-						change: me.fieldOnChange,
-						scope: me
-					}
+					boxLabel: SoD.getShortDayName(5)
 				}, {
-					itemId: 'opt1-day6',
 					bind: '{data.opt1Day6}',
-					boxLabel: SoD.getShortDayName(6),
-					listeners: {
-						change: me.fieldOnChange,
-						scope: me
-					}
+					boxLabel: SoD.getShortDayName(6)
 				}, {
-					itemId: 'opt1-day0',
 					bind: '{data.opt1Day0}',
-					boxLabel: SoD.getShortDayName(0),
-					listeners: {
-						change: me.fieldOnChange,
-						scope: me
-					}
+					boxLabel: SoD.getShortDayName(0)
 				}
 			]
 		}]);
+		
+		me.getViewModel().bind('{data}', me.onBindFieldsChanged, me, {deep: true});
 	},
 	
 	getRRuleConfig: function() {

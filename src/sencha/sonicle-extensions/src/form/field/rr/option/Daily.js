@@ -1,6 +1,6 @@
 /*
  * Sonicle ExtJs UX
- * Copyright (C) 2024 Sonicle S.r.l.
+ * Copyright (C) 2025 Sonicle S.r.l.
  * sonicle[at]sonicle.com
  * https://www.sonicle.com
  */
@@ -18,6 +18,15 @@ Ext.define('Sonicle.form.field.rr.option.Daily', {
 		}
 	},
 	
+	constructor: function(cfg) {
+		var me = this;
+		me.callParent([cfg]);
+		
+		Sonicle.VMUtils.applyFormulas(me.getViewModel(), {
+			foOpt1Interval: me.bindFormulaOptField('data', 'opt1Interval', 'opt1', ['opt2'])
+		});
+	},
+	
 	initComponent: function() {
 		var me = this;
 		me.callParent(arguments);
@@ -33,11 +42,7 @@ Ext.define('Sonicle.form.field.rr.option.Daily', {
 					xtype: 'radiofield',
 					itemId: 'opt1',
 					name: me.id + '-dailytype',
-					bind: '{data.opt1}',
-					listeners: {
-						change: me.optionSelectorOnChange,
-						scope: me
-					}
+					bind: '{data.opt1}'
 				}, {
 					xtype: 'label',
 					cls: 'x-form-cb-label-default',
@@ -45,15 +50,11 @@ Ext.define('Sonicle.form.field.rr.option.Daily', {
 				}, {
 					xtype: 'numberfield',
 					itemId: 'opt1-interval',
-					bind: '{data.opt1Interval}',
+					bind: '{foOpt1Interval}',
 					minValue: 1,
 					maxValue: 999,
 					allowDecimals: false,
 					allowBlank: false,
-					listeners: {
-						change: me.fieldOnChange,
-						scope: me
-					},
 					width: 80
 				}, {
 					xtype: 'label',
@@ -73,11 +74,7 @@ Ext.define('Sonicle.form.field.rr.option.Daily', {
 					xtype: 'radiofield',
 					itemId: 'opt2',
 					name: me.id + '-dailytype',
-					bind: '{data.opt2}',
-					listeners: {
-						change: me.optionSelectorOnChange,
-						scope: me
-					}
+					bind: '{data.opt2}'
 				}, {
 					xtype: 'label',
 					cls: 'x-form-cb-label-default',
@@ -85,6 +82,8 @@ Ext.define('Sonicle.form.field.rr.option.Daily', {
 				}
 			]
 		}]);
+		
+		me.getViewModel().bind('{data}', me.onBindFieldsChanged, me, {deep: true});
 	},
 	
 	getRRuleConfig: function() {
@@ -134,29 +133,12 @@ Ext.define('Sonicle.form.field.rr.option.Daily', {
 			me.getViewModel().set('data', data);
 		},
 		
-		shouldSkipChange: function(field) {
-			var data = this.getVMData();
-			if ((data.opt1 === true) && (field.getItemId().indexOf('opt1-') === -1)) return true;
-			if ((data.opt2 === true) && (field.getItemId().indexOf('opt2-') === -1)) return true;
-			return false;
-		},
-		
 		returnVMDataDefaults: function() {
 			return {
 				opt1: true,
 				opt1Interval: 1,
 				opt2: false
 			};
-		},
-		
-		fieldOnChange: function(s, nv, ov) {
-			var me = this, vm = me.getViewModel();
-			if (me.suspendOnChange === 0) {
-				vm.set('data.opt1', false);
-				vm.set('data.opt2', false);
-				vm.set('data.'+s.getItemId().split('-')[0], true);
-			}
-			me.callParent(arguments);
 		},
 		
 		isOpt1: function(rrCfg) {
