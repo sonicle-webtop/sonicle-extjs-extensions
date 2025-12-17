@@ -1,3 +1,9 @@
+/*
+ * Sonicle ExtJs UX
+ * Copyright (C) 2025 Sonicle S.r.l.
+ * sonicle[at]sonicle.com
+ * https://www.sonicle.com
+ */
 Ext.define('Sonicle.form.Feedback', {
 	extend: 'Ext.Component',
 	alias: 'widget.soformfeedback',
@@ -6,9 +12,28 @@ Ext.define('Sonicle.form.Feedback', {
 	],
 	
 	config: {
+		/**
+		 * @cfg {Boolean} [accent=true]
+		 * Specifies whether to show a colored accent on component side.
+		 */
 		accent: true,
+		
+		/**
+		 * @cfg {info|alert|warning|success} [type=info]
+		 * The feedback type.
+		 */
 		type: 'info',
+		
+		/**
+		 * @cfg {String} title
+		 * The feedback title to display.
+		 */
 		title: undefined,
+		
+		/**
+		 * @cfg {String} text
+		 * The feedback text to display.
+		 */
 		text: ''
 	},
 	
@@ -57,21 +82,18 @@ Ext.define('Sonicle.form.Feedback', {
 		});
 	},
 	
-	updateAccent: function(v) {
-		var me = this,
-			accentCls = me.baseCls + '-accent';
-		me[v === true ? 'addCls' : 'removeCls'](accentCls);
+	updateAccent: function(nv) {
+		this[nv === true ? 'addCls' : 'removeCls'](this.baseCls + '-accent');
 	},
 	
 	applyType: function(type) {
 		return Sonicle.String.isIn(type, ['info', 'alert', 'warning', 'success']) ? type : 'info';
 	},
 	
-	updateType: function(v, ov) {
-		var me = this,
-			baseCls = me.baseCls;
-		me.removeCls(me.baseCls + '-' + ov);
-		me.addCls(me.baseCls + '-' + v);
+	updateType: function(nv, ov) {
+		var me = this;
+		if (Ext.isString(ov)) me.removeCls(me.baseCls + '-' + ov);
+		if (Ext.isString(nv)) me.addCls(me.baseCls + '-' + nv);
 	},
 	
 	updateTitle: function(v) {

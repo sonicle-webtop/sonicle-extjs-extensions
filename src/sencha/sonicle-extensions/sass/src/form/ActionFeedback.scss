@@ -1,0 +1,47 @@
+.so-formactionfeedback .x-form-item-body {
+	padding: 5px 10px 5px 10px;
+	border-style: solid;
+    border-width: 0px;
+}
+.so-formactionfeedback.so-formactionfeedback-accent .x-form-item-body {
+	border-left-width: 4px;
+}
+.so-formactionfeedback.so-formactionfeedback-info .x-form-item-body {
+	background-color: var(--so-formfeedback-color-info-bg);
+}
+.so-formactionfeedback.so-formactionfeedback-alert .x-form-item-body {
+	background-color: var(--so-formfeedback-color-alert-bg);
+}
+.so-formactionfeedback.so-formactionfeedback-warning .x-form-item-body {
+	background-color: var(--so-formfeedback-color-warning-bg);
+}
+.so-formactionfeedback.so-formactionfeedback-success .x-form-item-body {
+	background-color: var(--so-formfeedback-color-success-bg);
+}
+.so-formactionfeedback.so-formactionfeedback-info.so-formactionfeedback-accent .x-form-item-body {
+	border-color: var(--so-formfeedback-color-info);
+}
+.so-formactionfeedback.so-formactionfeedback-alert.so-formactionfeedback-accent .x-form-item-body {
+	border-color: var(--so-formfeedback-color-alert);
+}
+.so-formactionfeedback.so-formactionfeedback-warning.so-formactionfeedback-accent .x-form-item-body {
+	border-color: var(--so-formfeedback-color-warning);
+}
+.so-formactionfeedback.so-formactionfeedback-success.so-formactionfeedback-accent .x-form-item-body {
+	border-color: var(--so-formfeedback-color-success);
+}
+.so-formactionfeedback.so-formactionfeedback-info label {
+	color: var(--so-formfeedback-color-info);
+}
+.so-formactionfeedback.so-formactionfeedback-alert label {
+	color: var(--so-formfeedback-color-alert);
+}
+.so-formactionfeedback.so-formactionfeedback-warning label {
+	color: var(--so-formfeedback-color-warning);
+}
+.so-formactionfeedback.so-formactionfeedback-success label {
+	color: var(--so-formfeedback-color-success);
+}
+.so-formactionfeedback-button {
+	margin: 0 0 0 2px;
+}
