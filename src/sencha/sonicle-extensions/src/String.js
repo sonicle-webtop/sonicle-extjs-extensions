@@ -826,6 +826,31 @@ Ext.define('Sonicle.String', {
 	},
 	
 	/**
+	 * Removes the QueryString part from a URL.
+	 * @param {tring} url The URL to be stripped.
+	 * @returns {String} The resulting URL
+	 */
+	urlStripQueryString: function(url) {
+		return this.removeEnd(this.substrBefore(url, '?', false), '/', false);
+	},
+	
+	/**
+	 * Appends content to the path of a URL, handling the query string part properly.
+	 * @param {String} url The URL to append path to.
+	 * @param {String} path The content to append to the URL path.
+	 * @returns {String} The resulting URL
+	 */
+	urlAppendPath: function(url, path) {
+		if (!Ext.isString(url)) return url;
+		if (Ext.isEmpty(path)) return url;
+		var me = this,
+			iofq = url.indexOf('?'),
+			base = url.substr(Math.max(iofq, 0)),
+			remaining = (iofq !== -1) ? url.substr(iofq) : '';
+		return me.removeEnd(base, '/', false) + '/' + me.removeStart(path, '/', false) + remaining;
+	},
+	
+	/**
 	 * Alias of (@link Ext.String#repeat).
 	 * @param {String} pattern The pattern to repeat.
 	 * @param {Number} count The number of times to repeat the pattern (may be 0).
@@ -844,22 +869,6 @@ Ext.define('Sonicle.String', {
 	 */
 	insert: function(s, value, index) {
 		return Ext.String.insert(s, value, index);
-	},
-	
-	/**
-	 * Appends content to the path of a URL, handling the query string part properly.
-	 * @param {String} url The URL to append path to.
-	 * @param {String} path The content to append to the URL path.
-	 * @returns {String} The resulting URL
-	 */
-	urlAppendPath: function(url, path) {
-		if (!Ext.isString(url)) return url;
-		if (Ext.isEmpty(path)) return url;
-		var me = this,
-				iofq = url.indexOf('?'),
-				base = url.substr(Math.max(iofq, 0)),
-				remaining = (iofq !== -1) ? url.substr(iofq) : '';
-		return me.removeEnd(base, '/', false) + '/' + me.removeStart(path, '/', false) + remaining;
 	},
 	
 	/**
