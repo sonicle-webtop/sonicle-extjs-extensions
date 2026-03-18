@@ -6,6 +6,9 @@
  */
 Ext.define('Sonicle.VMUtils', {
     singleton: true,
+	uses: [
+		'Sonicle.String'
+	],
 	
 	/**
 	 * Applies provided formula definition to passed ViewModel.
@@ -170,6 +173,161 @@ Ext.define('Sonicle.VMUtils', {
 			bind: {bindTo: '{'+path+'}'},
 			get: function(val) {
 				return Ext.callback(getFn, this, [val]);
+			}
+		};
+	},
+	
+	/**
+	 * Helper method for defining a {@link Ext.app.bind.Formula} that returns the model field's 
+	 * value if not empty, otherwise the specified default value.
+	 * @param {String} pathPrefix ViewModel's property prefix.
+	 * Specify as empty string if you're working directly with viewModel.
+	 * @param {String} propName Property name to bind
+	 * Specify as empty string if you're working directly with viewModel.
+	 * @param {Boolean} [not=false] True to apply NOT operator
+	 * @returns {Object} Formula configuration object
+	 */
+	foPropOrDefault: function(pathPrefix, propName, defaultValue) {
+		return {
+			bind: {bindTo: '{'+Sonicle.String.join('.', pathPrefix, propName)+'}'},
+			get: function(val) {
+				return Ext.isEmpty(val) ? defaultValue : val;
+			}
+		};
+	},
+	
+	/**
+	 * Defines a{@link Ext.app.bind.Formula} that checks the equality between 
+	 * ViewModel's property value and a passed value.
+	 * @param {String} pathPrefix ViewModel's property prefix.
+	 * Specify as empty string if you're working directly with viewModel.
+	 * @param {String} propName Property name to bind
+	 * Specify as empty string if you're working directly with viewModel.
+	 * @param {Mixed} equalsTo Value to match
+	 * @param {Boolean} [not=false] True to negate tests applying NOT operator
+	 * @returns {Object} Formula configuration object
+	 */
+	foPropIsEqual: function(pathPrefix, propName, equalsTo, not) {
+		if (arguments.length === 3) not = false;
+		return {
+			bind: {bindTo: '{'+Sonicle.String.join('.', pathPrefix, propName)+'}'},
+			get: function(val) {
+				return (not === true) ? (val !== equalsTo) : (val === equalsTo);
+			}
+		};
+	},
+	
+	/**
+	 * Defines a{@link Ext.app.bind.Formula} that checks if ViewModel's property
+	 * value is equal to one (or none for the negated form) of the passed list of values.
+	 * @param {String} pathPrefix ViewModel's property prefix.
+	 * Specify as empty string if you're working directly with viewModel.
+	 * @param {String} propName Property name to bind
+	 * Specify as empty string if you're working directly with viewModel.
+	 * @param {Mixed[]|Mixed} values Allowed values list
+	 * @param {Boolean} [not=false] Set to `true` to negate tests, applying NOT operator
+	 * @returns {Object} Formula configuration object
+	 */
+	foPropIsIn: function(pathPrefix, propName, values, not) {
+		if (arguments.length === 3) not = false;
+		values = Ext.Array.from(values);
+		return {
+			bind: {bindTo: '{'+Sonicle.String.join('.', pathPrefix, propName)+'}'},
+			get: function(val) {
+				var iof = values.indexOf(val);
+				return not === true ? iof === -1 : iof > -1;
+			}
+		};
+	},
+	
+	/**
+	 * Helper method for defining a {@link Ext.app.bind.Formula} that checks 
+	 * if specified ViewModel's property value is empty or not.
+	 * @param {String} pathPrefix ViewModel's property prefix.
+	 * Specify as empty string if you're working directly with viewModel.
+	 * @param {String} propName Property name to bind
+	 * Specify as empty string if you're working directly with viewModel.
+	 * @param {Boolean} [not=false] True to apply NOT operator
+	 * @returns {Object} Formula configuration object
+	 */
+	foPropIsEmpty: function(pathPrefix, propName, not) {
+		if (arguments.length === 2) not = false;
+		return {
+			bind: {bindTo: '{'+Sonicle.String.join('.', pathPrefix, propName)+'}'},
+			get: function(val) {
+				var ret = Ext.isEmpty(val);
+				return (not === true) ? !ret : ret;
+			}
+		};
+	},
+	
+	/**
+	 * Helper method for defining a {@link Ext.app.bind.Formula} that is able   
+	 * to perform a two-way binding between form-field and a model's field.
+	 * @param {String} modelProp ViewModel's property in which the model is stored.
+	 * @param {String} fieldName Model's field name.
+	 * @param {Function} getFn Function that calculate and return the value to get.
+	 * @param {Mixed} getFn.value The candidate value to return (current field's value).
+	 * @param {Ext.data.Model} getFn.record The model that owns the field.
+	 * @param {String} getFn.fieldName Model's field name passed above.
+	 * @param {Function} setFn Function that calculate and return the value to set.
+	 * @param {Mixed} setFn.value The candidate value to set.
+	 * @param {Ext.data.Model} setFn.record The models that owns the field.
+	 * @param {String} setFn.fieldName Model's field name passed above.
+	 * @param {Object} [opts] An object containing configuration.
+	 * @param {Function} [opts.modelProp] Override dafault property ('record') in which the model is stored.
+	 * @returns {Object} Formula configuration object
+	 */
+	foFieldTwoWay: function(modelProp, fieldName, getFn, setFn, opts) {
+		opts = opts || {};
+		var path = Sonicle.String.join('.', modelProp, fieldName);
+		return {
+			bind: {bindTo: '{'+path+'}'},
+			get: function(val) {
+				return Ext.callback(getFn, this, [val, this.get(modelProp), fieldName]);
+			},
+			set: function(val) {
+				var mo = this.get(modelProp);
+				if (val !== undefined) mo.set(fieldName, Ext.callback(setFn, this, [val, mo, fieldName]));
+			}
+		};
+	},
+	
+	/**
+	 * Helper method for defining a {@link Ext.app.bind.Formula} that looks into 
+	 * an internal association and returns items' count.
+	 * @param {String} modelProp ViewModel's property in which the model is stored
+	 * @param {String} associationName Model's association name
+	 * @returns {Object} Formula configuration object
+	 */
+	foAssociationCount: function(modelProp, associationName) {
+		return {
+			bind: {bindTo: '{'+Sonicle.String.join('.', modelProp, associationName, 'data')+'}', deep: true},
+			get: function(data) {
+				return (!data) ? 0 : data.length;
+			}
+		};
+	},
+	
+	/**
+	 * Helper method for defining a {@link Ext.app.bind.Formula} that returns a 
+	 * value from an internal association computed by a customized function 
+	 * passed as parameter.
+	 * @param {String} modelProp ViewModel's property in which the model is stored
+	 * @param {String} associationName Model's association name
+	 * @param {Function} getFn A function to produce the desired value.
+	 * @param {Object} getFn.data
+	 * @param {Integer} getFn.count
+	 * @param {Mixed...} [args] The arguments to append to getFn (after the 2nd argument).
+	 * @returns {Object} Formula configuration object
+	 */
+	foAssociationGetFn: function(modelProp, associationName, getFn) {
+		if (!Ext.isFunction(getFn)) getFn = function(v) {return v;};
+		var moreArgs = arguments.length > 3 ? Ext.Array.slice(arguments, 3) : [];
+		return {
+			bind: {bindTo: '{'+Sonicle.String.join('.', modelProp, associationName, 'data')+'}', deep: true},
+			get: function(data) {
+				return getFn.apply(this, [data, (!data) ? 0 : data.length].concat(moreArgs));
 			}
 		};
 	}
