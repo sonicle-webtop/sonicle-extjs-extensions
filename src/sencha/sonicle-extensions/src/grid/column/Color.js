@@ -31,6 +31,12 @@ Ext.define('Sonicle.grid.column.Color', {
 	swatchGeometry: 'rounded',
 	
 	/**
+	 * @cfg {String} [colorField]
+	 * The underlying {@link Ext.data.Field#name data field name} to bind as 
+	 * color swatch instead of using an icon.
+	 */
+	
+	/**
 	 * @cfg {Function} [getColor]
 	 * A function which returns the value for color.
 	 */
