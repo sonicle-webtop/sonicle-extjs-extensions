@@ -53,6 +53,10 @@ Ext.define('Sonicle.overrides.data.Model', {
 		return valid;
 	},
 	
+	isNewlyCreated: function() {
+		return !!this.isPhantom();
+	},
+	
 	privates: {
 		
 		/**
