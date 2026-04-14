@@ -128,56 +128,6 @@ Ext.define('Sonicle.VMUtils', {
 	},
 	
 	/**
-	 * Helper method for defining a {@link Ext.app.bind.Formula} that is able   
-	 * to perform a two-way binding within a ViewModel's property.
-	 * @param {String} pathPrefix ViewModel's property prefix.
-	 * Specify as empty string if you're working directly with viewModel.
-	 * @param {String} propName Property name to bind.
-	 * @param {Function} getFn Function that calculate and return the value to get.
-	 * @param {Function} setFn Function that calculate and return the value to set.
-	 * @param {Object} [opts] An object containing configuration.
-	 * @param {Function} [opts.noset] Set to `true` to NOT set the returned value in set method.
-	 * @returns {Object} Formula configuration object
-	 */
-	foPropTwoWay: function(pathPrefix, propName, getFn, setFn, opts) {
-		opts = opts || {};
-		var path = Sonicle.String.join('.', pathPrefix, propName);
-		return {
-			bind: {bindTo: '{'+path+'}'},
-			get: function(val) {
-				return Ext.callback(getFn, this, [val]);
-			},
-			set: function(val) {
-				var ret = Ext.callback(setFn, this, [val, path]);
-				if (!opts.noset) this.set(path, ret);
-			}
-		};
-	},
-	
-	/**
-	 * Helper method for defining a {@link Ext.app.bind.Formula} that is able   
-	 * to setup binding within a ViewModel's property and return a value 
-	 * computed by a customized function passed as parameter.
-	 * @param {String} pathPrefix ViewModel's property prefix.
-	 * Specify as empty string if you're working directly with viewModel.
-	 * @param {String} propName Property name to bind
-	 * @param {Function} getFn Function that calculate and return the value to get.
-	 * @param {Mixed} getFn.val Property value to process.
-	 * @param {Object} [opts] An object containing configuration.
-	 * @returns {Object} Formula configuration object
-	 */
-	foPropGet: function(pathPrefix, propName, getFn, opts) {
-		opts = opts || {};
-		var path = Sonicle.String.join('.', pathPrefix, propName);
-		return {
-			bind: {bindTo: '{'+path+'}'},
-			get: function(val) {
-				return Ext.callback(getFn, this, [val]);
-			}
-		};
-	},
-	
-	/**
 	 * Helper method for defining a {@link Ext.app.bind.Formula} that returns the model field's 
 	 * value if not empty, otherwise the specified default value.
 	 * @param {String} pathPrefix ViewModel's property prefix.
@@ -245,8 +195,7 @@ Ext.define('Sonicle.VMUtils', {
 	 * if specified ViewModel's property value is empty or not.
 	 * @param {String} pathPrefix ViewModel's property prefix.
 	 * Specify as empty string if you're working directly with viewModel.
-	 * @param {String} propName Property name to bind
-	 * Specify as empty string if you're working directly with viewModel.
+	 * @param {String} propName Property name to bind.
 	 * @param {Boolean} [not=false] True to apply NOT operator
 	 * @returns {Object} Formula configuration object
 	 */
@@ -263,19 +212,128 @@ Ext.define('Sonicle.VMUtils', {
 	
 	/**
 	 * Helper method for defining a {@link Ext.app.bind.Formula} that is able   
-	 * to perform a two-way binding between form-field and a model's field.
-	 * @param {String} modelProp ViewModel's property in which the model is stored.
-	 * @param {String} fieldName Model's field name.
+	 * to perform a two-way binding within a ViewModel's property.
+	 * @param {String} pathPrefix ViewModel's property prefix.
+	 * Specify as empty string if you're working directly with viewModel.
+	 * @param {String} propName Property name to bind.
 	 * @param {Function} getFn Function that calculate and return the value to get.
-	 * @param {Mixed} getFn.value The candidate value to return (current field's value).
-	 * @param {Ext.data.Model} getFn.record The model that owns the field.
-	 * @param {String} getFn.fieldName Model's field name passed above.
 	 * @param {Function} setFn Function that calculate and return the value to set.
-	 * @param {Mixed} setFn.value The candidate value to set.
-	 * @param {Ext.data.Model} setFn.record The models that owns the field.
-	 * @param {String} setFn.fieldName Model's field name passed above.
 	 * @param {Object} [opts] An object containing configuration.
-	 * @param {Function} [opts.modelProp] Override dafault property ('record') in which the model is stored.
+	 * @param {Function} [opts.noset] Set to `true` to NOT set the returned value in set method.
+	 * @returns {Object} Formula configuration object
+	 */
+	foPropTwoWay: function(pathPrefix, propName, getFn, setFn, opts) {
+		opts = opts || {};
+		var path = Sonicle.String.join('.', pathPrefix, propName);
+		return {
+			bind: {bindTo: '{'+Sonicle.String.join('.', pathPrefix, propName)+'}'},
+			get: function(val) {
+				return Ext.callback(getFn, this, [val]);
+			},
+			set: function(val) {
+				var ret = Ext.callback(setFn, this, [val, path]);
+				if (!opts.noset) this.set(path, ret);
+			}
+		};
+	},
+	
+	/**
+	 * Helper method for defining a {@link Ext.app.bind.Formula} that is able   
+	 * to setup binding within a ViewModel's property and return a value 
+	 * computed by a customized function passed as parameter.
+	 * @param {String} pathPrefix ViewModel's property prefix.
+	 * Specify as empty string if you're working directly with viewModel.
+	 * @param {String} propName Property name to bind
+	 * @param {Function} getFn Function that calculate and return the value to get.
+	 * @param {Mixed} getFn.val Property value to process.
+	 * @param {Object} [opts] An object containing configuration.
+	 * @returns {Object} Formula configuration object
+	 */
+	foPropGet___: function(pathPrefix, propName, getFn, opts) {
+		opts = opts || {};
+		var path = Sonicle.String.join('.', pathPrefix, propName);
+		return {
+			bind: {bindTo: '{'+path+'}'},
+			get: function(val) {
+				return Ext.callback(getFn, this, [val]);
+			}
+		};
+	},
+	
+	/**
+	 * Helper method for defining a {@link Ext.app.bind.Formula} that is able   
+	 * to setup binding within a ViewModel's property and return a value 
+	 * computed by a customized function passed as parameter.
+	 * @param {String} pathPrefix ViewModel's property prefix.
+	 * Specify as empty string if you're working directly with viewModel.
+	 * @param {String} propName Property name to bind to.
+	 * @param {Function} getFn A function to compute the final value.
+	 * @param {Mixed} getFn.val
+	 * @param {Object} [opts] An object containing configuration.
+	 * @param {Function} [opts.getArgsFn] Function to return more arguments to pass to getFn, after the value argument.
+	 * @param {Function} [opts.getArgsFn.pathPrefix]
+	 * @param {Function} [opts.getArgsFn.propName]
+	 * @param {Mixed[]} [opts.extraArgs] Extra static arguments to pass to getFn, after argsFn if any.
+	 * @returns {Object} Formula configuration object
+	 */
+	foPropGet: function(pathPrefix, propName, getFn, opts) {
+		opts = opts || {};
+		if (!Ext.isFunction(getFn)) getFn = function(v) {return v;};
+		var xargs = Ext.isArray(opts.extraArgs) ? opts.extraArgs : undefined;
+		return {
+			bind: {bindTo: '{'+Sonicle.String.join('.', pathPrefix, propName)+'}'},
+			get: function(val) {
+				return Ext.callback(getFn, this, Ext.Array.join([val], Ext.callback(opts.getArgsFn, this, [pathPrefix, propName]), xargs));
+			}
+		};
+	},
+	
+	/**
+	 * Helper method for defining a {@link Ext.app.bind.Formula} that is able   
+	 * to setup binding within a collection of ViewModel's properties and 
+	 * return a value computed by a customized function passed as parameter.
+	 * @param {String} pathPrefix ViewModel's property prefix
+	 * Specify as empty string if you're working directly with viewModel
+	 * @param {String[]|String} propNames An array of property names to bind to
+	 * @param {Function} getFn A function to compute the final value
+	 * @param {Object} getFn.vals
+	 * @param {Object} [opts] An object containing configuration
+	 * @param {Function} [opts.getArgsFn] Function to return more arguments to pass to getFn, after the value argument
+	 * @param {Function} [opts.getArgsFn.pathPrefix]
+	 * @param {Function} [opts.getArgsFn.propNames]
+	 * @param {Mixed[]} [opts.extraArgs] Extra static arguments to pass to getFn, after argsFn if any.
+	 * @returns {Object} Formula configuration object
+	 */
+	foPropMGet: function(pathPrefix, propNames, getFn, opts) {
+		opts = opts || {};
+		if (!Ext.isFunction(getFn)) getFn = function(v) {return v;};
+		var xargs = Ext.isArray(opts.extraArgs) ? opts.extraArgs : undefined,
+			bind = {};
+		Ext.iterate(Ext.Array.from(propNames), function(propName) {
+			bind[propName] = '{'+Sonicle.String.join('.', pathPrefix, propName)+'}';
+		});
+		return {
+			bind: bind,
+			get: function(val) {
+				return Ext.callback(getFn, this, Ext.Array.join([val], Ext.callback(opts.getArgsFn, this, [pathPrefix, propNames]), xargs));
+			}
+		};
+	},
+	
+	/**
+	 * Helper method for defining a {@link Ext.app.bind.Formula} that is able   
+	 * to perform a two-way binding between form-field and a model's field.
+	 * @param {String} modelProp ViewModel's property in which the model is stored
+	 * @param {String} fieldName Model's field name
+	 * @param {Function} getFn Function that calculate and return the value to get
+	 * @param {Mixed} getFn.value The candidate value to return (current field's value)
+	 * @param {Ext.data.Model} getFn.record The model that owns the field
+	 * @param {String} getFn.fieldName Model's field name passed above
+	 * @param {Function} setFn Function that calculate and return the value to set
+	 * @param {Mixed} setFn.value The candidate value to set
+	 * @param {Ext.data.Model} setFn.record The models that owns the field
+	 * @param {String} setFn.fieldName Model's field name passed above
+	 * @param {Object} [opts] An object containing configuration
 	 * @returns {Object} Formula configuration object
 	 */
 	foFieldTwoWay: function(modelProp, fieldName, getFn, setFn, opts) {
@@ -287,8 +345,11 @@ Ext.define('Sonicle.VMUtils', {
 				return Ext.callback(getFn, this, [val, this.get(modelProp), fieldName]);
 			},
 			set: function(val) {
-				var mo = this.get(modelProp);
-				if (val !== undefined) mo.set(fieldName, Ext.callback(setFn, this, [val, mo, fieldName]));
+				var mo = this.get(modelProp), ret;
+				if (val !== undefined) {
+					ret = Ext.callback(setFn, this, [val, mo, fieldName]);
+					if (!opts.noset) mo.set(fieldName, ret);
+				}
 			}
 		};
 	},
@@ -321,7 +382,7 @@ Ext.define('Sonicle.VMUtils', {
 	 * @param {Mixed...} [args] The arguments to append to getFn (after the 2nd argument).
 	 * @returns {Object} Formula configuration object
 	 */
-	foAssociationGetFn: function(modelProp, associationName, getFn) {
+	foAssociationGet: function(modelProp, associationName, getFn) {
 		if (!Ext.isFunction(getFn)) getFn = function(v) {return v;};
 		var moreArgs = arguments.length > 3 ? Ext.Array.slice(arguments, 3) : [];
 		return {
