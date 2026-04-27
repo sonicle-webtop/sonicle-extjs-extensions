@@ -493,12 +493,14 @@ Ext.define('Sonicle.Utils', {
 	},
 	
 	/**
-	 * Returns context menu data previously saved into menu.menuData property.
-	 * @returns {Object} The data object.
+	 * Returns context menu-data previously saved into menu.menuData property.
+	 * @param {String} [prop] Property name whose value will be extracted.
+	 * @returns {Object|Mixed} The whole menu-data object or single property value if necessary.
 	 */
-	getContextMenuData: function() {
-		var lcm = this.lastContextMenu;
-		return (lcm && lcm.menu) ? lcm.menu.menuData : null;
+	getContextMenuData: function(prop) {
+		var lcm = this.lastContextMenu,
+			menuData = (lcm && lcm.menu) ? lcm.menu.menuData : undefined;
+		return menuData ? (Ext.isString(prop) ? Sonicle.Object.getValue(menuData, prop) : menuData) : undefined;
 	},
 	
 	configurePropertyGrid: function(propertyGrid, sourceConfig, store) {
