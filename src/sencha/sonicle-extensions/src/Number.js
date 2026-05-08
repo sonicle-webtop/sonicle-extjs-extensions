@@ -8,6 +8,17 @@ Ext.define('Sonicle.Number', {
 	singleton: true,
 	
 	/**
+	 * Checks whether the specified bit flag is enabled in the given numeric value.
+	 * @param {Integer} value Numeric value containing one or more combined flags.
+	 * @param {Integer} flag Flag to verify.
+	 * @returns {Boolean} `true` if the specified flag is active in the value, `false` otherwise or if parameters are not numeric.
+	 */
+	hasFlag: function(value, flag) {
+		if (!Ext.isNumber(value) || !Ext.isNumber(flag)) return false;
+		return (value & flag) === flag;
+	},
+	
+	/**
 	 * Returns first valid Number value of provided arguments.
 	 * @param {Mixed...} numbers List of numbers.
 	 * @returns {Mixed} The first valid value.
