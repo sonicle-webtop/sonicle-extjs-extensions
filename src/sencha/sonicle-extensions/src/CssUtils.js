@@ -131,15 +131,28 @@ Ext.define('Sonicle.CssUtils', {
 	},
 	
 	/**
-	 * Sets a CSS :root variable value.
-	 * @param {String} name The name of the variable to set. 
-	 * @param {Mixed} value The value to set.
+	 * Sets the value of a CSS custom property on the root element.
+	 * @param {String} name The CSS variable name (e.g. '--my-color').
+	 * @param {String} value The value to assign to the CSS variable.
 	 */
 	setVariable: function(name, value) {
 		var root = document.querySelector(':root');
 		if (root) {
 			root.style.setProperty(name, value);
 		}
+	},
+	
+	/**
+	 * Returns the computed value of a CSS custom property defined on the root element.
+	 * @param {String} name The CSS variable name (e.g. '--my-color').
+	 * @return {String|null} The variable value, or null if the root element is not available.
+	 */
+	getVariable: function(name) {
+		var root = document.querySelector(':root');
+		if (root) {
+			return window.getComputedStyle(root).getPropertyValue(name).trim();
+		}
+		return null;
 	},
 	
 	/**
